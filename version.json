@@ -1,6 +1,6 @@
 {
-  "version": "1.0.8",
-  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.8/garaje-1.0.8-arm64.apk",
-  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.8/garaje-1.0.8.apk",
-  "notes": "Km por foto del cuentakilómetros y estimación automática de km entre lecturas. Perfiles: nombre con el que firmas, modo taller con recepción de visitas, quién tiene acceso a cada coche con botón para pedir cita, y aviso cuando otra persona apunta algo en tu coche."
+  "version": "1.0.7",
+  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.7/garaje-1.0.7-arm64.apk",
+  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.7/garaje-1.0.7.apk",
+  "notes": "Textos más claros y cercanos en toda la app, detalle de cada mantenimiento rediseñado (qué pasa, cada cuánto toca, por qué importa, historial), e icono corregido."
 }
