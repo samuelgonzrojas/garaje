@@ -1,6 +1,6 @@
 {
-  "version": "1.0.4",
-  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.4/garaje-1.0.4-arm64.apk",
-  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.4/garaje-1.0.4.apk",
-  "notes": "Nuevo acabado visual (tipografía Manrope, cabecera con degradado y matrícula, anillo de ITV, modo claro y oscuro pulidos). Alta con base de 64 marcas, 1.873 modelos y 17.000 motorizaciones. Ajustes → Enviar diagnóstico para pedir ayuda."
+  "version": "1.0.5",
+  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.5/garaje-1.0.5-arm64.apk",
+  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.5/garaje-1.0.5.apk",
+  "notes": "Nuevo acabado visual (tipografía Manrope, cabecera con degradado y matrícula, ficha de fecha de ITV, modo claro y oscuro pulidos). Alta con base de 64 marcas, 1.873 modelos y 17.000 motorizaciones. Ajustes → Enviar diagnóstico para pedir ayuda."
 }
