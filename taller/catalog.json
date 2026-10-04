@@ -1,0 +1,1056 @@
+{
+  "version": 1,
+  "description": "Catálogo base de mantenimiento para turismos de combustión. Intervalos conservadores; en fase 2 se sustituyen por datos por modelo. Cuando hay km y meses vence lo primero que llegue.",
+  "rules": {
+    "min_interval_km": 7500,
+    "round_km": 500,
+    "amber_ratio": 0.85,
+    "red_ratio": 1.0,
+    "unknown_level": "amber",
+    "high_mileage_km": 150000,
+    "old_vehicle_years": 12,
+    "km_reminder_weekday": 7,
+    "km_reminder_hour": 19,
+    "monthly_watch_max_level": "amber"
+  },
+  "interval_items": [
+    {
+      "id": "oil",
+      "name": "Aceite motor + filtro",
+      "interval_km": 15000,
+      "interval_months": 12,
+      "applies_to": {},
+      "ask_on_onboarding": true,
+      "description": "El más importante. Muchos fabricantes dicen 25-30.000 km (Longlife); para coches con años encima, no.",
+      "category": "motor"
+    },
+    {
+      "id": "air_filter",
+      "name": "Filtro de aire",
+      "interval_km": 30000,
+      "interval_months": 24,
+      "applies_to": {},
+      "ask_on_onboarding": true,
+      "description": "Barato y rápido. Más consumo y menos potencia si está sucio.",
+      "category": "motor"
+    },
+    {
+      "id": "cabin_filter",
+      "name": "Filtro de habitáculo",
+      "interval_km": 20000,
+      "interval_months": 12,
+      "applies_to": {},
+      "ask_on_onboarding": true,
+      "description": "Si el aire del habitáculo huele o sale flojo, es esto.",
+      "category": "habitaculo"
+    },
+    {
+      "id": "fuel_filter",
+      "name": "Filtro de combustible",
+      "interval_km": 40000,
+      "interval_months": 24,
+      "applies_to": {
+        "fuel": [
+          "diesel"
+        ]
+      },
+      "ask_on_onboarding": true,
+      "description": "Protege inyectores y bomba. En gasolina suele ser de por vida.",
+      "category": "motor"
+    },
+    {
+      "id": "brake_fluid",
+      "name": "Líquido de frenos",
+      "interval_km": null,
+      "interval_months": 24,
+      "applies_to": {},
+      "ask_on_onboarding": true,
+      "description": "Solo por tiempo: absorbe humedad y pierde eficacia aunque no uses el coche.",
+      "category": "frenos"
+    },
+    {
+      "id": "coolant",
+      "name": "Refrigerante",
+      "interval_km": 100000,
+      "interval_months": 48,
+      "applies_to": {},
+      "ask_on_onboarding": true,
+      "description": "Sustitución completa. Revisar nivel es otra cosa (vigilancia mensual).",
+      "category": "motor"
+    },
+    {
+      "id": "timing_belt",
+      "name": "Correa de distribución + bomba de agua",
+      "interval_km": 100000,
+      "interval_months": 60,
+      "applies_to": {
+        "timing": [
+          "belt",
+          "unknown"
+        ]
+      },
+      "ask_on_onboarding": true,
+      "description": "Si rompe, destroza el motor. Si tu coche lleva cadena, este ítem no aplica y pasa a vigilancia.",
+      "category": "motor"
+    },
+    {
+      "id": "aux_belt",
+      "name": "Correa de accesorios",
+      "interval_km": 60000,
+      "interval_months": 60,
+      "applies_to": {},
+      "ask_on_onboarding": true,
+      "description": "Mueve alternador, aire acondicionado y dirección. Chirridos en frío son el aviso.",
+      "category": "motor"
+    },
+    {
+      "id": "gearbox_oil_manual",
+      "name": "Aceite caja de cambios manual",
+      "interval_km": 120000,
+      "interval_months": null,
+      "applies_to": {
+        "transmission": [
+          "manual"
+        ]
+      },
+      "ask_on_onboarding": true,
+      "description": "Los fabricantes dicen 'de por vida'. A partir de 100.000 km, no te lo creas.",
+      "category": "transmision"
+    },
+    {
+      "id": "gearbox_oil_auto",
+      "name": "Aceite caja de cambios automática",
+      "interval_km": 60000,
+      "interval_months": null,
+      "applies_to": {
+        "transmission": [
+          "automatic"
+        ]
+      },
+      "ask_on_onboarding": true,
+      "description": "Con filtro si la caja lo lleva. Tirones al cambiar son el aviso.",
+      "category": "transmision"
+    },
+    {
+      "id": "diff_oil",
+      "name": "Aceite diferencial",
+      "interval_km": 100000,
+      "interval_months": null,
+      "applies_to": {
+        "drivetrain": [
+          "rwd",
+          "awd"
+        ]
+      },
+      "ask_on_onboarding": true,
+      "description": "Solo tracción trasera o total. Barato de hacer, caro de olvidar.",
+      "category": "transmision"
+    },
+    {
+      "id": "spark_plugs",
+      "name": "Bujías",
+      "interval_km": 60000,
+      "interval_months": null,
+      "applies_to": {
+        "fuel": [
+          "gasoline"
+        ]
+      },
+      "ask_on_onboarding": true,
+      "description": "Arranque difícil y tirones en frío son el aviso.",
+      "category": "motor"
+    },
+    {
+      "id": "wipers",
+      "name": "Escobillas limpiaparabrisas",
+      "interval_km": null,
+      "interval_months": 12,
+      "applies_to": {},
+      "ask_on_onboarding": false,
+      "description": "Lo mira la ITV. Si dejan rayas, cámbialas.",
+      "category": "habitaculo"
+    },
+    {
+      "id": "ac_service",
+      "name": "Carga y revisión aire acondicionado",
+      "interval_km": null,
+      "interval_months": 24,
+      "applies_to": {},
+      "ask_on_onboarding": false,
+      "description": "Hacerlo antes del verano.",
+      "category": "habitaculo"
+    },
+    {
+      "id": "tyre_rotation",
+      "name": "Rotación de neumáticos",
+      "interval_km": 10000,
+      "interval_months": null,
+      "applies_to": {},
+      "ask_on_onboarding": false,
+      "description": "Alarga la vida del juego. No aplica si llevas medidas distintas delante y detrás.",
+      "category": "ruedas"
+    }
+  ],
+  "watch_items": [
+    {
+      "id": "brake_pads",
+      "name": "Pastillas y discos de freno",
+      "check_every_km": 15000,
+      "check_every_months": null,
+      "check_on": [],
+      "applies_to": {},
+      "included_by_default": true,
+      "life_hint": "Pastillas: 40-60.000 km delante, 60-80.000 detrás. Discos cada dos juegos de pastillas.",
+      "symptoms": "Chirrido metálico, pedal largo, vibración al frenar.",
+      "category": "frenos"
+    },
+    {
+      "id": "tyres",
+      "name": "Neumáticos (dibujo, edad, presión)",
+      "check_every_km": null,
+      "check_every_months": 1,
+      "check_on": [],
+      "applies_to": {},
+      "included_by_default": true,
+      "life_hint": "40.000 km o 6 años (edad por código DOT en el flanco). ITV exige mínimo 1,6 mm de dibujo.",
+      "symptoms": "Desgaste irregular, grietas en el flanco, vibración.",
+      "category": "ruedas"
+    },
+    {
+      "id": "battery",
+      "name": "Batería",
+      "check_every_km": null,
+      "check_every_months": 12,
+      "check_on": [],
+      "applies_to": {},
+      "included_by_default": true,
+      "life_hint": "5-6 años. Revisar en otoño, antes del frío.",
+      "symptoms": "Arranque perezoso en frío, luces que parpadean.",
+      "category": "electrico"
+    },
+    {
+      "id": "shocks",
+      "name": "Amortiguadores",
+      "check_every_km": 30000,
+      "check_every_months": null,
+      "check_on": [],
+      "applies_to": {},
+      "included_by_default": true,
+      "life_hint": "80-100.000 km. Falla la ITV si pierden aceite.",
+      "symptoms": "Rebotes, coche que 'flota', manchas de aceite en el vástago.",
+      "category": "suspension"
+    },
+    {
+      "id": "timing_chain",
+      "name": "Cadena de distribución",
+      "check_every_km": null,
+      "check_every_months": null,
+      "check_on": [
+        "oil"
+      ],
+      "applies_to": {
+        "timing": [
+          "chain",
+          "unknown"
+        ]
+      },
+      "included_by_default": true,
+      "life_hint": "Sin intervalo oficial. Pregunta al taller en cada cambio de aceite.",
+      "symptoms": "Ruido de carraca o cascabeleo en frío, sobre todo en los primeros segundos tras arrancar.",
+      "category": "motor"
+    },
+    {
+      "id": "dpf",
+      "name": "Filtro de partículas (DPF)",
+      "check_every_km": null,
+      "check_every_months": 1,
+      "check_on": [],
+      "applies_to": {
+        "fuel": [
+          "diesel"
+        ]
+      },
+      "included_by_default": true,
+      "life_hint": "Hacer al menos un viaje largo (30+ min a velocidad sostenida) al mes para que regenere.",
+      "symptoms": "Testigo de DPF, pérdida de potencia, consumo disparado.",
+      "category": "motor"
+    },
+    {
+      "id": "turbo_egr",
+      "name": "Turbo y válvula EGR",
+      "check_every_km": null,
+      "check_every_months": null,
+      "check_on": [
+        "oil"
+      ],
+      "applies_to": {
+        "fuel": [
+          "diesel"
+        ]
+      },
+      "included_by_default": true,
+      "life_hint": "Revisar en cada cambio de aceite.",
+      "symptoms": "Humo negro o azul, pérdida de potencia, silbidos.",
+      "category": "motor"
+    },
+    {
+      "id": "glow_plugs",
+      "name": "Calentadores",
+      "check_every_km": null,
+      "check_every_months": 12,
+      "check_on": [],
+      "applies_to": {
+        "fuel": [
+          "diesel"
+        ]
+      },
+      "included_by_default": true,
+      "life_hint": "Revisar antes del invierno.",
+      "symptoms": "Arranque difícil en frío, humo blanco al arrancar.",
+      "category": "electrico"
+    },
+    {
+      "id": "clutch",
+      "name": "Embrague",
+      "check_every_km": null,
+      "check_every_months": null,
+      "check_on": [
+        "oil"
+      ],
+      "applies_to": {
+        "transmission": [
+          "manual"
+        ]
+      },
+      "included_by_default": true,
+      "life_hint": "150-200.000 km en uso normal; mucho menos si está reprogramado.",
+      "symptoms": "Patina en 5ª/6ª al acelerar a fondo, pedal muy alto, olor a quemado.",
+      "category": "transmision"
+    },
+    {
+      "id": "suspension_joints",
+      "name": "Rótulas, silentblocks y bieletas",
+      "check_every_km": 30000,
+      "check_every_months": null,
+      "check_on": [],
+      "applies_to": {},
+      "included_by_default": true,
+      "life_hint": "Lo mira la ITV con la placa de holguras.",
+      "symptoms": "Golpes secos en baches, dirección imprecisa.",
+      "category": "suspension"
+    },
+    {
+      "id": "lights",
+      "name": "Luces y testigos",
+      "check_every_km": null,
+      "check_every_months": 1,
+      "check_on": [],
+      "applies_to": {},
+      "included_by_default": true,
+      "life_hint": "Lo primero que tumba en ITV. Incluye matrícula, freno y antiniebla.",
+      "symptoms": "Cualquier testigo encendido en el cuadro es defecto grave en ITV.",
+      "category": "electrico"
+    },
+    {
+      "id": "fluids",
+      "name": "Niveles (aceite, refrigerante, limpiaparabrisas)",
+      "check_every_km": null,
+      "check_every_months": 1,
+      "check_on": [],
+      "applies_to": {},
+      "included_by_default": true,
+      "life_hint": "Con el motor frío y en llano.",
+      "symptoms": "Nivel bajo repetido = fuga o consumo; mancha en el suelo.",
+      "category": "motor"
+    },
+    {
+      "id": "injectors",
+      "name": "Inyectores",
+      "check_every_km": null,
+      "check_every_months": null,
+      "check_on": [
+        "oil"
+      ],
+      "applies_to": {
+        "fuel": [
+          "diesel"
+        ]
+      },
+      "included_by_default": false,
+      "life_hint": "Vigilancia reforzada en motores reprogramados.",
+      "symptoms": "Ralentí irregular, humo, olor a gasóleo, retorno excesivo.",
+      "category": "motor"
+    },
+    {
+      "id": "exercise_car",
+      "name": "Mover el coche (uso bajo)",
+      "check_every_km": null,
+      "check_every_months": 1,
+      "check_on": [],
+      "applies_to": {},
+      "included_by_default": false,
+      "life_hint": "Si pasa un mes parado: arranca, rueda 20-30 min y mueve el volante a tope.",
+      "symptoms": "Batería descargada, frenos agarrotados, neumáticos deformados.",
+      "category": "general"
+    },
+    {
+      "id": "hoses_rust",
+      "name": "Manguitos, latiguillos y óxido en bajos",
+      "check_every_km": null,
+      "check_every_months": 12,
+      "check_on": [],
+      "applies_to": {},
+      "included_by_default": false,
+      "life_hint": "Vehículos de más de 12 años. La ITV mira corrosión estructural.",
+      "symptoms": "Manguitos hinchados o agrietados, latiguillos de freno cuarteados, óxido con escamas.",
+      "category": "carroceria"
+    }
+  ],
+  "modifiers": [
+    {
+      "id": "tuned",
+      "name": "Reprogramado",
+      "question": "¿Está reprogramado (stage 1 o superior)?",
+      "auto": null,
+      "km_multipliers": {
+        "oil": 0.7,
+        "fuel_filter": 0.75
+      },
+      "months_overrides": {},
+      "add_watch": [
+        "injectors"
+      ],
+      "force_check_on_oil": [
+        "turbo_egr",
+        "clutch",
+        "injectors",
+        "dpf"
+      ],
+      "all_watch_check_on_oil": false
+    },
+    {
+      "id": "urban",
+      "name": "Uso urbano",
+      "question": "¿Lo usas sobre todo en ciudad (trayectos cortos)?",
+      "auto": null,
+      "km_multipliers": {
+        "oil": 0.75,
+        "brake_pads": 0.7
+      },
+      "months_overrides": {
+        "battery": 6
+      },
+      "add_watch": [],
+      "force_check_on_oil": [],
+      "all_watch_check_on_oil": false
+    },
+    {
+      "id": "low_km",
+      "name": "Pocos km al año",
+      "question": "¿Haces menos de 8.000 km al año?",
+      "auto": null,
+      "km_multipliers": {},
+      "months_overrides": {},
+      "add_watch": [
+        "exercise_car"
+      ],
+      "force_check_on_oil": [],
+      "all_watch_check_on_oil": false
+    },
+    {
+      "id": "towing",
+      "name": "Remolque o carga habitual",
+      "question": "¿Llevas remolque o vas cargado habitualmente?",
+      "auto": null,
+      "km_multipliers": {
+        "oil": 0.8,
+        "gearbox_oil_manual": 0.8,
+        "gearbox_oil_auto": 0.8,
+        "brake_pads": 0.7
+      },
+      "months_overrides": {},
+      "add_watch": [],
+      "force_check_on_oil": [],
+      "all_watch_check_on_oil": false
+    },
+    {
+      "id": "high_mileage",
+      "name": "Más de 150.000 km",
+      "question": null,
+      "auto": {
+        "min_km": 150000
+      },
+      "km_multipliers": {},
+      "months_overrides": {},
+      "add_watch": [],
+      "force_check_on_oil": [
+        "timing_chain",
+        "turbo_egr",
+        "clutch",
+        "injectors",
+        "shocks",
+        "suspension_joints"
+      ],
+      "all_watch_check_on_oil": false
+    },
+    {
+      "id": "old_vehicle",
+      "name": "Más de 12 años",
+      "question": null,
+      "auto": {
+        "min_age_years": 12
+      },
+      "km_multipliers": {},
+      "months_overrides": {},
+      "add_watch": [
+        "hoses_rust"
+      ],
+      "force_check_on_oil": [],
+      "all_watch_check_on_oil": false
+    }
+  ],
+  "modifications": [
+    {
+      "id": "wheels",
+      "name": "Llantas / neumáticos no de serie",
+      "itv_note": "Medida equivalente en ficha técnica o informe de conformidad. Las llantas no pueden sobresalir de la carrocería."
+    },
+    {
+      "id": "suspension",
+      "name": "Suspensión (muelles, roscada)",
+      "itv_note": "Necesita homologación y anotación en ficha. Altura mínima y faros bien reglados."
+    },
+    {
+      "id": "exhaust",
+      "name": "Escape",
+      "itv_note": "Marcado CE/E y nivel de ruido dentro del límite de ficha. Sin DPF eliminado: defecto grave."
+    },
+    {
+      "id": "lights",
+      "name": "Luces (LED, xenón, bombillas no de serie)",
+      "itv_note": "Faros con marcado de homologación para esa fuente de luz. Color y reglaje correctos."
+    },
+    {
+      "id": "tint",
+      "name": "Lunas tintadas",
+      "itv_note": "Parabrisas y ventanillas delanteras: mínimo 70 % de transmisión de luz. Láminas con certificado."
+    },
+    {
+      "id": "body",
+      "name": "Estética (paragolpes, alerón, taloneras)",
+      "itv_note": "Piezas homologadas o informe de laboratorio y anotación en ficha. Sin aristas cortantes."
+    },
+    {
+      "id": "other",
+      "name": "Otra modificación",
+      "itv_note": "Si no está en la ficha técnica, pregunta antes de ir."
+    }
+  ],
+  "onboarding": {
+    "steps": [
+      {
+        "id": "vehicle",
+        "title": "Tu coche",
+        "fields": [
+          {
+            "id": "make",
+            "label": "Marca",
+            "type": "text"
+          },
+          {
+            "id": "model",
+            "label": "Modelo",
+            "type": "text"
+          },
+          {
+            "id": "year",
+            "label": "Año de matriculación",
+            "type": "int"
+          },
+          {
+            "id": "fuel",
+            "label": "Combustible",
+            "type": "choice",
+            "options": [
+              {
+                "id": "diesel",
+                "label": "Diésel"
+              },
+              {
+                "id": "gasoline",
+                "label": "Gasolina"
+              }
+            ]
+          },
+          {
+            "id": "current_km",
+            "label": "Kilómetros actuales",
+            "type": "int"
+          },
+          {
+            "id": "transmission",
+            "label": "Cambio",
+            "type": "choice",
+            "options": [
+              {
+                "id": "manual",
+                "label": "Manual"
+              },
+              {
+                "id": "automatic",
+                "label": "Automático"
+              }
+            ]
+          },
+          {
+            "id": "drivetrain",
+            "label": "Tracción",
+            "type": "choice",
+            "options": [
+              {
+                "id": "fwd",
+                "label": "Delantera"
+              },
+              {
+                "id": "rwd",
+                "label": "Trasera"
+              },
+              {
+                "id": "awd",
+                "label": "Total / 4x4"
+              }
+            ]
+          },
+          {
+            "id": "timing",
+            "label": "Distribución",
+            "type": "choice",
+            "options": [
+              {
+                "id": "belt",
+                "label": "Correa"
+              },
+              {
+                "id": "chain",
+                "label": "Cadena"
+              },
+              {
+                "id": "unknown",
+                "label": "No lo sé"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "usage",
+        "title": "Cómo lo usas",
+        "description": "Marca lo que aplique. Cada condición ajusta los intervalos del plan. Después, marca las modificaciones que lleve y si están homologadas."
+      },
+      {
+        "id": "history",
+        "title": "¿Cuándo se hizo por última vez?",
+        "description": "Solo para los ítems que aplican a tu coche. Puedes saltarlo y la app te lo irá preguntando.",
+        "skippable": true,
+        "shortcut": {
+          "id": "all_done_at_last_service",
+          "label": "Se hizo todo en la última revisión, hace ___ km / ___ meses"
+        },
+        "answer_options": [
+          {
+            "id": "known",
+            "label": "Sé la fecha y/o los km"
+          },
+          {
+            "id": "approx_km",
+            "label": "Hace unos ___ km"
+          },
+          {
+            "id": "approx_months",
+            "label": "Hace unos ___ meses"
+          },
+          {
+            "id": "unknown",
+            "label": "No lo sé",
+            "resulting_level": "amber",
+            "hint": "Pregunta en tu taller o hazlo en la próxima revisión."
+          },
+          {
+            "id": "never",
+            "label": "Nunca / no aplica",
+            "resulting_level": "skip"
+          }
+        ]
+      },
+      {
+        "id": "itv",
+        "title": "ITV",
+        "description": "Fecha de la última ITV (la de la pegatina). Si no la sabes, la calculamos por el año del coche."
+      }
+    ]
+  },
+  "itv": {
+    "warn_days": 30,
+    "checklist_base": [
+      {
+        "id": "lights",
+        "name": "Todas las luces funcionan y están regladas",
+        "applies_to": {}
+      },
+      {
+        "id": "warning_lamps",
+        "name": "Ningún testigo encendido en el cuadro",
+        "applies_to": {}
+      },
+      {
+        "id": "tyres",
+        "name": "Neumáticos: dibujo > 1,6 mm, sin grietas, medida de ficha",
+        "applies_to": {}
+      },
+      {
+        "id": "brakes",
+        "name": "Frenos: sin ruidos, freno de mano retiene",
+        "applies_to": {}
+      },
+      {
+        "id": "emissions_diesel",
+        "name": "Humos: sin humo visible al acelerar (opacidad)",
+        "applies_to": {
+          "fuel": [
+            "diesel"
+          ]
+        }
+      },
+      {
+        "id": "emissions_gasoline",
+        "name": "Gases: catalizador y sonda lambda sin fallos",
+        "applies_to": {
+          "fuel": [
+            "gasoline"
+          ]
+        }
+      },
+      {
+        "id": "steering_suspension",
+        "name": "Dirección y suspensión sin holguras ni fugas",
+        "applies_to": {}
+      },
+      {
+        "id": "glass_wipers",
+        "name": "Parabrisas sin grietas en zona del conductor, escobillas bien",
+        "applies_to": {}
+      },
+      {
+        "id": "bodywork",
+        "name": "Carrocería sin aristas ni óxido estructural",
+        "applies_to": {}
+      },
+      {
+        "id": "belts_horn",
+        "name": "Cinturones y claxon funcionan",
+        "applies_to": {}
+      },
+      {
+        "id": "leaks",
+        "name": "Sin fugas de aceite, refrigerante ni combustible",
+        "applies_to": {}
+      },
+      {
+        "id": "plates",
+        "name": "Matrículas legibles y bien sujetas",
+        "applies_to": {}
+      },
+      {
+        "id": "documents",
+        "name": "Permiso de circulación, ficha técnica y seguro en vigor",
+        "applies_to": {}
+      }
+    ],
+    "modification_check": {
+      "name_template": "Modificación: {name} ({status})",
+      "status_labels": {
+        "yes": "homologada",
+        "no": "sin homologar",
+        "unknown": "no sé si está homologada"
+      },
+      "fail_if_status": [
+        "no",
+        "unknown"
+      ]
+    },
+    "schedules": {
+      "turismo": [
+        {
+          "age_from": 0,
+          "age_to": 4,
+          "every_months": null
+        },
+        {
+          "age_from": 4,
+          "age_to": 10,
+          "every_months": 24
+        },
+        {
+          "age_from": 10,
+          "age_to": null,
+          "every_months": 12
+        }
+      ],
+      "autocaravana": [
+        {
+          "age_from": 0,
+          "age_to": 4,
+          "every_months": null
+        },
+        {
+          "age_from": 4,
+          "age_to": 10,
+          "every_months": 24
+        },
+        {
+          "age_from": 10,
+          "age_to": null,
+          "every_months": 12
+        }
+      ],
+      "furgoneta": [
+        {
+          "age_from": 0,
+          "age_to": 2,
+          "every_months": null
+        },
+        {
+          "age_from": 2,
+          "age_to": 6,
+          "every_months": 24
+        },
+        {
+          "age_from": 6,
+          "age_to": 10,
+          "every_months": 12
+        },
+        {
+          "age_from": 10,
+          "age_to": null,
+          "every_months": 6
+        }
+      ],
+      "moto": [
+        {
+          "age_from": 0,
+          "age_to": 4,
+          "every_months": null
+        },
+        {
+          "age_from": 4,
+          "age_to": null,
+          "every_months": 24
+        }
+      ],
+      "ciclomotor": [
+        {
+          "age_from": 0,
+          "age_to": 3,
+          "every_months": null
+        },
+        {
+          "age_from": 3,
+          "age_to": null,
+          "every_months": 24
+        }
+      ],
+      "taxi": [
+        {
+          "age_from": 0,
+          "age_to": 5,
+          "every_months": 12
+        },
+        {
+          "age_from": 5,
+          "age_to": null,
+          "every_months": 6
+        }
+      ],
+      "autoescuela": [
+        {
+          "age_from": 0,
+          "age_to": 2,
+          "every_months": null
+        },
+        {
+          "age_from": 2,
+          "age_to": 5,
+          "every_months": 12
+        },
+        {
+          "age_from": 5,
+          "age_to": null,
+          "every_months": 6
+        }
+      ],
+      "camion": [
+        {
+          "age_from": 0,
+          "age_to": 10,
+          "every_months": 12
+        },
+        {
+          "age_from": 10,
+          "age_to": null,
+          "every_months": 6
+        }
+      ],
+      "autobus": [
+        {
+          "age_from": 0,
+          "age_to": 5,
+          "every_months": 12
+        },
+        {
+          "age_from": 5,
+          "age_to": null,
+          "every_months": 6
+        }
+      ],
+      "caravana": [
+        {
+          "age_from": 0,
+          "age_to": 6,
+          "every_months": null
+        },
+        {
+          "age_from": 6,
+          "age_to": null,
+          "every_months": 24
+        }
+      ],
+      "historico": [
+        {
+          "age_from": 0,
+          "age_to": 40,
+          "every_months": 24
+        },
+        {
+          "age_from": 40,
+          "age_to": 45,
+          "every_months": 36
+        },
+        {
+          "age_from": 45,
+          "age_to": 60,
+          "every_months": 48
+        },
+        {
+          "age_from": 60,
+          "age_to": null,
+          "every_months": null
+        }
+      ]
+    },
+    "source": "Real Decreto 920/2017, de 23 de octubre, artículo 6 (frecuencia de las inspecciones técnicas periódicas)."
+  },
+  "categories": [
+    {
+      "id": "motor",
+      "name": "Motor",
+      "icon": "engine"
+    },
+    {
+      "id": "transmision",
+      "name": "Transmisión",
+      "icon": "gearbox"
+    },
+    {
+      "id": "frenos",
+      "name": "Frenos",
+      "icon": "brake"
+    },
+    {
+      "id": "ruedas",
+      "name": "Neumáticos",
+      "icon": "tyre"
+    },
+    {
+      "id": "suspension",
+      "name": "Suspensión y dirección",
+      "icon": "suspension"
+    },
+    {
+      "id": "electrico",
+      "name": "Eléctrico y luces",
+      "icon": "electric"
+    },
+    {
+      "id": "habitaculo",
+      "name": "Habitáculo y visibilidad",
+      "icon": "cabin"
+    },
+    {
+      "id": "carroceria",
+      "name": "Carrocería y bajos",
+      "icon": "body"
+    },
+    {
+      "id": "general",
+      "name": "General",
+      "icon": "general"
+    }
+  ],
+  "vehicle_types": [
+    {
+      "id": "turismo",
+      "name": "Turismo",
+      "category": "M1"
+    },
+    {
+      "id": "autocaravana",
+      "name": "Autocaravana",
+      "category": "M1"
+    },
+    {
+      "id": "furgoneta",
+      "name": "Furgoneta / comercial ligero (≤ 3.500 kg)",
+      "category": "N1"
+    },
+    {
+      "id": "moto",
+      "name": "Motocicleta, triciclo o quad",
+      "category": "L"
+    },
+    {
+      "id": "ciclomotor",
+      "name": "Ciclomotor (≤ 50 cc)",
+      "category": "L1e"
+    },
+    {
+      "id": "taxi",
+      "name": "Taxi, VTC o ambulancia",
+      "category": "M1 servicio público"
+    },
+    {
+      "id": "autoescuela",
+      "name": "Vehículo de autoescuela",
+      "category": "M1 escuela"
+    },
+    {
+      "id": "camion",
+      "name": "Camión (> 3.500 kg)",
+      "category": "N2/N3"
+    },
+    {
+      "id": "autobus",
+      "name": "Autobús",
+      "category": "M2/M3"
+    },
+    {
+      "id": "caravana",
+      "name": "Caravana (remolque)",
+      "category": "O2"
+    },
+    {
+      "id": "historico",
+      "name": "Vehículo histórico",
+      "category": "Histórico"
+    }
+  ]
+}
