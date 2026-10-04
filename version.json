@@ -1,6 +1,6 @@
 {
-  "version": "1.0.3",
-  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.3/garaje-1.0.3-arm64.apk",
-  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.3/garaje-1.0.3.apk",
-  "notes": "Correcciones tras simular dos semanas de uso con dos móviles: sincronización más robusta (sin bucles ni pérdidas al editar a la vez), borrar un registro borra también sus km, aviso si los km tienen un dígito de más, ITV adelantada conserva la fecha, acceso por correo con código de 6 cifras, y cálculos de fechas correctos con el cambio de hora."
+  "version": "1.0.4",
+  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.4/garaje-1.0.4-arm64.apk",
+  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.4/garaje-1.0.4.apk",
+  "notes": "Nuevo acabado visual (tipografía Manrope, cabecera con degradado y matrícula, anillo de ITV, modo claro y oscuro pulidos). Alta con base de 64 marcas, 1.873 modelos y 17.000 motorizaciones. Ajustes → Enviar diagnóstico para pedir ayuda."
 }
