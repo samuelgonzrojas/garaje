@@ -1,6 +1,6 @@
 {
-  "version": "1.0.9",
-  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.9/garaje-1.0.9-arm64.apk",
-  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.9/garaje-1.0.9.apk",
-  "notes": "Repostajes: apunta litros, importe y km y la app calcula el consumo real y el gasto en combustible; los km del repostaje actualizan el semáforo. Plantillas de recordatorio para seguro, impuesto de circulación y revisión oficial."
+  "version": "1.0.10",
+  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.10/garaje-1.0.10-arm64.apk",
+  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.10/garaje-1.0.10.apk",
+  "notes": "Adjuntos: fotos de facturas y tickets en cada registro, y documentos del coche (ficha técnica, permiso, seguro, tarjeta ITV) guardados en la nube y compartidos con quien ve el coche. Informe PDF \"Para vender\" con portada, historial con facturas y consumo real. Widget de pantalla de inicio con km, ITV y lo más urgente (Ajustes → Añadir widget). Historial de versiones en Ajustes y en la web."
 }
