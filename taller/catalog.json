@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "description": "Catálogo base de mantenimiento para turismos de combustión. Intervalos conservadores; en fase 2 se sustituyen por datos por modelo. Cuando hay km y meses vence lo primero que llegue.",
+  "version": 2,
+  "description": "Catálogo base de mantenimiento: turismos y furgonetas de combustión (clase car) y motos/ciclomotores (clase moto). Intervalos conservadores. Cuando hay km y meses vence lo primero que llegue.",
   "rules": {
     "min_interval_km": 7500,
     "round_km": 500,
@@ -11,7 +11,11 @@
     "old_vehicle_years": 12,
     "km_reminder_weekday": 7,
     "km_reminder_hour": 19,
-    "monthly_watch_max_level": "amber"
+    "monthly_watch_max_level": "amber",
+    "min_interval_km_by_class": {
+      "car": 7500,
+      "moto": 500
+    }
   },
   "interval_items": [
     {
@@ -19,7 +23,11 @@
       "name": "Aceite motor + filtro",
       "interval_km": 15000,
       "interval_months": 12,
-      "applies_to": {},
+      "applies_to": {
+        "vehicle_class": [
+          "car"
+        ]
+      },
       "ask_on_onboarding": true,
       "description": "El más importante. Muchos fabricantes dicen 25-30.000 km (Longlife); para coches con años encima, no.",
       "category": "motor"
@@ -29,7 +37,11 @@
       "name": "Filtro de aire",
       "interval_km": 30000,
       "interval_months": 24,
-      "applies_to": {},
+      "applies_to": {
+        "vehicle_class": [
+          "car"
+        ]
+      },
       "ask_on_onboarding": true,
       "description": "Barato y rápido. Más consumo y menos potencia si está sucio.",
       "category": "motor"
@@ -39,7 +51,11 @@
       "name": "Filtro de habitáculo",
       "interval_km": 20000,
       "interval_months": 12,
-      "applies_to": {},
+      "applies_to": {
+        "vehicle_class": [
+          "car"
+        ]
+      },
       "ask_on_onboarding": true,
       "description": "Si el aire del habitáculo huele o sale flojo, es esto.",
       "category": "habitaculo"
@@ -52,6 +68,9 @@
       "applies_to": {
         "fuel": [
           "diesel"
+        ],
+        "vehicle_class": [
+          "car"
         ]
       },
       "ask_on_onboarding": true,
@@ -65,7 +84,7 @@
       "interval_months": 24,
       "applies_to": {},
       "ask_on_onboarding": true,
-      "description": "Solo por tiempo: absorbe humedad y pierde eficacia aunque no uses el coche.",
+      "description": "Solo por tiempo: absorbe humedad y pierde eficacia aunque no uses el coche. En moto también: cada 2 años, igual que en el coche.",
       "category": "frenos"
     },
     {
@@ -73,7 +92,11 @@
       "name": "Refrigerante",
       "interval_km": 100000,
       "interval_months": 48,
-      "applies_to": {},
+      "applies_to": {
+        "vehicle_class": [
+          "car"
+        ]
+      },
       "ask_on_onboarding": true,
       "description": "Sustitución completa. Revisar nivel es otra cosa (vigilancia mensual).",
       "category": "motor"
@@ -87,6 +110,9 @@
         "timing": [
           "belt",
           "unknown"
+        ],
+        "vehicle_class": [
+          "car"
         ]
       },
       "ask_on_onboarding": true,
@@ -98,7 +124,11 @@
       "name": "Correa de accesorios",
       "interval_km": 60000,
       "interval_months": 60,
-      "applies_to": {},
+      "applies_to": {
+        "vehicle_class": [
+          "car"
+        ]
+      },
       "ask_on_onboarding": true,
       "description": "Mueve alternador, aire acondicionado y dirección. Chirridos en frío son el aviso.",
       "category": "motor"
@@ -111,6 +141,9 @@
       "applies_to": {
         "transmission": [
           "manual"
+        ],
+        "vehicle_class": [
+          "car"
         ]
       },
       "ask_on_onboarding": true,
@@ -125,6 +158,9 @@
       "applies_to": {
         "transmission": [
           "automatic"
+        ],
+        "vehicle_class": [
+          "car"
         ]
       },
       "ask_on_onboarding": true,
@@ -140,6 +176,9 @@
         "drivetrain": [
           "rwd",
           "awd"
+        ],
+        "vehicle_class": [
+          "car"
         ]
       },
       "ask_on_onboarding": true,
@@ -154,6 +193,9 @@
       "applies_to": {
         "fuel": [
           "gasoline"
+        ],
+        "vehicle_class": [
+          "car"
         ]
       },
       "ask_on_onboarding": true,
@@ -165,7 +207,11 @@
       "name": "Escobillas limpiaparabrisas",
       "interval_km": null,
       "interval_months": 12,
-      "applies_to": {},
+      "applies_to": {
+        "vehicle_class": [
+          "car"
+        ]
+      },
       "ask_on_onboarding": false,
       "description": "Lo mira la ITV. Si dejan rayas, cámbialas.",
       "category": "habitaculo"
@@ -175,7 +221,11 @@
       "name": "Carga y revisión aire acondicionado",
       "interval_km": null,
       "interval_months": 24,
-      "applies_to": {},
+      "applies_to": {
+        "vehicle_class": [
+          "car"
+        ]
+      },
       "ask_on_onboarding": false,
       "description": "Hacerlo antes del verano.",
       "category": "habitaculo"
@@ -185,10 +235,184 @@
       "name": "Rotación de neumáticos",
       "interval_km": 10000,
       "interval_months": null,
-      "applies_to": {},
+      "applies_to": {
+        "vehicle_class": [
+          "car"
+        ]
+      },
       "ask_on_onboarding": false,
       "description": "Alarga la vida del juego. No aplica si llevas medidas distintas delante y detrás.",
       "category": "ruedas"
+    },
+    {
+      "id": "moto_oil",
+      "name": "Aceite motor + filtro",
+      "interval_km": 6000,
+      "interval_months": 12,
+      "applies_to": {
+        "vehicle_class": [
+          "moto"
+        ],
+        "fuel": [
+          "gasoline"
+        ]
+      },
+      "ask_on_onboarding": true,
+      "category": "motor",
+      "description": "En moto el aceite trabaja más: motor, cambio y embrague comparten cárter. Cada 6.000 km o un año es lo habitual; en scooters pequeños incluso 4.000. Mira el libro de tu modelo y ajústalo desde el detalle."
+    },
+    {
+      "id": "moto_air_filter",
+      "name": "Filtro de aire",
+      "interval_km": 12000,
+      "interval_months": 24,
+      "applies_to": {
+        "vehicle_class": [
+          "moto"
+        ],
+        "fuel": [
+          "gasoline"
+        ]
+      },
+      "ask_on_onboarding": true,
+      "category": "motor",
+      "description": "Con polvo o campo, antes. Un filtro sucio sube el consumo y quita potencia."
+    },
+    {
+      "id": "moto_spark_plugs",
+      "name": "Bujías",
+      "interval_km": 12000,
+      "interval_months": 24,
+      "applies_to": {
+        "vehicle_class": [
+          "moto"
+        ],
+        "fuel": [
+          "gasoline"
+        ]
+      },
+      "ask_on_onboarding": true,
+      "category": "motor",
+      "description": "Las de iridio aguantan más (hasta 24-40.000 km); las convencionales, 12.000."
+    },
+    {
+      "id": "valve_clearance",
+      "name": "Reglaje de válvulas",
+      "interval_km": 24000,
+      "interval_months": null,
+      "applies_to": {
+        "vehicle_class": [
+          "moto"
+        ],
+        "fuel": [
+          "gasoline"
+        ]
+      },
+      "ask_on_onboarding": true,
+      "category": "motor",
+      "description": "Según el modelo, entre 12.000 y 40.000 km. Un reglaje fuera de tolerancia se nota en arranque difícil y ruido de taqués."
+    },
+    {
+      "id": "chain_kit",
+      "name": "Kit de transmisión (cadena, piñón y corona)",
+      "interval_km": 25000,
+      "interval_months": null,
+      "applies_to": {
+        "vehicle_class": [
+          "moto"
+        ],
+        "final_drive": [
+          "chain"
+        ]
+      },
+      "ask_on_onboarding": true,
+      "category": "transmision",
+      "description": "Dura de 20.000 a 40.000 km si se engrasa y tensa. Se cambia el kit completo: cadena nueva con piñón gastado se come en nada."
+    },
+    {
+      "id": "belt_final",
+      "name": "Correa de transmisión final",
+      "interval_km": 40000,
+      "interval_months": 48,
+      "applies_to": {
+        "vehicle_class": [
+          "moto"
+        ],
+        "final_drive": [
+          "belt"
+        ]
+      },
+      "ask_on_onboarding": true,
+      "category": "transmision",
+      "description": "Sin engrase, pero vigila grietas y tensión. Suele durar 40.000 km o más."
+    },
+    {
+      "id": "shaft_oil",
+      "name": "Aceite del cardán",
+      "interval_km": 24000,
+      "interval_months": 24,
+      "applies_to": {
+        "vehicle_class": [
+          "moto"
+        ],
+        "final_drive": [
+          "shaft"
+        ]
+      },
+      "ask_on_onboarding": true,
+      "category": "transmision",
+      "description": "Poca cantidad y barato; si se queda sin aceite, el par cónico se destroza."
+    },
+    {
+      "id": "cvt_belt",
+      "name": "Correa del variador y rodillos",
+      "interval_km": 20000,
+      "interval_months": null,
+      "applies_to": {
+        "vehicle_class": [
+          "moto"
+        ],
+        "transmission": [
+          "automatic"
+        ],
+        "fuel": [
+          "gasoline"
+        ]
+      },
+      "ask_on_onboarding": true,
+      "category": "transmision",
+      "description": "En scooters: la correa se cambia con los rodillos. Tirones al arrancar o pérdida de punta son el aviso."
+    },
+    {
+      "id": "moto_coolant",
+      "name": "Refrigerante",
+      "interval_km": 24000,
+      "interval_months": 36,
+      "applies_to": {
+        "vehicle_class": [
+          "moto"
+        ],
+        "fuel": [
+          "gasoline"
+        ]
+      },
+      "ask_on_onboarding": false,
+      "category": "motor",
+      "description": "Solo si tu moto es de refrigeración líquida; si es por aire, quita este recordatorio desde el detalle."
+    },
+    {
+      "id": "fork_oil",
+      "name": "Aceite de horquilla",
+      "interval_km": 30000,
+      "interval_months": 36,
+      "applies_to": {
+        "vehicle_class": [
+          "moto"
+        ]
+      },
+      "ask_on_onboarding": false,
+      "category": "suspension",
+      "description": "Se degrada aunque no se note: la horquilla rebota y frena peor. Aprovecha para revisar retenes."
     }
   ],
   "watch_items": [
@@ -198,7 +422,11 @@
       "check_every_km": 15000,
       "check_every_months": null,
       "check_on": [],
-      "applies_to": {},
+      "applies_to": {
+        "vehicle_class": [
+          "car"
+        ]
+      },
       "included_by_default": true,
       "life_hint": "Pastillas: 40-60.000 km delante, 60-80.000 detrás. Discos cada dos juegos de pastillas.",
       "symptoms": "Chirrido metálico, pedal largo, vibración al frenar.",
@@ -210,7 +438,11 @@
       "check_every_km": null,
       "check_every_months": 1,
       "check_on": [],
-      "applies_to": {},
+      "applies_to": {
+        "vehicle_class": [
+          "car"
+        ]
+      },
       "included_by_default": true,
       "life_hint": "40.000 km o 6 años (edad por código DOT en el flanco). ITV exige mínimo 1,6 mm de dibujo.",
       "symptoms": "Desgaste irregular, grietas en el flanco, vibración.",
@@ -234,7 +466,11 @@
       "check_every_km": 30000,
       "check_every_months": null,
       "check_on": [],
-      "applies_to": {},
+      "applies_to": {
+        "vehicle_class": [
+          "car"
+        ]
+      },
       "included_by_default": true,
       "life_hint": "80-100.000 km. Falla la ITV si pierden aceite.",
       "symptoms": "Rebotes, coche que 'flota', manchas de aceite en el vástago.",
@@ -252,6 +488,9 @@
         "timing": [
           "chain",
           "unknown"
+        ],
+        "vehicle_class": [
+          "car"
         ]
       },
       "included_by_default": true,
@@ -268,6 +507,9 @@
       "applies_to": {
         "fuel": [
           "diesel"
+        ],
+        "vehicle_class": [
+          "car"
         ]
       },
       "included_by_default": true,
@@ -286,6 +528,9 @@
       "applies_to": {
         "fuel": [
           "diesel"
+        ],
+        "vehicle_class": [
+          "car"
         ]
       },
       "included_by_default": true,
@@ -302,6 +547,9 @@
       "applies_to": {
         "fuel": [
           "diesel"
+        ],
+        "vehicle_class": [
+          "car"
         ]
       },
       "included_by_default": true,
@@ -333,7 +581,11 @@
       "check_every_km": 30000,
       "check_every_months": null,
       "check_on": [],
-      "applies_to": {},
+      "applies_to": {
+        "vehicle_class": [
+          "car"
+        ]
+      },
       "included_by_default": true,
       "life_hint": "Lo mira la ITV con la placa de holguras.",
       "symptoms": "Golpes secos en baches, dirección imprecisa.",
@@ -357,7 +609,11 @@
       "check_every_km": null,
       "check_every_months": 1,
       "check_on": [],
-      "applies_to": {},
+      "applies_to": {
+        "vehicle_class": [
+          "car"
+        ]
+      },
       "included_by_default": true,
       "life_hint": "Con el motor frío y en llano.",
       "symptoms": "Nivel bajo repetido = fuga o consumo; mancha en el suelo.",
@@ -374,6 +630,9 @@
       "applies_to": {
         "fuel": [
           "diesel"
+        ],
+        "vehicle_class": [
+          "car"
         ]
       },
       "included_by_default": false,
@@ -383,7 +642,7 @@
     },
     {
       "id": "exercise_car",
-      "name": "Mover el coche (uso bajo)",
+      "name": "Mover el vehículo (uso bajo)",
       "check_every_km": null,
       "check_every_months": 1,
       "check_on": [],
@@ -399,11 +658,124 @@
       "check_every_km": null,
       "check_every_months": 12,
       "check_on": [],
-      "applies_to": {},
+      "applies_to": {
+        "vehicle_class": [
+          "car"
+        ]
+      },
       "included_by_default": false,
       "life_hint": "Vehículos de más de 12 años. La ITV mira corrosión estructural.",
       "symptoms": "Manguitos hinchados o agrietados, latiguillos de freno cuarteados, óxido con escamas.",
       "category": "carroceria"
+    },
+    {
+      "id": "chain_lube",
+      "name": "Engrasar y tensar la cadena",
+      "check_every_km": 1000,
+      "check_every_months": null,
+      "check_on": [
+        "moto_oil"
+      ],
+      "applies_to": {
+        "vehicle_class": [
+          "moto"
+        ],
+        "final_drive": [
+          "chain"
+        ]
+      },
+      "included_by_default": true,
+      "category": "transmision",
+      "life_hint": "Cada 500-1.000 km y después de lluvia. Tensión según el libro (normalmente 25-35 mm de juego).",
+      "symptoms": "Ruido metálico, tirones al cortar gas, eslabones agarrotados, óxido."
+    },
+    {
+      "id": "steering_bearings",
+      "name": "Rodamientos de dirección y basculante",
+      "check_every_km": 20000,
+      "check_every_months": null,
+      "check_on": [
+        "moto_oil"
+      ],
+      "applies_to": {
+        "vehicle_class": [
+          "moto"
+        ]
+      },
+      "included_by_default": true,
+      "category": "suspension",
+      "life_hint": "Rodamientos de dirección: 30-50.000 km. Engrasar los del basculante cada 20.000.",
+      "symptoms": "Dirección que se \"clava\" en el centro, holgura al frenar, ruido al virar."
+    },
+    {
+      "id": "cables_levers",
+      "name": "Cables, manetas, puños y reposapiés",
+      "check_every_km": null,
+      "check_every_months": 12,
+      "check_on": [
+        "moto_oil"
+      ],
+      "applies_to": {
+        "vehicle_class": [
+          "moto"
+        ]
+      },
+      "included_by_default": true,
+      "category": "general",
+      "life_hint": "Engrasar cables de gas y embrague una vez al año; comprobar juego de manetas.",
+      "symptoms": "Gas duro o que no retorna, embrague que patina o no desembraga."
+    },
+    {
+      "id": "moto_tyres",
+      "name": "Neumáticos (dibujo, edad, presión)",
+      "check_every_km": 5000,
+      "check_every_months": null,
+      "check_on": [
+        "moto_oil"
+      ],
+      "applies_to": {
+        "vehicle_class": [
+          "moto"
+        ]
+      },
+      "included_by_default": true,
+      "category": "ruedas",
+      "life_hint": "El trasero dura 8-15.000 km; el delantero, casi el doble. Más de 6 años (fecha DOT), a cambiar aunque tenga dibujo. Presión cada 15 días: en moto se nota muchísimo.",
+      "symptoms": "Perfil \"cuadrado\", grietas en el flanco, vibraciones, la moto no quiere tumbar."
+    },
+    {
+      "id": "moto_brake_pads",
+      "name": "Pastillas y discos de freno",
+      "check_every_km": 10000,
+      "check_every_months": null,
+      "check_on": [
+        "moto_oil"
+      ],
+      "applies_to": {
+        "vehicle_class": [
+          "moto"
+        ]
+      },
+      "included_by_default": true,
+      "category": "frenos",
+      "life_hint": "Delante 15-25.000 km según uso; detrás suele durar más. Discos: el espesor mínimo va grabado en el propio disco.",
+      "symptoms": "Chirrido, maneta que se va al fondo, vibración al frenar, surcos en el disco."
+    },
+    {
+      "id": "moto_levels",
+      "name": "Niveles: aceite motor y líquido de frenos",
+      "check_every_km": null,
+      "check_every_months": 1,
+      "check_on": [],
+      "applies_to": {
+        "vehicle_class": [
+          "moto"
+        ]
+      },
+      "included_by_default": true,
+      "category": "general",
+      "life_hint": "Mirilla o varilla con la moto vertical y el motor templado. El nivel de frenos baja al gastarse las pastillas: es normal.",
+      "symptoms": "Aceite por debajo de la mirilla, líquido de frenos oscuro o bajo mínimo."
     }
   ],
   "modifiers": [
@@ -414,7 +786,8 @@
       "auto": null,
       "km_multipliers": {
         "oil": 0.7,
-        "fuel_filter": 0.75
+        "fuel_filter": 0.75,
+        "moto_oil": 0.7
       },
       "months_overrides": {},
       "add_watch": [
@@ -426,7 +799,12 @@
         "injectors",
         "dpf"
       ],
-      "all_watch_check_on_oil": false
+      "all_watch_check_on_oil": false,
+      "applies_to": {
+        "vehicle_class": [
+          "car"
+        ]
+      }
     },
     {
       "id": "urban",
@@ -435,7 +813,11 @@
       "auto": null,
       "km_multipliers": {
         "oil": 0.75,
-        "brake_pads": 0.7
+        "brake_pads": 0.7,
+        "moto_oil": 0.75,
+        "chain_kit": 0.8,
+        "moto_brake_pads": 0.7,
+        "cvt_belt": 0.8
       },
       "months_overrides": {
         "battery": 6
@@ -455,7 +837,12 @@
         "exercise_car"
       ],
       "force_check_on_oil": [],
-      "all_watch_check_on_oil": false
+      "all_watch_check_on_oil": false,
+      "applies_to": {
+        "vehicle_class": [
+          "car"
+        ]
+      }
     },
     {
       "id": "towing",
@@ -466,12 +853,18 @@
         "oil": 0.8,
         "gearbox_oil_manual": 0.8,
         "gearbox_oil_auto": 0.8,
-        "brake_pads": 0.7
+        "brake_pads": 0.7,
+        "moto_oil": 0.8
       },
       "months_overrides": {},
       "add_watch": [],
       "force_check_on_oil": [],
-      "all_watch_check_on_oil": false
+      "all_watch_check_on_oil": false,
+      "applies_to": {
+        "vehicle_class": [
+          "car"
+        ]
+      }
     },
     {
       "id": "high_mileage",
@@ -491,7 +884,12 @@
         "shocks",
         "suspension_joints"
       ],
-      "all_watch_check_on_oil": false
+      "all_watch_check_on_oil": false,
+      "applies_to": {
+        "vehicle_class": [
+          "car"
+        ]
+      }
     },
     {
       "id": "old_vehicle",
@@ -507,6 +905,135 @@
       ],
       "force_check_on_oil": [],
       "all_watch_check_on_oil": false
+    },
+    {
+      "id": "offroad",
+      "name": "Campo / pistas",
+      "question": "¿La usas por pistas, campo o enduro?",
+      "auto": null,
+      "km_multipliers": {
+        "moto_air_filter": 0.5,
+        "chain_kit": 0.7,
+        "moto_oil": 0.8,
+        "fork_oil": 0.7
+      },
+      "months_overrides": {},
+      "add_watch": [],
+      "force_check_on_oil": [
+        "steering_bearings"
+      ],
+      "all_watch_check_on_oil": false,
+      "applies_to": {
+        "vehicle_class": [
+          "moto"
+        ]
+      }
+    },
+    {
+      "id": "track",
+      "name": "Circuito / deportiva",
+      "question": "¿Haces tandas en circuito o conducción muy deportiva?",
+      "auto": null,
+      "km_multipliers": {
+        "moto_oil": 0.7,
+        "moto_brake_pads": 0.6,
+        "chain_kit": 0.8
+      },
+      "months_overrides": {},
+      "add_watch": [],
+      "force_check_on_oil": [
+        "moto_brake_pads",
+        "moto_tyres"
+      ],
+      "all_watch_check_on_oil": false,
+      "applies_to": {
+        "vehicle_class": [
+          "moto"
+        ]
+      }
+    },
+    {
+      "id": "pillion",
+      "name": "Pasajero o maletas",
+      "question": "¿Sueles ir con pasajero o con maletas cargadas?",
+      "auto": null,
+      "km_multipliers": {
+        "moto_brake_pads": 0.8,
+        "chain_kit": 0.85,
+        "fork_oil": 0.8
+      },
+      "months_overrides": {},
+      "add_watch": [],
+      "force_check_on_oil": [],
+      "all_watch_check_on_oil": false,
+      "applies_to": {
+        "vehicle_class": [
+          "moto"
+        ]
+      }
+    },
+    {
+      "id": "outdoor",
+      "name": "Duerme en la calle",
+      "question": "¿Duerme en la calle o sin techo?",
+      "auto": null,
+      "km_multipliers": {
+        "chain_kit": 0.85
+      },
+      "months_overrides": {
+        "battery": 6,
+        "cables_levers": 6
+      },
+      "add_watch": [],
+      "force_check_on_oil": [],
+      "all_watch_check_on_oil": false,
+      "applies_to": {
+        "vehicle_class": [
+          "moto"
+        ]
+      }
+    },
+    {
+      "id": "moto_low_km",
+      "name": "Pocos km al año",
+      "question": "¿Haces menos de 3.000 km al año?",
+      "auto": null,
+      "km_multipliers": {},
+      "months_overrides": {
+        "battery": 6
+      },
+      "add_watch": [
+        "exercise_car"
+      ],
+      "force_check_on_oil": [],
+      "all_watch_check_on_oil": false,
+      "applies_to": {
+        "vehicle_class": [
+          "moto"
+        ]
+      }
+    },
+    {
+      "id": "moto_high_mileage",
+      "name": "Más de 60.000 km",
+      "question": null,
+      "auto": {
+        "min_km": 60000
+      },
+      "km_multipliers": {},
+      "months_overrides": {},
+      "add_watch": [],
+      "force_check_on_oil": [
+        "steering_bearings",
+        "clutch",
+        "cables_levers"
+      ],
+      "all_watch_check_on_oil": false,
+      "applies_to": {
+        "vehicle_class": [
+          "moto"
+        ]
+      }
     }
   ],
   "modifications": [
@@ -533,24 +1060,84 @@
     {
       "id": "tint",
       "name": "Lunas tintadas",
-      "itv_note": "Parabrisas y ventanillas delanteras: mínimo 70 % de transmisión de luz. Láminas con certificado."
+      "itv_note": "Parabrisas y ventanillas delanteras: mínimo 70 % de transmisión de luz. Láminas con certificado.",
+      "applies_to": {
+        "vehicle_class": [
+          "car"
+        ]
+      }
     },
     {
       "id": "body",
       "name": "Estética (paragolpes, alerón, taloneras)",
-      "itv_note": "Piezas homologadas o informe de laboratorio y anotación en ficha. Sin aristas cortantes."
+      "itv_note": "Piezas homologadas o informe de laboratorio y anotación en ficha. Sin aristas cortantes.",
+      "applies_to": {
+        "vehicle_class": [
+          "car"
+        ]
+      }
     },
     {
       "id": "other",
       "name": "Otra modificación",
       "itv_note": "Si no está en la ficha técnica, pregunta antes de ir."
+    },
+    {
+      "id": "handlebar",
+      "name": "Manillar o semimanillares",
+      "itv_note": "Debe estar homologado o anotado en ficha si cambia anchura o altura. Los cables no pueden ir tirantes a tope de giro.",
+      "applies_to": {
+        "vehicle_class": [
+          "moto"
+        ]
+      }
+    },
+    {
+      "id": "mirrors",
+      "name": "Retrovisores no originales",
+      "itv_note": "Deben llevar marcado de homologación (E) y permitir ver detrás. Los de extremo de manillar sin marcado suelen suspender.",
+      "applies_to": {
+        "vehicle_class": [
+          "moto"
+        ]
+      }
+    },
+    {
+      "id": "plate_holder",
+      "name": "Portamatrículas corto o intermitentes LED",
+      "itv_note": "La matrícula debe ir en su ángulo e iluminada; los intermitentes LED, homologados y a la distancia reglamentaria.",
+      "applies_to": {
+        "vehicle_class": [
+          "moto"
+        ]
+      }
+    },
+    {
+      "id": "windscreen",
+      "name": "Cúpula o parabrisas",
+      "itv_note": "Si es original o accesorio homologado para el modelo, sin problema. Sin aristas cortantes.",
+      "applies_to": {
+        "vehicle_class": [
+          "moto"
+        ]
+      }
+    },
+    {
+      "id": "luggage",
+      "name": "Maletas, baúl o soportes",
+      "itv_note": "Soportes homologados para el modelo; no pueden tapar luces ni matrícula. Las maletas se pueden quitar para la inspección.",
+      "applies_to": {
+        "vehicle_class": [
+          "moto"
+        ]
+      }
     }
   ],
   "onboarding": {
     "steps": [
       {
         "id": "vehicle",
-        "title": "Tu coche",
+        "title": "Tu vehículo",
         "fields": [
           {
             "id": "make",
@@ -650,7 +1237,7 @@
       {
         "id": "history",
         "title": "¿Cuándo se hizo por última vez?",
-        "description": "Solo para los ítems que aplican a tu coche. Puedes saltarlo y la app te lo irá preguntando.",
+        "description": "Solo para los ítems que aplican a tu vehículo. Puedes saltarlo y la app te lo irá preguntando.",
         "skippable": true,
         "shortcut": {
           "id": "all_done_at_last_service",
@@ -700,7 +1287,11 @@
       {
         "id": "warning_lamps",
         "name": "Ningún testigo encendido en el cuadro",
-        "applies_to": {}
+        "applies_to": {
+          "vehicle_class": [
+            "car"
+          ]
+        }
       },
       {
         "id": "tyres",
@@ -733,22 +1324,38 @@
       {
         "id": "steering_suspension",
         "name": "Dirección y suspensión sin holguras ni fugas",
-        "applies_to": {}
+        "applies_to": {
+          "vehicle_class": [
+            "car"
+          ]
+        }
       },
       {
         "id": "glass_wipers",
         "name": "Parabrisas sin grietas en zona del conductor, escobillas bien",
-        "applies_to": {}
+        "applies_to": {
+          "vehicle_class": [
+            "car"
+          ]
+        }
       },
       {
         "id": "bodywork",
         "name": "Carrocería sin aristas ni óxido estructural",
-        "applies_to": {}
+        "applies_to": {
+          "vehicle_class": [
+            "car"
+          ]
+        }
       },
       {
         "id": "belts_horn",
         "name": "Cinturones y claxon funcionan",
-        "applies_to": {}
+        "applies_to": {
+          "vehicle_class": [
+            "car"
+          ]
+        }
       },
       {
         "id": "leaks",
@@ -764,6 +1371,72 @@
         "id": "documents",
         "name": "Permiso de circulación, ficha técnica y seguro en vigor",
         "applies_to": {}
+      },
+      {
+        "id": "exhaust_noise",
+        "name": "Escape original u homologado, sin ruido excesivo ni fugas",
+        "applies_to": {
+          "vehicle_class": [
+            "moto"
+          ]
+        }
+      },
+      {
+        "id": "mirrors_horn",
+        "name": "Retrovisores (los dos) y claxon funcionan",
+        "applies_to": {
+          "vehicle_class": [
+            "moto"
+          ]
+        }
+      },
+      {
+        "id": "stand_chain",
+        "name": "Caballete firme; cadena tensa y sin óxido",
+        "applies_to": {
+          "vehicle_class": [
+            "moto"
+          ],
+          "final_drive": [
+            "chain"
+          ]
+        }
+      },
+      {
+        "id": "fork_steering",
+        "name": "Horquilla y amortiguador sin fugas; dirección sin holgura ni puntos duros",
+        "applies_to": {
+          "vehicle_class": [
+            "moto"
+          ]
+        }
+      },
+      {
+        "id": "frame_rust",
+        "name": "Chasis y basculante sin óxido ni grietas; carenados sin aristas",
+        "applies_to": {
+          "vehicle_class": [
+            "moto"
+          ]
+        }
+      },
+      {
+        "id": "plate_light",
+        "name": "Matrícula en su ángulo, con luz, y portamatrículas reglamentario",
+        "applies_to": {
+          "vehicle_class": [
+            "moto"
+          ]
+        }
+      },
+      {
+        "id": "indicators",
+        "name": "Intermitentes homologados, visibles y a la distancia correcta",
+        "applies_to": {
+          "vehicle_class": [
+            "moto"
+          ]
+        }
       }
     ],
     "modification_check": {
