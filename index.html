@@ -2,75 +2,229 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Garaje — el mantenimiento de tu coche, sin olvidos</title>
-<meta name="description" content="Garaje te recuerda el aceite, los filtros, la ITV y todo lo que tu coche necesita, con un plan hecho a medida de tu vehículo y de cómo lo usas.">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Garaje · El mantenimiento de tu coche y tu moto, sin olvidos</title>
+<meta name="description" content="Garaje monta el plan de mantenimiento de tu coche o tu moto según su motor y cómo lo usas: aceite, filtros, distribución, ITV. Rellénalo con una foto de la ficha técnica. Gratis y sin anuncios.">
+<meta name="theme-color" content="#F3F5F8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0B1118" media="(prefers-color-scheme: dark)">
+<link rel="canonical" href="https://samuelgonzrojas.github.io/garaje/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="es_ES">
+<meta property="og:site_name" content="Garaje">
+<meta property="og:title" content="Garaje · El mantenimiento de tu coche, sin olvidos">
+<meta property="og:description" content="Plan a medida de tu motor, semáforo de lo que toca, ITV y fotos que rellenan los datos por ti. Gratis.">
+<meta property="og:url" content="https://samuelgonzrojas.github.io/garaje/">
+<meta property="og:image" content="https://samuelgonzrojas.github.io/garaje/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preload" href="fonts/manrope-extrabold.woff" as="font" type="font/woff" crossorigin>
 <link rel="stylesheet" href="style.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"MobileApplication","name":"Garaje","operatingSystem":"Android","applicationCategory":"UtilitiesApplication","inLanguage":"es","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},"url":"https://samuelgonzrojas.github.io/garaje/"}
+</script>
 </head>
 <body>
 <div class="wrap">
 <header>
   <a class="logo" href="./"><img src="icon-192.png" alt=""> Garaje</a>
-  <nav><a href="#como">Cómo funciona</a><a href="taller/">Para talleres</a><a href="novedades.html">Novedades</a><a href="#faq">Preguntas</a><a href="privacidad.html">Privacidad</a></nav>
+  <nav><a href="#funciones">Funciones</a><a href="#fotos">Fotos</a><a href="taller/">Para talleres</a><a href="novedades.html">Novedades</a><a href="#preguntas">Preguntas</a></nav>
 </header>
 
+<!-- PORTADA -->
 <section class="hero">
   <div>
-    <h1>El mantenimiento de tu coche, sin olvidos.</h1>
-    <p>Dale de alta tu coche en cinco minutos y Garaje te monta el plan: aceite, filtros, frenos, correa o cadena, ITV… ajustado a tu motor y a cómo lo usas. Un semáforo te dice qué toca y qué puede esperar.</p>
-    <a class="btn" href="https://github.com/samuelgonzrojas/garaje/releases/latest/download/garaje.apk">Descargar para Android</a>
-    <a class="btn ghost" href="#instalar">Cómo se instala</a>
+    <span class="eyebrow">Gratis · Android · Sin anuncios</span>
+    <h1>Tu coche, siempre <span>a punto</span>.</h1>
+    <p class="lead">Garaje monta el plan de mantenimiento de tu coche o tu moto según su motor y cómo lo usas. Un semáforo te dice qué toca, qué puede esperar y cuándo es la ITV. Y los datos los rellenas con una foto.</p>
+    <div class="cta">
+      <a class="btn" href="https://github.com/samuelgonzrojas/garaje/releases/latest/download/garaje.apk">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg>
+        Descargar para Android
+      </a>
+      <a class="btn ghost" href="#instalar">Cómo se instala</a>
+    </div>
+    <div class="trust"><span>Funciona sin conexión</span><span>Datos en la UE</span><span>Se actualiza sola</span></div>
   </div>
-  <div class="phone" aria-hidden="true">
-    <div class="km">243.000 km <small style="font-weight:400;font-size:14px">· BMW 118d (2007)</small></div>
-    <div class="row"><span class="dot red"></span><div><b>Líquido de frenos</b><small>Pasado hace 5 meses · cada 24 meses</small></div></div>
-    <div class="row"><span class="dot red"></span><div><b>Filtro de combustible</b><small>Pasado en 1.000 km</small></div></div>
-    <div class="row"><span class="dot amber"></span><div><b>Refrigerante</b><small>Quedan 47.000 km · quedan 5 meses</small></div></div>
-    <div class="row"><span class="dot amber"></span><div><b>ITV</b><small>Quedan 29 días · checklist 9/13</small></div></div>
-    <div class="row"><span class="dot green"></span><div><b>Aceite motor + filtro</b><small>Quedan 6.000 km</small></div></div>
+
+  <div class="device" aria-hidden="true">
+    <div class="phone">
+      <div class="app-title">Mi coche</div>
+      <div class="app-sub">BMW 118d · 2008</div>
+      <div class="odo"><small>Cuentakilómetros</small><b>243.702 km</b><span class="plate"><span>1234 FTP</span></span></div>
+      <div class="tile"><i class="r">!</i><div style="flex:1"><b>Líquido de frenos</b><small>Pasado hace 5 meses</small><div class="bar"><span style="width:100%;background:var(--red)"></span></div></div></div>
+      <div class="tile"><i class="a">•</i><div style="flex:1"><b>ITV</b><small>Quedan 29 días · checklist 9/13</small><div class="bar"><span style="width:82%;background:var(--amber)"></span></div></div></div>
+      <div class="tile"><i class="a">•</i><div style="flex:1"><b>Cadena de distribución</b><small>Pregunta en el próximo cambio de aceite</small></div></div>
+      <div class="tile"><i class="g">✓</i><div style="flex:1"><b>Aceite motor + filtro</b><small>Quedan 6.000 km</small><div class="bar"><span style="width:40%;background:var(--green)"></span></div></div></div>
+      <div class="tabs"><span class="on">Inicio</span><span>Historial</span><span>ITV</span><span>Mi coche</span></div>
+    </div>
+    <div class="float f1"><span class="ic">📷</span><div>243.702 km<small>Leído de la foto</small></div></div>
+    <div class="float f2"><span class="ic">🔔</span><div>ITV en 29 días<small>Te avisamos con tiempo</small></div></div>
   </div>
 </section>
 
-<section id="talleres" class="card" style="margin:8px 0 24px;display:flex;gap:18px;align-items:center;flex-wrap:wrap;justify-content:space-between">
-  <div style="flex:1;min-width:260px"><h3 style="margin:0 0 6px">¿Tienes un taller?</h3><p style="margin:0">Tus clientes te dan acceso a su coche con un código y tú apuntas los trabajos desde el ordenador. El cliente lo ve en su móvil al momento, firmado por tu taller. Gratis.</p></div>
-  <a class="btn" href="taller/">Abrir el panel de taller</a>
+<div class="stats reveal">
+  <div class="stat"><b>143</b><span>marcas de coche y moto</span></div>
+  <div class="stat"><b>3.089</b><span>modelos con sus motores</span></div>
+  <div class="stat"><b>107</b><span>motores con plan propio</span></div>
+  <div class="stat"><b>408</b><span>puntos débiles conocidos</span></div>
+</div>
+
+<!-- FUNCIONES -->
+<section id="funciones" class="section">
+  <div class="section-head reveal">
+    <span class="eyebrow">Qué hace</span>
+    <h2>Todo lo que tu coche necesita, en un solo sitio.</h2>
+    <p>Sin hojas de cálculo ni pegatinas en el parabrisas. Garaje sabe qué toca y te lo dice antes de que sea tarde.</p>
+  </div>
+  <div class="features">
+    <div class="card feature reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg></div><h3>Plan a medida de tu motor</h3><p>Diésel o gasolina, correa o cadena, reprogramado, uso urbano, remolque… Cada respuesta ajusta los intervalos. Y te dice qué aceite y cuánto lleva.</p></div>
+    <div class="card feature reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="7" y="2" width="10" height="20" rx="5"/><circle cx="12" cy="7" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="17" r="1.6"/></svg></div><h3>Semáforo honesto</h3><p>Verde, ámbar o rojo por kilómetros y por meses, lo que llegue antes. Lo que no sabes sale en ámbar, nunca en verde por defecto.</p></div>
+    <div class="card feature reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 10h18M8.5 15l2.5 2.5 4.5-5"/></svg></div><h3>ITV sin sustos</h3><p>Calcula la fecha según la edad y el tipo de vehículo, te avisa con tiempo y te da un checklist con tus modificaciones y si están homologadas.</p></div>
+    <div class="card feature reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4m0 4h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg></div><h3>Puntos débiles de tu motor</h3><p>Turbo, inyectores, cadena, volante bimasa… Lo que suele fallar en tu motor, para que lo vigiles en cada revisión.</p></div>
+    <div class="card feature reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg></div><h3>Historial que vende tu coche</h3><p>Cada trabajo con fecha, km, quién lo hizo, cuánto costó y la foto de la factura. Exporta un informe en PDF para enseñarlo al venderlo.</p></div>
+    <div class="card feature reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.9M16 3.1a4 4 0 010 7.8"/></svg></div><h3>Compártelo con quien lo cuida</h3><p>Familia o taller: les pasas un código y ven y apuntan en el mismo coche. Cada registro dice quién lo hizo.</p></div>
+    <div class="card feature reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22V5a2 2 0 012-2h7a2 2 0 012 2v17M3 22h11M14 10h2a2 2 0 012 2v4a1.5 1.5 0 003 0V8l-3-3M7 7h3"/></svg></div><h3>Repostajes y consumo</h3><p>Apunta cada repostaje y ve el consumo real, el coste cada 100 km y lo gastado en el último año. ¿Vienes de Fuelio o Drivvo? Importa tu historial.</p></div>
+    <div class="card feature reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5l11 11L12 23V1l5.5 5.5-11 11"/></svg></div><h3>Kilómetros solos por Bluetooth</h3><p>Si quieres, al conectar el móvil al coche apunta el viaje y suma los kilómetros sin que tengas que abrir la app.</p></div>
+    <div class="card feature reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.3A8 8 0 109 20h9a5 5 0 000-10z"/></svg></div><h3>Tuyo, y a salvo</h3><p>Funciona sin conexión. Si inicias sesión, copias diarias en servidores de la UE y recuperas todo en otro móvil.</p></div>
+  </div>
 </section>
 
-<section id="como" class="features">
-  <div class="card"><h3>Plan a medida</h3><p>Diésel o gasolina, correa o cadena, tracción, reprogramado, uso urbano… cada respuesta ajusta los intervalos. Nada de recordatorios genéricos.</p></div>
-  <div class="card"><h3>Semáforo honesto</h3><p>Verde, ámbar o rojo según km y meses, lo que llegue antes. Lo que no sabes sale en ámbar, nunca en verde por defecto.</p></div>
-  <div class="card"><h3>ITV sin sustos</h3><p>Fecha de la próxima según la edad del coche, aviso con 30 días y un checklist propio que incluye tus modificaciones y si están homologadas.</p></div>
-  <div class="card"><h3>Vigilancia inteligente</h3><p>Cadena de distribución, turbo, embrague, inyectores: cosas sin intervalo fijo que la app te recuerda preguntar en cada cambio de aceite.</p></div>
-  <div class="card"><h3>Quién hizo qué</h3><p>Cada registro guarda fecha, km, quién lo hizo y cuánto costó. El historial del coche deja de vivir en la memoria de alguien.</p></div>
-  <div class="card"><h3>Tuyo y en la nube</h3><p>Funciona sin conexión. Si quieres, entra con Google o con tu correo y tus datos se guardan cifrados en servidores de la UE para recuperarlos en cualquier móvil.</p></div>
+<!-- FOTOS -->
+<section id="fotos" class="section">
+  <div class="spot">
+    <div class="reveal">
+      <span class="eyebrow">Nuevo</span>
+      <h2>Dale de alta tu coche con una foto.</h2>
+      <p>Haz una foto a la ficha técnica o al permiso de circulación. Garaje lee la marca, el modelo, el motor, el bastidor, la matrícula y la fecha de matriculación, y elige el plan de ese motor.</p>
+      <ul class="checks">
+        <li>Lo lee el propio móvil: la foto no se sube a ningún sitio</li>
+        <li>Te enseña lo leído antes de rellenar nada</li>
+        <li>También lee la matrícula de una foto del coche</li>
+      </ul>
+    </div>
+    <div class="spot-art reveal">
+      <div class="sheet" aria-hidden="true">
+        <h4>Esto he leído</h4>
+        <div class="hint">Revísalo: luego puedes cambiar cualquier dato.</div>
+        <div class="kvrow"><span>Matrícula</span><b>1234 FTP</b></div>
+        <div class="kvrow"><span>Marca</span><b>BMW</b></div>
+        <div class="kvrow"><span>Modelo</span><b>1 Series</b></div>
+        <div class="kvrow"><span>Motor</span><b>2.0 118d 143 CV</b></div>
+        <div class="kvrow"><span>Matriculación</span><b>12/03/2008</b></div>
+        <div class="kvrow"><span>Combustible</span><b>Diésel</b></div>
+        <div class="kvrow"><span>Bastidor</span><b>WBAUE71070E123456</b></div>
+        <div class="acts"><a href="#fotos">Descartar</a><span class="btn">Usar estos datos</span></div>
+      </div>
+    </div>
+  </div>
 </section>
 
-<section id="instalar" class="faq">
-  <h2>Cómo se instala</h2>
-  <details open><summary>Todavía no está en Google Play: se instala con un archivo (APK)</summary>
-    <p>1. Pulsa <b>Descargar para Android</b> desde el móvil. Se baja un archivo de unos 45 MB.</p>
-    <p>2. Ábrelo desde la notificación de descarga. Android te pedirá permiso para instalar apps de ese navegador: acéptalo solo para esta vez.</p>
-    <p>3. Si Google Play Protect avisa de "aplicación desconocida", elige <b>Instalar de todas formas</b> (o "Más detalles" → "Instalar"). Es normal mientras no esté en la tienda.</p>
-    <p>4. A partir de ahí no hace falta repetirlo: la propia app avisa cuando hay una versión nueva y la descarga.</p>
-  </details>
-  <details><summary>¿Es seguro?</summary><p>El archivo está firmado y publicado en el repositorio público del proyecto. No pide ubicación ni contactos; la cámara solo se usa si tú haces una foto al cuentakilómetros, y la foto se lee en el propio móvil.</p></details>
+<section class="section">
+  <div class="spot rev">
+    <div class="reveal">
+      <span class="eyebrow">Kilómetros</span>
+      <h2>Apunta los km sin teclear.</h2>
+      <p>Foto al cuadro y listo. Entiende pantallas de puntos, ámbar o digitales, descarta la hora, la temperatura y la autonomía, y si duda te deja elegir entre lo que ha visto.</p>
+      <ul class="checks">
+        <li>Usa la última lectura para no equivocarse de número</li>
+        <li>Te avisa si sobra o falta un dígito</li>
+        <li>Corrige una lectura mal hecha sin perder el historial</li>
+      </ul>
+    </div>
+    <div class="spot-art reveal">
+      <div class="dash" aria-hidden="true">
+        <div class="lcd"><div class="sm">→| ⛽ 356 km</div><div class="big">243702 km ▲207</div></div>
+        <div class="scan"></div>
+        <div class="result"><span class="chip on">243.702 km</span><span class="chip">356 km</span></div>
+      </div>
+    </div>
+  </div>
 </section>
 
-<section id="faq" class="faq">
-  <h2>Preguntas frecuentes</h2>
-  <details><summary>¿Cuándo estará en Google Play?</summary><p>Cuando el grupo de prueba la haya pulido. Mientras tanto se instala desde esta web y se actualiza sola.</p></details>
-  <details><summary>¿Cuánto cuesta?</summary><p>Nada. Garaje nace porque yo mismo necesitaba una herramienta así. Si algún día hay una versión de pago, la básica seguirá siendo gratuita.</p></details>
-  <details><summary>¿De dónde salen los intervalos?</summary><p>De un catálogo conservador para turismos, ajustado por las condiciones de uso que indiques. No sustituye al libro de mantenimiento de tu fabricante ni a tu taller; te ayuda a no olvidarte de preguntar.</p></details>
-  <details><summary>¿Y mis datos?</summary><p>Se guardan en tu móvil. Solo si inicias sesión se suben a tu cuenta, en servidores de la Unión Europea, y nadie más los ve. Puedes borrarlos cuando quieras. Más detalle en la <a href="privacidad.html">política de privacidad</a>.</p></details>
+<section class="section">
+  <div class="spot">
+    <div class="reveal">
+      <span class="eyebrow">Coche, moto o furgoneta</span>
+      <h2>Las motos tienen su propio plan.</h2>
+      <p>Cadena, holgura de válvulas, aceite de horquilla, correa del scooter… Garaje no reutiliza el plan de un coche: conoce 1.216 modelos de moto, con su transmisión y su cilindrada.</p>
+      <div class="types"><span>🚗 Coche</span><span>🏍️ Moto</span><span>🛵 Ciclomotor</span><span>🚐 Furgoneta</span><span>🚕 Taxi</span><span>🏕️ Autocaravana</span></div>
+    </div>
+    <div class="spot-art reveal">
+      <div class="phone" style="max-width:330px;margin:0 auto" aria-hidden="true">
+        <div class="app-title">Mi moto</div>
+        <div class="app-sub">Yamaha MT-07 · 2019</div>
+        <div class="tile"><i class="r">!</i><div style="flex:1"><b>Kit de transmisión</b><small>Pasado en 1.200 km</small></div></div>
+        <div class="tile"><i class="a">•</i><div style="flex:1"><b>Engrasar y tensar la cadena</b><small>Cada 500-1.000 km y después de lluvia</small></div></div>
+        <div class="tile"><i class="a">•</i><div style="flex:1"><b>Reglaje de válvulas</b><small>Quedan 3.500 km</small></div></div>
+        <div class="tile"><i class="g">✓</i><div style="flex:1"><b>Aceite de horquilla</b><small>Quedan 14 meses</small></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TALLERES -->
+<section id="talleres" class="section">
+  <div class="band reveal">
+    <div>
+      <span class="eyebrow" style="color:#9CCBF5">Para talleres</span>
+      <h2>Tus clientes, con el historial al día. Sin papeles.</h2>
+      <p>El cliente te da acceso a su coche con un código. Tú apuntas los trabajos desde el ordenador y él lo ve en su móvil al momento, firmado por tu taller. Gratis.</p>
+      <a class="btn" href="taller/">Abrir el panel de taller</a>
+    </div>
+    <ul>
+      <li>Apunta una visita entera de una vez<small>Aceite, filtros y lo que hayas revisado, con los km</small></li>
+      <li>Firmado con el nombre de tu taller<small>El cliente sabe quién y cuándo lo hizo</small></li>
+      <li>Le recuerda volver cuando toque<small>Su app le avisa del próximo mantenimiento</small></li>
+    </ul>
+  </div>
+</section>
+
+<!-- INSTALAR -->
+<section id="instalar" class="section">
+  <div class="section-head reveal">
+    <span class="eyebrow">Instalar</span>
+    <h2>En un minuto, desde esta web.</h2>
+    <p>Todavía no está en Google Play: se instala con un archivo (APK) firmado y publicado en el repositorio del proyecto.</p>
+  </div>
+  <div class="steps">
+    <div class="card step reveal"><h3>Descarga</h3><p>Pulsa <b>Descargar para Android</b> desde el móvil. Son unos 45 MB.</p></div>
+    <div class="card step reveal"><h3>Ábrelo</h3><p>Desde la notificación de descarga. Android pedirá permiso para instalar desde el navegador: acéptalo esta vez.</p></div>
+    <div class="card step reveal"><h3>Confirma</h3><p>Si Play Protect avisa de "app desconocida", elige <b>Instalar de todas formas</b>. Es normal fuera de la tienda.</p></div>
+    <div class="card step reveal"><h3>Olvídate</h3><p>No hay que repetirlo: la app avisa cuando hay versión nueva y se actualiza.</p></div>
+  </div>
+  <p style="margin-top:22px"><a class="btn" href="https://github.com/samuelgonzrojas/garaje/releases/latest/download/garaje.apk">Descargar para Android</a></p>
+</section>
+
+<!-- PREGUNTAS -->
+<section id="preguntas" class="faq section" style="padding-top:0">
+  <div class="section-head reveal"><span class="eyebrow">Preguntas</span><h2>Lo que suele preguntar la gente.</h2></div>
+  <details><summary>¿Cuánto cuesta?</summary><p>Nada, y no tiene anuncios. Garaje nace porque yo mismo necesitaba una herramienta así. Si algún día hay una versión de pago, lo básico seguirá siendo gratis.</p></details>
+  <details><summary>¿Es seguro instalarla fuera de Google Play?</summary><p>El archivo está firmado y publicado en el repositorio público del proyecto. No pide contactos. La cámara solo se usa cuando tú haces una foto, y la foto se lee en el propio móvil. La ubicación solo se pide si activas los viajes por Bluetooth.</p></details>
+  <details><summary>¿Cuándo estará en Google Play?</summary><p>Cuando el grupo de prueba la haya pulido. Mientras tanto se instala desde aquí y se actualiza sola.</p></details>
+  <details><summary>¿De dónde salen los intervalos?</summary><p>De un catálogo conservador, ajustado por el motor y por cómo usas el vehículo. No sustituye al libro de mantenimiento del fabricante ni a tu taller: te ayuda a no olvidarte de preguntar.</p></details>
+  <details><summary>¿Y mis datos?</summary><p>Se guardan en tu móvil. Solo si inicias sesión se suben a tu cuenta, en servidores de la Unión Europea, y nadie más los ve salvo quien tú invites. Puedes borrar la cuenta y los datos desde la app. Más detalle en la <a href="privacidad.html">política de privacidad</a>.</p></details>
+  <details><summary>¿Hay versión para iPhone?</summary><p>De momento solo Android. Si te interesa en iPhone, escríbeme y lo tengo en cuenta.</p></details>
 </section>
 
 <footer>
-  <a href="privacidad.html">Política de privacidad</a>
-  <a href="condiciones.html">Condiciones del servicio</a>
+  <a href="privacidad.html">Privacidad</a>
+  <a href="condiciones.html">Condiciones</a>
+  <a href="novedades.html">Novedades</a>
   <a href="mailto:samuelgonzrojas@gmail.com">Contacto</a>
-  <div style="margin-top:8px">© 2026 Garaje · Hecho en España</div>
+  <div style="margin-top:10px">© 2026 Garaje · Hecho en España</div>
 </footer>
 </div>
+<script>
+// Aparición suave al hacer scroll (sin JS, todo se ve igual).
+(function(){
+  var els=document.querySelectorAll('.reveal');
+  if(!('IntersectionObserver' in window)){els.forEach(function(e){e.classList.add('in')});return;}
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{rootMargin:'0px 0px -8% 0px'});
+  els.forEach(function(e){io.observe(e)});
+})();
+</script>
 </body>
 </html>

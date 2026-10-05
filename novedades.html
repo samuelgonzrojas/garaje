@@ -7,29 +7,35 @@
 <link rel="icon" href="icon-192.png">
 <link rel="stylesheet" href="style.css">
 <style>
-.changelog h2{margin:28px 0 8px;font-size:22px}
-.changelog h2 small{font-size:14px;font-weight:400;opacity:.7;margin-left:8px}
-.changelog ul{margin:0 0 8px 18px;line-height:1.5}
-.changelog .lead{opacity:.8}
+.changelog{max-width:780px}
+.changelog h1{font-size:clamp(32px,5vw,44px);margin:20px 0 6px}
+.changelog .lead{color:var(--muted);font-size:17px;margin:0 0 24px}
+.release{margin:0 0 14px}
+.release h2{margin:0 0 8px;font-size:22px}
+.release h2 small{font-size:14px;font-weight:600;color:var(--muted);margin-left:8px}
+.release ul{margin:0;padding-left:20px;line-height:1.55}
+.release li{margin:4px 0}
+.release:first-of-type{border-color:var(--brand-bright)}
 </style>
 </head>
 <body>
 <div class="wrap">
 <header>
   <a class="logo" href="./"><img src="icon-192.png" alt=""> Garaje</a>
-  <nav><a href="./">Inicio</a><a href="./#instalar">Instalar</a><a href="privacidad.html">Privacidad</a></nav>
+  <nav><a href="./">Inicio</a><a href="./#funciones">Funciones</a><a href="./#instalar">Instalar</a><a href="taller/">Para talleres</a></nav>
 </header>
 <section class="changelog">
-<h1>Novedades</h1>
-<p class="lead">Cada versión se publica como APK en https://github.com/samuelgonzrojas/garaje/releases y la app</p>
-<p class="lead">avisa sola cuando hay una nueva. Las fechas son de publicación.</p>
-<h2 id="v1-0-13">1.0.13 <small>5 de octubre de 2026</small></h2>
+<span class="eyebrow">Novedades</span>
+<h1>Qué hay de nuevo</h1>
+<p class="lead">Cada versión se publica en <a href="https://github.com/samuelgonzrojas/garaje/releases">GitHub</a> y la app avisa sola cuando hay una nueva.</p>
+<article class="card release"><h2 id="v1-0-13">1.0.13 <small>5 de octubre de 2026</small></h2>
 <ul>
 <li>Rellena el alta con una foto de la ficha técnica o del permiso de circulación (marca, modelo, motor, bastidor, fecha) y lee la matrícula de una foto.</li>
 <li>Arreglada la lectura de km por foto, que fallaba en todos los móviles.</li>
 <li>Editar un vehículo ya no borra intervalos ni recordatorios propios.</li>
 </ul>
-<h2 id="v1-0-12">1.0.12 <small>5 de octubre de 2026</small></h2>
+</article>
+<article class="card release"><h2 id="v1-0-12">1.0.12 <small>5 de octubre de 2026</small></h2>
 <ul>
 <li>Km: se pueden bajar corrigiendo la última lectura o guardando una nueva;</li>
 <li>la foto del cuentakilómetros lee mejor (descarta hora, temperatura y velocidad, corrige letras por dígitos, usa la última lectura como pista) y deja elegir entre los números vistos.</li>
@@ -42,7 +48,8 @@
 <li>Informes de fallos anónimos (se pueden desactivar en Ajustes) y comprobación de integridad al arrancar.</li>
 <li>Rendimiento: los avisos solo se reprograman cuando cambian los datos.</li>
 </ul>
-<h2 id="v1-0-11">1.0.11 <small>5 de octubre de 2026</small></h2>
+</article>
+<article class="card release"><h2 id="v1-0-11">1.0.11 <small>5 de octubre de 2026</small></h2>
 <ul>
 <li>Garaje: con varios vehículos la app abre con todos de un vistazo (semáforo, km e ITV);</li>
 <li>con uno solo entra directo.</li>
@@ -59,74 +66,88 @@
 <li>Doble atrás para salir y pantalla de carga sin esquinas blancas.</li>
 <li>Corregido: los checks de la ITV se deshacían al sincronizar.</li>
 </ul>
-<h2 id="v1-0-10">1.0.10 <small>4 de octubre de 2026</small></h2>
+</article>
+<article class="card release"><h2 id="v1-0-10">1.0.10 <small>4 de octubre de 2026</small></h2>
 <ul>
 <li>Adjuntos: fotos de facturas y tickets en cada registro, y documentos del coche (ficha técnica, permiso, seguro, tarjeta ITV) guardados en la nube y compartidos con quien ve el coche.</li>
 <li>Informe PDF &quot;Para vender&quot; con portada, historial con facturas y consumo real.</li>
 <li>Widget de pantalla de inicio con km, ITV y lo más urgente (Ajustes → Añadir widget).</li>
 <li>Historial de versiones en Ajustes y en la web.</li>
 </ul>
-<h2 id="v1-0-9">1.0.9 <small>4 de octubre de 2026</small></h2>
+</article>
+<article class="card release"><h2 id="v1-0-9">1.0.9 <small>4 de octubre de 2026</small></h2>
 <ul>
 <li>Repostajes: litros, importe, km y depósito lleno. Consumo real (l/100 km), euros por 100 km y gasto en combustible del último año en Historial. Los km del repostaje actualizan el semáforo.</li>
 <li>Plantillas de recordatorio: seguro, impuesto de circulación, revisión oficial, presión de ruedas y lavado.</li>
 <li>Enlace de descarga fijo (`garaje.apk`) y botón &quot;Descargar para Android&quot; en la web.</li>
 </ul>
-<h2 id="v1-0-8">1.0.8 <small>4 de octubre de 2026</small></h2>
+</article>
+<article class="card release"><h2 id="v1-0-8">1.0.8 <small>4 de octubre de 2026</small></h2>
 <ul>
 <li>Km por foto del cuentakilómetros (lectura en el propio móvil, sin conexión).</li>
 <li>Estimación automática de km entre lecturas según el ritmo de uso; los avisos por km se programan por fecha.</li>
 <li>Perfiles: nombre con el que firmas, modo taller con &quot;Recepción de taller&quot;, &quot;Quién tiene acceso&quot; con botones de llamar y WhatsApp, y aviso cuando otra cuenta apunta algo en tu coche.</li>
 <li>La notificación semanal de km abre directamente el diálogo de km.</li>
 </ul>
-<h2 id="v1-0-7">1.0.7 <small>4 de octubre de 2026</small></h2>
+</article>
+<article class="card release"><h2 id="v1-0-7">1.0.7 <small>4 de octubre de 2026</small></h2>
 <ul>
 <li>Textos más cercanos y explicativos en toda la app.</li>
 <li>Detalle de cada mantenimiento rediseñado: qué pasa, cada cuánto toca y de dónde sale, por qué importa, historial.</li>
 <li>Icono de la app corregido (se veía blanco sobre blanco en algunos lanzadores).</li>
 </ul>
-<h2 id="v1-0-6">1.0.6 <small>4 de octubre de 2026</small></h2>
+</article>
+<article class="card release"><h2 id="v1-0-6">1.0.6 <small>4 de octubre de 2026</small></h2>
 <ul>
 <li>Icono nuevo (cuentakilómetros que dibuja la G) e iconos redondeados en toda la interfaz.</li>
 <li>Intervalos a medida por ítem (&quot;la correa cada 10.000 km&quot;) y recordatorios propios por km o meses.</li>
 <li>Roles al compartir: familiar o taller; cada registro queda firmado por quien lo apunta.</li>
 <li>El aviso de versión nueva se comprueba en cada arranque; &quot;Ahora no&quot; solo lo pospone un día.</li>
 </ul>
-<h2 id="v1-0-5">1.0.5 <small>4 de octubre de 2026</small></h2>
+</article>
+<article class="card release"><h2 id="v1-0-5">1.0.5 <small>4 de octubre de 2026</small></h2>
 <ul>
 <li>Tarjeta de ITV con ficha de calendario en vez del anillo de progreso.</li>
 </ul>
-<h2 id="v1-0-4">1.0.4 <small>4 de octubre de 2026</small></h2>
+</article>
+<article class="card release"><h2 id="v1-0-4">1.0.4 <small>4 de octubre de 2026</small></h2>
 <ul>
 <li>Acabado visual nuevo: tipografía Manrope, cabecera con degradado y matrícula, tarjetas, modo claro y oscuro pulidos.</li>
 <li>Alta con base de 64 marcas, 1.873 modelos y 17.000 motorizaciones; el motor elegido rellena combustible, cambio y tracción y ajusta los intervalos.</li>
 <li>Ajustes → &quot;Enviar diagnóstico&quot;.</li>
 </ul>
-<h2 id="v1-0-3">1.0.3 <small>4 de octubre de 2026</small></h2>
+</article>
+<article class="card release"><h2 id="v1-0-3">1.0.3 <small>4 de octubre de 2026</small></h2>
 <ul>
 <li>Correcciones tras simular dos semanas de uso con dos móviles: sincronización sin bucles ni pérdidas al editar a la vez, borrar un registro borra también sus km, aviso si los km tienen un dígito de más, ITV adelantada conserva la fecha, fechas correctas con el cambio de hora.</li>
 <li>Acceso por correo con código de 6 cifras.</li>
 </ul>
-<h2 id="v1-0-2">1.0.2 <small>4 de octubre de 2026</small></h2>
+</article>
+<article class="card release"><h2 id="v1-0-2">1.0.2 <small>4 de octubre de 2026</small></h2>
 <ul>
 <li>Corrige el inicio de sesión en la versión instalada por APK (faltaba el permiso de red).</li>
 <li>Los errores de acceso se muestran en pantalla.</li>
 </ul>
-<h2 id="v1-0-1">1.0.1 <small>4 de octubre de 2026</small></h2>
+</article>
+<article class="card release"><h2 id="v1-0-1">1.0.1 <small>4 de octubre de 2026</small></h2>
 <ul>
 <li>Sincronización en directo entre móviles que comparten un vehículo; actualización al volver a la app y al tirar hacia abajo.</li>
 <li>Aviso de versiones nuevas desde la propia app.</li>
 <li>Búsqueda del coche por matrícula en el alta (pendiente de contratar el proveedor).</li>
 </ul>
-<h2 id="v1-0-0">1.0.0 <small>4 de octubre de 2026</small></h2>
+</article>
+<article class="card release"><h2 id="v1-0-0">1.0.0 <small>4 de octubre de 2026</small></h2>
 <ul>
 <li>Primera versión instalable: plan de mantenimiento por motor y uso, semáforo, ITV según el Real Decreto 920/2017, historial con gráficas y PDF, recordatorios, cuenta con Google o correo, vehículos compartidos por código, copia diaria en la nube.</li>
 </ul>
+</article>
 </section>
 <footer>
-  <a href="privacidad.html">Política de privacidad</a>
-  <a href="condiciones.html">Condiciones del servicio</a>
+  <a href="privacidad.html">Privacidad</a>
+  <a href="condiciones.html">Condiciones</a>
   <a href="https://github.com/samuelgonzrojas/garaje/releases">Todas las versiones (APK)</a>
+  <a href="mailto:samuelgonzrojas@gmail.com">Contacto</a>
+  <div style="margin-top:10px">© 2026 Garaje · Hecho en España</div>
 </footer>
 </div>
 </body>
