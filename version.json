@@ -1,6 +1,6 @@
 {
-  "version": "1.0.12",
-  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.12/garaje-1.0.12-arm64.apk",
-  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.12/garaje-1.0.12.apk",
-  "notes": "Km: se pueden bajar corrigiendo la última lectura o guardando una nueva; la foto del cuentakilómetros lee mejor (descarta hora, temperatura y velocidad, corrige letras por dígitos, usa la última lectura como pista) y deja elegir entre los números vistos. Inicio: cuando hay más de tres cosas pendientes se muestran en un carrusel con la lista plegada debajo. Historial: un solo botón Informe con los dos PDF. ITV rediseñada: fecha con barra del periodo, pedir cita, qué llevar, checklist con progreso y bueno saber. Mi coche: lista de intervalos pulsable, personas compactas, piezas y especificaciones por motor (aceite, cantidad, refrigerante, bujías, distribución…) y tus propias referencias en cada trabajo. Deshacer al borrar registros y repostajes, papelera de vehículos de 30 días, copias versionadas en la nube con restauración, estado de sincronización, borrar cuenta y datos. Importar repostajes y trabajos desde Fuelio, Drivvo, Simply Auto o una hoja de cálculo (CSV). Informes de fallos anónimos (se pueden desactivar en Ajustes) y comprobación de integridad al arrancar. Rendimiento: los avisos solo se reprograman cuando cambian los datos."
+  "version": "1.0.13",
+  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.13/garaje-1.0.13-arm64.apk",
+  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.13/garaje-1.0.13.apk",
+  "notes": "Rellena el alta con una foto de la ficha técnica o del permiso de circulación (marca, modelo, motor, bastidor, fecha) y lee la matrícula de una foto. Arreglada la lectura de km por foto, que fallaba en todos los móviles. Editar un vehículo ya no borra intervalos ni recordatorios propios."
 }
