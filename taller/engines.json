@@ -1,0 +1,6208 @@
+{
+ "version": 2,
+ "disclaimer": "Valores orientativos y conservadores por familia de motor, pensados para coches con años encima. Se basan en libros de mantenimiento y en los fallos habituales conocidos de cada motor; confirma siempre con el manual y con tu taller.",
+ "engines": [
+  {
+   "id": "bmw_n47_e8x",
+   "make": "BMW",
+   "models": [
+    "serie 1",
+    "1 series",
+    "118d",
+    "120d",
+    "116d",
+    "123d",
+    "e87",
+    "e81",
+    "e82",
+    "e88"
+   ],
+   "years": [
+    2007,
+    2011
+   ],
+   "fuel": "diesel",
+   "label": "BMW Serie 1 diésel (E81/E87, motor N47, 2007-2011)",
+   "engine": "2.0d N47 (116d/118d/120d/123d)",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "fuel_filter": {
+     "km": 40000,
+     "months": 24
+    },
+    "diff_oil": {
+     "km": 100000
+    }
+   },
+   "watch_hints": {
+    "timing_chain": "Motor N47: la cadena va pegada al cambio y es cara de sustituir. Un ruido de carraca o cascabeleo en frío en los primeros segundos es motivo de taller inmediato.",
+    "turbo_egr": "EGR y colector de admisión se carbonizan con uso urbano; limpieza preventiva cada 60-80.000 km."
+   },
+   "known_issues": [
+    "Cadena de distribución y guías (N47): desgaste prematuro, rotura catastrófica si se ignora el ruido.",
+    "Volante bimasa y embrague a partir de 150.000 km.",
+    "Bomba de vacío y fugas de aceite por el cárter de la cadena.",
+    "Carbonilla en EGR y admisión con trayectos cortos."
+   ],
+   "specs": {
+    "oil": "5W-30 BMW Longlife-04 (ACEA C3)",
+    "oil_l": "5,2 l con filtro",
+    "coolant": "BMW azul (silicatos), al 50 %",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "gearbox": "Caja manual: 75W-80 GL-4 (de por vida según BMW; muchos la cambian a 100.000 km)",
+    "diff": "Diferencial: 75W-90 GL-5, ~1,2 l",
+    "battery": "80-90 Ah AGM si lleva start-stop (hay que registrarla)"
+   }
+  },
+  {
+   "id": "bmw_n47_f2x",
+   "make": "BMW",
+   "models": [
+    "serie 1",
+    "serie 3",
+    "1 series",
+    "3 series",
+    "116d",
+    "118d",
+    "120d",
+    "316d",
+    "318d",
+    "320d",
+    "f20",
+    "f21",
+    "f30",
+    "f31"
+   ],
+   "years": [
+    2011,
+    2014
+   ],
+   "fuel": "diesel",
+   "label": "BMW Serie 1 / Serie 3 diésel (F20/F30, motor N47 revisado, 2011-2014)",
+   "engine": "2.0d N47N",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "fuel_filter": {
+     "km": 40000,
+     "months": 24
+    },
+    "diff_oil": {
+     "km": 100000
+    }
+   },
+   "watch_hints": {
+    "timing_chain": "N47 revisado: menos fallos que el anterior, pero sigue mereciendo escuchar el arranque en frío."
+   },
+   "known_issues": [
+    "Cadena de distribución (menos frecuente que en 2007-2011).",
+    "Carbonilla en EGR/admisión.",
+    "Volante bimasa."
+   ],
+   "specs": {
+    "oil": "5W-30 BMW Longlife-04",
+    "oil_l": "5,2 l con filtro",
+    "coolant": "BMW azul, al 50 %",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "battery": "AGM 80-90 Ah con registro"
+   }
+  },
+  {
+   "id": "bmw_b47",
+   "make": "BMW",
+   "models": [
+    "serie 1",
+    "serie 2",
+    "serie 3",
+    "serie 4",
+    "x1",
+    "x3",
+    "116d",
+    "118d",
+    "120d",
+    "318d",
+    "320d",
+    "f20",
+    "f30",
+    "f40",
+    "g20"
+   ],
+   "years": [
+    2015,
+    2024
+   ],
+   "fuel": "diesel",
+   "label": "BMW diésel 1.5d/2.0d (motor B37/B47, 2015 en adelante)",
+   "engine": "1.5d B37 / 2.0d B47",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "fuel_filter": {
+     "km": 40000,
+     "months": 24
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Mucho más fiable que el N47. Vigilar EGR y, en versiones con AdBlue, el sistema SCR.",
+    "Testigo de nivel de aceite: comprobar manualmente cada 2.000 km."
+   ],
+   "specs": {
+    "oil": "0W-30 BMW Longlife-04 o Longlife-12 FE",
+    "oil_l": "5,25 l con filtro",
+    "coolant": "BMW azul o verde (según año), al 50 %",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "battery": "AGM con registro"
+   }
+  },
+  {
+   "id": "bmw_n13",
+   "make": "BMW",
+   "models": [
+    "serie 1",
+    "1 series",
+    "114i",
+    "116i",
+    "118i",
+    "f20",
+    "f21"
+   ],
+   "years": [
+    2011,
+    2015
+   ],
+   "fuel": "gasoline",
+   "label": "BMW Serie 1 gasolina 1.6 turbo (motor N13, 2011-2015)",
+   "engine": "1.6 turbo N13 (114i/116i/118i)",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 12000,
+     "months": 12
+    },
+    "spark_plugs": {
+     "km": 45000
+    }
+   },
+   "watch_hints": {
+    "timing_chain": "N13: tensor y cadena dan ruido en frío a partir de 80-100.000 km; cambio preventivo recomendable."
+   },
+   "known_issues": [
+    "Cadena y tensor de distribución.",
+    "Bobinas de encendido y bujías (tirones, testigo de motor).",
+    "Consumo de aceite: revisar nivel con frecuencia.",
+    "Termostato eléctrico y fugas de refrigerante."
+   ],
+   "specs": {
+    "oil": "5W-30 BMW Longlife-04 o Longlife-01",
+    "oil_l": "4,25 l con filtro",
+    "coolant": "BMW azul",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "NGK SILZKBR8D8S (iridio), cada 60.000 km"
+   }
+  },
+  {
+   "id": "vag_19tdi_pd",
+   "make": [
+    "Seat",
+    "Volkswagen",
+    "VW",
+    "Audi",
+    "Skoda"
+   ],
+   "models": [
+    "leon",
+    "león",
+    "ibiza",
+    "altea",
+    "toledo",
+    "alhambra",
+    "golf",
+    "polo",
+    "passat",
+    "touran",
+    "caddy",
+    "bora",
+    "a3",
+    "a4",
+    "octavia",
+    "fabia",
+    "superb"
+   ],
+   "years": [
+    2000,
+    2010
+   ],
+   "fuel": "diesel",
+   "label": "Grupo VW 1.9 TDI inyector-bomba (2000-2010)",
+   "engine": "1.9 TDI PD (90/100/105/130/150 CV)",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "timing_belt": {
+     "km": 90000,
+     "months": 60
+    },
+    "fuel_filter": {
+     "km": 40000,
+     "months": 24
+    },
+    "aux_belt": {
+     "km": 60000,
+     "months": 60
+    }
+   },
+   "watch_hints": {
+    "turbo_egr": "Turbo de geometría variable: se agarrota con uso urbano; un viaje largo al mes ayuda."
+   },
+   "known_issues": [
+    "Correa de distribución: cambiar con bomba de agua y tensor; no apurar los 120.000 km que indican algunos manuales.",
+    "Bomba tándem y fugas de gasóleo en inyectores-bomba.",
+    "Volante bimasa y embrague.",
+    "Caudalímetro y geometría del turbo con pérdida de potencia."
+   ],
+   "specs": {
+    "oil": "5W-40 VW 505.01 (imprescindible en inyector-bomba)",
+    "oil_l": "4,3 l con filtro",
+    "coolant": "G12 / G12+ (rosa), al 50 %",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Kit de distribución con bomba de agua y rodillos; polea del cigüeñal también si tiene km"
+   }
+  },
+  {
+   "id": "vag_tdi_cr",
+   "make": [
+    "Seat",
+    "Volkswagen",
+    "VW",
+    "Audi",
+    "Skoda"
+   ],
+   "models": [
+    "leon",
+    "león",
+    "ibiza",
+    "ateca",
+    "arona",
+    "alhambra",
+    "golf",
+    "polo",
+    "passat",
+    "tiguan",
+    "touran",
+    "t-roc",
+    "caddy",
+    "a3",
+    "a4",
+    "q2",
+    "q3",
+    "octavia",
+    "fabia",
+    "superb",
+    "karoq",
+    "kodiaq"
+   ],
+   "years": [
+    2009,
+    2022
+   ],
+   "fuel": "diesel",
+   "label": "Grupo VW 1.6 TDI / 2.0 TDI common-rail (2009-2022)",
+   "engine": "1.6 TDI / 2.0 TDI CR (EA189 y EA288)",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "timing_belt": {
+     "km": 120000,
+     "months": 60
+    },
+    "fuel_filter": {
+     "km": 40000,
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "dpf": "DPF sensible al uso urbano: un trayecto de 30 minutos a velocidad sostenida al mes evita regeneraciones fallidas."
+   },
+   "known_issues": [
+    "Correa de distribución: el fabricante dice 210.000 km; en la práctica se cambia a 120.000-150.000 o 5-6 años.",
+    "EGR y refrigerador EGR (humos, testigo).",
+    "DPF obstruido en uso urbano.",
+    "Inyectores en los primeros 2.0 CR (2009-2011).",
+    "Servicio Longlife de 30.000 km: no recomendable con años encima; cada 15.000 km."
+   ],
+   "specs": {
+    "oil": "5W-30 VW 507.00 (Longlife) o 5W-40 VW 505.01 en intervalo fijo",
+    "oil_l": "1.6 TDI: 4,3 l · 2.0 TDI: 4,3-4,6 l con filtro",
+    "coolant": "G12++ / G13 (lila), al 50 %",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Correa: 210.000 km según VW, 120.000 recomendado; con bomba de agua"
+   }
+  },
+  {
+   "id": "vag_12_14_tsi_ea111",
+   "make": [
+    "Seat",
+    "Volkswagen",
+    "VW",
+    "Audi",
+    "Skoda"
+   ],
+   "models": [
+    "leon",
+    "león",
+    "ibiza",
+    "altea",
+    "golf",
+    "polo",
+    "touran",
+    "a1",
+    "a3",
+    "octavia",
+    "fabia",
+    "yeti"
+   ],
+   "years": [
+    2007,
+    2014
+   ],
+   "fuel": "gasoline",
+   "label": "Grupo VW 1.2 TSI / 1.4 TSI con cadena (EA111, 2007-2014)",
+   "engine": "1.2 TSI 105 CV / 1.4 TSI 122-160 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 12000,
+     "months": 12
+    },
+    "spark_plugs": {
+     "km": 45000
+    }
+   },
+   "watch_hints": {
+    "timing_chain": "EA111: la cadena se estira y el tensor falla; ruido de cadena al arrancar en frío = cambio urgente (riesgo de rotura)."
+   },
+   "known_issues": [
+    "Cadena de distribución y tensor: fallo conocido, cambio preventivo a 100.000-120.000 km.",
+    "Consumo de aceite elevado en 1.4 TSI (segmentos).",
+    "Bobinas de encendido.",
+    "Bomba de agua con fugas."
+   ],
+   "specs": {
+    "oil": "5W-30 VW 504.00/507.00 (o 502.00)",
+    "oil_l": "3,6-3,8 l con filtro",
+    "coolant": "G12++ / G13",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "NGK PZFR6R / ZKR7AI-8 según motor, cada 60.000 km",
+    "timing": "Cadena: vigilar el tensor (ruido en frío)"
+   }
+  },
+  {
+   "id": "vag_tsi_ea211",
+   "make": [
+    "Seat",
+    "Volkswagen",
+    "VW",
+    "Audi",
+    "Skoda",
+    "Cupra"
+   ],
+   "models": [
+    "leon",
+    "león",
+    "ibiza",
+    "arona",
+    "ateca",
+    "formentor",
+    "golf",
+    "polo",
+    "t-cross",
+    "t-roc",
+    "tiguan",
+    "a1",
+    "a3",
+    "q2",
+    "octavia",
+    "fabia",
+    "scala",
+    "kamiq",
+    "karoq"
+   ],
+   "years": [
+    2014,
+    2025
+   ],
+   "fuel": "gasoline",
+   "label": "Grupo VW 1.0 TSI / 1.4 TSI / 1.5 TSI con correa (EA211, 2014 en adelante)",
+   "engine": "1.0 TSI / 1.4 TSI / 1.5 TSI (EA211, EA211 evo)",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "timing_belt": {
+     "km": 150000,
+     "months": 96
+    },
+    "spark_plugs": {
+     "km": 60000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Correa de distribución: el fabricante la da por 'de por vida' o 240.000 km; conviene revisarla a los 120.000 y cambiarla a 150.000 o 8 años.",
+    "1.5 TSI 2017-2019: tirones en frío (actualización de software).",
+    "Carbonilla en válvulas de admisión (inyección directa) con uso urbano."
+   ],
+   "specs": {
+    "oil": "5W-30 VW 504.00 o 0W-20 VW 508.00 (EA211 evo)",
+    "oil_l": "4,0 l con filtro",
+    "coolant": "G13",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Cada 60.000 km",
+    "timing": "Correa dentada: VW no fija cambio; 120.000 km o 8 años recomendado"
+   }
+  },
+  {
+   "id": "vag_20_tfsi_ea888",
+   "make": [
+    "Seat",
+    "Volkswagen",
+    "VW",
+    "Audi",
+    "Skoda",
+    "Cupra"
+   ],
+   "models": [
+    "leon",
+    "león",
+    "golf",
+    "gti",
+    "passat",
+    "tiguan",
+    "a3",
+    "a4",
+    "a5",
+    "q3",
+    "q5",
+    "tt",
+    "octavia",
+    "superb",
+    "formentor"
+   ],
+   "years": [
+    2008,
+    2025
+   ],
+   "fuel": "gasoline",
+   "label": "Grupo VW 1.8 TFSI / 2.0 TFSI / 2.0 TSI (EA888)",
+   "engine": "1.8 / 2.0 turbo EA888",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 12000,
+     "months": 12
+    },
+    "spark_plugs": {
+     "km": 45000
+    }
+   },
+   "watch_hints": {
+    "timing_chain": "EA888 (2008-2014): tensor de cadena defectuoso en las primeras series; comprobar versión del tensor y escuchar en frío."
+   },
+   "known_issues": [
+    "Tensor de cadena en EA888 gen.1-2 (2008-2014): rotura sin aviso si es el original.",
+    "Consumo de aceite alto en 2.0 TFSI 2009-2013 (segmentos).",
+    "Bomba de agua y termostato con fugas.",
+    "Válvula de descarga del turbo (diverter)."
+   ],
+   "specs": {
+    "oil": "5W-30 VW 504.00 o 0W-20 VW 508.00 (gen. 3)",
+    "oil_l": "4,7-5,7 l con filtro según generación",
+    "coolant": "G12++ / G13",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Cada 60.000 km (NGK PFR7S8EG o equivalente)",
+    "timing": "Cadena: tensor rediseñado a partir de 2012"
+   }
+  },
+  {
+   "id": "psa_16_hdi_dv6",
+   "make": [
+    "Peugeot",
+    "Citroën",
+    "Citroen",
+    "DS",
+    "Ford",
+    "Mazda",
+    "Volvo",
+    "Mini"
+   ],
+   "models": [
+    "206",
+    "207",
+    "208",
+    "307",
+    "308",
+    "3008",
+    "5008",
+    "partner",
+    "2008",
+    "c3",
+    "c4",
+    "c5",
+    "berlingo",
+    "xsara",
+    "picasso",
+    "ds3",
+    "ds4",
+    "fiesta",
+    "focus",
+    "c-max",
+    "fusion",
+    "mazda2",
+    "mazda3",
+    "c30",
+    "s40",
+    "v50",
+    "one d",
+    "cooper d"
+   ],
+   "years": [
+    2004,
+    2018
+   ],
+   "fuel": "diesel",
+   "label": "PSA / Ford 1.6 HDi / 1.6 TDCi (motor DV6, 2004-2018)",
+   "engine": "1.6 HDi 90/110 CV, 1.6 e-HDi, 1.6 BlueHDi, 1.6 TDCi",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 12000,
+     "months": 12
+    },
+    "timing_belt": {
+     "km": 120000,
+     "months": 72
+    },
+    "fuel_filter": {
+     "km": 40000,
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "turbo_egr": "DV6: el turbo muere por lodos de aceite; cambios estrictos cada 12.000 km con aceite 5W30 homologado y limpiar las cribas de los conductos.",
+    "dpf": "FAP con aditivo (Eolys/Infineum): el depósito se agota hacia los 80.000-120.000 km; si no se rellena, el filtro se obstruye."
+   },
+   "known_issues": [
+    "Turbo por falta de lubricación (cribas de aceite obstruidas): el fallo más caro y más frecuente.",
+    "FAP: aditivo agotado o filtro saturado en uso urbano.",
+    "EGR y bomba de vacío.",
+    "Junta de culata y fugas por el intercambiador (1.6 HDi 110 CV 2004-2010).",
+    "Correa de distribución: el fabricante dice 240.000 km/10 años; conservador 120.000 km/6 años."
+   ],
+   "specs": {
+    "oil": "5W-30 PSA B71 2290 (Total Quartz Ineo ECS) — nunca otro grado con FAP",
+    "oil_l": "3,75 l con filtro (DV6C), 3,85 l (DV6D)",
+    "coolant": "PSA / Glysantin G33 (verde-azul)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Correa con bomba de agua y rodillos",
+    "fap": "Aditivo Eolys / Powerflex: depósito cada ~120.000 km"
+   }
+  },
+  {
+   "id": "psa_12_puretech",
+   "make": [
+    "Peugeot",
+    "Citroën",
+    "Citroen",
+    "DS",
+    "Opel",
+    "Toyota"
+   ],
+   "models": [
+    "108",
+    "208",
+    "2008",
+    "308",
+    "3008",
+    "5008",
+    "rifter",
+    "partner",
+    "c1",
+    "c3",
+    "c3 aircross",
+    "c4",
+    "c4 cactus",
+    "c5 aircross",
+    "berlingo",
+    "ds3",
+    "ds7",
+    "corsa",
+    "crossland",
+    "grandland",
+    "mokka",
+    "astra",
+    "combo",
+    "aygo",
+    "proace city"
+   ],
+   "years": [
+    2014,
+    2023
+   ],
+   "fuel": "gasoline",
+   "label": "PSA 1.2 PureTech turbo (correa en baño de aceite, 2014-2023)",
+   "engine": "1.2 PureTech 110/130 CV (EB2DT/EB2ADT)",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 10000,
+     "months": 12
+    },
+    "timing_belt": {
+     "km": 100000,
+     "months": 72
+    },
+    "spark_plugs": {
+     "km": 40000
+    }
+   },
+   "watch_hints": {
+    "fluids": "PureTech: comprobar el nivel de aceite cada 1.000 km; consume y el nivel bajo acelera la degradación de la correa."
+   },
+   "known_issues": [
+    "Correa de distribución en baño de aceite: se deshilacha, tapona la criba y destruye el motor. Cambio a 100.000 km o 6 años (campaña del fabricante), antes si hay consumo de aceite.",
+    "Consumo de aceite elevado.",
+    "Usar solo aceite 0W30 homologado PSA B71 2312; otro aceite ataca la correa.",
+    "Embrague y bomba de agua."
+   ],
+   "specs": {
+    "oil": "0W-30 PSA B71 2312 (Total Quartz Ineo First)",
+    "oil_l": "3,5 l con filtro",
+    "coolant": "PSA / Glysantin G33",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Cada 40.000 km",
+    "timing": "Correa en baño de aceite: PSA la fija a 100.000 km/6 años; revisarla a los 60.000 (se deshilacha)"
+   }
+  },
+  {
+   "id": "psa_15_bluehdi_dv5",
+   "make": [
+    "Peugeot",
+    "Citroën",
+    "Citroen",
+    "DS",
+    "Opel",
+    "Toyota"
+   ],
+   "models": [
+    "208",
+    "2008",
+    "308",
+    "3008",
+    "5008",
+    "rifter",
+    "partner",
+    "c3",
+    "c3 aircross",
+    "c4",
+    "c5 aircross",
+    "berlingo",
+    "ds3",
+    "ds7",
+    "corsa",
+    "crossland",
+    "grandland",
+    "astra",
+    "combo",
+    "proace city"
+   ],
+   "years": [
+    2017,
+    2025
+   ],
+   "fuel": "diesel",
+   "label": "PSA 1.5 BlueHDi (motor DV5, 2017 en adelante)",
+   "engine": "1.5 BlueHDi 100/130 CV",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "timing_belt": {
+     "km": 150000,
+     "months": 96
+    },
+    "fuel_filter": {
+     "km": 40000,
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "dpf": "AdBlue: el depósito e inyector SCR dan fallos; no dejar que el testigo llegue a cero."
+   },
+   "known_issues": [
+    "Sistema AdBlue (depósito, bomba, inyector).",
+    "Válvula EGR.",
+    "Mucho más fiable que el 1.6 HDi en turbo y FAP."
+   ],
+   "specs": {
+    "oil": "0W-30 PSA B71 2312",
+    "oil_l": "3,9 l con filtro",
+    "coolant": "PSA / Glysantin G33",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "adblue": "AdBlue: depósito de 15-17 l, unos 1.000 km por litro",
+    "timing": "Correa con bomba de agua"
+   }
+  },
+  {
+   "id": "renault_15_dci_k9k",
+   "make": [
+    "Renault",
+    "Dacia",
+    "Nissan",
+    "Mercedes",
+    "Mercedes-Benz"
+   ],
+   "models": [
+    "clio",
+    "megane",
+    "mégane",
+    "scenic",
+    "scénic",
+    "captur",
+    "kadjar",
+    "kangoo",
+    "modus",
+    "fluence",
+    "laguna",
+    "sandero",
+    "logan",
+    "duster",
+    "lodgy",
+    "dokker",
+    "qashqai",
+    "juke",
+    "micra",
+    "note",
+    "pulsar",
+    "nv200",
+    "clase a",
+    "a 180",
+    "a180",
+    "clase b",
+    "b 180",
+    "citan"
+   ],
+   "years": [
+    2005,
+    2021
+   ],
+   "fuel": "diesel",
+   "label": "Renault / Dacia / Nissan 1.5 dCi (motor K9K, 2005-2021)",
+   "engine": "1.5 dCi 75/85/90/105/110 CV",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "timing_belt": {
+     "km": 120000,
+     "months": 60
+    },
+    "fuel_filter": {
+     "km": 40000,
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "turbo_egr": "K9K: el turbo falla por falta de engrase si se alargan los cambios de aceite; nunca el intervalo de 30.000 km del fabricante.",
+    "injectors": "Inyectores Delphi: ralentí irregular y arranque difícil anuncian el fallo; se reparan por separado."
+   },
+   "known_issues": [
+    "Inyectores (sobre todo Delphi en 2005-2012).",
+    "Turbo por lubricación deficiente.",
+    "Volante bimasa y embrague.",
+    "EGR y caudalímetro.",
+    "Correa de distribución: el fabricante dice 160.000 km/6 años; conservador 120.000 km/5 años con bomba de agua."
+   ],
+   "specs": {
+    "oil": "5W-30 RN0720 (con FAP) o 5W-40 RN0710 (sin FAP)",
+    "oil_l": "4,4-4,5 l con filtro",
+    "coolant": "Glaceol RX Type D (amarillo), al 50 %",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Correa con bomba de agua y correa de accesorios; 120.000 km / 5 años (60.000 en los primeros K9K)"
+   }
+  },
+  {
+   "id": "renault_16_dci_r9m",
+   "make": [
+    "Renault",
+    "Nissan",
+    "Dacia",
+    "Mercedes",
+    "Mercedes-Benz"
+   ],
+   "models": [
+    "megane",
+    "mégane",
+    "scenic",
+    "scénic",
+    "kadjar",
+    "talisman",
+    "espace",
+    "trafic",
+    "qashqai",
+    "x-trail",
+    "duster",
+    "vito",
+    "clase c",
+    "c 200",
+    "c 220"
+   ],
+   "years": [
+    2011,
+    2021
+   ],
+   "fuel": "diesel",
+   "label": "Renault / Nissan 1.6 dCi 130 CV (motor R9M, 2011-2021)",
+   "engine": "1.6 dCi 130/160 CV",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "timing_belt": {
+     "km": 120000,
+     "months": 72
+    },
+    "fuel_filter": {
+     "km": 40000,
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "dpf": "DPF y, en los de AdBlue, sistema SCR: sensibles al uso urbano."
+   },
+   "known_issues": [
+    "EGR de baja presión y DPF.",
+    "Fugas de refrigerante por intercambiador EGR.",
+    "Más fiable que el 1.5 dCi en inyectores y turbo."
+   ],
+   "specs": {
+    "oil": "5W-30 RN0720",
+    "oil_l": "5,5 l con filtro",
+    "coolant": "Glaceol RX Type D",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Cadena"
+   }
+  },
+  {
+   "id": "renault_12_tce_h5ft",
+   "make": [
+    "Renault",
+    "Dacia",
+    "Nissan",
+    "Mercedes",
+    "Mercedes-Benz"
+   ],
+   "models": [
+    "clio",
+    "captur",
+    "megane",
+    "mégane",
+    "scenic",
+    "scénic",
+    "kadjar",
+    "kangoo",
+    "duster",
+    "lodgy",
+    "dokker",
+    "qashqai",
+    "juke",
+    "pulsar",
+    "clase a",
+    "clase b"
+   ],
+   "years": [
+    2012,
+    2018
+   ],
+   "fuel": "gasoline",
+   "label": "Renault / Nissan 1.2 TCe / 1.2 DIG-T (motor H5Ft, 2012-2018)",
+   "engine": "1.2 TCe 115/120/130 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 10000,
+     "months": 12
+    },
+    "spark_plugs": {
+     "km": 40000
+    }
+   },
+   "watch_hints": {
+    "fluids": "H5Ft: comprobar el nivel de aceite cada 1.000 km. El consumo excesivo (más de 0,5 l/1.000 km) es un fallo reconocido y daña la cadena y el catalizador."
+   },
+   "known_issues": [
+    "Consumo de aceite excesivo (segmentos): fallo reconocido por el fabricante, con campaña de sustitución de motor en algunos casos.",
+    "Cadena de distribución dañada por nivel bajo de aceite.",
+    "Depósito de expansión y fugas de refrigerante."
+   ],
+   "specs": {
+    "oil": "5W-30 RN0700 / RN0710 (o 5W-40)",
+    "oil_l": "4,0 l con filtro",
+    "coolant": "Glaceol RX Type D",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Cada 60.000 km",
+    "timing": "Cadena",
+    "notes": "Consumo de aceite conocido: comprobar nivel cada 1.000 km"
+   }
+  },
+  {
+   "id": "renault_09_tce_h4bt",
+   "make": [
+    "Renault",
+    "Dacia",
+    "Nissan",
+    "Smart"
+   ],
+   "models": [
+    "clio",
+    "captur",
+    "twingo",
+    "sandero",
+    "logan",
+    "dokker",
+    "micra",
+    "fortwo",
+    "forfour"
+   ],
+   "years": [
+    2012,
+    2020
+   ],
+   "fuel": "gasoline",
+   "label": "Renault / Dacia 0.9 TCe 90 CV (motor H4Bt, 2012-2020)",
+   "engine": "0.9 TCe 90 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "spark_plugs": {
+     "km": 40000
+    }
+   },
+   "watch_hints": {
+    "timing_chain": "H4Bt: cadena ruidosa a partir de 100.000 km; escuchar en frío."
+   },
+   "known_issues": [
+    "Cadena de distribución ruidosa.",
+    "Bobinas y bujías (tirones).",
+    "Embrague en uso urbano intenso."
+   ],
+   "specs": {
+    "oil": "5W-30 / 5W-40 RN0700",
+    "oil_l": "3,9-4,1 l con filtro",
+    "coolant": "Glaceol RX Type D",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Correa con bomba de agua; 120.000 km / 6 años"
+   }
+  },
+  {
+   "id": "toyota_hybrid",
+   "make": [
+    "Toyota",
+    "Lexus"
+   ],
+   "models": [
+    "yaris",
+    "auris",
+    "corolla",
+    "c-hr",
+    "prius",
+    "rav4",
+    "camry",
+    "ct200h",
+    "ct 200h",
+    "ux",
+    "nx",
+    "is300h"
+   ],
+   "years": [
+    2010,
+    2025
+   ],
+   "fuel": "gasoline",
+   "label": "Toyota / Lexus híbrido (1.5 / 1.8 / 2.0 / 2.5 Hybrid)",
+   "engine": "Hybrid Synergy Drive (1NZ/2ZR/M15A/M20A/A25A)",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "brake_fluid": {
+     "months": 24
+    },
+    "coolant": {
+     "km": 100000,
+     "months": 60
+    },
+    "spark_plugs": {
+     "km": 90000
+    },
+    "air_filter": {
+     "km": 30000,
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "battery": "Dos baterías: la de 12 V (suele durar 5-7 años y deja el coche sin arrancar) y la híbrida, que se revisa con diagnosis en cada visita al taller.",
+    "brake_pads": "Frenos regenerativos: las pastillas duran muchísimo, pero los discos se oxidan por poco uso; frenar fuerte de vez en cuando limpia la superficie.",
+    "turbo_egr": "1.8 híbrido 2010-2018: la EGR y el refrigerador EGR se carbonizan (tirones, vibración en frío); limpieza cada 80.000 km."
+   },
+   "known_issues": [
+    "Batería de 12 V agotada tras 5-7 años (el fallo más común).",
+    "EGR carbonizada en el 1.8 (vibración en frío, pérdida de potencia).",
+    "Bomba de agua eléctrica del inversor: incluye su propio circuito de refrigerante.",
+    "Discos de freno oxidados por poco uso."
+   ],
+   "specs": {
+    "oil": "0W-20 (1NZ/2ZR) o 0W-16 (M15A/M20A), API SN/SP",
+    "oil_l": "1.8: 4,2 l con filtro · 1.5: 3,7 l · 2.0 M20A: 4,5 l",
+    "coolant": "Toyota Super Long Life (rosa); el inversor lleva su propio circuito",
+    "brake_fluid": "DOT 3 / DOT 4 (sistema electrohidráulico: purga con útil)",
+    "plugs": "Iridio, cada 120.000 km",
+    "battery": "12 V AGM pequeña (auxiliar); la de tracción no se mantiene",
+    "timing": "Cadena"
+   }
+  },
+  {
+   "id": "ford_10_ecoboost",
+   "make": "Ford",
+   "models": [
+    "fiesta",
+    "focus",
+    "b-max",
+    "c-max",
+    "ecosport",
+    "puma",
+    "mondeo",
+    "tourneo",
+    "transit courier",
+    "transit connect"
+   ],
+   "years": [
+    2012,
+    2022
+   ],
+   "fuel": "gasoline",
+   "label": "Ford 1.0 EcoBoost (correa en baño de aceite, 2012-2022)",
+   "engine": "1.0 EcoBoost 100/125/140 CV",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "timing_belt": {
+     "km": 120000,
+     "months": 96
+    },
+    "spark_plugs": {
+     "km": 60000
+    }
+   },
+   "watch_hints": {
+    "fluids": "EcoBoost: la correa va en baño de aceite; usar solo aceite 5W20 homologado Ford y no alargar cambios.",
+    "lights": "Testigo de temperatura: en los 2012-2014 un manguito de refrigeración podía fallar y sobrecalentar el motor; ante cualquier aviso, parar."
+   },
+   "known_issues": [
+    "Correa de distribución en aceite: el fabricante dice 10 años/240.000 km; se recomienda 120.000 km u 8 años, y revisar la criba de aceite.",
+    "Sistema de refrigeración 2012-2014 (manguito de nailon degradado, campaña del fabricante).",
+    "Bobinas de encendido.",
+    "Culata y fugas de refrigerante en unidades tempranas."
+   ],
+   "specs": {
+    "oil": "5W-20 Ford WSS-M2C948-B (Castrol Magnatec Professional E)",
+    "oil_l": "4,1 l con filtro",
+    "coolant": "Ford WSS-M97B44-D (naranja)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Cada 60.000 km",
+    "timing": "Correa en baño de aceite (240.000 km / 10 años según Ford; vigilar deshilachado) y correa de bomba de aceite"
+   }
+  },
+  {
+   "id": "ford_15_tdci",
+   "make": "Ford",
+   "models": [
+    "fiesta",
+    "focus",
+    "b-max",
+    "c-max",
+    "ecosport",
+    "puma",
+    "tourneo",
+    "transit connect"
+   ],
+   "years": [
+    2015,
+    2022
+   ],
+   "fuel": "diesel",
+   "label": "Ford 1.5 TDCi / 1.5 EcoBlue (2015-2022)",
+   "engine": "1.5 TDCi 95/120 CV (DV5), 1.5 EcoBlue",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "timing_belt": {
+     "km": 150000,
+     "months": 96
+    },
+    "fuel_filter": {
+     "km": 40000,
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "dpf": "DPF: evitar uso solo urbano; regeneraciones incompletas diluyen el aceite."
+   },
+   "known_issues": [
+    "DPF en uso urbano.",
+    "EGR.",
+    "Sistema AdBlue en EcoBlue."
+   ],
+   "specs": {
+    "oil": "5W-30 WSS-M2C913-D (TDCi) · 0W-30 WSS-M2C950-A (EcoBlue)",
+    "oil_l": "3,8 l con filtro",
+    "coolant": "Ford WSS-M97B44-D",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Correa con bomba de agua"
+   }
+  },
+  {
+   "id": "fiat_opel_13_multijet",
+   "make": [
+    "Opel",
+    "Fiat",
+    "Alfa Romeo",
+    "Lancia",
+    "Suzuki"
+   ],
+   "models": [
+    "corsa",
+    "astra",
+    "meriva",
+    "combo",
+    "agila",
+    "punto",
+    "grande punto",
+    "panda",
+    "500",
+    "500l",
+    "doblo",
+    "doblò",
+    "idea",
+    "qubo",
+    "fiorino",
+    "mito",
+    "musa",
+    "ypsilon",
+    "swift",
+    "ignis",
+    "sx4"
+   ],
+   "years": [
+    2004,
+    2020
+   ],
+   "fuel": "diesel",
+   "label": "Fiat / Opel 1.3 Multijet / 1.3 CDTI (2004-2020)",
+   "engine": "1.3 JTD / Multijet / CDTI 70-95 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "fuel_filter": {
+     "km": 30000,
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "timing_chain": "1.3 Multijet: la cadena se estira si se alargan los cambios de aceite; ruido de cadena en frío = taller."
+   },
+   "known_issues": [
+    "Cadena de distribución estirada por aceite viejo o nivel bajo.",
+    "EGR y colector de admisión (swirl flaps) con carbonilla.",
+    "Turbo en las versiones de 90-95 CV.",
+    "Bomba de aceite y presión baja (testigo) en unidades con muchos km."
+   ],
+   "specs": {
+    "oil": "5W-30 Selenia WR Pure Energy (ACEA C2) · Opel: 5W-30 dexos2",
+    "oil_l": "3,2 l con filtro",
+    "coolant": "Paraflu UP (rojo) / Opel dexcool",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Cadena: cambiar tensor y cadena si suena (sobre 150.000 km)"
+   }
+  },
+  {
+   "id": "opel_17_cdti",
+   "make": "Opel",
+   "models": [
+    "astra",
+    "zafira",
+    "meriva",
+    "corsa",
+    "mokka",
+    "insignia"
+   ],
+   "years": [
+    2004,
+    2016
+   ],
+   "fuel": "diesel",
+   "label": "Opel 1.7 CDTI (motor Isuzu, 2004-2016)",
+   "engine": "1.7 CDTI 100/110/125/130 CV",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "timing_belt": {
+     "km": 90000,
+     "months": 72
+    },
+    "fuel_filter": {
+     "km": 30000,
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "turbo_egr": "1.7 CDTI: EGR y colector se obstruyen; pérdida de potencia y humo negro."
+   },
+   "known_issues": [
+    "EGR y colector de admisión.",
+    "Inyectores (fugas por los retornos).",
+    "Volante bimasa.",
+    "Correa de distribución: cambiar con bomba de agua."
+   ],
+   "specs": {
+    "oil": "5W-30 dexos2",
+    "oil_l": "5,4 l con filtro",
+    "coolant": "Opel / GM dexcool (naranja)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Correa con bomba de agua; 150.000 km / 10 años"
+   }
+  },
+  {
+   "id": "opel_12_14_ecotec",
+   "make": "Opel",
+   "models": [
+    "corsa",
+    "astra",
+    "meriva",
+    "adam",
+    "agila",
+    "mokka"
+   ],
+   "years": [
+    2006,
+    2019
+   ],
+   "fuel": "gasoline",
+   "label": "Opel 1.2 / 1.4 gasolina atmosférico y 1.4 Turbo (2006-2019)",
+   "engine": "1.2 Twinport, 1.4 Twinport, 1.4 Turbo (A14NET/B14XER)",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "spark_plugs": {
+     "km": 60000
+    }
+   },
+   "watch_hints": {
+    "timing_chain": "Ecotec: cadena y tensor ruidosos a partir de 120.000 km."
+   },
+   "known_issues": [
+    "Cadena de distribución ruidosa con muchos km.",
+    "Bobinas de encendido (módulo DIS).",
+    "Termostato y fugas de refrigerante en el 1.4 Turbo.",
+    "Consumo de aceite en 1.4 Turbo."
+   ],
+   "specs": {
+    "oil": "5W-30 dexos2 (Turbo: dexos1 Gen2 según año)",
+    "oil_l": "3,5 l (atmosférico) · 4,0 l (1.4 Turbo) con filtro",
+    "coolant": "GM dexcool",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Cada 60.000 km",
+    "timing": "Twinport: correa 90.000 km / 10 años · 1.4 Turbo: cadena"
+   }
+  },
+  {
+   "id": "hyundai_kia_16_crdi_u2",
+   "make": [
+    "Hyundai",
+    "Kia"
+   ],
+   "models": [
+    "i30",
+    "i40",
+    "ix35",
+    "ix20",
+    "tucson",
+    "kona",
+    "elantra",
+    "ceed",
+    "cee'd",
+    "sportage",
+    "venga",
+    "carens",
+    "soul",
+    "niro",
+    "stonic",
+    "rio"
+   ],
+   "years": [
+    2009,
+    2022
+   ],
+   "fuel": "diesel",
+   "label": "Hyundai / Kia 1.6 CRDi y 1.7 CRDi (motores U2, 2009-2022)",
+   "engine": "1.6 CRDi 110-136 CV, 1.7 CRDi 115-141 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "fuel_filter": {
+     "km": 40000,
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "dpf": "DPF y EGR sensibles al uso urbano; en 2018+ también sistema SCR/AdBlue."
+   },
+   "known_issues": [
+    "EGR y DPF en uso urbano.",
+    "Volante bimasa y embrague.",
+    "Inyectores con muchos km.",
+    "Motor en general fiable; respetar los 15.000 km de aceite en vez de los 30.000 del manual."
+   ],
+   "specs": {
+    "oil": "5W-30 ACEA C3 (Hyundai Premium DPF Diesel)",
+    "oil_l": "5,3 l con filtro",
+    "coolant": "Hyundai / Kia (verde), al 50 %",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Cadena"
+   }
+  },
+  {
+   "id": "hyundai_kia_gdi_tgdi",
+   "make": [
+    "Hyundai",
+    "Kia"
+   ],
+   "models": [
+    "i10",
+    "i20",
+    "i30",
+    "kona",
+    "bayon",
+    "tucson",
+    "ceed",
+    "cee'd",
+    "xceed",
+    "stonic",
+    "sportage",
+    "niro",
+    "rio",
+    "picanto",
+    "soul"
+   ],
+   "years": [
+    2011,
+    2025
+   ],
+   "fuel": "gasoline",
+   "label": "Hyundai / Kia 1.0 T-GDi / 1.2 / 1.4 / 1.6 GDi y T-GDi (2011 en adelante)",
+   "engine": "Kappa 1.0 T-GDi, Kappa 1.2/1.25, Gamma 1.4/1.6 GDi, Gamma 1.6 T-GDi",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "spark_plugs": {
+     "km": 60000
+    }
+   },
+   "watch_hints": {
+    "turbo_egr": "Inyección directa: carbonilla en las válvulas de admisión con uso urbano; limpieza por walnut blasting hacia los 100.000 km."
+   },
+   "known_issues": [
+    "Carbonilla en admisión (GDi).",
+    "Consumo de aceite en 1.6 GDi 2011-2015.",
+    "Bobinas y bujías.",
+    "Cadena de distribución fiable salvo nivel de aceite bajo."
+   ],
+   "specs": {
+    "oil": "0W-20 / 5W-30 ACEA C2-C3 (T-GDi: API SP, 5W-30)",
+    "oil_l": "Kappa 1.0 T-GDi: 3,6 l · Gamma 1.6: 3,6 l con filtro",
+    "coolant": "Hyundai / Kia (verde)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Iridio, cada 60.000 km (T-GDi 40.000)",
+    "timing": "Cadena"
+   }
+  },
+  {
+   "id": "mercedes_om651",
+   "make": [
+    "Mercedes",
+    "Mercedes-Benz"
+   ],
+   "models": [
+    "clase c",
+    "c 200",
+    "c 220",
+    "c 250",
+    "c200",
+    "c220",
+    "c250",
+    "clase e",
+    "e 200",
+    "e 220",
+    "e220",
+    "e250",
+    "glk",
+    "gla",
+    "glc",
+    "cla",
+    "clase a",
+    "a 200",
+    "a 220",
+    "a200",
+    "a220",
+    "clase b",
+    "b 200",
+    "b200",
+    "vito",
+    "viano",
+    "sprinter",
+    "clase v"
+   ],
+   "years": [
+    2008,
+    2019
+   ],
+   "fuel": "diesel",
+   "label": "Mercedes 2.1 CDI / 2.2 CDI (motor OM651, 2008-2019)",
+   "engine": "OM651 1.8/2.1 CDI 136-204 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "fuel_filter": {
+     "km": 40000,
+     "months": 24
+    },
+    "gearbox_oil_auto": {
+     "km": 60000
+    }
+   },
+   "watch_hints": {
+    "timing_chain": "OM651: cadena y tensor con ruido en frío a partir de 150.000 km; cambio preventivo.",
+    "injectors": "Inyectores Delphi (2009-2011): campaña del fabricante; ruido de claqueteo y fugas por el retorno."
+   },
+   "known_issues": [
+    "Inyectores Delphi en los primeros años.",
+    "Cadena de distribución con muchos km.",
+    "Turbo y refrigerador EGR.",
+    "Caja automática 7G-Tronic: cambio de aceite y filtro cada 60.000 km aunque Mercedes diga 'de por vida'."
+   ],
+   "specs": {
+    "oil": "5W-30 MB 229.51 / 229.52",
+    "oil_l": "6,5 l con filtro",
+    "coolant": "MB 325.0 / 326.0 (azul)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Cadena (trasera, cara: vigilar ruido)",
+    "adblue": "AdBlue en versiones Euro 6"
+   }
+  },
+  {
+   "id": "fiat_12_fire",
+   "make": [
+    "Fiat",
+    "Lancia",
+    "Ford"
+   ],
+   "models": [
+    "punto",
+    "grande punto",
+    "punto evo",
+    "panda",
+    "500",
+    "idea",
+    "qubo",
+    "ypsilon",
+    "ka"
+   ],
+   "years": [
+    2003,
+    2020
+   ],
+   "fuel": "gasoline",
+   "label": "Fiat 1.2 / 1.4 Fire 8v (2003-2020)",
+   "engine": "1.2 Fire 60/69 CV, 1.4 Fire 77 CV",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "timing_belt": {
+     "km": 100000,
+     "months": 60
+    },
+    "spark_plugs": {
+     "km": 45000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Correa de distribución: cambiar con bomba de agua; el fabricante dice 120.000 km/5 años.",
+    "Bobinas y bujías.",
+    "Termostato y manguitos.",
+    "Motor sencillo y barato de mantener."
+   ],
+   "specs": {
+    "oil": "10W-40 / 5W-40 Selenia 20K (ACEA A3)",
+    "oil_l": "2,8 l con filtro",
+    "coolant": "Paraflu UP (rojo)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Cada 60.000 km",
+    "timing": "Correa: 120.000 km / 5 años (60.000 si uso duro)"
+   }
+  },
+  {
+   "id": "vag_tdi_10_14_ea288_small",
+   "make": [
+    "Seat",
+    "Volkswagen",
+    "VW",
+    "Skoda",
+    "Audi"
+   ],
+   "models": [
+    "ibiza",
+    "arona",
+    "polo",
+    "fabia",
+    "a1",
+    "mii",
+    "up",
+    "citigo",
+    "toledo",
+    "rapid"
+   ],
+   "years": [
+    2014,
+    2020
+   ],
+   "fuel": "diesel",
+   "label": "Grupo VW 1.4 TDI 3 cilindros (2014-2020)",
+   "engine": "1.4 TDI 75/90/105 CV",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "timing_belt": {
+     "km": 120000,
+     "months": 60
+    },
+    "fuel_filter": {
+     "km": 40000,
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "dpf": "DPF en un coche pequeño de ciudad: el enemigo número uno; un viaje largo al mes."
+   },
+   "known_issues": [
+    "DPF y EGR en uso urbano.",
+    "Vibraciones del 3 cilindros: soportes de motor.",
+    "Correa de distribución a 120.000 km o 5 años."
+   ],
+   "specs": {
+    "oil": "5W-30 VW 504.00/507.00",
+    "oil_l": "3,6-4,0 l con filtro",
+    "coolant": "G13",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Correa con bomba de agua"
+   }
+  },
+  {
+   "id": "nissan_16_dig_t_mr16ddt",
+   "make": "Nissan",
+   "models": [
+    "juke",
+    "qashqai",
+    "pulsar",
+    "x-trail"
+   ],
+   "years": [
+    2010,
+    2020
+   ],
+   "fuel": "gasoline",
+   "label": "Nissan 1.6 DIG-T 163-190 CV (motor MR16DDT, 2010-2020)",
+   "engine": "1.6 DIG-T turbo",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 10000,
+     "months": 12
+    },
+    "spark_plugs": {
+     "km": 45000
+    }
+   },
+   "watch_hints": {
+    "timing_chain": "MR16DDT: cadena y tensor con ruido; nivel de aceite bajo lo acelera."
+   },
+   "known_issues": [
+    "Consumo de aceite y cadena de distribución.",
+    "Turbo con muchos km.",
+    "Carbonilla en admisión (inyección directa)."
+   ],
+   "specs": {
+    "oil": "5W-30 ACEA C3 (Nissan)",
+    "oil_l": "4,4 l con filtro",
+    "coolant": "Nissan L250",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Cada 60.000 km",
+    "timing": "Cadena"
+   }
+  },
+  {
+   "id": "vag_20tdi_pd",
+   "make": [
+    "Seat",
+    "Volkswagen",
+    "VW",
+    "Audi",
+    "Skoda"
+   ],
+   "models": [
+    "leon",
+    "león",
+    "altea",
+    "toledo",
+    "alhambra",
+    "golf",
+    "jetta",
+    "passat",
+    "touran",
+    "sharan",
+    "a3",
+    "a4",
+    "a6",
+    "octavia",
+    "superb"
+   ],
+   "years": [
+    2003,
+    2010
+   ],
+   "fuel": "diesel",
+   "label": "Grupo VW 2.0 TDI inyector-bomba (BKD/BMM/BMP, 2003-2010)",
+   "engine": "2.0 TDI PD 136/140/170 CV",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "timing_belt": {
+     "km": 90000,
+     "months": 60
+    },
+    "fuel_filter": {
+     "km": 40000,
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "turbo_egr": "2.0 TDI PD: geometría del turbo agarrotada y EGR sucia con uso urbano; limpieza preventiva."
+   },
+   "known_issues": [
+    "Bomba de aceite: el hexágono de arrastre se desgasta (BKD/BMM) y deja el motor sin presión; comprobar en el cambio de correa.",
+    "Culata porosa y pérdida de refrigerante en unidades de 2004-2006.",
+    "Inyectores-bomba y volante bimasa.",
+    "DPF (BMM) en uso urbano."
+   ],
+   "specs": {
+    "oil": "5W-40 VW 505.01 o 5W-30 VW 507.00",
+    "oil_l": "4,3 l con filtro",
+    "coolant": "G12+ / G12++",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Correa con bomba de agua y rodillos"
+   }
+  },
+  {
+   "id": "vag_30tdi_v6",
+   "make": [
+    "Audi",
+    "Volkswagen",
+    "VW",
+    "Porsche"
+   ],
+   "models": [
+    "a4",
+    "a5",
+    "a6",
+    "a7",
+    "a8",
+    "q5",
+    "q7",
+    "touareg",
+    "cayenne",
+    "phaeton"
+   ],
+   "years": [
+    2004,
+    2020
+   ],
+   "fuel": "diesel",
+   "label": "Audi / VW 3.0 TDI V6 (2004-2020)",
+   "engine": "3.0 TDI V6 204-272 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 12000,
+     "months": 12
+    },
+    "fuel_filter": {
+     "km": 40000,
+     "months": 24
+    },
+    "gearbox_oil_auto": {
+     "km": 60000
+    }
+   },
+   "watch_hints": {
+    "timing_chain": "3.0 TDI: las cadenas van en la parte trasera del motor; sustituirlas obliga a sacar el motor. Escuchar en frío y no alargar los cambios de aceite.",
+    "turbo_egr": "Refrigerador EGR con fugas de refrigerante y colectores con mariposas (swirl flaps) agarrotadas."
+   },
+   "known_issues": [
+    "Mariposas de admisión (swirl flaps) y sus varillajes.",
+    "Refrigerador EGR con fugas.",
+    "Cadenas de distribución traseras (coste muy alto).",
+    "Sistema AdBlue en Euro 6 (2015+).",
+    "Cambio automático: aceite y filtro cada 60.000 km."
+   ],
+   "specs": {
+    "oil": "5W-30 VW 504.00/507.00",
+    "oil_l": "7,5-8,0 l con filtro",
+    "coolant": "G12++ / G13",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Cadenas traseras (motor fuera para cambiarlas): vigilar ruido"
+   }
+  },
+  {
+   "id": "bmw_m47_e46_e87",
+   "make": [
+    "BMW"
+   ],
+   "models": [
+    "serie 1",
+    "serie 3",
+    "118d",
+    "120d",
+    "318d",
+    "320d",
+    "e46",
+    "e87",
+    "e90",
+    "x3"
+   ],
+   "years": [
+    2001,
+    2007
+   ],
+   "fuel": "diesel",
+   "label": "BMW 2.0d (motor M47/M47N2, 2001-2007)",
+   "engine": "2.0d M47 115/122/150/163 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "fuel_filter": {
+     "km": 40000,
+     "months": 24
+    },
+    "diff_oil": {
+     "km": 100000
+    }
+   },
+   "watch_hints": {
+    "turbo_egr": "M47N2 (2004-2007): las mariposas del colector de admisión (swirl flaps) se sueltan y caen al cilindro; muchos talleres las eliminan preventivamente."
+   },
+   "known_issues": [
+    "Mariposas de admisión (swirl flaps) que se desprenden: fallo catastrófico conocido.",
+    "Turbo y geometría variable.",
+    "Volante bimasa y embrague.",
+    "EGR y carbonilla."
+   ],
+   "specs": {
+    "oil": "5W-40 BMW Longlife-01 o 5W-30 Longlife-04",
+    "oil_l": "5,0-5,5 l con filtro",
+    "coolant": "BMW azul",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Cadena"
+   }
+  },
+  {
+   "id": "bmw_m57",
+   "make": [
+    "BMW"
+   ],
+   "models": [
+    "serie 3",
+    "serie 5",
+    "serie 7",
+    "330d",
+    "325d",
+    "525d",
+    "530d",
+    "535d",
+    "730d",
+    "x3",
+    "x5",
+    "x6",
+    "e90",
+    "e60",
+    "e70"
+   ],
+   "years": [
+    2002,
+    2013
+   ],
+   "fuel": "diesel",
+   "label": "BMW 3.0d seis cilindros (motor M57, 2002-2013)",
+   "engine": "3.0d M57 204-286 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "fuel_filter": {
+     "km": 40000,
+     "months": 24
+    },
+    "diff_oil": {
+     "km": 100000
+    },
+    "gearbox_oil_auto": {
+     "km": 60000
+    }
+   },
+   "watch_hints": {
+    "turbo_egr": "M57: swirl flaps en el colector (eliminarlas o sustituir por metálicas), turbo de geometría variable y EGR."
+   },
+   "known_issues": [
+    "Mariposas de admisión (swirl flaps).",
+    "Inyectores piezoeléctricos en las últimas versiones.",
+    "Turbo bi-turbo en 535d/335d: caro.",
+    "Cambio automático ZF: aceite cada 60.000-80.000 km aunque digan 'de por vida'."
+   ],
+   "specs": {
+    "oil": "5W-30 BMW Longlife-04 (o 5W-40 LL-01)",
+    "oil_l": "7,5 l con filtro",
+    "coolant": "BMW azul",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Cadena"
+   }
+  },
+  {
+   "id": "mercedes_om642",
+   "make": [
+    "Mercedes",
+    "Mercedes-Benz"
+   ],
+   "models": [
+    "clase c",
+    "clase e",
+    "clase s",
+    "clase m",
+    "ml",
+    "gl",
+    "glk",
+    "gle",
+    "gls",
+    "clase r",
+    "vito",
+    "viano",
+    "sprinter",
+    "c 320",
+    "c 350",
+    "e 320",
+    "e 350",
+    "ml 320",
+    "ml 350"
+   ],
+   "years": [
+    2005,
+    2018
+   ],
+   "fuel": "diesel",
+   "label": "Mercedes 3.0 V6 CDI / BlueTEC (motor OM642, 2005-2018)",
+   "engine": "OM642 3.0 V6 190-265 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 12000,
+     "months": 12
+    },
+    "fuel_filter": {
+     "km": 40000,
+     "months": 24
+    },
+    "gearbox_oil_auto": {
+     "km": 60000
+    }
+   },
+   "watch_hints": {
+    "fluids": "OM642: las juntas del radiador de aceite (en la V del motor) pierden aceite; mancha debajo del motor y olor a aceite quemado = ese fallo."
+   },
+   "known_issues": [
+    "Juntas del enfriador de aceite: fugas, reparación laboriosa.",
+    "Motor de las mariposas de admisión y colectores.",
+    "Actuador del turbo y refrigerador EGR.",
+    "Inyectores y 'black death' (fuga por el asiento) en 2005-2010."
+   ],
+   "specs": {
+    "oil": "5W-30 MB 229.51",
+    "oil_l": "8,5 l con filtro",
+    "coolant": "MB 325.0 (azul)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Cadena",
+    "notes": "Fugas de aceite por el enfriador (junta) muy típicas"
+   }
+  },
+  {
+   "id": "mercedes_om640_om646",
+   "make": [
+    "Mercedes",
+    "Mercedes-Benz"
+   ],
+   "models": [
+    "clase a",
+    "clase b",
+    "clase c",
+    "clk",
+    "clase e",
+    "vito",
+    "viano",
+    "sprinter",
+    "a 160",
+    "a 180",
+    "a 200",
+    "b 180",
+    "b 200",
+    "c 200",
+    "c 220",
+    "e 200",
+    "e 220",
+    "w169",
+    "w245",
+    "w203",
+    "w204"
+   ],
+   "years": [
+    2003,
+    2012
+   ],
+   "fuel": "diesel",
+   "label": "Mercedes 2.0 / 2.2 CDI (motores OM640 y OM646, 2003-2012)",
+   "engine": "OM640 2.0 CDI 82-140 CV, OM646 2.2 CDI 102-170 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "fuel_filter": {
+     "km": 40000,
+     "months": 24
+    },
+    "gearbox_oil_auto": {
+     "km": 60000
+    }
+   },
+   "watch_hints": {
+    "injectors": "CDI: fuga por el asiento del inyector ('black death', costra negra sobre la culata); se detecta por olor y por el claqueteo."
+   },
+   "known_issues": [
+    "Fugas por los asientos de los inyectores.",
+    "EGR y mariposas de admisión.",
+    "Turbo con muchos km.",
+    "Clase A/B: cambio CVT Autotronic delicado; cambio de aceite cada 60.000 km."
+   ],
+   "specs": {
+    "oil": "5W-30 MB 229.51 (o 5W-40 229.31)",
+    "oil_l": "OM640: 5,5 l · OM646: 6,5 l con filtro",
+    "coolant": "MB 325.0",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Cadena"
+   }
+  },
+  {
+   "id": "psa_ford_20_hdi_tdci_dw10",
+   "make": [
+    "Peugeot",
+    "Citroën",
+    "Citroen",
+    "DS",
+    "Ford",
+    "Volvo",
+    "Mitsubishi",
+    "Fiat",
+    "Lancia"
+   ],
+   "models": [
+    "307",
+    "308",
+    "407",
+    "508",
+    "607",
+    "807",
+    "3008",
+    "5008",
+    "expert",
+    "rcz",
+    "c4",
+    "c5",
+    "c8",
+    "c4 picasso",
+    "c5 aircross",
+    "ds4",
+    "ds5",
+    "jumpy",
+    "focus",
+    "mondeo",
+    "c-max",
+    "s-max",
+    "galaxy",
+    "kuga",
+    "transit connect",
+    "s40",
+    "v50",
+    "c30",
+    "v70",
+    "s80",
+    "asx",
+    "outlander",
+    "scudo",
+    "ulysse",
+    "phedra"
+   ],
+   "years": [
+    2003,
+    2019
+   ],
+   "fuel": "diesel",
+   "label": "PSA / Ford 2.0 HDi / 2.0 TDCi (motor DW10, 2003-2019)",
+   "engine": "2.0 HDi 136/140/150/163 CV, 2.0 TDCi 115-180 CV",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "timing_belt": {
+     "km": 120000,
+     "months": 72
+    },
+    "fuel_filter": {
+     "km": 40000,
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "dpf": "FAP con aditivo en los primeros (Eolys); comprobar nivel del depósito de aditivo hacia los 80.000-120.000 km.",
+    "injectors": "Inyectores Siemens/Delphi: claqueteo y fallos de ralentí; se reparan por unidad."
+   },
+   "known_issues": [
+    "Inyectores.",
+    "FAP/DPF y aditivo en uso urbano.",
+    "Turbo de geometría variable y EGR.",
+    "Volante bimasa y embrague.",
+    "Correa: el fabricante dice 240.000 km/10 años; conservador 120.000/6."
+   ],
+   "specs": {
+    "oil": "5W-30 PSA B71 2290 / Ford WSS-M2C913-D",
+    "oil_l": "5,25 l con filtro",
+    "coolant": "PSA G33 / Ford naranja",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Correa con bomba de agua"
+   }
+  },
+  {
+   "id": "psa_14_hdi_dv4",
+   "make": [
+    "Peugeot",
+    "Citroën",
+    "Citroen",
+    "Ford",
+    "Mazda",
+    "Toyota",
+    "Suzuki"
+   ],
+   "models": [
+    "206",
+    "207",
+    "1007",
+    "bipper",
+    "c2",
+    "c3",
+    "nemo",
+    "fiesta",
+    "fusion",
+    "mazda2",
+    "aygo",
+    "liana"
+   ],
+   "years": [
+    2002,
+    2014
+   ],
+   "fuel": "diesel",
+   "label": "PSA / Ford 1.4 HDi / 1.4 TDCi (motor DV4, 2002-2014)",
+   "engine": "1.4 HDi 68/70 CV",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 12000,
+     "months": 12
+    },
+    "timing_belt": {
+     "km": 120000,
+     "months": 72
+    },
+    "fuel_filter": {
+     "km": 30000,
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "turbo_egr": "DV4: turbo pequeño que sufre si se alargan los cambios de aceite; EGR se obstruye."
+   },
+   "known_issues": [
+    "Turbo por lubricación.",
+    "EGR y caudalímetro.",
+    "Fugas en el circuito de gasóleo (retornos).",
+    "Motor sencillo, barato de mantener si se cambia el aceite a tiempo."
+   ],
+   "specs": {
+    "oil": "5W-30 PSA B71 2290 (o 5W-40 B71 2296 sin FAP)",
+    "oil_l": "3,75 l con filtro",
+    "coolant": "PSA G33",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Correa con bomba de agua"
+   }
+  },
+  {
+   "id": "renault_19_dci_f9q",
+   "make": [
+    "Renault",
+    "Nissan",
+    "Volvo",
+    "Mitsubishi",
+    "Suzuki"
+   ],
+   "models": [
+    "megane",
+    "mégane",
+    "scenic",
+    "scénic",
+    "laguna",
+    "espace",
+    "trafic",
+    "kangoo",
+    "primastar",
+    "interstar",
+    "s40",
+    "v40",
+    "carisma",
+    "grand vitara"
+   ],
+   "years": [
+    2000,
+    2010
+   ],
+   "fuel": "diesel",
+   "label": "Renault 1.9 dCi (motor F9Q, 2000-2010)",
+   "engine": "1.9 dCi 100/120/130 CV",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 12000,
+     "months": 12
+    },
+    "timing_belt": {
+     "km": 90000,
+     "months": 60
+    },
+    "fuel_filter": {
+     "km": 30000,
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "turbo_egr": "F9Q: el turbo es su punto negro, por lodos y respiración del cárter; aceite cada 12.000 km como mucho."
+   },
+   "known_issues": [
+    "Turbo por lubricación (muy frecuente).",
+    "Volante bimasa.",
+    "Inyectores y caudalímetro.",
+    "Culatas con poros en los primeros 1.9 dCi 120.",
+    "Correa de distribución: no apurar."
+   ],
+   "specs": {
+    "oil": "5W-40 RN0710",
+    "oil_l": "4,8 l con filtro",
+    "coolant": "Glaceol RX Type D",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Correa con bomba de agua"
+   }
+  },
+  {
+   "id": "renault_20_dci_m9r",
+   "make": [
+    "Renault",
+    "Nissan",
+    "Opel"
+   ],
+   "models": [
+    "megane",
+    "mégane",
+    "scenic",
+    "scénic",
+    "laguna",
+    "espace",
+    "koleos",
+    "trafic",
+    "qashqai",
+    "x-trail",
+    "primastar",
+    "vivaro"
+   ],
+   "years": [
+    2006,
+    2016
+   ],
+   "fuel": "diesel",
+   "label": "Renault / Nissan 2.0 dCi (motor M9R, 2006-2016)",
+   "engine": "2.0 dCi 150/173/175 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "fuel_filter": {
+     "km": 40000,
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "turbo_egr": "M9R: EGR y colector se obstruyen con uso urbano; la pérdida de potencia suele empezar ahí.",
+    "injectors": "Inyectores piezoeléctricos: caros; un ralentí irregular en frío es el aviso."
+   },
+   "known_issues": [
+    "Inyectores.",
+    "EGR y colector.",
+    "Bomba de aceite y presión baja en unidades con muchos km.",
+    "Volante bimasa."
+   ],
+   "specs": {
+    "oil": "5W-30 RN0720 / 5W-40 RN0710",
+    "oil_l": "7,4 l con filtro",
+    "coolant": "Glaceol RX Type D",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Cadena"
+   }
+  },
+  {
+   "id": "toyota_14_d4d",
+   "make": [
+    "Toyota",
+    "Mini"
+   ],
+   "models": [
+    "yaris",
+    "auris",
+    "corolla",
+    "corolla verso",
+    "urban cruiser",
+    "one d"
+   ],
+   "years": [
+    2001,
+    2018
+   ],
+   "fuel": "diesel",
+   "label": "Toyota 1.4 D-4D (motor 1ND-TV, 2001-2018)",
+   "engine": "1.4 D-4D 75/90 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "fuel_filter": {
+     "km": 40000,
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "injectors": "1.4 D-4D: fugas por las juntas de los inyectores (costra negra en la culata, olor a gasóleo quemado)."
+   },
+   "known_issues": [
+    "Juntas de los inyectores.",
+    "EGR en uso urbano.",
+    "DPF en los 2010+ si solo ciudad.",
+    "Motor muy fiable y de bajo coste por lo demás."
+   ],
+   "specs": {
+    "oil": "5W-30 ACEA C2 (Toyota Fuel Economy)",
+    "oil_l": "3,8-3,9 l con filtro",
+    "coolant": "Toyota Super Long Life (rosa)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Cadena"
+   }
+  },
+  {
+   "id": "toyota_20_22_d4d",
+   "make": [
+    "Toyota",
+    "Lexus"
+   ],
+   "models": [
+    "avensis",
+    "rav4",
+    "corolla",
+    "corolla verso",
+    "verso",
+    "auris",
+    "is 220d"
+   ],
+   "years": [
+    2005,
+    2018
+   ],
+   "fuel": "diesel",
+   "label": "Toyota 2.0 / 2.2 D-4D (motores 1AD/2AD, 2005-2018)",
+   "engine": "2.0 D-4D 126 CV, 2.2 D-4D 150/177 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "fuel_filter": {
+     "km": 40000,
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "fluids": "2.2 D-4D (2AD-FHV): pérdida de refrigerante sin fuga visible = junta de culata; vigilar el nivel y la presión del vaso."
+   },
+   "known_issues": [
+    "Junta de culata en el 2.2 D-CAT (2005-2009): consumo de refrigerante.",
+    "Inyectores (reparados en campaña).",
+    "EGR y DPF.",
+    "Embrague y volante bimasa."
+   ],
+   "specs": {
+    "oil": "5W-30 ACEA C2",
+    "oil_l": "5,9 l con filtro",
+    "coolant": "Toyota SLLC (rosa)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Cadena"
+   }
+  },
+  {
+   "id": "honda_22_ictdi_idtec",
+   "make": [
+    "Honda"
+   ],
+   "models": [
+    "civic",
+    "accord",
+    "cr-v",
+    "frv",
+    "fr-v"
+   ],
+   "years": [
+    2004,
+    2018
+   ],
+   "fuel": "diesel",
+   "label": "Honda 2.2 i-CTDi / i-DTEC y 1.6 i-DTEC (2004-2018)",
+   "engine": "2.2 i-CTDi 140 CV, 2.2 i-DTEC 150/180 CV, 1.6 i-DTEC 120 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "fuel_filter": {
+     "km": 40000,
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "dpf": "i-DTEC: DPF sensible al uso urbano; en el 1.6 también EGR de baja presión."
+   },
+   "known_issues": [
+    "EGR y colector (i-CTDi).",
+    "DPF en i-DTEC con uso urbano.",
+    "Motores muy fiables; lo que más se cambia son embragues y bimasas."
+   ],
+   "specs": {
+    "oil": "0W-30 / 5W-30 ACEA C2-C3 (Honda)",
+    "oil_l": "5,9 l con filtro (2.2) · 4,2 l (1.6)",
+    "coolant": "Honda Type 2 (azul)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Cadena"
+   }
+  },
+  {
+   "id": "hyundai_kia_20_crdi_d4ha",
+   "make": [
+    "Hyundai",
+    "Kia"
+   ],
+   "models": [
+    "tucson",
+    "ix35",
+    "santa fe",
+    "sportage",
+    "sorento",
+    "i40",
+    "carens"
+   ],
+   "years": [
+    2010,
+    2021
+   ],
+   "fuel": "diesel",
+   "label": "Hyundai / Kia 2.0 CRDi (motor D4HA, 2010-2021)",
+   "engine": "2.0 CRDi 136-185 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "fuel_filter": {
+     "km": 40000,
+     "months": 24
+    },
+    "gearbox_oil_auto": {
+     "km": 60000
+    }
+   },
+   "watch_hints": {
+    "dpf": "DPF y EGR en uso urbano; en 2018+ también SCR/AdBlue."
+   },
+   "known_issues": [
+    "EGR y DPF.",
+    "Volante bimasa.",
+    "Inyectores con muchos km.",
+    "Fiable si se respetan 15.000 km de aceite."
+   ],
+   "specs": {
+    "oil": "5W-30 ACEA C3",
+    "oil_l": "6,7 l con filtro",
+    "coolant": "Hyundai / Kia (verde)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Cadena"
+   }
+  },
+  {
+   "id": "hyundai_kia_20_crdi_d4ea",
+   "make": [
+    "Hyundai",
+    "Kia"
+   ],
+   "models": [
+    "tucson",
+    "santa fe",
+    "sportage",
+    "sonata",
+    "trajet",
+    "magentis",
+    "cerato",
+    "carens"
+   ],
+   "years": [
+    2004,
+    2010
+   ],
+   "fuel": "diesel",
+   "label": "Hyundai / Kia 2.0 CRDi (motor D4EA, 2004-2010)",
+   "engine": "2.0 CRDi 112/125/140/150 CV",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "timing_belt": {
+     "km": 90000,
+     "months": 60
+    },
+    "fuel_filter": {
+     "km": 30000,
+     "months": 24
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Correa de distribución con bomba de agua a 90.000 km.",
+    "Turbo de geometría variable.",
+    "Inyectores y EGR.",
+    "Caudalímetro."
+   ],
+   "specs": {
+    "oil": "5W-30 / 5W-40 ACEA B4 (C3 con FAP)",
+    "oil_l": "5,9 l con filtro",
+    "coolant": "Hyundai / Kia (verde)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Correa con bomba de agua"
+   }
+  },
+  {
+   "id": "fiat_16_20_multijet",
+   "make": [
+    "Fiat",
+    "Alfa Romeo",
+    "Lancia",
+    "Jeep",
+    "Opel"
+   ],
+   "models": [
+    "bravo",
+    "500x",
+    "500l",
+    "tipo",
+    "doblo",
+    "doblò",
+    "croma",
+    "sedici",
+    "giulietta",
+    "mito",
+    "delta",
+    "renegade",
+    "compass",
+    "combo"
+   ],
+   "years": [
+    2008,
+    2022
+   ],
+   "fuel": "diesel",
+   "label": "Fiat 1.6 / 2.0 Multijet (2008-2022)",
+   "engine": "1.6 Multijet 105/120 CV, 2.0 Multijet 140/170 CV",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "timing_belt": {
+     "km": 120000,
+     "months": 60
+    },
+    "fuel_filter": {
+     "km": 30000,
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "dpf": "Multijet: DPF en uso urbano; evitar apagar en plena regeneración."
+   },
+   "known_issues": [
+    "EGR y DPF.",
+    "Volante bimasa y embrague.",
+    "Turbo con muchos km.",
+    "Correa de distribución a 120.000 km o 5 años."
+   ],
+   "specs": {
+    "oil": "5W-30 Selenia WR Forward (ACEA C2)",
+    "oil_l": "1.6: 4,6 l · 2.0: 4,9 l con filtro",
+    "coolant": "Paraflu UP (rojo)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Correa con bomba de agua"
+   }
+  },
+  {
+   "id": "fiat_opel_19_jtd_cdti",
+   "make": [
+    "Fiat",
+    "Alfa Romeo",
+    "Lancia",
+    "Opel",
+    "Saab",
+    "Suzuki"
+   ],
+   "models": [
+    "stilo",
+    "bravo",
+    "croma",
+    "multipla",
+    "doblo",
+    "doblò",
+    "147",
+    "156",
+    "159",
+    "gt",
+    "lybra",
+    "thesis",
+    "vectra",
+    "astra",
+    "zafira",
+    "signum",
+    "9-3",
+    "sx4"
+   ],
+   "years": [
+    2002,
+    2011
+   ],
+   "fuel": "diesel",
+   "label": "Fiat / Alfa / Opel 1.9 JTD / Multijet / CDTI (2002-2011)",
+   "engine": "1.9 JTD 115 CV, 1.9 Multijet 120/150 CV, 1.9 CDTI 100/120/150 CV",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 12000,
+     "months": 12
+    },
+    "timing_belt": {
+     "km": 90000,
+     "months": 60
+    },
+    "fuel_filter": {
+     "km": 30000,
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "turbo_egr": "1.9 150 CV: las mariposas del colector (swirl flaps) se rompen y entran al motor; muchos talleres montan colector sin mariposas."
+   },
+   "known_issues": [
+    "Mariposas de admisión (swirl flaps) en versiones de 150 CV.",
+    "EGR y caudalímetro.",
+    "Turbo y bimasa.",
+    "Bomba de aceite y presión baja en el 1.9 CDTI con muchos km."
+   ],
+   "specs": {
+    "oil": "5W-40 Selenia WR / Opel dexos2 5W-30",
+    "oil_l": "4,3-4,5 l con filtro",
+    "coolant": "Paraflu UP / GM dexcool",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Correa con bomba de agua"
+   }
+  },
+  {
+   "id": "opel_16_cdti",
+   "make": [
+    "Opel"
+   ],
+   "models": [
+    "astra",
+    "zafira",
+    "zafira tourer",
+    "meriva",
+    "mokka",
+    "insignia",
+    "cascada"
+   ],
+   "years": [
+    2013,
+    2019
+   ],
+   "fuel": "diesel",
+   "label": "Opel 1.6 CDTI 'Whisper diesel' (motor B16DTH, 2013-2019)",
+   "engine": "1.6 CDTI 110/136 CV",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "timing_belt": {
+     "km": 120000,
+     "months": 72
+    },
+    "fuel_filter": {
+     "km": 40000,
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "dpf": "1.6 CDTI: con AdBlue a partir de 2015; depósito e inyector SCR dan averías."
+   },
+   "known_issues": [
+    "Sistema AdBlue (2015+).",
+    "EGR y DPF.",
+    "Consumo de refrigerante por intercambiador EGR.",
+    "Correa a 120.000 km o 6 años."
+   ],
+   "specs": {
+    "oil": "5W-30 dexos2",
+    "oil_l": "5,0 l con filtro",
+    "coolant": "GM dexcool",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Correa con bomba de agua",
+    "adblue": "AdBlue en Euro 6"
+   }
+  },
+  {
+   "id": "opel_20_cdti_a20dth",
+   "make": [
+    "Opel",
+    "Saab"
+   ],
+   "models": [
+    "insignia",
+    "astra",
+    "zafira tourer",
+    "antara",
+    "9-5"
+   ],
+   "years": [
+    2008,
+    2017
+   ],
+   "fuel": "diesel",
+   "label": "Opel 2.0 CDTI (motor A20DTH, 2008-2017)",
+   "engine": "2.0 CDTI 130/160/165/195 CV",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "timing_belt": {
+     "km": 120000,
+     "months": 72
+    },
+    "fuel_filter": {
+     "km": 40000,
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "turbo_egr": "A20DTH: EGR y DPF sufren en ciudad; pérdida de potencia y humo."
+   },
+   "known_issues": [
+    "EGR y DPF.",
+    "Volante bimasa.",
+    "Fugas de aceite por el cárter y el turbo.",
+    "Correa a 120.000 km o 6 años con bomba de agua."
+   ],
+   "specs": {
+    "oil": "5W-30 dexos2",
+    "oil_l": "4,5 l con filtro",
+    "coolant": "GM dexcool",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Correa con bomba de agua"
+   }
+  },
+  {
+   "id": "mazda_skyactiv_d",
+   "make": [
+    "Mazda"
+   ],
+   "models": [
+    "mazda3",
+    "mazda6",
+    "cx-3",
+    "cx-30",
+    "cx-5",
+    "mazda2"
+   ],
+   "years": [
+    2012,
+    2022
+   ],
+   "fuel": "diesel",
+   "label": "Mazda Skyactiv-D 1.5 / 1.8 / 2.2 (2012-2022)",
+   "engine": "1.5 D 105 CV, 1.8 D 116 CV, 2.2 D 150/175 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 10000,
+     "months": 12
+    },
+    "fuel_filter": {
+     "km": 40000,
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "fluids": "Skyactiv-D: el gasóleo de las regeneraciones diluye el aceite; si el nivel SUBE por encima de la marca X, cambiar aceite ya."
+   },
+   "known_issues": [
+    "Dilución del aceite por regeneraciones del DPF (uso urbano).",
+    "Inyectores y colector de admisión obstruido con carbonilla.",
+    "Bujías de incandescencia.",
+    "Cambio de aceite estricto cada 10.000 km."
+   ],
+   "specs": {
+    "oil": "0W-30 / 5W-30 Mazda Original Oil Ultra DPF (ACEA C3)",
+    "oil_l": "2.2: 5,1 l con filtro · 1.5: 4,8 l",
+    "coolant": "Mazda FL22",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Cadena",
+    "notes": "Nivel de aceite: vigilar que no suba (dilución por regeneraciones)"
+   }
+  },
+  {
+   "id": "volvo_d4204t",
+   "make": [
+    "Volvo"
+   ],
+   "models": [
+    "v40",
+    "s60",
+    "v60",
+    "xc60",
+    "s90",
+    "v90",
+    "xc90",
+    "xc40"
+   ],
+   "years": [
+    2014,
+    2023
+   ],
+   "fuel": "diesel",
+   "label": "Volvo 2.0 D2 / D3 / D4 (motor D4204T, 2014-2023)",
+   "engine": "2.0 Drive-E diésel 120-235 CV",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "timing_belt": {
+     "km": 150000,
+     "months": 96
+    },
+    "fuel_filter": {
+     "km": 40000,
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "dpf": "AdBlue (Euro 6) y DPF: evitar uso solo urbano."
+   },
+   "known_issues": [
+    "Sistema AdBlue.",
+    "EGR y DPF.",
+    "Correa: el fabricante dice 10 años/240.000 km; conservador 150.000/8 años.",
+    "Bomba de combustible de baja presión (campaña)."
+   ],
+   "specs": {
+    "oil": "0W-20 Volvo VCC RBS0-2AE (Castrol Edge Professional V)",
+    "oil_l": "5,2 l con filtro",
+    "coolant": "Volvo (verde-azul)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Correa con bomba de agua"
+   }
+  },
+  {
+   "id": "volvo_d5_5cyl",
+   "make": [
+    "Volvo",
+    "Ford"
+   ],
+   "models": [
+    "s60",
+    "v70",
+    "xc70",
+    "s80",
+    "xc60",
+    "xc90",
+    "c30",
+    "s40",
+    "v50",
+    "mondeo",
+    "s-max",
+    "galaxy",
+    "kuga"
+   ],
+   "years": [
+    2001,
+    2015
+   ],
+   "fuel": "diesel",
+   "label": "Volvo D5 cinco cilindros (D5244T, 2001-2015)",
+   "engine": "2.4 D5 163-215 CV (también Ford 2.5 TDCi)",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "timing_belt": {
+     "km": 120000,
+     "months": 72
+    },
+    "fuel_filter": {
+     "km": 40000,
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "turbo_egr": "D5: mariposas de admisión agarrotadas y EGR; limpieza preventiva."
+   },
+   "known_issues": [
+    "Mariposas de admisión (swirl flaps).",
+    "Respiradero del cárter obstruido (fugas de aceite, humo).",
+    "Turbo con muchos km.",
+    "Correa con bomba de agua a 120.000 km."
+   ],
+   "specs": {
+    "oil": "0W-30 ACEA A5/B5 (Castrol SLX)",
+    "oil_l": "5,9 l con filtro",
+    "coolant": "Volvo",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Correa con bomba de agua"
+   }
+  },
+  {
+   "id": "vag_16_mpi",
+   "make": [
+    "Seat",
+    "Volkswagen",
+    "VW",
+    "Audi",
+    "Skoda"
+   ],
+   "models": [
+    "ibiza",
+    "leon",
+    "león",
+    "toledo",
+    "altea",
+    "polo",
+    "golf",
+    "jetta",
+    "caddy",
+    "touran",
+    "a3",
+    "fabia",
+    "octavia",
+    "rapid",
+    "roomster"
+   ],
+   "years": [
+    2000,
+    2016
+   ],
+   "fuel": "gasoline",
+   "label": "Grupo VW 1.6 MPI 8v/16v (BSE/BGU/CWVA, 2000-2016)",
+   "engine": "1.6 MPI 102/105/110 CV",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "timing_belt": {
+     "km": 90000,
+     "months": 60
+    },
+    "spark_plugs": {
+     "km": 60000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Correa de distribución: cambiar con bomba de agua y rodillos.",
+    "Bobinas de encendido y bujías.",
+    "Consumo de aceite en el 1.6 16v CWVA (2014-2016, campaña de segmentos).",
+    "Motor sencillo y barato: la mejor noticia posible."
+   ],
+   "specs": {
+    "oil": "5W-40 VW 502.00",
+    "oil_l": "4,5 l con filtro",
+    "coolant": "G12 / G12+",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Cada 60.000 km",
+    "timing": "Correa con bomba de agua"
+   }
+  },
+  {
+   "id": "vag_12_12v_chain",
+   "make": [
+    "Seat",
+    "Volkswagen",
+    "VW",
+    "Audi",
+    "Skoda"
+   ],
+   "models": [
+    "ibiza",
+    "polo",
+    "fabia",
+    "fox",
+    "cordoba",
+    "córdoba",
+    "roomster"
+   ],
+   "years": [
+    2002,
+    2009
+   ],
+   "fuel": "gasoline",
+   "label": "Grupo VW 1.2 12v tres cilindros con cadena (AZQ/BME/BZG, 2002-2009)",
+   "engine": "1.2 12v 64/70 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 12000,
+     "months": 12
+    },
+    "spark_plugs": {
+     "km": 45000
+    }
+   },
+   "watch_hints": {
+    "timing_chain": "1.2 12v: la cadena salta dientes y dobla válvulas; ruido de cadena o testigo de motor = parar y revisar."
+   },
+   "known_issues": [
+    "Cadena de distribución y tensor: fallo conocido, cambio preventivo hacia los 100.000 km.",
+    "Bobinas de encendido.",
+    "Consumo de aceite.",
+    "Culata y guías de válvulas con muchos km."
+   ],
+   "specs": {
+    "oil": "5W-40 VW 502.00",
+    "oil_l": "2,8 l con filtro",
+    "coolant": "G12+",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Cada 60.000 km",
+    "timing": "Cadena: vigilar tensor (ruido al arrancar)"
+   }
+  },
+  {
+   "id": "vag_14_16v_belt",
+   "make": [
+    "Seat",
+    "Volkswagen",
+    "VW",
+    "Audi",
+    "Skoda"
+   ],
+   "models": [
+    "ibiza",
+    "polo",
+    "fabia",
+    "golf",
+    "leon",
+    "león",
+    "toledo",
+    "cordoba",
+    "córdoba",
+    "a2",
+    "roomster"
+   ],
+   "years": [
+    2000,
+    2014
+   ],
+   "fuel": "gasoline",
+   "label": "Grupo VW 1.4 16v (BBY/BXW/BUD, 2000-2014)",
+   "engine": "1.4 16v 75/80/85/100 CV",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "timing_belt": {
+     "km": 90000,
+     "months": 60
+    },
+    "spark_plugs": {
+     "km": 60000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Correa de distribución con bomba de agua a 90.000 km.",
+    "Bobinas de encendido.",
+    "Termostato y manguitos.",
+    "Motor fiable y económico."
+   ],
+   "specs": {
+    "oil": "5W-40 VW 502.00",
+    "oil_l": "3,2 l con filtro",
+    "coolant": "G12+",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Cada 60.000 km",
+    "timing": "Correa con bomba de agua"
+   }
+  },
+  {
+   "id": "vag_18t_20v",
+   "make": [
+    "Seat",
+    "Volkswagen",
+    "VW",
+    "Audi",
+    "Skoda"
+   ],
+   "models": [
+    "golf",
+    "bora",
+    "leon",
+    "león",
+    "toledo",
+    "octavia",
+    "passat",
+    "a3",
+    "a4",
+    "a6",
+    "tt",
+    "exeo"
+   ],
+   "years": [
+    1997,
+    2008
+   ],
+   "fuel": "gasoline",
+   "label": "Grupo VW 1.8 Turbo 20v (1997-2008)",
+   "engine": "1.8T 150/180/210/225 CV",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 10000,
+     "months": 12
+    },
+    "timing_belt": {
+     "km": 90000,
+     "months": 60
+    },
+    "spark_plugs": {
+     "km": 45000
+    }
+   },
+   "watch_hints": {
+    "fluids": "1.8T: propenso a lodos si se alargan los cambios; aceite 5W40 cada 10.000 km y comprobar la criba."
+   },
+   "known_issues": [
+    "Lodos y criba de aceite obstruida (turbo).",
+    "Bobinas de encendido.",
+    "Bomba de agua con rodete de plástico: cambiar con la correa.",
+    "Caudalímetro y fugas de vacío."
+   ],
+   "specs": {
+    "oil": "5W-40 VW 502.00",
+    "oil_l": "4,5 l con filtro",
+    "coolant": "G12+",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Cada 60.000 km (NGK BKR6EQUP o equivalente)",
+    "timing": "Correa con bomba de agua"
+   }
+  },
+  {
+   "id": "psa_mini_16_thp_prince",
+   "make": [
+    "Peugeot",
+    "Citroën",
+    "Citroen",
+    "DS",
+    "Mini"
+   ],
+   "models": [
+    "207",
+    "208",
+    "308",
+    "3008",
+    "5008",
+    "rcz",
+    "508",
+    "c4",
+    "c4 picasso",
+    "c5",
+    "ds3",
+    "ds4",
+    "ds5",
+    "cooper s",
+    "cooper",
+    "one",
+    "countryman",
+    "clubman",
+    "jcw"
+   ],
+   "years": [
+    2007,
+    2018
+   ],
+   "fuel": "gasoline",
+   "label": "PSA / Mini 1.6 THP y 1.6 VTi (motor Prince N12/N14/N18, 2007-2018)",
+   "engine": "1.6 THP 150/156/163/200 CV, 1.6 VTi 120 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 10000,
+     "months": 12
+    },
+    "spark_plugs": {
+     "km": 40000
+    }
+   },
+   "watch_hints": {
+    "timing_chain": "Prince: el tensor de cadena pierde presión y la cadena se estira; ruido de 'bote de clavos' al arrancar en frío = cambiar cadena, guías y tensor ya.",
+    "fluids": "Consumo de aceite elevado: comprobar nivel cada 1.000 km."
+   },
+   "known_issues": [
+    "Cadena de distribución y tensor (fallo muy conocido).",
+    "Carbonilla en válvulas de admisión (inyección directa).",
+    "Bomba de alta presión y bobinas.",
+    "Termostato, bomba de agua y fugas de refrigerante.",
+    "Consumo de aceite."
+   ],
+   "specs": {
+    "oil": "5W-30 PSA B71 2290 / Mini Longlife-04",
+    "oil_l": "4,25 l con filtro",
+    "coolant": "PSA G33 / Mini azul",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Cada 40.000-60.000 km",
+    "timing": "Cadena: tensor y guías con ruido en frío (\"muerte del diésel\")"
+   }
+  },
+  {
+   "id": "psa_tu_14_16",
+   "make": [
+    "Peugeot",
+    "Citroën",
+    "Citroen"
+   ],
+   "models": [
+    "106",
+    "206",
+    "207",
+    "307",
+    "1007",
+    "partner",
+    "c2",
+    "c3",
+    "c4",
+    "xsara",
+    "saxo",
+    "berlingo"
+   ],
+   "years": [
+    1999,
+    2012
+   ],
+   "fuel": "gasoline",
+   "label": "PSA 1.4 / 1.6 16v (motores TU, 1999-2012)",
+   "engine": "1.4 75 CV, 1.4 16v 88 CV, 1.6 16v 109 CV",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "timing_belt": {
+     "km": 100000,
+     "months": 60
+    },
+    "spark_plugs": {
+     "km": 60000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Correa de distribución con bomba de agua.",
+    "Bobinas y bujías (tirones).",
+    "Junta de culata en el 1.6 16v si ha sobrecalentado: vigilar termostato y ventilador.",
+    "Motores sencillos y muy baratos de mantener."
+   ],
+   "specs": {
+    "oil": "5W-40 / 10W-40 PSA B71 2296",
+    "oil_l": "3,0-3,25 l con filtro",
+    "coolant": "PSA G33",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Cada 60.000 km",
+    "timing": "Correa con bomba de agua"
+   }
+  },
+  {
+   "id": "psa_vti_eb_3cyl",
+   "make": [
+    "Peugeot",
+    "Citroën",
+    "Citroen",
+    "DS",
+    "Opel",
+    "Toyota"
+   ],
+   "models": [
+    "108",
+    "208",
+    "2008",
+    "301",
+    "c1",
+    "c3",
+    "c4 cactus",
+    "c-elysee",
+    "c-elysée",
+    "corsa",
+    "aygo"
+   ],
+   "years": [
+    2012,
+    2022
+   ],
+   "fuel": "gasoline",
+   "label": "PSA 1.0 / 1.2 VTi PureTech atmosférico (motor EB2F, 2012-2022)",
+   "engine": "1.0 VTi 68 CV, 1.2 VTi / PureTech 82 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 12000,
+     "months": 12
+    },
+    "spark_plugs": {
+     "km": 45000
+    }
+   },
+   "watch_hints": {
+    "timing_chain": "EB2F (sin turbo): lleva cadena, no la correa húmeda del turbo; ruidosa a partir de 100.000 km."
+   },
+   "known_issues": [
+    "Consumo de aceite.",
+    "Cadena de distribución ruidosa.",
+    "Termostato y fugas de refrigerante.",
+    "Embrague en uso urbano."
+   ],
+   "specs": {
+    "oil": "0W-30 PSA B71 2312 / 5W-30 B71 2290",
+    "oil_l": "3,25 l con filtro",
+    "coolant": "PSA G33",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Cada 40.000 km",
+    "timing": "Correa en baño de aceite: revisar deshilachado"
+   }
+  },
+  {
+   "id": "renault_16_16v_k4m",
+   "make": [
+    "Renault",
+    "Dacia",
+    "Nissan"
+   ],
+   "models": [
+    "clio",
+    "megane",
+    "mégane",
+    "scenic",
+    "scénic",
+    "modus",
+    "kangoo",
+    "laguna",
+    "fluence",
+    "sandero",
+    "logan",
+    "duster",
+    "lodgy",
+    "dokker"
+   ],
+   "years": [
+    2000,
+    2017
+   ],
+   "fuel": "gasoline",
+   "label": "Renault / Dacia 1.6 16v (motor K4M, 2000-2017)",
+   "engine": "1.6 16v 105/110/115 CV",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "timing_belt": {
+     "km": 90000,
+     "months": 60
+    },
+    "spark_plugs": {
+     "km": 60000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Correa de distribución con bomba de agua a 90.000 km.",
+    "Bobinas de encendido (una por cilindro).",
+    "Cuerpo de mariposa sucio: ralentí inestable.",
+    "Motor fiable y barato."
+   ],
+   "specs": {
+    "oil": "5W-40 RN0700",
+    "oil_l": "4,8 l con filtro",
+    "coolant": "Glaceol RX Type D",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Cada 60.000 km",
+    "timing": "Correa con bomba de agua; 120.000 km / 6 años"
+   }
+  },
+  {
+   "id": "renault_mb_13_tce_h5ht",
+   "make": [
+    "Renault",
+    "Dacia",
+    "Nissan",
+    "Mercedes",
+    "Mercedes-Benz"
+   ],
+   "models": [
+    "clio",
+    "captur",
+    "megane",
+    "mégane",
+    "kadjar",
+    "arkana",
+    "austral",
+    "scenic",
+    "scénic",
+    "duster",
+    "jogger",
+    "qashqai",
+    "juke",
+    "clase a",
+    "clase b",
+    "a 180",
+    "a 200",
+    "a180",
+    "a200",
+    "cla",
+    "gla"
+   ],
+   "years": [
+    2018,
+    2025
+   ],
+   "fuel": "gasoline",
+   "label": "Renault / Nissan / Mercedes 1.3 TCe / DIG-T / M282 (2018 en adelante)",
+   "engine": "1.3 TCe 115/130/140/160 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "spark_plugs": {
+     "km": 45000
+    }
+   },
+   "watch_hints": {
+    "turbo_egr": "Inyección directa: carbonilla en admisión con uso urbano; viajes largos ayudan."
+   },
+   "known_issues": [
+    "Consumo de aceite en unidades 2018-2019 (actualización del fabricante).",
+    "Carbonilla en válvulas de admisión.",
+    "Bobinas y bujías.",
+    "En general fiable; mantener los 15.000 km de aceite."
+   ],
+   "specs": {
+    "oil": "5W-30 RN17 / MB 229.71 (0W-20 en Mercedes)",
+    "oil_l": "4,5-5,0 l con filtro",
+    "coolant": "Glaceol RX Type D / MB 325.0",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Cada 60.000 km",
+    "timing": "Cadena"
+   }
+  },
+  {
+   "id": "toyota_10_1kr",
+   "make": [
+    "Toyota",
+    "Peugeot",
+    "Citroën",
+    "Citroen",
+    "Daihatsu"
+   ],
+   "models": [
+    "aygo",
+    "yaris",
+    "iq",
+    "107",
+    "108",
+    "c1",
+    "sirion"
+   ],
+   "years": [
+    2005,
+    2022
+   ],
+   "fuel": "gasoline",
+   "label": "Toyota / PSA 1.0 tres cilindros (motor 1KR-FE, 2005-2022)",
+   "engine": "1.0 VVT-i 68/69/72 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "spark_plugs": {
+     "km": 60000
+    }
+   },
+   "watch_hints": {
+    "fluids": "1KR: con muchos km consume algo de aceite; comprobar el nivel cada 2.000 km."
+   },
+   "known_issues": [
+    "Consumo de aceite en unidades con muchos km.",
+    "Bomba de agua con fugas.",
+    "Embrague y cojinete en uso urbano.",
+    "Motor muy fiable y barato."
+   ],
+   "specs": {
+    "oil": "0W-20 / 5W-30",
+    "oil_l": "3,1 l con filtro",
+    "coolant": "Toyota SLLC (rosa)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Iridio, cada 100.000 km",
+    "timing": "Cadena"
+   }
+  },
+  {
+   "id": "toyota_13_16_18_vvti",
+   "make": [
+    "Toyota"
+   ],
+   "models": [
+    "yaris",
+    "auris",
+    "corolla",
+    "verso",
+    "avensis",
+    "urban cruiser",
+    "c-hr"
+   ],
+   "years": [
+    2007,
+    2019
+   ],
+   "fuel": "gasoline",
+   "label": "Toyota 1.33 / 1.6 / 1.8 Dual VVT-i y Valvematic (2007-2019)",
+   "engine": "1.33 VVT-i 99 CV, 1.6 Valvematic 132 CV, 1.8 Valvematic 147 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "spark_plugs": {
+     "km": 90000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Consumo de aceite en los primeros 1.33 (2009-2011, campaña de segmentos).",
+    "Bobinas con muchos km.",
+    "Muy fiables; cambio de aceite cada 15.000 km y poco más."
+   ],
+   "specs": {
+    "oil": "0W-20 / 5W-30",
+    "oil_l": "1.33: 3,7 l · 1.6/1.8: 4,2 l con filtro",
+    "coolant": "Toyota SLLC (rosa)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Iridio, cada 100.000 km",
+    "timing": "Cadena"
+   }
+  },
+  {
+   "id": "ford_sigma_125_16",
+   "make": [
+    "Ford",
+    "Mazda",
+    "Volvo"
+   ],
+   "models": [
+    "fiesta",
+    "fusion",
+    "focus",
+    "b-max",
+    "c-max",
+    "ecosport",
+    "ka+",
+    "mazda2",
+    "c30",
+    "s40",
+    "v50"
+   ],
+   "years": [
+    2002,
+    2018
+   ],
+   "fuel": "gasoline",
+   "label": "Ford 1.25 / 1.4 / 1.6 Duratec (Sigma, 2002-2018)",
+   "engine": "1.25 82 CV, 1.4 96 CV, 1.6 100/105/125 CV",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "timing_belt": {
+     "km": 120000,
+     "months": 96
+    },
+    "spark_plugs": {
+     "km": 60000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Correa de distribución: el fabricante dice 10 años/160.000 km; conservador 120.000/8 años.",
+    "Bobinas y bujías.",
+    "Caja del termostato (plástico) con fugas.",
+    "Motores fiables y económicos."
+   ],
+   "specs": {
+    "oil": "5W-30 Ford WSS-M2C913-D",
+    "oil_l": "3,8-4,1 l con filtro",
+    "coolant": "Ford WSS-M97B44-D (naranja)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Cada 60.000 km",
+    "timing": "Correa: 160.000 km / 10 años según Ford; 120.000 recomendado"
+   }
+  },
+  {
+   "id": "ford_15_16_ecoboost",
+   "make": [
+    "Ford"
+   ],
+   "models": [
+    "focus",
+    "kuga",
+    "mondeo",
+    "c-max",
+    "s-max",
+    "galaxy",
+    "fiesta st",
+    "puma st"
+   ],
+   "years": [
+    2010,
+    2020
+   ],
+   "fuel": "gasoline",
+   "label": "Ford 1.5 / 1.6 EcoBoost (2010-2020)",
+   "engine": "1.6 EcoBoost 150/160/182 CV, 1.5 EcoBoost 150/182 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 12000,
+     "months": 12
+    },
+    "spark_plugs": {
+     "km": 45000
+    }
+   },
+   "watch_hints": {
+    "fluids": "1.6 EcoBoost: pérdida de refrigerante puede acabar en sobrecalentamiento y rotura de culata (campañas Kuga/Focus); nivel bajo repetido = taller."
+   },
+   "known_issues": [
+    "Pérdida de refrigerante y sobrecalentamiento (1.6 EcoBoost, campañas del fabricante).",
+    "Culata agrietada en 1.6.",
+    "Bobinas y bujías.",
+    "Carbonilla en admisión."
+   ],
+   "specs": {
+    "oil": "5W-20 Ford WSS-M2C948-B",
+    "oil_l": "4,1 l con filtro",
+    "coolant": "Ford naranja",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Cada 60.000 km",
+    "timing": "Correa con bomba de agua"
+   }
+  },
+  {
+   "id": "hyundai_kia_gamma_mpi",
+   "make": [
+    "Hyundai",
+    "Kia"
+   ],
+   "models": [
+    "i20",
+    "i30",
+    "ix20",
+    "elantra",
+    "accent",
+    "rio",
+    "ceed",
+    "cee'd",
+    "venga",
+    "soul",
+    "cerato"
+   ],
+   "years": [
+    2007,
+    2017
+   ],
+   "fuel": "gasoline",
+   "label": "Hyundai / Kia 1.4 / 1.6 MPI (motor Gamma, 2007-2017)",
+   "engine": "1.4 100/109 CV, 1.6 122/126 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "spark_plugs": {
+     "km": 60000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Bobinas y bujías.",
+    "Sensor de posición del cigüeñal (calado en caliente).",
+    "Motor fiable; cadena sin historial de fallos si el aceite está al nivel."
+   ],
+   "specs": {
+    "oil": "5W-30 / 5W-20 API SN",
+    "oil_l": "3,3-3,6 l con filtro",
+    "coolant": "Hyundai / Kia (verde)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Cada 60.000 km",
+    "timing": "Cadena"
+   }
+  },
+  {
+   "id": "honda_ivtec_14_18",
+   "make": [
+    "Honda"
+   ],
+   "models": [
+    "jazz",
+    "civic",
+    "cr-v",
+    "hr-v",
+    "accord"
+   ],
+   "years": [
+    2006,
+    2017
+   ],
+   "fuel": "gasoline",
+   "label": "Honda 1.4 / 1.8 / 2.0 i-VTEC (2006-2017)",
+   "engine": "1.4 i-VTEC 100 CV, 1.8 i-VTEC 140 CV, 2.0 i-VTEC 150-155 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "spark_plugs": {
+     "km": 100000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Casi nada: bobinas con muchos km y algún ruido de cadena a partir de 200.000 km.",
+    "Jazz: mando del cambio CVT y aceite CVT cada 40.000 km.",
+    "Embrague en uso urbano."
+   ],
+   "specs": {
+    "oil": "0W-20 / 5W-30 (Honda)",
+    "oil_l": "1.8: 3,7 l · 1.4: 3,5 l con filtro",
+    "coolant": "Honda Type 2 (azul)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Iridio, cada 100.000 km",
+    "timing": "Cadena"
+   }
+  },
+  {
+   "id": "mercedes_m271",
+   "make": [
+    "Mercedes",
+    "Mercedes-Benz"
+   ],
+   "models": [
+    "clase c",
+    "clk",
+    "clase e",
+    "slk",
+    "c 180",
+    "c 200",
+    "c 230",
+    "c 250",
+    "e 200",
+    "e 250",
+    "c180",
+    "c200",
+    "e200",
+    "w203",
+    "w204",
+    "w211",
+    "w212"
+   ],
+   "years": [
+    2002,
+    2014
+   ],
+   "fuel": "gasoline",
+   "label": "Mercedes 1.8 Kompressor / CGI (motor M271, 2002-2014)",
+   "engine": "1.8 Kompressor 143-192 CV, 1.8 CGI 156-204 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 12000,
+     "months": 12
+    },
+    "spark_plugs": {
+     "km": 45000
+    },
+    "gearbox_oil_auto": {
+     "km": 60000
+    }
+   },
+   "watch_hints": {
+    "timing_chain": "M271: la cadena estira y desgasta los piñones de los árboles de levas; ruido de cadena en frío = cambiar cadena, piñones y ajustadores."
+   },
+   "known_issues": [
+    "Cadena de distribución y piñones de los árboles de levas (fallo muy conocido).",
+    "Ajustadores de árbol de levas (ruido).",
+    "Fugas de aceite por la tapa de balancines.",
+    "Bujías cada 45.000 km; en CGI, inyectores y bomba de alta."
+   ],
+   "specs": {
+    "oil": "5W-30 MB 229.5 / 229.3",
+    "oil_l": "5,5-6,0 l con filtro",
+    "coolant": "MB 325.0 (azul)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Cada 60.000 km",
+    "timing": "Cadena: estiramiento conocido, vigilar ruido"
+   }
+  },
+  {
+   "id": "mercedes_m272_m273",
+   "make": [
+    "Mercedes",
+    "Mercedes-Benz"
+   ],
+   "models": [
+    "clase c",
+    "clase e",
+    "clase s",
+    "clk",
+    "cls",
+    "slk",
+    "clase m",
+    "ml",
+    "clase r",
+    "gl",
+    "c 230",
+    "c 280",
+    "c 350",
+    "e 280",
+    "e 350",
+    "ml 350"
+   ],
+   "years": [
+    2004,
+    2012
+   ],
+   "fuel": "gasoline",
+   "label": "Mercedes V6 2.5 / 3.0 / 3.5 (motor M272) y V8 (M273), 2004-2012",
+   "engine": "M272 204-272 CV, M273 388 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 12000,
+     "months": 12
+    },
+    "spark_plugs": {
+     "km": 60000
+    },
+    "gearbox_oil_auto": {
+     "km": 60000
+    }
+   },
+   "watch_hints": {
+    "timing_chain": "M272 2004-2008: el piñón del eje de equilibrado se desgasta (testigo de motor, códigos de árbol de levas); reparación muy cara."
+   },
+   "known_issues": [
+    "Piñón del eje de equilibrado (2004-2008).",
+    "Mariposas del colector de admisión (varillaje de plástico).",
+    "Fugas de aceite por tapas y por el intercambiador.",
+    "Cambio 7G-Tronic: aceite cada 60.000 km."
+   ],
+   "specs": {
+    "oil": "5W-30 MB 229.5",
+    "oil_l": "8,0 l con filtro",
+    "coolant": "MB 325.0",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Cada 100.000 km",
+    "timing": "Cadena (piñón del árbol de equilibrado en M272 hasta 2006)"
+   }
+  },
+  {
+   "id": "mercedes_m270_m274",
+   "make": [
+    "Mercedes",
+    "Mercedes-Benz"
+   ],
+   "models": [
+    "clase a",
+    "clase b",
+    "cla",
+    "gla",
+    "clase c",
+    "clase e",
+    "glc",
+    "a 180",
+    "a 200",
+    "a 250",
+    "b 180",
+    "b 200",
+    "c 180",
+    "c 200",
+    "c 250",
+    "e 200",
+    "e 250",
+    "a180",
+    "a200",
+    "c180",
+    "c200",
+    "w176",
+    "w246",
+    "w205"
+   ],
+   "years": [
+    2012,
+    2019
+   ],
+   "fuel": "gasoline",
+   "label": "Mercedes 1.6 / 2.0 turbo (motores M270 y M274, 2012-2019)",
+   "engine": "1.6 turbo 122/156 CV, 2.0 turbo 184-211 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "spark_plugs": {
+     "km": 60000
+    },
+    "gearbox_oil_auto": {
+     "km": 60000
+    }
+   },
+   "watch_hints": {
+    "timing_chain": "M270/M274: ajustadores de árbol de levas y cadena ruidosos en frío; el fabricante publicó actualizaciones."
+   },
+   "known_issues": [
+    "Ajustadores de árbol de levas (ruido en frío).",
+    "Inyectores con fugas y consumo de aceite en algunas unidades.",
+    "Bomba de agua.",
+    "Cambio 7G-DCT: aceite cada 60.000 km."
+   ],
+   "specs": {
+    "oil": "5W-30 MB 229.5 / 229.51 (0W-20 229.71 en los últimos)",
+    "oil_l": "5,4-6,0 l con filtro",
+    "coolant": "MB 325.0 / 326.0",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Cada 60.000 km",
+    "timing": "Cadena"
+   }
+  },
+  {
+   "id": "bmw_n42_n46",
+   "make": [
+    "BMW"
+   ],
+   "models": [
+    "serie 1",
+    "serie 3",
+    "116i",
+    "118i",
+    "120i",
+    "316i",
+    "318i",
+    "320i",
+    "e87",
+    "e81",
+    "e90",
+    "e46",
+    "x1",
+    "x3",
+    "z4"
+   ],
+   "years": [
+    2001,
+    2011
+   ],
+   "fuel": "gasoline",
+   "label": "BMW 1.8 / 2.0 Valvetronic (motores N42/N46, 2001-2011)",
+   "engine": "1.8/2.0 16v 115-170 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 12000,
+     "months": 12
+    },
+    "spark_plugs": {
+     "km": 60000
+    }
+   },
+   "watch_hints": {
+    "timing_chain": "N46: cadena y guías ruidosas en frío a partir de 150.000 km; cambio preventivo de guías y tensor.",
+    "fluids": "Consumo de aceite por retenes de válvula y segmentos: comprobar nivel cada 1.000 km."
+   },
+   "known_issues": [
+    "Consumo de aceite (retenes de válvula, segmentos).",
+    "Fugas de aceite por tapa de balancines y filtro.",
+    "Valvetronic (motor excéntrica, sensor).",
+    "Cadena de distribución y guías con muchos km."
+   ],
+   "specs": {
+    "oil": "5W-30 BMW Longlife-01",
+    "oil_l": "4,25 l con filtro",
+    "coolant": "BMW azul",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Cada 60.000 km",
+    "timing": "Cadena"
+   }
+  },
+  {
+   "id": "bmw_n52_n53",
+   "make": [
+    "BMW"
+   ],
+   "models": [
+    "serie 1",
+    "serie 3",
+    "serie 5",
+    "x1",
+    "x3",
+    "z4",
+    "125i",
+    "130i",
+    "323i",
+    "325i",
+    "328i",
+    "330i",
+    "523i",
+    "525i",
+    "528i",
+    "530i",
+    "e87",
+    "e90",
+    "e60"
+   ],
+   "years": [
+    2005,
+    2013
+   ],
+   "fuel": "gasoline",
+   "label": "BMW seis cilindros 2.5 / 3.0 atmosférico (motores N52/N53, 2005-2013)",
+   "engine": "N52/N53 2.5/3.0 190-272 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 12000,
+     "months": 12
+    },
+    "spark_plugs": {
+     "km": 60000
+    }
+   },
+   "watch_hints": {
+    "fluids": "N52: bomba de agua eléctrica y termostato son el fallo clásico; aviso de temperatura = parar."
+   },
+   "known_issues": [
+    "Bomba de agua eléctrica y termostato.",
+    "Fugas por la junta del alojamiento del filtro de aceite y tapa de balancines.",
+    "Valvetronic.",
+    "N53 (inyección directa): inyectores y bomba de alta."
+   ],
+   "specs": {
+    "oil": "5W-30 BMW Longlife-01 (0W-30 LL-01 FE)",
+    "oil_l": "6,5 l con filtro",
+    "coolant": "BMW azul",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Cada 60.000 km",
+    "timing": "Cadena"
+   }
+  },
+  {
+   "id": "bmw_n20_n26",
+   "make": [
+    "BMW"
+   ],
+   "models": [
+    "serie 1",
+    "serie 2",
+    "serie 3",
+    "serie 4",
+    "serie 5",
+    "x1",
+    "x3",
+    "x4",
+    "z4",
+    "120i",
+    "125i",
+    "320i",
+    "328i",
+    "420i",
+    "428i",
+    "520i",
+    "528i",
+    "f20",
+    "f30",
+    "f10"
+   ],
+   "years": [
+    2011,
+    2017
+   ],
+   "fuel": "gasoline",
+   "label": "BMW 2.0 turbo cuatro cilindros (motores N20/N26, 2011-2017)",
+   "engine": "2.0 TwinPower Turbo 156-245 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 10000,
+     "months": 12
+    },
+    "spark_plugs": {
+     "km": 45000
+    }
+   },
+   "watch_hints": {
+    "timing_chain": "N20 (sobre todo 2011-2015): las guías de la cadena se rompen y la cadena salta; ruido de cadena o testigo = taller inmediato. Cambio preventivo hacia los 100.000 km."
+   },
+   "known_issues": [
+    "Guías de la cadena de distribución y cadena de la bomba de aceite (fallo muy conocido).",
+    "Fugas de aceite (tapa de balancines, alojamiento del filtro).",
+    "Bomba de agua eléctrica.",
+    "Consumo de aceite: nivel cada 1.000 km."
+   ],
+   "specs": {
+    "oil": "5W-30 BMW Longlife-01 / 0W-30 LL-01 FE",
+    "oil_l": "5,0 l con filtro",
+    "coolant": "BMW azul",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Cada 60.000 km",
+    "timing": "Cadena: guías con rotura conocida hasta 2015; vigilar ruido"
+   }
+  },
+  {
+   "id": "fiat_14_tjet_multiair",
+   "make": [
+    "Fiat",
+    "Alfa Romeo",
+    "Lancia",
+    "Jeep",
+    "Abarth"
+   ],
+   "models": [
+    "punto",
+    "grande punto",
+    "bravo",
+    "500",
+    "500l",
+    "500x",
+    "tipo",
+    "doblo",
+    "doblò",
+    "mito",
+    "giulietta",
+    "delta",
+    "renegade",
+    "500 abarth",
+    "595"
+   ],
+   "years": [
+    2007,
+    2022
+   ],
+   "fuel": "gasoline",
+   "label": "Fiat 1.4 T-Jet / 1.4 MultiAir (2007-2022)",
+   "engine": "1.4 T-Jet 120/135/150/165 CV, 1.4 MultiAir 105/140/170 CV",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 12000,
+     "months": 12
+    },
+    "timing_belt": {
+     "km": 100000,
+     "months": 60
+    },
+    "spark_plugs": {
+     "km": 40000
+    }
+   },
+   "watch_hints": {
+    "fluids": "MultiAir: el módulo hidráulico necesita aceite limpio y del grado exacto; cambios cada 12.000 km con el aceite homologado Fiat."
+   },
+   "known_issues": [
+    "Módulo MultiAir ('brick'): fallo caro si el aceite va sucio.",
+    "Bobinas y bujías cada 40.000 km.",
+    "Turbo y válvula de descarga.",
+    "Correa de distribución a 100.000 km o 5 años."
+   ],
+   "specs": {
+    "oil": "5W-40 Selenia (T-Jet) · 5W-30 Selenia K Pure Energy / Digitek (MultiAir)",
+    "oil_l": "2,8-3,0 l con filtro",
+    "coolant": "Paraflu UP (rojo)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Cada 60.000 km (MultiAir: 30.000)",
+    "timing": "Correa con bomba de agua"
+   }
+  },
+  {
+   "id": "fiat_09_twinair",
+   "make": [
+    "Fiat",
+    "Alfa Romeo",
+    "Lancia"
+   ],
+   "models": [
+    "500",
+    "500l",
+    "panda",
+    "punto",
+    "mito",
+    "ypsilon"
+   ],
+   "years": [
+    2010,
+    2021
+   ],
+   "fuel": "gasoline",
+   "label": "Fiat 0.9 TwinAir dos cilindros (2010-2021)",
+   "engine": "0.9 TwinAir 65/85/105 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 12000,
+     "months": 12
+    },
+    "spark_plugs": {
+     "km": 40000
+    }
+   },
+   "watch_hints": {
+    "fluids": "TwinAir: consume aceite y el módulo MultiAir lo necesita limpio; nivel cada 1.000 km."
+   },
+   "known_issues": [
+    "Consumo de aceite elevado.",
+    "Módulo MultiAir.",
+    "Vibraciones: soportes de motor.",
+    "Bobinas y bujías."
+   ],
+   "specs": {
+    "oil": "0W-30 Selenia Digitek (ACEA C2)",
+    "oil_l": "2,7 l con filtro",
+    "coolant": "Paraflu UP (rojo)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Cada 60.000 km",
+    "timing": "Cadena"
+   }
+  },
+  {
+   "id": "nissan_hr16de",
+   "make": [
+    "Nissan",
+    "Renault"
+   ],
+   "models": [
+    "micra",
+    "note",
+    "juke",
+    "qashqai",
+    "pulsar",
+    "tiida",
+    "nv200",
+    "clio",
+    "megane",
+    "mégane",
+    "captur"
+   ],
+   "years": [
+    2007,
+    2020
+   ],
+   "fuel": "gasoline",
+   "label": "Nissan / Renault 1.6 16v (motor HR16DE / H4M, 2007-2020)",
+   "engine": "1.6 16v 110/115/117 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "spark_plugs": {
+     "km": 60000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Bobinas y bujías.",
+    "Soportes de motor.",
+    "Muy fiable; en Nissan con cambio CVT, aceite CVT cada 60.000 km."
+   ],
+   "specs": {
+    "oil": "5W-30 ACEA A5 / 0W-20 (según año)",
+    "oil_l": "4,3 l con filtro",
+    "coolant": "Nissan L250 (verde) / L248",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Iridio, cada 100.000 km",
+    "timing": "Cadena"
+   }
+  },
+  {
+   "id": "suzuki_boosterjet_dualjet",
+   "make": [
+    "Suzuki"
+   ],
+   "models": [
+    "swift",
+    "ignis",
+    "baleno",
+    "vitara",
+    "s-cross",
+    "sx4 s-cross",
+    "swace"
+   ],
+   "years": [
+    2015,
+    2025
+   ],
+   "fuel": "gasoline",
+   "label": "Suzuki 1.0 / 1.4 Boosterjet y 1.2 Dualjet (2015 en adelante)",
+   "engine": "1.0 Boosterjet 111 CV, 1.4 Boosterjet 129-140 CV, 1.2 Dualjet 83-90 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "spark_plugs": {
+     "km": 60000
+    }
+   },
+   "watch_hints": {
+    "battery": "Mild hybrid (SHVS): además de la de 12 V hay una batería de litio bajo el asiento; si el coche pasa semanas parado se descarga."
+   },
+   "known_issues": [
+    "Batería del mild hybrid descargada por inactividad.",
+    "Carbonilla en admisión (Boosterjet, inyección directa).",
+    "Embrague en uso urbano.",
+    "Muy fiables por lo demás."
+   ],
+   "specs": {
+    "oil": "0W-20 / 5W-30 (Suzuki)",
+    "oil_l": "1.0: 3,1 l · 1.4: 3,5 l con filtro",
+    "coolant": "Suzuki Super LLC (azul)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Cada 40.000 km (Boosterjet)",
+    "timing": "Cadena"
+   }
+  },
+  {
+   "id": "hyundai_kia_hybrid_16gdi",
+   "make": [
+    "Hyundai",
+    "Kia"
+   ],
+   "models": [
+    "niro",
+    "ioniq",
+    "kona",
+    "tucson",
+    "sportage",
+    "ceed",
+    "xceed",
+    "sorento",
+    "santa fe"
+   ],
+   "years": [
+    2016,
+    2025
+   ],
+   "fuel": "gasoline",
+   "label": "Hyundai / Kia híbridos 1.6 GDi Hybrid (2016 en adelante)",
+   "engine": "1.6 GDi HEV/PHEV 141 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "spark_plugs": {
+     "km": 90000
+    },
+    "brake_fluid": {
+     "months": 24
+    },
+    "coolant": {
+     "km": 100000,
+     "months": 60
+    }
+   },
+   "watch_hints": {
+    "battery": "Batería de 12 V de litio integrada: botón de reinicio en el salpicadero si se descarga; la híbrida se revisa por diagnosis.",
+    "brake_pads": "Frenos regenerativos: discos oxidados por poco uso; frenar fuerte de vez en cuando."
+   },
+   "known_issues": [
+    "Batería de 12 V descargada.",
+    "Discos de freno oxidados.",
+    "Carbonilla en admisión (GDi).",
+    "Caja de doble embrague: aceite cada 60.000 km."
+   ],
+   "specs": {
+    "oil": "0W-20 API SP",
+    "oil_l": "4,2 l con filtro",
+    "coolant": "Hyundai / Kia (verde); el inversor lleva circuito propio",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Iridio, cada 100.000 km",
+    "timing": "Cadena"
+   }
+  },
+  {
+   "id": "mazda_skyactiv_g",
+   "make": [
+    "Mazda"
+   ],
+   "models": [
+    "mazda2",
+    "mazda3",
+    "mazda6",
+    "cx-3",
+    "cx-30",
+    "cx-5",
+    "mx-5"
+   ],
+   "years": [
+    2012,
+    2025
+   ],
+   "fuel": "gasoline",
+   "label": "Mazda Skyactiv-G 1.5 / 2.0 / 2.5 (2012 en adelante)",
+   "engine": "1.5 90-115 CV, 2.0 120-165 CV, 2.5 194 CV",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "spark_plugs": {
+     "km": 60000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Casi nada reseñable: bobinas con muchos km y carbonilla leve.",
+    "Cambio automático: aceite cada 60.000 km aunque Mazda diga 'de por vida'."
+   ],
+   "specs": {
+    "oil": "0W-20 Mazda Original (o 5W-30)",
+    "oil_l": "2.0: 4,2 l · 1.5: 3,8 l con filtro",
+    "coolant": "Mazda FL22",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Iridio, cada 120.000 km",
+    "timing": "Cadena"
+   }
+  },
+  {
+   "id": "yamaha_cp2",
+   "make": "Yamaha",
+   "models": [
+    "mt-07",
+    "mt07",
+    "tracer 7",
+    "tracer 700",
+    "xsr700",
+    "xsr 700",
+    "tenere 700",
+    "ténéré 700",
+    "t7"
+   ],
+   "years": [
+    2014,
+    2030
+   ],
+   "fuel": "gasoline",
+   "label": "Yamaha CP2 689 cc (MT-07, Tracer 7, XSR700, Ténéré 700)",
+   "engine": "Bicilíndrico paralelo CP2 689 cc, refrigeración líquida",
+   "timing": "chain",
+   "intervals": {
+    "moto_oil": {
+     "km": 10000,
+     "months": 12
+    },
+    "valve_clearance": {
+     "km": 40000
+    },
+    "moto_spark_plugs": {
+     "km": 12000
+    },
+    "moto_air_filter": {
+     "km": 40000
+    }
+   },
+   "watch_hints": {
+    "steering_bearings": "En la MT-07 los rodamientos de dirección cogen holgura pronto (20-30.000 km): un \"clic\" al frenar fuerte es el aviso."
+   },
+   "known_issues": [
+    "Rodamientos de dirección con holgura a los 20-30.000 km.",
+    "Freno delantero flojo de serie: latiguillo metálico y purga mejoran mucho.",
+    "Regulador/rectificador caliente en unidades 2014-2017.",
+    "Óxido en tornillería y colector si duerme fuera."
+   ],
+   "specs": {
+    "oil": "10W-40 JASO MA2 (Yamalube)",
+    "oil_l": "3,0 l con filtro (2,7 sin filtro)",
+    "coolant": "Yamaha (azul), al 50 %",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "NGK LMAR8A-9 ×2",
+    "drive": "Cadena 525 × 108 eslabones (MT-07 / XSR700); Ténéré 525 × 118",
+    "tyres": "120/70 ZR17 · 180/55 ZR17 (MT-07)"
+   }
+  },
+  {
+   "id": "yamaha_cp3",
+   "make": "Yamaha",
+   "models": [
+    "mt-09",
+    "mt09",
+    "tracer 9",
+    "tracer 900",
+    "xsr900",
+    "xsr 900",
+    "niken",
+    "mt-09 sp"
+   ],
+   "years": [
+    2013,
+    2030
+   ],
+   "fuel": "gasoline",
+   "label": "Yamaha CP3 847/890 cc (MT-09, Tracer 9, XSR900, Niken)",
+   "engine": "Tricilíndrico CP3 847-890 cc",
+   "timing": "chain",
+   "intervals": {
+    "moto_oil": {
+     "km": 10000,
+     "months": 12
+    },
+    "valve_clearance": {
+     "km": 40000
+    },
+    "moto_spark_plugs": {
+     "km": 12000
+    },
+    "moto_air_filter": {
+     "km": 40000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Respuesta brusca del gas y tirones en las primeras (2013-2016): reprogramación de fábrica.",
+    "Bomba de agua con sudoración (2014-2017).",
+    "Rodamientos de dirección.",
+    "Embrague con ruido en frío: normal si no patina."
+   ],
+   "specs": {
+    "oil": "10W-40 JASO MA2",
+    "oil_l": "3,4 l con filtro",
+    "coolant": "Yamaha (azul)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "NGK CPR9EA-9 ×3",
+    "drive": "Cadena 525 × 110",
+    "tyres": "120/70 ZR17 · 180/55 ZR17"
+   }
+  },
+  {
+   "id": "yamaha_125_4t",
+   "make": "Yamaha",
+   "models": [
+    "yzf-r125",
+    "r125",
+    "mt-125",
+    "mt125",
+    "xsr125",
+    "wr125",
+    "wr125r",
+    "wr125x"
+   ],
+   "years": [
+    2008,
+    2030
+   ],
+   "fuel": "gasoline",
+   "label": "Yamaha 125 4T (R125, MT-125, XSR125, WR125)",
+   "engine": "Monocilíndrico 125 cc 4 válvulas, refrigeración líquida",
+   "timing": "chain",
+   "intervals": {
+    "moto_oil": {
+     "km": 6000,
+     "months": 12
+    },
+    "valve_clearance": {
+     "km": 12000
+    },
+    "moto_spark_plugs": {
+     "km": 12000
+    },
+    "moto_air_filter": {
+     "km": 24000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Tensor y cadena de distribución ruidosos con km.",
+    "Bomba de agua con fugas por el retén (anteriores a 2019).",
+    "Bobina y pipa de bujía: fallos de encendido con lluvia."
+   ],
+   "specs": {
+    "oil": "10W-40 JASO MA2",
+    "oil_l": "1,15 l con filtro",
+    "coolant": "Yamaha (azul)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "NGK CR9E / CR9EK según año",
+    "drive": "Cadena 428 × 132 (R125 / MT-125)"
+   }
+  },
+  {
+   "id": "yamaha_bluecore_125",
+   "make": "Yamaha",
+   "models": [
+    "nmax",
+    "nmax 125",
+    "xmax 125",
+    "x-max 125",
+    "tricity 125",
+    "delight",
+    "d'elight",
+    "ray zr"
+   ],
+   "years": [
+    2015,
+    2030
+   ],
+   "fuel": "gasoline",
+   "label": "Yamaha Blue Core 125 (NMAX, XMAX 125, Tricity 125)",
+   "engine": "Monocilíndrico 125 cc Blue Core, variador CVT",
+   "timing": "chain",
+   "intervals": {
+    "moto_oil": {
+     "km": 5000,
+     "months": 12
+    },
+    "moto_spark_plugs": {
+     "km": 12000
+    },
+    "moto_air_filter": {
+     "km": 20000
+    },
+    "cvt_belt": {
+     "km": 20000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Correa del variador con grietas antes de los 20.000 en uso urbano intenso.",
+    "Rodamiento de la polea trasera.",
+    "Sensor de ángulo de inclinación que corta el motor (falso contacto)."
+   ],
+   "specs": {
+    "oil": "10W-40 JASO MA2 (motor) · 10W-40 transmisión 0,15 l",
+    "oil_l": "0,9 l con filtro",
+    "coolant": "Yamaha (azul)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "NGK CPR8EA-9",
+    "drive": "Correa del variador y rodillos cada 20.000 km",
+    "tyres": "110/70-13 · 130/70-13 (NMAX)"
+   }
+  },
+  {
+   "id": "yamaha_300_scooter",
+   "make": "Yamaha",
+   "models": [
+    "xmax 300",
+    "x-max 300",
+    "tricity 300",
+    "xmax 400",
+    "x-max 400",
+    "majesty 400"
+   ],
+   "years": [
+    2017,
+    2030
+   ],
+   "fuel": "gasoline",
+   "label": "Yamaha XMAX 300/400, Tricity 300",
+   "engine": "Monocilíndrico 292-395 cc Blue Core, CVT",
+   "timing": "chain",
+   "intervals": {
+    "moto_oil": {
+     "km": 6000,
+     "months": 12
+    },
+    "moto_spark_plugs": {
+     "km": 12000
+    },
+    "moto_air_filter": {
+     "km": 24000
+    },
+    "cvt_belt": {
+     "km": 24000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Rodillos y correa a los 20-25.000.",
+    "Cúpula eléctrica/manual con holgura y ruido.",
+    "Óxido en tornillería del caballete."
+   ],
+   "specs": {
+    "oil": "10W-40 JASO MA2 · transmisión 0,25 l",
+    "oil_l": "1,7 l con filtro",
+    "coolant": "Yamaha (azul)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "drive": "Correa del variador y rodillos cada 24.000 km",
+    "tyres": "120/70-15 · 140/70-14 (XMAX 300)"
+   }
+  },
+  {
+   "id": "yamaha_tmax",
+   "make": "Yamaha",
+   "models": [
+    "tmax",
+    "t-max",
+    "tmax 530",
+    "tmax 560",
+    "tmax 500"
+   ],
+   "years": [
+    2008,
+    2030
+   ],
+   "fuel": "gasoline",
+   "label": "Yamaha TMAX 500/530/560",
+   "engine": "Bicilíndrico 499-562 cc, CVT y correa dentada final",
+   "timing": "chain",
+   "intervals": {
+    "moto_oil": {
+     "km": 6000,
+     "months": 12
+    },
+    "moto_spark_plugs": {
+     "km": 12000
+    },
+    "moto_air_filter": {
+     "km": 24000
+    },
+    "cvt_belt": {
+     "km": 24000
+    },
+    "belt_final": {
+     "km": 40000,
+     "months": 48
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Correa de transmisión final: revisar tensión y grietas cada 10.000.",
+    "Rodamientos de dirección (peso alto).",
+    "Pastillas traseras con desgaste rápido."
+   ],
+   "specs": {
+    "oil": "10W-40 JASO MA2 · aceite de transmisión final",
+    "oil_l": "3,5 l con filtro",
+    "coolant": "Yamaha (azul)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "NGK CR8E ×2",
+    "drive": "Correa del variador (24.000) y correa dentada final (revisar tensión cada 10.000)",
+    "tyres": "120/70 R15 · 160/60 R15"
+   }
+  },
+  {
+   "id": "honda_cb500",
+   "make": "Honda",
+   "models": [
+    "cb500f",
+    "cb500x",
+    "cb500r",
+    "cbr500r",
+    "cb 500",
+    "rebel 500",
+    "cmx500",
+    "nx500",
+    "cb500 hornet",
+    "cb500f hornet"
+   ],
+   "years": [
+    2013,
+    2030
+   ],
+   "fuel": "gasoline",
+   "label": "Honda CB500 (CB500F/X/R, CBR500R, Rebel 500, NX500)",
+   "engine": "Bicilíndrico paralelo 471 cc, refrigeración líquida",
+   "timing": "chain",
+   "intervals": {
+    "moto_oil": {
+     "km": 12000,
+     "months": 12
+    },
+    "valve_clearance": {
+     "km": 24000
+    },
+    "moto_spark_plugs": {
+     "km": 24000
+    },
+    "moto_air_filter": {
+     "km": 36000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Pastillas delanteras de desgaste rápido (compuesto blando).",
+    "Regulador de tensión en 2013-2015.",
+    "Rodamientos de dirección con holgura hacia los 30.000.",
+    "Tapón del radiador y manguitos: comprobar nivel con frecuencia."
+   ],
+   "specs": {
+    "oil": "10W-30 JASO MA (Honda)",
+    "oil_l": "3,2 l con filtro",
+    "coolant": "Honda (azul / verde según año)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "NGK CPR8EA-9 ×2",
+    "drive": "Cadena 520 × 112",
+    "tyres": "120/70 ZR17 · 160/60 ZR17"
+   }
+  },
+  {
+   "id": "honda_nc_series",
+   "make": "Honda",
+   "models": [
+    "nc700",
+    "nc700s",
+    "nc700x",
+    "nc750",
+    "nc750s",
+    "nc750x",
+    "integra",
+    "x-adv",
+    "xadv",
+    "forza 750"
+   ],
+   "years": [
+    2012,
+    2030
+   ],
+   "fuel": "gasoline",
+   "label": "Honda NC700/750, Integra, X-ADV, Forza 750",
+   "engine": "Bicilíndrico 670-745 cc de bajo régimen (DCT opcional)",
+   "timing": "chain",
+   "intervals": {
+    "moto_oil": {
+     "km": 12000,
+     "months": 12
+    },
+    "valve_clearance": {
+     "km": 24000
+    },
+    "moto_spark_plugs": {
+     "km": 32000
+    },
+    "moto_air_filter": {
+     "km": 36000
+    }
+   },
+   "watch_hints": {
+    "clutch": "Con DCT el aceite y su filtro son el embrague: no alargues el cambio de aceite ni uses aceites con aditivos de fricción."
+   },
+   "known_issues": [
+    "Filtro de aceite del DCT: se cambia con cada aceite.",
+    "Bomba de agua con sudoración (NC700 2012-2014).",
+    "Sensor del caballete lateral que corta el motor.",
+    "Rodamientos de la rueda trasera."
+   ],
+   "specs": {
+    "oil": "10W-30 JASO MA (con DCT el mismo aceite; sin aditivos de fricción)",
+    "oil_l": "3,7 l con filtro · DCT: 4,1 l (lleva su filtro)",
+    "coolant": "Honda",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "NGK IFR6G-11K ×2 (iridio)",
+    "drive": "Cadena 520 × 114",
+    "tyres": "120/70 ZR17 · 160/60 ZR17"
+   }
+  },
+  {
+   "id": "honda_esp_125",
+   "make": "Honda",
+   "models": [
+    "sh125",
+    "sh 125",
+    "sh150",
+    "sh 150",
+    "pcx",
+    "pcx125",
+    "pcx 125",
+    "forza 125",
+    "vision 110",
+    "scoopy",
+    "dio",
+    "adv125",
+    "adv 125",
+    "sh mode",
+    "lead 110"
+   ],
+   "years": [
+    2013,
+    2030
+   ],
+   "fuel": "gasoline",
+   "label": "Honda eSP 125/150 (SH, PCX, Forza 125, Vision)",
+   "engine": "Monocilíndrico eSP 125-150 cc, CVT, Idling Stop",
+   "timing": "chain",
+   "intervals": {
+    "moto_oil": {
+     "km": 6000,
+     "months": 12
+    },
+    "moto_spark_plugs": {
+     "km": 12000
+    },
+    "moto_air_filter": {
+     "km": 24000
+    },
+    "cvt_belt": {
+     "km": 24000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Correa y rodillos a los 20-25.000 km.",
+    "Pastillas delanteras.",
+    "Batería corta si solo haces trayectos cortos (Idling Stop).",
+    "Rodamientos del eje de la polea trasera."
+   ],
+   "specs": {
+    "oil": "10W-30 JASO MB (embrague seco) · transmisión 0,15 l",
+    "oil_l": "0,9 l con filtro",
+    "coolant": "Honda",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "NGK CPR8EA-9",
+    "drive": "Correa del variador y rodillos cada 24.000 km",
+    "tyres": "100/80-16 · 120/80-16 (SH125)"
+   }
+  },
+  {
+   "id": "honda_africa_twin",
+   "make": "Honda",
+   "models": [
+    "africa twin",
+    "crf1000l",
+    "crf1100l",
+    "crf1000",
+    "crf1100"
+   ],
+   "years": [
+    2016,
+    2030
+   ],
+   "fuel": "gasoline",
+   "label": "Honda Africa Twin CRF1000L/CRF1100L",
+   "engine": "Bicilíndrico 998-1084 cc (DCT opcional)",
+   "timing": "chain",
+   "intervals": {
+    "moto_oil": {
+     "km": 12000,
+     "months": 12
+    },
+    "valve_clearance": {
+     "km": 24000
+    },
+    "moto_spark_plugs": {
+     "km": 32000
+    },
+    "moto_air_filter": {
+     "km": 36000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Kit de cadena corto en uso con maletas (25-30.000).",
+    "DCT: aceite y filtro rigurosos.",
+    "Sensor del caballete lateral.",
+    "Fugas por el retén de la horquilla si se va por pistas."
+   ],
+   "specs": {
+    "oil": "10W-30 JASO MA",
+    "oil_l": "3,9 l con filtro · DCT: 4,7 l",
+    "coolant": "Honda",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Iridio ×4 (SIMR8A9 o según año)",
+    "drive": "Cadena 525 × 124",
+    "tyres": "90/90-21 · 150/70 R18"
+   }
+  },
+  {
+   "id": "honda_125_4t",
+   "make": "Honda",
+   "models": [
+    "cb125f",
+    "cb125r",
+    "cbr125r",
+    "cb125",
+    "cbf125",
+    "msx125",
+    "grom",
+    "monkey 125",
+    "dax 125",
+    "super cub"
+   ],
+   "years": [
+    2009,
+    2030
+   ],
+   "fuel": "gasoline",
+   "label": "Honda 125 4T (CB125F/R, CBR125R, MSX, Monkey)",
+   "engine": "Monocilíndrico 125 cc, 2 o 4 válvulas",
+   "timing": "chain",
+   "intervals": {
+    "moto_oil": {
+     "km": 4000,
+     "months": 12
+    },
+    "valve_clearance": {
+     "km": 12000
+    },
+    "moto_spark_plugs": {
+     "km": 8000
+    },
+    "moto_air_filter": {
+     "km": 16000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Tensor de la cadena de distribución (CBR125R) ruidoso.",
+    "Pastillas delanteras.",
+    "Batería pequeña: sufre con arranques en frío."
+   ],
+   "specs": {
+    "oil": "10W-30 JASO MA",
+    "oil_l": "1,0-1,1 l con filtro",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "NGK CPR8EA-9",
+    "drive": "Cadena 428 × 118-124 según modelo"
+   }
+  },
+  {
+   "id": "honda_cb650",
+   "make": "Honda",
+   "models": [
+    "cb650f",
+    "cb650r",
+    "cbr650f",
+    "cbr650r",
+    "cb650"
+   ],
+   "years": [
+    2014,
+    2030
+   ],
+   "fuel": "gasoline",
+   "label": "Honda CB650F/R, CBR650F/R",
+   "engine": "Tetracilíndrico 649 cc",
+   "timing": "chain",
+   "intervals": {
+    "moto_oil": {
+     "km": 12000,
+     "months": 12
+    },
+    "valve_clearance": {
+     "km": 24000
+    },
+    "moto_spark_plugs": {
+     "km": 32000
+    },
+    "moto_air_filter": {
+     "km": 36000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Regulador/rectificador en 2014-2016.",
+    "Rodamientos del basculante secos.",
+    "Fugas de horquilla por retenes (2014-2017)."
+   ],
+   "specs": {
+    "oil": "10W-30 JASO MA",
+    "oil_l": "3,3 l con filtro",
+    "coolant": "Honda",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "NGK CR9EH-9 ×4",
+    "drive": "Cadena 525 × 118",
+    "tyres": "120/70 ZR17 · 180/55 ZR17"
+   }
+  },
+  {
+   "id": "kawasaki_er6_650",
+   "make": "Kawasaki",
+   "models": [
+    "er-6n",
+    "er-6f",
+    "er6n",
+    "er6f",
+    "er-6",
+    "z650",
+    "z 650",
+    "ninja 650",
+    "versys 650",
+    "vulcan s",
+    "z650rs"
+   ],
+   "years": [
+    2006,
+    2030
+   ],
+   "fuel": "gasoline",
+   "label": "Kawasaki 649 cc bicilíndrico (ER-6, Z650, Ninja 650, Versys 650, Vulcan S)",
+   "engine": "Bicilíndrico paralelo 649 cc",
+   "timing": "chain",
+   "intervals": {
+    "moto_oil": {
+     "km": 12000,
+     "months": 12
+    },
+    "valve_clearance": {
+     "km": 24000
+    },
+    "moto_spark_plugs": {
+     "km": 12000
+    },
+    "moto_air_filter": {
+     "km": 36000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Regulador/rectificador recalentado (ER-6 2006-2012).",
+    "Tensor de la cadena de distribución ruidoso.",
+    "Rodamientos de dirección.",
+    "Ralentí inestable: cuerpo de inyección sucio."
+   ],
+   "specs": {
+    "oil": "10W-40 JASO MA2",
+    "oil_l": "2,4 l con filtro",
+    "coolant": "Kawasaki (verde)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "NGK CR9EIA-9 ×2 (CR9EK en las primeras)",
+    "drive": "Cadena 520 × 114",
+    "tyres": "120/70 ZR17 · 160/60 ZR17"
+   }
+  },
+  {
+   "id": "kawasaki_z900_1000",
+   "make": "Kawasaki",
+   "models": [
+    "z900",
+    "z 900",
+    "z900rs",
+    "z1000",
+    "z 1000",
+    "ninja 1000",
+    "ninja 1000sx",
+    "z1000sx",
+    "versys 1000"
+   ],
+   "years": [
+    2010,
+    2030
+   ],
+   "fuel": "gasoline",
+   "label": "Kawasaki Z900/Z1000/Ninja 1000SX/Versys 1000",
+   "engine": "Tetracilíndrico 948-1043 cc",
+   "timing": "chain",
+   "intervals": {
+    "moto_oil": {
+     "km": 12000,
+     "months": 12
+    },
+    "valve_clearance": {
+     "km": 24000
+    },
+    "moto_spark_plugs": {
+     "km": 12000
+    },
+    "moto_air_filter": {
+     "km": 36000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Ruido de embrague en frío (normal si no patina).",
+    "Silbido de la caja de aire (normal).",
+    "Pastillas delanteras de desgaste rápido en uso deportivo."
+   ],
+   "specs": {
+    "oil": "10W-40 JASO MA2",
+    "oil_l": "4,0 l con filtro",
+    "coolant": "Kawasaki (verde)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "NGK CR9EIA-9 ×4",
+    "drive": "Cadena 525 × 116",
+    "tyres": "120/70 ZR17 · 180/55 ZR17"
+   }
+  },
+  {
+   "id": "kawasaki_300_500",
+   "make": "Kawasaki",
+   "models": [
+    "ninja 300",
+    "ninja 400",
+    "ninja 500",
+    "z300",
+    "z 300",
+    "z400",
+    "z 400",
+    "z500",
+    "z 500",
+    "versys 300",
+    "versys-x 300",
+    "ninja 250r"
+   ],
+   "years": [
+    2008,
+    2030
+   ],
+   "fuel": "gasoline",
+   "label": "Kawasaki 296-451 cc bicilíndrico (Ninja/Z 300-500, Versys 300)",
+   "engine": "Bicilíndrico paralelo 296-451 cc",
+   "timing": "chain",
+   "intervals": {
+    "moto_oil": {
+     "km": 12000,
+     "months": 12
+    },
+    "valve_clearance": {
+     "km": 24000
+    },
+    "moto_spark_plugs": {
+     "km": 12000
+    },
+    "moto_air_filter": {
+     "km": 36000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Sensor del caballete lateral que corta el motor.",
+    "Regulador de tensión (Ninja 300).",
+    "Tornillería de los discos de freno: comprobar apriete."
+   ],
+   "specs": {
+    "oil": "10W-40 JASO MA2",
+    "oil_l": "1,7-2,4 l con filtro según modelo",
+    "coolant": "Kawasaki (verde)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Según modelo (CR9EIA-9 / LMAR9G)",
+    "drive": "Cadena 520 × 106-112",
+    "tyres": "110/70 R17 · 150/60 R17 (Ninja 400)"
+   }
+  },
+  {
+   "id": "bmw_boxer_lc",
+   "make": "BMW",
+   "models": [
+    "r 1200 gs",
+    "r1200gs",
+    "r 1200 rt",
+    "r 1200 r",
+    "r 1250 gs",
+    "r1250gs",
+    "r 1250 rt",
+    "r 1250 r",
+    "r 1250 rs",
+    "r 1300 gs",
+    "r1300gs",
+    "r ninet",
+    "r nine t",
+    "r 18"
+   ],
+   "years": [
+    2004,
+    2030
+   ],
+   "fuel": "gasoline",
+   "label": "BMW bóxer R 1200/1250/1300 (GS, RT, R, RS, R nineT)",
+   "engine": "Bóxer bicilíndrico 1170-1300 cc, cardán",
+   "timing": "chain",
+   "intervals": {
+    "moto_oil": {
+     "km": 10000,
+     "months": 12
+    },
+    "valve_clearance": {
+     "km": 20000
+    },
+    "moto_spark_plugs": {
+     "km": 20000
+    },
+    "moto_air_filter": {
+     "km": 40000
+    },
+    "shaft_oil": {
+     "km": 20000,
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "steering_bearings": "En el bóxer el rodamiento del Paralever y el del cardán cogen holgura: levanta la rueda trasera y mueve con la mano en cada aceite."
+   },
+   "known_issues": [
+    "Rodamiento del cardán/Paralever con holgura (ruido o vibración).",
+    "Fugas por el retén de bomba de agua y aceite (LC 2013-2016).",
+    "Sensor del mando de gas (R 1200 GS LC).",
+    "Llamada a revisión del embrague en R 1250 (2019-2020)."
+   ],
+   "specs": {
+    "oil": "5W-40 BMW Advantec Ultimate (LC) · 15W-50 (aire/aceite)",
+    "oil_l": "4,0 l con filtro",
+    "coolant": "BMW (LC), al 50 %",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "NGK LMAR8D-J ×4 (LC)",
+    "drive": "Cardán: aceite 75W-90 GL-5, 180 ml, cada 20.000 km",
+    "tyres": "120/70 R19 · 170/60 R17 (GS)"
+   }
+  },
+  {
+   "id": "bmw_f_rotax",
+   "make": "BMW",
+   "models": [
+    "f 650 gs",
+    "f650gs",
+    "f 700 gs",
+    "f700gs",
+    "f 800 gs",
+    "f800gs",
+    "f 800 r",
+    "f800r",
+    "f 800 gt",
+    "f 800 st",
+    "f 750 gs",
+    "f 850 gs",
+    "f 900 r",
+    "f 900 xr",
+    "f 900 gs"
+   ],
+   "years": [
+    2008,
+    2030
+   ],
+   "fuel": "gasoline",
+   "label": "BMW F 650/700/750/800/850/900 bicilíndrica",
+   "engine": "Bicilíndrico paralelo 798-895 cc (Rotax/BMW)",
+   "timing": "chain",
+   "intervals": {
+    "moto_oil": {
+     "km": 10000,
+     "months": 12
+    },
+    "valve_clearance": {
+     "km": 20000
+    },
+    "moto_spark_plugs": {
+     "km": 20000
+    },
+    "moto_air_filter": {
+     "km": 40000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Cadena de distribución y tensor ruidosos.",
+    "Brida de la bomba de combustible (fugas) en F 800 hasta 2012.",
+    "Rodamientos del basculante.",
+    "Correa final en F 800 S/ST: tensión."
+   ],
+   "specs": {
+    "oil": "10W-40 / 5W-40 JASO MA2",
+    "oil_l": "3,0 l con filtro",
+    "coolant": "BMW",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "NGK DCPR8EKC ×2",
+    "drive": "Cadena 525 × 116 (F 800 GS 525 × 116)",
+    "tyres": "90/90-21 · 150/70 R17 (GS)"
+   }
+  },
+  {
+   "id": "bmw_g310",
+   "make": "BMW",
+   "models": [
+    "g 310 r",
+    "g310r",
+    "g 310 gs",
+    "g310gs"
+   ],
+   "years": [
+    2016,
+    2030
+   ],
+   "fuel": "gasoline",
+   "label": "BMW G 310 R/GS",
+   "engine": "Monocilíndrico 313 cc",
+   "timing": "chain",
+   "intervals": {
+    "moto_oil": {
+     "km": 10000,
+     "months": 12
+    },
+    "valve_clearance": {
+     "km": 10000
+    },
+    "moto_spark_plugs": {
+     "km": 20000
+    },
+    "moto_air_filter": {
+     "km": 20000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Tapón de la bomba de aceite (llamada a revisión 2016-2018).",
+    "Caballete lateral con holgura.",
+    "Batería y arranque en frío."
+   ],
+   "specs": {
+    "oil": "10W-40 / 5W-40 JASO MA2",
+    "oil_l": "1,55 l con filtro",
+    "coolant": "BMW",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "drive": "Cadena 520 × 112",
+    "tyres": "110/70 R17 · 150/60 R17 (R)"
+   }
+  },
+  {
+   "id": "ktm_lc8c",
+   "make": "KTM",
+   "models": [
+    "790 duke",
+    "890 duke",
+    "790 adventure",
+    "890 adventure",
+    "890 adventure r",
+    "990 duke",
+    "norden 901"
+   ],
+   "years": [
+    2018,
+    2030
+   ],
+   "fuel": "gasoline",
+   "label": "KTM LC8c 790/890/990 (Duke, Adventure; Husqvarna Norden 901)",
+   "engine": "Bicilíndrico paralelo LC8c 799-947 cc",
+   "timing": "chain",
+   "intervals": {
+    "moto_oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "valve_clearance": {
+     "km": 30000
+    },
+    "moto_spark_plugs": {
+     "km": 15000
+    },
+    "moto_air_filter": {
+     "km": 30000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Talleres recomiendan aceite a los 7.500 si se exprime: el embrague lo agradece.",
+    "Bomba de agua y refrigerante (790 2018-2019).",
+    "Rodamientos de la rueda trasera.",
+    "Sensor de calidad de aceite (790) con avisos falsos."
+   ],
+   "specs": {
+    "oil": "10W-50 Motorex Power Synt 4T (KTM)",
+    "oil_l": "3,3 l con filtro",
+    "coolant": "KTM / Motorex (verde-azul)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "NGK LMAR9AI-10 ×2",
+    "drive": "Cadena 520 × 118",
+    "tyres": "120/70 ZR17 · 180/55 ZR17 (Duke)"
+   }
+  },
+  {
+   "id": "ktm_125_390",
+   "make": "KTM",
+   "models": [
+    "125 duke",
+    "200 duke",
+    "250 duke",
+    "390 duke",
+    "rc 125",
+    "rc 390",
+    "390 adventure",
+    "svartpilen 125",
+    "svartpilen 401",
+    "vitpilen 401",
+    "svartpilen 250"
+   ],
+   "years": [
+    2011,
+    2030
+   ],
+   "fuel": "gasoline",
+   "label": "KTM 125/200/250/390 (Duke, RC, Adventure; Husqvarna 125/401)",
+   "engine": "Monocilíndrico 125-373 cc, refrigeración líquida",
+   "timing": "chain",
+   "intervals": {
+    "moto_oil": {
+     "km": 7500,
+     "months": 12
+    },
+    "valve_clearance": {
+     "km": 15000
+    },
+    "moto_spark_plugs": {
+     "km": 15000
+    },
+    "moto_air_filter": {
+     "km": 15000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Tensor y guías de la cadena de distribución (390 hasta 2016).",
+    "Consumo de aceite entre cambios: mirar la mirilla cada 1.000 km.",
+    "Retén de la bomba de agua: refrigerante en el aceite.",
+    "Pastillas delanteras."
+   ],
+   "specs": {
+    "oil": "10W-50 / 15W-50 JASO MA2 (Motorex)",
+    "oil_l": "1,3-1,7 l con filtros (lleva dos)",
+    "coolant": "KTM / Motorex",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "NGK LKAR8AI-9 (390)",
+    "drive": "Cadena 520 × 118",
+    "tyres": "110/70 R17 · 150/60 R17"
+   }
+  },
+  {
+   "id": "ktm_lc4_690",
+   "make": "KTM",
+   "models": [
+    "690 duke",
+    "690 smc",
+    "690 smc r",
+    "690 enduro",
+    "690 enduro r",
+    "701 enduro",
+    "701 supermoto",
+    "svartpilen 701",
+    "vitpilen 701",
+    "es 700",
+    "sm 700"
+   ],
+   "years": [
+    2008,
+    2030
+   ],
+   "fuel": "gasoline",
+   "label": "KTM LC4 690 / Husqvarna 701 / Gas Gas 700",
+   "engine": "Monocilíndrico LC4 690 cc",
+   "timing": "chain",
+   "intervals": {
+    "moto_oil": {
+     "km": 10000,
+     "months": 12
+    },
+    "valve_clearance": {
+     "km": 10000
+    },
+    "moto_spark_plugs": {
+     "km": 10000
+    },
+    "moto_air_filter": {
+     "km": 15000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Vibraciones: tornillería y soportes se aflojan; repasar aprietes.",
+    "Sensor de posición del cigüeñal (corte de motor en caliente).",
+    "Embrague antirrebote con ruido.",
+    "Bomba de agua (retén)."
+   ],
+   "specs": {
+    "oil": "10W-50 Motorex",
+    "oil_l": "1,7 l con filtros",
+    "coolant": "KTM / Motorex",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Iridio (LKAR8BI-9 o según año)",
+    "drive": "Cadena 520 × 116",
+    "notes": "Dos filtros de aceite y tamiz: cambiarlos siempre juntos"
+   }
+  },
+  {
+   "id": "ducati_testastretta_11",
+   "make": "Ducati",
+   "models": [
+    "monster 821",
+    "monster 937",
+    "monster 1200",
+    "monster sp",
+    "multistrada 950",
+    "multistrada v2",
+    "multistrada 1200",
+    "multistrada 1260",
+    "hypermotard 939",
+    "hypermotard 950",
+    "supersport 950",
+    "supersport",
+    "diavel",
+    "xdiavel",
+    "scrambler 1100"
+   ],
+   "years": [
+    2010,
+    2030
+   ],
+   "fuel": "gasoline",
+   "label": "Ducati Testastretta 11° (Monster, Multistrada, Hypermotard, SuperSport, Diavel)",
+   "engine": "Bicilíndrico en L Testastretta 821-1262 cc",
+   "timing": "chain",
+   "intervals": {
+    "moto_oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "valve_clearance": {
+     "km": 30000
+    },
+    "moto_spark_plugs": {
+     "km": 15000
+    },
+    "moto_air_filter": {
+     "km": 30000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Reglaje de válvulas desmodrómico: caro, no lo saltes.",
+    "Regulador de tensión caliente.",
+    "Bomba de agua con fugas (937).",
+    "Embrague húmedo ruidoso (normal)."
+   ],
+   "specs": {
+    "oil": "15W-50 Shell Advance Ultra 4T (Ducati)",
+    "oil_l": "3,4-3,7 l con filtro según modelo",
+    "coolant": "Shell Advance Coolant / Ducati",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "NGK MAR9A-J ×2",
+    "drive": "Cadena 525 × 108-116",
+    "notes": "Reglaje desmodrómico: solo en taller con galgas; filtro de aceite original recomendado"
+   }
+  },
+  {
+   "id": "triumph_triple_660_765",
+   "make": "Triumph",
+   "models": [
+    "street triple",
+    "street triple 675",
+    "street triple 765",
+    "daytona 675",
+    "trident 660",
+    "tiger 660 sport",
+    "daytona 660",
+    "tiger sport 660"
+   ],
+   "years": [
+    2007,
+    2030
+   ],
+   "fuel": "gasoline",
+   "label": "Triumph tricilíndrica 660/675/765 (Street Triple, Daytona, Trident, Tiger Sport 660)",
+   "engine": "Tricilíndrico 660-765 cc",
+   "timing": "chain",
+   "intervals": {
+    "moto_oil": {
+     "km": 10000,
+     "months": 12
+    },
+    "valve_clearance": {
+     "km": 20000
+    },
+    "moto_spark_plugs": {
+     "km": 20000
+    },
+    "moto_air_filter": {
+     "km": 20000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Regulador/rectificador (675 hasta 2012).",
+    "Rodamientos de dirección.",
+    "Sensor del caballete lateral.",
+    "Embrague con tirón en frío (675)."
+   ],
+   "specs": {
+    "oil": "10W-40 / 15W-50 Castrol Power1 (Triumph)",
+    "oil_l": "3,1-3,2 l con filtro",
+    "coolant": "Triumph HD4X (híbrido OAT)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "675: NGK CR9EK ×3 · 765: LMAR9A-9 ×3",
+    "drive": "Cadena 525 × 118 (675) · 520 (765)",
+    "tyres": "120/70 ZR17 · 180/55 ZR17"
+   }
+  },
+  {
+   "id": "suzuki_sv650",
+   "make": "Suzuki",
+   "models": [
+    "sv650",
+    "sv 650",
+    "sv650s",
+    "sv650x",
+    "gladius",
+    "v-strom 650",
+    "vstrom 650",
+    "dl650"
+   ],
+   "years": [
+    1999,
+    2030
+   ],
+   "fuel": "gasoline",
+   "label": "Suzuki SV650 / Gladius / V-Strom 650",
+   "engine": "Bicilíndrico en V 645 cc",
+   "timing": "chain",
+   "intervals": {
+    "moto_oil": {
+     "km": 6000,
+     "months": 12
+    },
+    "valve_clearance": {
+     "km": 24000
+    },
+    "moto_spark_plugs": {
+     "km": 12000
+    },
+    "moto_air_filter": {
+     "km": 18000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Regulador/rectificador recalentado (clásico hasta 2015).",
+    "Ralentí irregular en frío: cuerpos de inyección sucios.",
+    "Rodamientos de dirección.",
+    "Tornillos del cárter de embrague con fugas."
+   ],
+   "specs": {
+    "oil": "10W-40 JASO MA2",
+    "oil_l": "2,7-2,9 l con filtro",
+    "coolant": "Suzuki Super LLC",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "NGK CR8E ×2 (CR8EK en los primeros)",
+    "drive": "Cadena 525 × 112 (SV) · 525 × 118 (V-Strom)",
+    "tyres": "120/70 ZR17 · 160/60 ZR17 (SV650)"
+   }
+  },
+  {
+   "id": "suzuki_burgman",
+   "make": "Suzuki",
+   "models": [
+    "burgman",
+    "burgman 125",
+    "burgman 200",
+    "burgman 400",
+    "burgman 650"
+   ],
+   "years": [
+    2003,
+    2030
+   ],
+   "fuel": "gasoline",
+   "label": "Suzuki Burgman 125/200/400/650",
+   "engine": "Monocilíndrico 125-400 cc / bicilíndrico 650, CVT",
+   "timing": "chain",
+   "intervals": {
+    "moto_oil": {
+     "km": 6000,
+     "months": 12
+    },
+    "moto_spark_plugs": {
+     "km": 12000
+    },
+    "moto_air_filter": {
+     "km": 18000
+    },
+    "cvt_belt": {
+     "km": 20000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Correa y rodillos (400) a los 20.000; la 650 cambia aceite del CVT.",
+    "Rodamiento de la polea trasera.",
+    "Bomba de combustible (400 2007-2012).",
+    "Pastillas traseras."
+   ],
+   "specs": {
+    "oil": "10W-40 JASO MA2 · 400: aceite de transmisión final",
+    "oil_l": "125/200: 1,1 l · 400: 1,9 l · 650: 3,4 l + aceite del CVT",
+    "coolant": "Suzuki",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "NGK CR7E (400)",
+    "drive": "Correa del variador y rodillos cada 20.000 km (400); el 650 cambia aceite del CVT"
+   }
+  },
+  {
+   "id": "kymco_sym_125_300",
+   "make": "Kymco",
+   "models": [
+    "agility",
+    "agility 125",
+    "agility city",
+    "people s",
+    "people gti",
+    "super dink",
+    "downtown",
+    "x-town",
+    "xtown",
+    "like 125",
+    "grand dink",
+    "dink",
+    "kxct",
+    "xciting",
+    "ak 550"
+   ],
+   "years": [
+    2008,
+    2030
+   ],
+   "fuel": "gasoline",
+   "label": "Kymco 125-550 (Agility, People, Super Dink, Downtown, Xciting, AK)",
+   "engine": "Monocilíndrico 125-550 cc, CVT",
+   "timing": "chain",
+   "intervals": {
+    "moto_oil": {
+     "km": 4000,
+     "months": 12
+    },
+    "moto_spark_plugs": {
+     "km": 8000
+    },
+    "moto_air_filter": {
+     "km": 12000
+    },
+    "cvt_belt": {
+     "km": 15000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Correa y rodillos a los 15-20.000 km.",
+    "Pastillas delanteras de desgaste rápido.",
+    "Bobina y batería.",
+    "Óxido en tornillería y escape."
+   ],
+   "specs": {
+    "oil": "10W-40 JASO MA2 · transmisión 0,15-0,2 l",
+    "oil_l": "0,9-1,2 l con filtro según modelo",
+    "coolant": "Kymco (los de agua)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "NGK CR7E / CR8E según modelo",
+    "drive": "Correa del variador y rodillos cada 15-20.000 km"
+   }
+  },
+  {
+   "id": "sym_125_300",
+   "make": "SYM",
+   "models": [
+    "symphony",
+    "symphony st",
+    "jet 14",
+    "jet x",
+    "jet 4",
+    "joymax",
+    "joymax z",
+    "cruisym",
+    "hd 125",
+    "hd 200",
+    "hd 300",
+    "maxsym",
+    "fiddle",
+    "citycom"
+   ],
+   "years": [
+    2008,
+    2030
+   ],
+   "fuel": "gasoline",
+   "label": "SYM 125-500 (Symphony, Jet, Joymax, Cruisym, HD, Maxsym)",
+   "engine": "Monocilíndrico 125-500 cc, CVT",
+   "timing": "chain",
+   "intervals": {
+    "moto_oil": {
+     "km": 4000,
+     "months": 12
+    },
+    "moto_spark_plugs": {
+     "km": 8000
+    },
+    "moto_air_filter": {
+     "km": 12000
+    },
+    "cvt_belt": {
+     "km": 15000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Correa y rodillos a los 15-20.000 km.",
+    "Pastillas delanteras.",
+    "Regulador y batería.",
+    "Amortiguadores traseros blandos con pasajero."
+   ],
+   "specs": {
+    "oil": "10W-40 JASO MA2 · transmisión 0,15-0,2 l",
+    "oil_l": "0,9-1,2 l con filtro según modelo",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "NGK CR7E / CR8E según modelo",
+    "drive": "Correa del variador y rodillos cada 15-20.000 km"
+   }
+  },
+  {
+   "id": "piaggio_iget",
+   "make": "Piaggio",
+   "models": [
+    "liberty",
+    "liberty 125",
+    "liberty 150",
+    "medley",
+    "medley 125",
+    "medley 150",
+    "beverly 300",
+    "beverly 350",
+    "beverly 400",
+    "primavera",
+    "primavera 125",
+    "primavera 150",
+    "sprint 125",
+    "sprint 150",
+    "gts 125",
+    "gts 300",
+    "gts super 300",
+    "gtv 300",
+    "sr gt 125",
+    "sr gt 200",
+    "1 active"
+   ],
+   "years": [
+    2015,
+    2030
+   ],
+   "fuel": "gasoline",
+   "label": "Piaggio / Vespa / Aprilia i-get 125-400 (Liberty, Medley, Beverly, Primavera, Sprint, GTS, SR GT)",
+   "engine": "Monocilíndrico i-get 125-400 cc, CVT",
+   "timing": "chain",
+   "intervals": {
+    "moto_oil": {
+     "km": 10000,
+     "months": 12
+    },
+    "moto_spark_plugs": {
+     "km": 10000
+    },
+    "moto_air_filter": {
+     "km": 20000
+    },
+    "cvt_belt": {
+     "km": 20000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Correa y rodillos a los 20.000.",
+    "Rodamientos de dirección (GTS).",
+    "Regulador de tensión.",
+    "Tapón de llenado de aceite que se afloja."
+   ],
+   "specs": {
+    "oil": "5W-40 Eni i-Ride PG (Piaggio) · transmisión 100 ml 80W-90",
+    "oil_l": "1,0-1,3 l con filtro según modelo",
+    "coolant": "Piaggio (los de agua)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "NGK CR8EB (125 i-get)",
+    "drive": "Correa del variador y rodillos cada 20.000 km",
+    "tyres": "110/70-12 · 120/70-12 (Primavera)"
+   }
+  },
+  {
+   "id": "royal_enfield_650",
+   "make": "Royal Enfield",
+   "models": [
+    "interceptor 650",
+    "continental gt 650",
+    "super meteor 650",
+    "shotgun 650",
+    "bear 650",
+    "classic 650"
+   ],
+   "years": [
+    2018,
+    2030
+   ],
+   "fuel": "gasoline",
+   "label": "Royal Enfield 650 bicilíndrica",
+   "engine": "Bicilíndrico paralelo 648 cc, refrigeración por aire/aceite",
+   "timing": "chain",
+   "intervals": {
+    "moto_oil": {
+     "km": 10000,
+     "months": 12
+    },
+    "valve_clearance": {
+     "km": 10000
+    },
+    "moto_spark_plugs": {
+     "km": 10000
+    },
+    "moto_air_filter": {
+     "km": 20000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Pérdida de aceite por la tapa de válvulas y el tapón de llenado.",
+    "Óxido en tornillería y pintura si duerme fuera.",
+    "Cable de embrague duro: engrasar.",
+    "Rodamientos de dirección."
+   ],
+   "specs": {
+    "oil": "15W-50 JASO MA2 (semisintético)",
+    "oil_l": "3,1 l con filtro",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "×2, según manual",
+    "drive": "Cadena 520 × 118",
+    "tyres": "100/90-18 · 130/70-18"
+   }
+  },
+  {
+   "id": "royal_enfield_350",
+   "make": "Royal Enfield",
+   "models": [
+    "meteor 350",
+    "classic 350",
+    "hunter 350",
+    "bullet 350",
+    "himalayan 411",
+    "scram 411"
+   ],
+   "years": [
+    2020,
+    2030
+   ],
+   "fuel": "gasoline",
+   "label": "Royal Enfield 350 J-series / 411",
+   "engine": "Monocilíndrico 349-411 cc, refrigeración por aire",
+   "timing": "chain",
+   "intervals": {
+    "moto_oil": {
+     "km": 5000,
+     "months": 6
+    },
+    "valve_clearance": {
+     "km": 10000
+    },
+    "moto_spark_plugs": {
+     "km": 10000
+    },
+    "moto_air_filter": {
+     "km": 10000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Aceite cada 5.000 o 6 meses: el motor va por aire y lo nota.",
+    "Óxido en tornillería y llantas.",
+    "Regulador de tensión.",
+    "Cadena: engrase frecuente, kit corto."
+   ],
+   "specs": {
+    "oil": "15W-50 JASO MA2",
+    "oil_l": "1,9-2,1 l con filtro",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "drive": "Cadena 520",
+    "notes": "Refrigeración por aire: cambios de aceite cortos (5.000 km / 6 meses)"
+   }
+  }
+ ],
+ "specs_note": "Especificaciones orientativas recopiladas de manuales y talleres: comprueba siempre el libro de tu vehículo antes de comprar."
+}

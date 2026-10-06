@@ -1,6 +1,6 @@
 {
-  "version": "1.0.16",
-  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.16/garaje-1.0.16-arm64.apk",
-  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.16/garaje-1.0.16.apk",
-  "notes": "Comparte un vehículo enseñando un código QR desde Mi coche, y escanéalo en 'Tengo un código'. Cada vehículo muestra su identificador único. Los km se pueden leer de una foto que ya tengas en la galería."
+  "version": "1.0.17",
+  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.17/garaje-1.0.17-arm64.apk",
+  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.17/garaje-1.0.17.apk",
+  "notes": "Si tu taller usa Garaje, verás en Inicio en qué estado está tu coche, podrás aprobar o rechazar el presupuesto desde el móvil y escribiros mensajes. Nuevo panel para talleres con órdenes de trabajo, presupuestos, piezas y proveedores."
 }

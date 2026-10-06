@@ -4,62 +4,31 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Garaje · Panel de taller</title>
-<meta name="description" content="Consulta y apunta desde el ordenador los trabajos de los coches a los que te han dado acceso en Garaje.">
+<meta name="description" content="El día a día del taller con Garaje: órdenes de trabajo, presupuestos que el cliente aprueba en su móvil, piezas, proveedores y el historial de cada coche.">
 <link rel="icon" href="../icon-192.png">
 <link rel="stylesheet" href="../style.css">
-<style>
-.panel{max-width:960px}
-.muted{color:var(--muted)}
-.hidden{display:none!important}
-.card{margin-bottom:14px}
-.card h2{margin:0 0 6px;font-size:20px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
-.vcard{cursor:pointer;transition:transform .12s,box-shadow .12s}
-.vcard:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,0,0,.08)}
-.vcard h3{margin:0 0 2px;font-size:17px}
-.plate{display:inline-block;background:#fff;color:#111;border:2px solid #1D4B70;border-left:10px solid #1D4B70;border-radius:6px;padding:1px 8px;font-weight:800;letter-spacing:1px;font-size:14px;margin:6px 0}
-.badge{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;background:var(--line);color:var(--ink);margin-left:6px;vertical-align:middle}
-.badge.workshop{background:#F2A51633;color:#9a6400}
-.badge.owner{background:#2EBD6B33;color:#1b7a44}
-.kv{display:flex;gap:18px;flex-wrap:wrap;margin:8px 0 0}
-.kv div b{display:block;font-size:20px}
-.kv div small{color:var(--muted)}
-label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
-input,select,textarea{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
-input:focus,select:focus,textarea:focus{outline:2px solid var(--brand-2);border-color:transparent}
-button.btn{border:0;cursor:pointer;font:inherit}
-button.btn:disabled{opacity:.5;cursor:default}
-.btn.small{padding:8px 14px;font-size:14px}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.line{display:grid;grid-template-columns:2fr 110px 2fr 36px;gap:8px;align-items:end;margin-bottom:6px}
-.line .x{background:transparent;border:0;color:var(--muted);font-size:20px;cursor:pointer;padding:8px 0}
-table{width:100%;border-collapse:collapse;font-size:15px}
-th{text-align:left;color:var(--muted);font-weight:600;font-size:13px;padding:8px 6px;border-bottom:1px solid var(--line)}
-td{padding:10px 6px;border-bottom:1px solid var(--line);vertical-align:top}
-td small{color:var(--muted);display:block}
-.err{color:#E5484D;font-size:14px;margin-top:8px;min-height:1.2em}
-.ok{color:#2EBD6B;font-size:14px;margin-top:8px}
-.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-.who{font-size:14px;color:var(--muted)}
-.who b{color:var(--ink)}
-.back{display:inline-block;margin:6px 0 12px;color:var(--muted);text-decoration:none;font-size:14px}
-.code{letter-spacing:6px;font-size:24px;text-align:center;font-weight:700}
-.sub{margin:0 0 14px;color:var(--muted)}
-@media (max-width:640px){.line{grid-template-columns:1fr 1fr;}.line .x{grid-column:2;justify-self:end}}
-</style>
+<link rel="stylesheet" href="taller.css">
 </head>
 <body>
 <div class="wrap panel">
-<header>
+<header class="no-print">
   <a class="logo" href="../"><img src="../icon-192.png" alt=""> Garaje <span class="muted" style="font-weight:500;font-size:15px;margin-left:4px">· Panel de taller</span></a>
-  <nav id="nav" class="hidden"><span class="who">Firmas como <b id="who"></b> · <a href="#" id="editName">cambiar</a> · <a href="#" id="logout">salir</a></span></nav>
+  <nav id="nav" class="hidden"><span class="who"><b id="who"></b> · <a href="#" id="logout">salir</a></span></nav>
 </header>
 
+<nav id="tabs" class="tabs hidden no-print">
+  <button data-tab="jobs" class="on">Órdenes</button>
+  <button data-tab="cars">Coches</button>
+  <button data-tab="parts">Piezas</button>
+  <button data-tab="suppliers">Proveedores</button>
+  <button data-tab="settings">Mi taller</button>
+</nav>
+
 <!-- ACCESO -->
-<section id="login">
+<section id="login" class="no-print">
   <div class="card" style="max-width:460px;margin:30px auto">
     <h2>Entrar</h2>
-    <p class="sub">Para talleres y familiares: consulta y apunta los trabajos de los coches a los que te han dado acceso, desde el ordenador. Lo que apuntes aparece en el móvil del dueño al momento, firmado con tu nombre.</p>
+    <p class="sub">Para talleres: órdenes de trabajo, presupuestos que el cliente aprueba en su móvil, piezas y proveedores. También para familiares que quieran apuntar trabajos desde el ordenador.</p>
     <div id="stepEmail">
       <label for="email">Tu correo</label>
       <input id="email" type="email" autocomplete="email" placeholder="taller@ejemplo.com">
@@ -76,12 +45,96 @@ td small{color:var(--muted);display:block}
   </div>
 </section>
 
-<!-- LISTA DE COCHES -->
-<section id="vehicles" class="hidden">
+<!-- ALTA DEL TALLER -->
+<section id="setup" class="hidden no-print">
+  <div class="card" style="max-width:640px;margin:10px auto">
+    <h2>Da de alta tu taller</h2>
+    <p class="sub">Estos datos salen en los presupuestos y órdenes de reparación, y el cliente los ve en su app. Puedes cambiarlos cuando quieras en "Mi taller".</p>
+    <form id="setupForm" class="ws-form"></form>
+    <p class="muted" style="font-size:14px;margin-top:14px">¿No eres un taller? <a href="#" id="skipSetup">Solo quiero apuntar trabajos de un coche</a>.</p>
+  </div>
+</section>
+
+<!-- ÓRDENES -->
+<section id="tab-jobs" class="tab hidden no-print">
+  <div class="top" style="margin-bottom:14px">
+    <div><h2 style="margin:0">Órdenes de trabajo</h2><p class="sub" style="margin:2px 0 0">Lo que hay hoy en el taller. El cliente ve el estado en su móvil.</p></div>
+    <button class="btn" id="newJobBtn">+ Nueva orden</button>
+  </div>
+  <div class="board" id="board"></div>
+  <details class="card" style="margin-top:16px"><summary>Entregadas y canceladas</summary><div id="doneJobs" style="margin-top:10px"></div></details>
+</section>
+
+<!-- UNA ORDEN -->
+<section id="job" class="hidden no-print">
+  <a href="#" class="back" id="jobBack">← Órdenes</a>
+  <div class="card">
+    <div class="top">
+      <div>
+        <h2 id="jTitle"></h2>
+        <span class="plate" id="jPlate"></span><span class="status" id="jStatus"></span>
+        <p class="muted" id="jSub" style="margin:6px 0 0;font-size:14px"></p>
+      </div>
+      <div class="actions" id="jActions"></div>
+    </div>
+  </div>
+
+  <div class="job-grid">
+    <div>
+      <div class="card">
+        <h3>Recepción</h3>
+        <div class="row3">
+          <div><label>Km</label><input id="jKm" type="number" min="0"></div>
+          <div><label>Combustible</label><select id="jFuel"><option value="">—</option><option>Reserva</option><option>1/4</option><option>1/2</option><option>3/4</option><option>Lleno</option></select></div>
+          <div><label>Entrega prevista</label><input id="jPromised" type="date"></div>
+        </div>
+        <div class="row2">
+          <div><label>Cliente</label><input id="jCustomer"></div>
+          <div><label>Teléfono</label><input id="jPhone" type="tel"></div>
+        </div>
+        <label>Lo que pide el cliente</label><textarea id="jRequest" rows="2"></textarea>
+        <label>Estado del coche al recibirlo (golpes, testigos, objetos…)</label><textarea id="jIntake" rows="2"></textarea>
+      </div>
+
+      <div class="card">
+        <div class="top"><h3 style="margin:0">Presupuesto</h3>
+          <div><button class="btn ghost small" id="addLabor">+ Mano de obra</button> <button class="btn ghost small" id="addPart">+ Pieza</button></div></div>
+        <div id="jLines"></div>
+        <div class="totals" id="jTotals"></div>
+        <div class="top" style="margin-top:12px">
+          <div class="err" id="jErr"></div>
+          <div><span class="ok hidden" id="jSaved">Guardado</span> <button class="btn" id="jSave">Guardar</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h3>Para este coche</h3>
+        <p class="muted" style="font-size:13px;margin:0 0 8px">Toca una sugerencia para añadirla al presupuesto.</p>
+        <div id="jRecs"></div>
+      </div>
+      <div class="card">
+        <h3>Mensajes con el cliente</h3>
+        <div class="chat" id="jChat"></div>
+        <form id="jMsgForm" class="chat-form"><input id="jMsg" placeholder="Escribe al cliente…" maxlength="2000"><button class="btn small">Enviar</button></form>
+      </div>
+      <div class="card">
+        <h3>Documentos</h3>
+        <p class="muted" style="font-size:13px;margin:0 0 10px">Para imprimir o guardar en PDF y que lo firme el cliente.</p>
+        <button class="btn ghost small" id="printQuote">Presupuesto</button>
+        <button class="btn ghost small" id="printOrder">Orden de reparación / resguardo</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COCHES -->
+<section id="tab-cars" class="tab hidden no-print">
   <div class="card top">
     <div>
       <h2>Coches a los que tienes acceso</h2>
-      <p class="sub" style="margin:0">Pulsa uno para ver su historial y apuntar trabajos. El dueño te da acceso desde la app: menú → Compartir con alguien → Taller.</p>
+      <p class="sub" style="margin:0">El dueño te da acceso desde la app: Mi coche → Compartir → Taller. Te enseñará un código o un QR.</p>
     </div>
     <form id="joinForm" style="display:flex;gap:8px;align-items:center">
       <input id="joinCode" placeholder="Código de 6 letras" style="width:170px;text-transform:uppercase" maxlength="6">
@@ -94,8 +147,8 @@ td small{color:var(--muted);display:block}
 </section>
 
 <!-- UN COCHE -->
-<section id="vehicle" class="hidden">
-  <a href="#" class="back" id="back">← Todos los coches</a>
+<section id="vehicle" class="hidden no-print">
+  <a href="#" class="back" id="back">← Coches</a>
   <div class="card">
     <div class="top">
       <div>
@@ -108,11 +161,12 @@ td small{color:var(--muted);display:block}
         <div><b id="vLast"></b><small>Último trabajo</small></div>
       </div>
     </div>
+    <div style="margin-top:12px" id="vJobActions"><button class="btn" id="vNewJob">+ Abrir orden de trabajo</button></div>
   </div>
 
-  <div class="card">
-    <h2>Apuntar los trabajos de esta visita</h2>
-    <p class="sub">Fecha y km del coche hoy, y una línea por cada trabajo. Al guardar, el dueño lo ve en su móvil con tu firma.</p>
+  <div class="card" id="quickLog">
+    <h2>Apuntar trabajos sin orden</h2>
+    <p class="sub">Para apuntar algo ya hecho. Al guardar, el dueño lo ve en su móvil con tu firma.</p>
     <div class="row2">
       <div><label for="fDate">Fecha</label><input id="fDate" type="date"></div>
       <div><label for="fKm">Km del cuentakilómetros</label><input id="fKm" type="number" inputmode="numeric" min="0" step="1"></div>
@@ -135,13 +189,57 @@ td small{color:var(--muted);display:block}
   </div>
 </section>
 
-<footer>
+<!-- PIEZAS -->
+<section id="tab-parts" class="tab hidden no-print">
+  <div class="top" style="margin-bottom:14px">
+    <div><h2 style="margin:0">Piezas</h2><p class="sub" style="margin:2px 0 0">Tu biblioteca: se llena sola con las piezas de las órdenes entregadas y aprende en qué motores las montas.</p></div>
+    <button class="btn" id="newPartBtn">+ Pieza</button>
+  </div>
+  <input id="partSearch" placeholder="Buscar por descripción, marca o referencia…" style="margin-bottom:12px">
+  <div class="card" style="padding:0;overflow-x:auto">
+    <table class="list">
+      <thead><tr><th>Pieza</th><th>Marca y referencia</th><th>Proveedor</th><th class="num">Coste</th><th class="num">PVP</th><th class="num">Usos</th><th></th></tr></thead>
+      <tbody id="partsBody"></tbody>
+    </table>
+    <p class="muted hidden" id="noParts" style="padding:16px">Aún no hay piezas. Se añaden solas al entregar órdenes, o con "+ Pieza".</p>
+  </div>
+</section>
+
+<!-- PROVEEDORES -->
+<section id="tab-suppliers" class="tab hidden no-print">
+  <div class="top" style="margin-bottom:14px">
+    <div><h2 style="margin:0">Proveedores</h2><p class="sub" style="margin:2px 0 0">Tus distribuidores de recambios, a un toque de llamada o correo.</p></div>
+    <button class="btn" id="newSupplierBtn">+ Proveedor</button>
+  </div>
+  <div class="grid" id="suppliersGrid"></div>
+  <p class="muted hidden" id="noSuppliers">Añade los distribuidores a los que compras: luego los eliges en cada pieza.</p>
+</section>
+
+<!-- MI TALLER -->
+<section id="tab-settings" class="tab hidden no-print">
+  <div class="card" style="max-width:720px">
+    <h2>Mi taller</h2>
+    <p class="sub">Salen en presupuestos y órdenes de reparación, y el cliente los ve en su app.</p>
+    <form id="settingsForm" class="ws-form"></form>
+    <div class="ok hidden" id="settingsOk">Guardado.</div>
+  </div>
+</section>
+
+<!-- DIÁLOGOS -->
+<dialog id="dlg" class="no-print"><form method="dialog" id="dlgForm"></form></dialog>
+
+<!-- DOCUMENTO PARA IMPRIMIR -->
+<div id="print" class="print-only"></div>
+
+<footer class="no-print">
   <a href="../privacidad.html">Política de privacidad</a>
   <a href="../condiciones.html">Condiciones del servicio</a>
   <a href="mailto:samuelgonzrojas@gmail.com">Contacto</a>
   <div style="margin-top:8px">© 2026 Garaje · Hecho en España</div>
 </footer>
 </div>
+<datalist id="brands"></datalist>
+<datalist id="partNames"></datalist>
 <script type="module" src="app.js"></script>
 </body>
 </html>
