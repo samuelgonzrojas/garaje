@@ -1,6 +1,6 @@
 {
-  "version": "1.0.15",
-  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.15/garaje-1.0.15-arm64.apk",
-  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.15/garaje-1.0.15.apk",
-  "notes": "Misma versión que la de Google Play. Si instalas la app desde Google Play, las actualizaciones te llegan por la tienda."
+  "version": "1.0.16",
+  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.16/garaje-1.0.16-arm64.apk",
+  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.16/garaje-1.0.16.apk",
+  "notes": "Comparte un vehículo enseñando un código QR desde Mi coche, y escanéalo en 'Tengo un código'. Cada vehículo muestra su identificador único. Los km se pueden leer de una foto que ya tengas en la galería."
 }

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Únete a un vehículo — Garaje</title>
+<meta name="description" content="Te han invitado a un vehículo en Garaje.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="icon-192.png">
+<link rel="stylesheet" href="style.css">
+<style>
+.join{max-width:520px;margin:24px auto 0;text-align:center}
+.join .code{font-size:44px;font-weight:800;letter-spacing:10px;margin:14px 0 6px;font-variant-numeric:tabular-nums}
+.join ol{text-align:left;color:var(--muted);line-height:1.7;padding-left:22px}
+.join .btn{margin-top:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <a class="logo" href="./"><img src="icon-192.png" alt=""> Garaje</a>
+  <nav><a href="./">Qué es Garaje</a></nav>
+</header>
+
+<section class="join card">
+  <span class="eyebrow">Invitación</span>
+  <h1 style="margin:0">Te han invitado a un vehículo</h1>
+  <p style="color:var(--muted)">Con este código verás su mantenimiento y podrás apuntar trabajos y kilómetros desde tu móvil.</p>
+  <div class="code" id="code">······</div>
+  <p style="color:var(--muted);font-size:14px;margin-top:0">Caduca a los 7 días de crearse.</p>
+  <ol>
+    <li>Abre Garaje e inicia sesión (Ajustes → Iniciar sesión).</li>
+    <li>Toca <b>Tengo un código</b> y escribe el código, o escanea el QR otra vez desde ahí.</li>
+  </ol>
+  <p>¿Aún no tienes Garaje?</p>
+  <a class="btn" href="https://github.com/samuelgonzrojas/garaje/releases/latest/download/garaje.apk">Descargar para Android</a>
+</section>
+
+<footer>
+  <a href="privacidad.html">Privacidad</a>
+  <a href="mailto:samuelgonzrojas@gmail.com">Contacto</a>
+</footer>
+</div>
+<script>
+// El código llega en el enlace del QR: unirse.html?c=AB12CD
+(function(){
+  var c=(new URLSearchParams(location.search).get('c')||'').toUpperCase();
+  if(/^[A-Z0-9]{6}$/.test(c)) document.getElementById('code').textContent=c;
+})();
+</script>
+</body>
+</html>
