@@ -1,6 +1,6 @@
 {
-  "version": "1.0.19",
-  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.19/garaje-1.0.19-arm64.apk",
-  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.19/garaje-1.0.19.apk",
-  "notes": "Mensajes del taller en orden y sin avisos repetidos. En Inicio solo se ven las órdenes abiertas y la última entregada."
+  "version": "1.0.20",
+  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.20/garaje-1.0.20-arm64.apk",
+  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.20/garaje-1.0.20.apk",
+  "notes": "Al terminar un viaje te deja un resumen (km, tiempo, velocidad media y máxima, consumo y gasto). En Inicio verás el último viaje durante 12 horas; desliza la tarjeta para quitarla."
 }
