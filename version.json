@@ -1,6 +1,6 @@
 {
-  "version": "1.0.14",
-  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.14/garaje-1.0.14-arm64.apk",
-  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.14/garaje-1.0.14.apk",
-  "notes": "Toca los kilómetros de Inicio y verás su historial: gráfica, media diaria y cuántos km salen de fotos, viajes por Bluetooth, trabajos o repostajes. Aviso más claro al activar los viajes."
+  "version": "1.0.15",
+  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.15/garaje-1.0.15-arm64.apk",
+  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.15/garaje-1.0.15.apk",
+  "notes": "Misma versión que la de Google Play. Si instalas la app desde Google Play, las actualizaciones te llegan por la tienda."
 }
