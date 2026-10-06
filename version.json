@@ -1,6 +1,6 @@
 {
-  "version": "1.0.17",
-  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.17/garaje-1.0.17-arm64.apk",
-  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.17/garaje-1.0.17.apk",
-  "notes": "Si tu taller usa Garaje, verás en Inicio en qué estado está tu coche, podrás aprobar o rechazar el presupuesto desde el móvil y escribiros mensajes. Nuevo panel para talleres con órdenes de trabajo, presupuestos, piezas y proveedores."
+  "version": "1.0.18",
+  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.18/garaje-1.0.18-arm64.apk",
+  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.18/garaje-1.0.18.apk",
+  "notes": "Te avisa de los mensajes de tu taller, también los que llegan con la app cerrada, y puedes escribirle por WhatsApp desde la orden."
 }

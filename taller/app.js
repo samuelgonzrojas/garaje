@@ -716,11 +716,15 @@ async function deliver() {
 async function learnParts(engineId) {
   for (const l of job.lines || []) {
     if (l.kind !== 'part' || !(l.description || '').trim()) continue;
+    // La misma pieza: por id de la biblioteca, por marca + referencia (aunque
+    // la descripción cambie) o, sin referencia, por la descripción exacta.
+    const norm = (x) => (x || '').toLowerCase().replace(/[\s.\-]/g, '');
     const existing = parts.find((p) => p.id === l.part_id) ||
-      parts.find((p) => p.description === l.description && (p.reference || '') === (l.reference || '') && (p.brand || '') === (l.brand || ''));
+      (l.reference ? parts.find((p) => norm(p.reference) === norm(l.reference) && norm(p.brand) === norm(l.brand)) : null) ||
+      parts.find((p) => !p.reference && !l.reference && p.description === l.description && norm(p.brand) === norm(l.brand));
     const engineIds = existing ? [...new Set([...(existing.engine_ids || []), ...(engineId ? [engineId] : [])])] : (engineId ? [engineId] : []);
     const row = {
-      workshop_id: workshop.id, description: l.description.trim(), brand: l.brand || null, reference: l.reference || null,
+      workshop_id: workshop.id, description: existing?.description || l.description.trim(), brand: l.brand || null, reference: l.reference || null,
       catalog_id: l.catalog_id || null, supplier_id: l.supplier_id || null, price: num(l.unit_price), engine_ids: engineIds,
       uses: (existing?.uses || 0) + 1, last_used_at: new Date().toISOString(),
     };
