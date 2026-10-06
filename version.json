@@ -1,6 +1,6 @@
 {
-  "version": "1.0.13",
-  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.13/garaje-1.0.13-arm64.apk",
-  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.13/garaje-1.0.13.apk",
-  "notes": "Rellena el alta con una foto de la ficha técnica o del permiso de circulación (marca, modelo, motor, bastidor, fecha) y lee la matrícula de una foto. Arreglada la lectura de km por foto, que fallaba en todos los móviles. Editar un vehículo ya no borra intervalos ni recordatorios propios."
+  "version": "1.0.14",
+  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.14/garaje-1.0.14-arm64.apk",
+  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.14/garaje-1.0.14.apk",
+  "notes": "Toca los kilómetros de Inicio y verás su historial: gráfica, media diaria y cuántos km salen de fotos, viajes por Bluetooth, trabajos o repostajes. Aviso más claro al activar los viajes."
 }
