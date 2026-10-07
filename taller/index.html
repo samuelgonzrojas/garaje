@@ -18,6 +18,7 @@
 
 <nav id="tabs" class="tabs hidden no-print">
   <button data-tab="jobs" class="on">Órdenes</button>
+  <button data-tab="leads">Solicitudes<span class="badge workshop hidden" id="leadsBadge"></span></button>
   <button data-tab="cars">Coches</button>
   <button data-tab="parts">Piezas</button>
   <button data-tab="suppliers">Proveedores</button>
@@ -63,6 +64,15 @@
   </div>
   <div class="board" id="board"></div>
   <details class="card" style="margin-top:16px"><summary>Entregadas y canceladas</summary><div id="doneJobs" style="margin-top:10px"></div></details>
+</section>
+
+<!-- SOLICITUDES DE PRESUPUESTO (clientes enviados por Garaje) -->
+<section id="tab-leads" class="tab hidden no-print">
+  <div class="top" style="margin-bottom:14px">
+    <div><h2 style="margin:0">Solicitudes de presupuesto</h2><p class="sub" style="margin:2px 0 0">Clientes que te llegan desde la app Garaje. Responde con precio y cita; cuando acepten, abre la orden desde aquí.</p></div>
+  </div>
+  <div id="leadsList"></div>
+  <details class="card" style="margin-top:16px"><summary>Cerradas</summary><div id="leadsDone" style="margin-top:10px"></div></details>
 </section>
 
 <!-- UNA ORDEN -->

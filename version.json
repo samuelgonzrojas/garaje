@@ -1,6 +1,6 @@
 {
-  "version": "1.0.23",
-  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.23/garaje-1.0.23-arm64.apk",
-  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.23/garaje-1.0.23.apk",
-  "notes": "Cada vehículo tiene su propio Bluetooth para los viajes: el del coche y el del casco de la moto, y los km se suman al vehículo correcto."
+  "version": "1.0.24",
+  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.24/garaje-1.0.24-arm64.apk",
+  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.24/garaje-1.0.24.apk",
+  "notes": "Pide presupuesto y cita a un taller de Garaje desde la app con lo que le toca a tu vehículo. Las revisiones (luces, niveles, neumáticos) solo avisan cuando tocan. Lee mejor el permiso de circulación. Mi coche sin el identificador."
 }

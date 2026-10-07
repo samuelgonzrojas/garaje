@@ -20,6 +20,7 @@ let workshop = null;       // fila de public.workshops (null si no es taller)
 let roles = {};            // vehicle_id -> role
 let vehicles = [];         // filas de public.vehicles
 let jobs = [];             // órdenes del taller
+let leads = [];            // solicitudes de presupuesto llegadas desde la app
 let parts = [];            // biblioteca de piezas
 let suppliers = [];        // proveedores
 let catalogNames = {};     // catalog_id -> nombre
@@ -46,6 +47,8 @@ const STATUS = {
   rejected: 'Presupuesto rechazado', in_progress: 'En reparación', waiting_parts: 'Esperando piezas',
   ready: 'Listo para recoger', delivered: 'Entregado', cancelled: 'Cancelado',
 };
+const LEAD_STATUS = { sent: 'Nueva', quoted: 'Respondida', accepted: 'Aceptada', declined: 'Rechazada', converted: 'Orden abierta', closed: 'Cerrada' };
+const LEAD_OPEN = ['sent', 'quoted', 'accepted'];
 const COLUMNS = [
   ['Entrada', ['received', 'diagnosis']],
   ['Esperando al cliente', ['quote_sent', 'rejected']],
@@ -164,7 +167,7 @@ async function enter() {
     show('setup');
   } else {
     show('tabs');
-    if (workshop) await Promise.all([loadJobs(), loadParts(), loadSuppliers()]);
+    if (workshop) await Promise.all([loadJobs(), loadLeads(), loadParts(), loadSuppliers()]);
     setTab(workshop ? tab : 'cars');
   }
   subscribe();
@@ -175,6 +178,7 @@ function subscribe() {
   channel = sb.channel('panel')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'vehicles' }, () => loadVehicles())
     .on('postgres_changes', { event: '*', schema: 'public', table: 'jobs' }, () => workshop && loadJobs())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'leads' }, () => workshop && loadLeads())
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'job_messages' }, (p) => {
       if (job && p.new.job_id === job.id) loadMessages();
     })
@@ -210,6 +214,27 @@ const WS_FIELDS = [
   ['vat', 'IVA (%)', '21'],
   ['quote_validity_days', 'Validez del presupuesto (días hábiles)', '12'],
 ];
+/** Bloque de la ficha: aparecer en la app para recibir solicitudes de presupuesto. */
+function listingBlock(d) {
+  const vt = d.vehicle_types || ['car'];
+  const accepted = leads.filter((l) => ['accepted', 'converted'].includes(l.status)).length;
+  const stats = leads.length ? ` Hasta ahora: ${leads.length} ${leads.length === 1 ? 'solicitud' : 'solicitudes'}, ${accepted} ${accepted === 1 ? 'aceptada' : 'aceptadas'}.` : '';
+  const fee = num(d.lead_fee);
+  return `<h3 style="margin:18px 0 4px">Visible en la app Garaje</h3>
+    <p class="muted" style="font-size:13px;margin:0 0 8px">Si lo activas, los usuarios de Garaje de tu zona pueden pedirte presupuesto desde la app con lo que le toca a su vehículo. Cada solicitud es un cliente que te envía Garaje${fee ? ` (tarifa acordada: ${fmtEur(fee)} por cliente enviado)` : ''}.${stats}</p>
+    <label class="chk"><input type="checkbox" name="listed" ${d.listed ? 'checked' : ''}> Aparecer en la app</label>
+    <div class="row3">
+      <div><label>Ciudad</label><input name="city" value="${esc(d.city ?? '')}" placeholder="Madrid"></div>
+      <div><label>Provincia</label><input name="province" value="${esc(d.province ?? '')}" placeholder="Madrid"></div>
+      <div><label>Código postal</label><input name="postal_code" value="${esc(d.postal_code ?? '')}" inputmode="numeric" placeholder="28001"></div>
+    </div>
+    <div><label>Vehículos que atiendes</label>
+      <label class="chk"><input type="checkbox" name="vt_car" ${vt.includes('car') ? 'checked' : ''}> Coches</label>
+      <label class="chk"><input type="checkbox" name="vt_moto" ${vt.includes('moto') ? 'checked' : ''}> Motos</label>
+    </div>
+    <div><label>Qué haces mejor (sale en la app, opcional)</label><input name="description" value="${esc(d.description ?? '')}" placeholder="Mecánica general, diésel, neumáticos, ITV…" maxlength="140"></div>`;
+}
+
 function renderWsForm(formId, data, button) {
   const f = $(formId);
   const field = ([k, label, ph, req]) => `<div><label>${label}${req ? ' *' : ''}</label><input name="${k}" value="${esc(data[k] ?? '')}" placeholder="${esc(ph)}" ${req ? 'required' : ''} ${['labor_rate', 'vat', 'quote_validity_days'].includes(k) ? 'inputmode="decimal"' : ''}></div>`;
@@ -218,6 +243,7 @@ function renderWsForm(formId, data, button) {
     ${field(WS_FIELDS[3])}${field(WS_FIELDS[4])}
     <div class="row2">${field(WS_FIELDS[5])}${field(WS_FIELDS[6])}</div>
     <div class="row3">${field(WS_FIELDS[7])}${field(WS_FIELDS[8])}${field(WS_FIELDS[9])}</div>
+    ${listingBlock(data)}
     <div class="err" id="${formId}Err"></div>
     <button class="btn">${button}</button>`;
   f.onsubmit = async (e) => {
@@ -228,6 +254,12 @@ function renderWsForm(formId, data, button) {
       const v = (fd[k] ?? '').trim();
       row[k] = ['labor_rate', 'vat'].includes(k) ? (num(v) ?? (k === 'vat' ? 21 : 45)) : k === 'quote_validity_days' ? (parseInt(v, 10) || 12) : (v || null);
     }
+    // Visible en la app (solicitudes de presupuesto).
+    row.listed = !!fd.listed;
+    for (const k of ['city', 'province', 'postal_code', 'description']) row[k] = (fd[k] ?? '').trim() || null;
+    row.vehicle_types = ['car', 'moto'].filter((t) => fd['vt_' + t]);
+    if (row.vehicle_types.length === 0) row.vehicle_types = ['car'];
+    if (row.listed && !row.city) { $(formId + 'Err').textContent = 'Para aparecer en la app hace falta la ciudad.'; return; }
     if (!row.name) { $(formId + 'Err').textContent = 'Falta el nombre del taller.'; return; }
     const q = workshop ? sb.from('workshops').update(row).eq('id', workshop.id) : sb.from('workshops').insert(row);
     const { error } = await q;
@@ -246,9 +278,10 @@ for (const b of document.querySelectorAll('.tabs button')) b.onclick = () => set
 function setTab(t) {
   tab = t;
   for (const b of document.querySelectorAll('.tabs button')) b.classList.toggle('on', b.dataset.tab === t);
-  for (const id of ['tab-jobs', 'tab-cars', 'tab-parts', 'tab-suppliers', 'tab-settings', 'job', 'vehicle']) show(id, false);
+  for (const id of ['tab-jobs', 'tab-leads', 'tab-cars', 'tab-parts', 'tab-suppliers', 'tab-settings', 'job', 'vehicle']) show(id, false);
   show('tab-' + t);
   if (t === 'jobs') renderBoard();
+  if (t === 'leads') renderLeads();
   if (t === 'cars') renderGrid();
   if (t === 'parts') renderParts();
   if (t === 'suppliers') renderSuppliers();
@@ -439,7 +472,7 @@ function jobCard(j) {
   const s = v ? summary(v) : { name: 'Coche sin acceso', plate: '' };
   const el = document.createElement('div');
   el.className = 'jcard';
-  el.innerHTML = `<span class="num-tag">OR ${j.number}</span><b>${esc(s.name)}</b>
+  el.innerHTML = `<span class="num-tag">OR ${j.number}</span>${j.lead_id ? '<span class="badge workshop">Garaje</span>' : ''}<b>${esc(s.name)}</b>
     <small>${esc(s.plate)}${j.customer_name ? ' · ' + esc(j.customer_name) : ''}</small>
     ${j.customer_request ? `<small>${esc(j.customer_request.slice(0, 80))}</small>` : ''}
     <span class="status ${j.status}">${STATUS[j.status]}</span>
@@ -473,7 +506,7 @@ $('newJobBtn').onclick = async () => {
   if (id) newJobFor(vehicles.find((v) => v.id === id));
 };
 
-async function newJobFor(row) {
+async function newJobFor(row, extra = {}) {
   const s = summary(row);
   // Cliente: el propietario del coche (nombre y teléfono de su perfil).
   let name = null, phone = null;
@@ -482,13 +515,108 @@ async function newJobFor(row) {
     const owner = (data || []).find((p) => p.role === 'owner');
     if (owner) { name = owner.display_name; phone = owner.phone; }
   } catch { /* sin datos */ }
-  const { data, error } = await sb.from('jobs').insert({
+  const base = {
     workshop_id: workshop.id, vehicle_id: row.id, km: s.km, vat: workshop.vat,
     customer_name: name, customer_phone: phone,
-  }).select('*').single();
-  if (error) { alert('No se pudo abrir la orden: ' + error.message); return; }
+  };
+  // Desde una solicitud: lo que pidió el cliente, su teléfono, la cita.
+  for (const [k, v] of Object.entries(extra)) if (v != null && v !== '') base[k] = v;
+  const { data, error } = await sb.from('jobs').insert(base).select('*').single();
+  if (error) { alert('No se pudo abrir la orden: ' + error.message); return null; }
   jobs.unshift(data);
   openJob(data);
+  return data;
+}
+
+// ------------------------------------------------------------------ solicitudes (clientes enviados por Garaje)
+async function loadLeads() {
+  if (!workshop) return;
+  const { data, error } = await sb.from('leads').select('*').eq('workshop_id', workshop.id).order('created_at', { ascending: false }).limit(200);
+  if (error) { console.warn(error); return; }
+  leads = data || [];
+  const n = leads.filter((l) => l.status === 'sent' || l.status === 'accepted').length;
+  const b = $('leadsBadge');
+  b.textContent = n;
+  b.classList.toggle('hidden', n === 0);
+  if (tab === 'leads') renderLeads();
+}
+
+function leadCard(l) {
+  const v = l.vehicle || {};
+  const items = (l.items || []).map((i) => esc(i.name)).join(', ');
+  const el = document.createElement('div');
+  el.className = 'card lead';
+  el.innerHTML = `<div class="top"><div><b>${esc(v.name || 'Vehículo')}</b> <span class="plate">${esc(v.plate || '')}</span> <span class="status ${l.status}">${LEAD_STATUS[l.status] || l.status}</span>
+      <p class="muted" style="margin:4px 0 0;font-size:13px">${fmtTime(l.created_at)}${v.km ? ' · ' + fmtKm(v.km) : ''}${v.year ? ' · ' + esc(v.year) : ''}${v.fuel ? ' · ' + esc(v.fuel) : ''}</p></div>
+      <div class="actions"></div></div>
+    ${items ? `<p style="margin:8px 0 0"><b>Pide:</b> ${items}</p>` : ''}
+    ${l.message ? `<p style="margin:6px 0 0">“${esc(l.message)}”</p>` : ''}
+    ${l.preferred ? `<p class="muted" style="margin:6px 0 0">Le viene bien: ${esc(l.preferred)}</p>` : ''}
+    <p class="muted" style="margin:6px 0 0">${esc(l.customer_name || 'Cliente de Garaje')}${l.customer_phone ? ` · <a href="tel:${esc(l.customer_phone)}">${esc(l.customer_phone)}</a>` : ''}</p>
+    ${l.quote_amount != null ? `<p style="margin:6px 0 0"><b>Tu respuesta:</b> ${fmtEur(num(l.quote_amount))}${l.appointment_at ? ' · cita ' + fmtTime(l.appointment_at) : ''}${l.quote_text ? '<br>' + esc(l.quote_text) : ''}</p>` : ''}
+    ${l.decision_note ? `<p class="muted" style="margin:6px 0 0">Nota del cliente: ${esc(l.decision_note)}</p>` : ''}`;
+  const acts = el.querySelector('.actions');
+  const btn = (label, fn, cls = 'btn small') => { const b = document.createElement('button'); b.className = cls; b.textContent = label; b.onclick = fn; acts.appendChild(b); };
+  if (l.status === 'sent' || l.status === 'quoted') btn(l.status === 'sent' ? 'Responder' : 'Cambiar respuesta', () => respondLead(l));
+  if (l.status === 'accepted') btn('Abrir orden', () => convertLead(l));
+  if (l.status === 'converted' && l.job_id) btn('Ver orden', () => { const j = jobs.find((x) => x.id === l.job_id); if (j) openJob(j); }, 'btn ghost small');
+  if (['sent', 'quoted', 'accepted', 'declined'].includes(l.status)) btn('Cerrar', () => closeLead(l), 'btn ghost small');
+  return el;
+}
+
+function renderLeads() {
+  const list = $('leadsList');
+  list.innerHTML = '';
+  const open = leads.filter((l) => LEAD_OPEN.includes(l.status));
+  if (open.length === 0) {
+    list.innerHTML = `<p class="muted">Ninguna pendiente. ${workshop?.listed ? 'Los usuarios de Garaje de tu zona pueden pedirte presupuesto desde la app.' : 'Activa "Aparecer en la app" en Mi taller para recibir solicitudes.'}</p>`;
+  }
+  for (const l of open) list.appendChild(leadCard(l));
+  const done = $('leadsDone');
+  done.innerHTML = '';
+  const closed = leads.filter((l) => !LEAD_OPEN.includes(l.status)).slice(0, 30);
+  if (closed.length === 0) done.innerHTML = '<p class="muted">Ninguna todavía.</p>';
+  for (const l of closed) done.appendChild(leadCard(l));
+}
+
+async function respondLead(l) {
+  const def = l.appointment_at ? new Date(l.appointment_at) : null;
+  const local = def ? new Date(def.getTime() - def.getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '';
+  const r = await dialog(`<h3>Responder a ${esc(l.customer_name || 'el cliente')}</h3>
+    <label>Precio orientativo, IVA incluido (€)</label><input name="amount" inputmode="decimal" value="${l.quote_amount ?? ''}" required>
+    <label>Qué incluye y comentarios</label><textarea name="text" rows="3">${esc(l.quote_text ?? '')}</textarea>
+    <label>Propón una cita (opcional)</label><input type="datetime-local" name="when" value="${local}">
+    <p class="muted" style="font-size:13px">El cliente lo recibe en su móvil y puede aceptarlo. Al aceptar, tendrás acceso a su vehículo para abrir la orden.</p>`,
+    'Enviar respuesta', (fd) => fd);
+  if (!r) return;
+  const amount = num(r.amount);
+  if (amount == null) { alert('Pon un precio.'); return; }
+  const { error } = await sb.rpc('quote_lead', { p_lead: l.id, p_amount: amount, p_text: (r.text || '').trim() || null, p_appointment: r.when ? new Date(r.when).toISOString() : null });
+  if (error) { alert('No se pudo responder: ' + error.message); return; }
+  await loadLeads();
+}
+
+async function convertLead(l) {
+  let row = vehicles.find((v) => v.id === l.vehicle_id);
+  if (!row) { await loadVehicles(); row = vehicles.find((v) => v.id === l.vehicle_id); }
+  if (!row) { alert('Todavía no tienes acceso a este vehículo: el cliente tiene que aceptar desde la app (o darte el código de taller en la pestaña Coches).'); return; }
+  const request = [(l.items || []).map((i) => i.name).join(', '), l.message].filter(Boolean).join('. ');
+  const created = await newJobFor(row, {
+    customer_request: request || null, lead_id: l.id,
+    customer_name: l.customer_name, customer_phone: l.customer_phone,
+    promised_at: l.appointment_at ? l.appointment_at.slice(0, 10) : null,
+  });
+  if (!created) return;
+  const { error } = await sb.from('leads').update({ status: 'converted', job_id: created.id, updated_at: new Date().toISOString() }).eq('id', l.id);
+  if (error) console.warn(error);
+  await loadLeads();
+}
+
+async function closeLead(l) {
+  if (!confirm('¿Cerrar esta solicitud? El cliente dejará de verla como pendiente.')) return;
+  const { error } = await sb.from('leads').update({ status: 'closed', updated_at: new Date().toISOString() }).eq('id', l.id);
+  if (error) { alert('No se pudo cerrar: ' + error.message); return; }
+  await loadLeads();
 }
 
 let dirty = false;
