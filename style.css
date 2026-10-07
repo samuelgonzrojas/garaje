@@ -40,6 +40,10 @@ nav a:hover{color:var(--ink)}
 .btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--line);box-shadow:none}
 .btn.ghost:hover{box-shadow:var(--shadow)}
 .btn svg{width:20px;height:20px}
+.btn.play{background:#111;color:#fff;padding:9px 20px 9px 16px;gap:10px;line-height:1.1;font-size:19px}
+.btn.play:hover{box-shadow:0 8px 20px rgba(0,0,0,.3)}
+.btn.play small{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;opacity:.85}
+.btn.play svg.gp{width:26px;height:26px}
 
 /* Tarjetas y piezas comunes */
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow)}
@@ -152,6 +156,7 @@ h1,h2,h3{letter-spacing:-.5px}
 
 /* Pasos de instalación */
 .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;counter-reset:s}
+.steps.three{grid-template-columns:repeat(3,1fr)}
 .step{counter-increment:s}
 .step::before{content:counter(s);display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--brand);color:#fff;font-weight:800;margin-bottom:12px}
 
@@ -183,10 +188,11 @@ footer a:hover{color:var(--ink)}
   .hero,.spot,.band{grid-template-columns:1fr}
   .spot.rev .spot-art{order:0}
   .features{grid-template-columns:1fr 1fr}
-  .stats,.steps{grid-template-columns:1fr 1fr}
+  .stats,.steps,.steps.three{grid-template-columns:1fr 1fr}
   .float.f1{right:-8px}.float.f2{left:-8px}
 }
 @media (max-width:600px){
+  .steps.three{grid-template-columns:1fr}
   header{flex-direction:column;align-items:flex-start;gap:8px}
   nav{justify-content:flex-start}
   .features{grid-template-columns:1fr}
