@@ -217,3 +217,7 @@ footer a:hover{color:var(--ink)}
 #toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:#17313f;color:#fff;padding:12px 18px;border-radius:14px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;max-width:calc(100% - 32px);text-align:center;z-index:50}
 #toast.show{opacity:1;transform:translate(-50%,0)}
 #toast.error{background:#b3261e}
+
+/* Vídeo de presentación (YouTube) */
+.video{position:relative;width:100%;max-width:960px;aspect-ratio:16/9;border-radius:var(--radius);overflow:hidden;background:#0d131b;box-shadow:var(--shadow);border:1px solid var(--line)}
+.video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
