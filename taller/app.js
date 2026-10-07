@@ -21,6 +21,7 @@ let roles = {};            // vehicle_id -> role
 let vehicles = [];         // filas de public.vehicles
 let jobs = [];             // órdenes del taller
 let leads = [];            // solicitudes de presupuesto llegadas desde la app
+let agendaStart = null;    // lunes de la semana que se enseña en la agenda
 let parts = [];            // biblioteca de piezas
 let suppliers = [];        // proveedores
 let catalogNames = {};     // catalog_id -> nombre
@@ -278,10 +279,11 @@ for (const b of document.querySelectorAll('.tabs button')) b.onclick = () => set
 function setTab(t) {
   tab = t;
   for (const b of document.querySelectorAll('.tabs button')) b.classList.toggle('on', b.dataset.tab === t);
-  for (const id of ['tab-jobs', 'tab-leads', 'tab-cars', 'tab-parts', 'tab-suppliers', 'tab-settings', 'job', 'vehicle']) show(id, false);
+  for (const id of ['tab-jobs', 'tab-leads', 'tab-agenda', 'tab-cars', 'tab-parts', 'tab-suppliers', 'tab-settings', 'job', 'vehicle']) show(id, false);
   show('tab-' + t);
   if (t === 'jobs') renderBoard();
   if (t === 'leads') renderLeads();
+  if (t === 'agenda') renderAgenda();
   if (t === 'cars') renderGrid();
   if (t === 'parts') renderParts();
   if (t === 'suppliers') renderSuppliers();
@@ -457,6 +459,7 @@ async function loadJobs() {
   if (error) { console.warn(error); return; }
   jobs = data || [];
   if (tab === 'jobs' && !job) renderBoard();
+  if (tab === 'agenda') renderAgenda();
   if (job) {
     const fresh = jobs.find((j) => j.id === job.id);
     // Si el cliente decidió mientras estaba abierta, refresca estado y botones.
@@ -539,6 +542,7 @@ async function loadLeads() {
   b.textContent = n;
   b.classList.toggle('hidden', n === 0);
   if (tab === 'leads') renderLeads();
+  if (tab === 'agenda') renderAgenda();
 }
 
 function leadCard(l) {
@@ -612,6 +616,55 @@ async function convertLead(l) {
   if (error) console.warn(error);
   await loadLeads();
 }
+
+// ------------------------------------------------------------------ agenda
+const monday = (d) => { const x = new Date(d); x.setHours(0, 0, 0, 0); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; };
+const sameDay = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+
+function renderAgenda() {
+  agendaStart ||= monday(new Date());
+  const end = new Date(agendaStart); end.setDate(end.getDate() + 6);
+  $('agTitle').textContent = `Semana del ${fmtDate(agendaStart.toISOString())} al ${fmtDate(end.toISOString())}`;
+  const today = new Date();
+  // Citas: solicitudes aceptadas o convertidas en orden, con hora.
+  const items = [];
+  for (const l of leads) {
+    if (!l.appointment_at || !['accepted', 'converted'].includes(l.status)) continue;
+    const j = l.job_id ? jobs.find((x) => x.id === l.job_id) : null;
+    if (j && ['delivered', 'cancelled'].includes(j.status)) continue;
+    const v = l.vehicle || {};
+    items.push({ at: new Date(l.appointment_at), kind: 'cita', title: v.name || 'Vehículo', sub: `${esc(l.customer_name || 'Cliente de Garaje')}${j ? ' · OR ' + j.number : ' · pendiente de abrir orden'}`, job: j, lead: l });
+  }
+  // Entregas previstas de las órdenes abiertas.
+  for (const j of jobs) {
+    if (!j.promised_at || ['delivered', 'cancelled'].includes(j.status)) continue;
+    const v = vehicleOf(j); const s = v ? summary(v) : { name: 'Coche' };
+    items.push({ at: new Date(j.promised_at + 'T18:00:00'), kind: 'entrega', title: s.name, sub: `Entrega prevista · OR ${j.number} · ${STATUS[j.status]}`, job: j });
+  }
+  const w = $('agWeek');
+  w.innerHTML = '';
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(agendaStart); d.setDate(d.getDate() + i);
+    const col = document.createElement('div');
+    col.className = 'day' + (sameDay(d, today) ? ' today' : d < today && !sameDay(d, today) ? ' past' : '');
+    col.innerHTML = `<h4>${DAYS[i]}<b>${d.getDate()}</b></h4>`;
+    const list = items.filter((it) => sameDay(it.at, d)).sort((a, b) => a.at - b.at);
+    if (list.length === 0) col.innerHTML += '<p class="muted" style="font-size:12px;margin:0 4px">—</p>';
+    for (const it of list) {
+      const el = document.createElement('div');
+      el.className = 'appt' + (it.kind === 'entrega' ? ' delivery' : '');
+      const hour = it.kind === 'cita' ? it.at.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : 'Entrega';
+      el.innerHTML = `<small>${hour}</small><b>${esc(it.title)}</b><small>${it.sub}</small>`;
+      el.onclick = () => { if (it.job) openJob(it.job); else setTab('leads'); };
+      col.appendChild(el);
+    }
+    w.appendChild(col);
+  }
+}
+$('agPrev').onclick = () => { agendaStart = monday(agendaStart || new Date()); agendaStart.setDate(agendaStart.getDate() - 7); renderAgenda(); };
+$('agNext').onclick = () => { agendaStart = monday(agendaStart || new Date()); agendaStart.setDate(agendaStart.getDate() + 7); renderAgenda(); };
+$('agToday').onclick = () => { agendaStart = monday(new Date()); renderAgenda(); };
 
 async function closeLead(l) {
   if (!confirm('¿Cerrar esta solicitud? El cliente dejará de verla como pendiente.')) return;

@@ -19,6 +19,7 @@
 <nav id="tabs" class="tabs hidden no-print">
   <button data-tab="jobs" class="on">Órdenes</button>
   <button data-tab="leads">Solicitudes<span class="badge workshop hidden" id="leadsBadge"></span></button>
+  <button data-tab="agenda">Agenda</button>
   <button data-tab="cars">Coches</button>
   <button data-tab="parts">Piezas</button>
   <button data-tab="suppliers">Proveedores</button>
@@ -73,6 +74,16 @@
   </div>
   <div id="leadsList"></div>
   <details class="card" style="margin-top:16px"><summary>Cerradas</summary><div id="leadsDone" style="margin-top:10px"></div></details>
+</section>
+
+<!-- AGENDA: citas aceptadas desde la app y entregas previstas -->
+<section id="tab-agenda" class="tab hidden no-print">
+  <div class="top" style="margin-bottom:14px">
+    <div><h2 style="margin:0">Agenda</h2><p class="sub" style="margin:2px 0 0">Citas aceptadas por los clientes desde la app y entregas previstas de las órdenes. El cliente recibe un recordatorio el día antes.</p></div>
+    <div class="actions"><button class="btn ghost small" id="agPrev">‹ Semana anterior</button><button class="btn ghost small" id="agToday">Hoy</button><button class="btn ghost small" id="agNext">Semana siguiente ›</button></div>
+  </div>
+  <h3 id="agTitle" style="margin:0 0 10px"></h3>
+  <div class="week" id="agWeek"></div>
 </section>
 
 <!-- UNA ORDEN -->
