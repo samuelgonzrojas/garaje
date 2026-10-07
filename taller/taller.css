@@ -128,6 +128,6 @@ dialog::backdrop{background:rgba(10,16,24,.45)}
 label.chk{display:inline-flex;align-items:center;gap:6px;font-weight:500;margin:4px 14px 8px 0;cursor:pointer}
 label.chk input{width:auto;margin:0}
 .lead .actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
-.status.sent{background:#F2A51633;color:#9a6400}
+.status.sent,.status.reschedule{background:#F2A51633;color:#9a6400}
 .status.accepted{background:#2EBD6B33;color:#1b7a44}
 .status.quoted,.status.converted{background:var(--line)}

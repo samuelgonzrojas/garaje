@@ -47,8 +47,8 @@ const STATUS = {
   rejected: 'Presupuesto rechazado', in_progress: 'En reparación', waiting_parts: 'Esperando piezas',
   ready: 'Listo para recoger', delivered: 'Entregado', cancelled: 'Cancelado',
 };
-const LEAD_STATUS = { sent: 'Nueva', quoted: 'Respondida', accepted: 'Aceptada', declined: 'Rechazada', converted: 'Orden abierta', closed: 'Cerrada' };
-const LEAD_OPEN = ['sent', 'quoted', 'accepted'];
+const LEAD_STATUS = { sent: 'Nueva', quoted: 'Respondida', reschedule: 'Pide otra hora', accepted: 'Aceptada', declined: 'Rechazada', converted: 'Orden abierta', closed: 'Cerrada' };
+const LEAD_OPEN = ['sent', 'quoted', 'reschedule', 'accepted'];
 const COLUMNS = [
   ['Entrada', ['received', 'diagnosis']],
   ['Esperando al cliente', ['quote_sent', 'rejected']],
@@ -554,13 +554,14 @@ function leadCard(l) {
     ${l.preferred ? `<p class="muted" style="margin:6px 0 0">Le viene bien: ${esc(l.preferred)}</p>` : ''}
     <p class="muted" style="margin:6px 0 0">${esc(l.customer_name || 'Cliente de Garaje')}${l.customer_phone ? ` · <a href="tel:${esc(l.customer_phone)}">${esc(l.customer_phone)}</a>` : ''}</p>
     ${l.quote_amount != null ? `<p style="margin:6px 0 0"><b>Tu respuesta:</b> ${fmtEur(num(l.quote_amount))}${l.appointment_at ? ' · cita ' + fmtTime(l.appointment_at) : ''}${l.quote_text ? '<br>' + esc(l.quote_text) : ''}</p>` : ''}
+    ${l.status === 'reschedule' ? `<p style="margin:6px 0 0"><b>Pide otra hora${l.client_preferred_at ? ': propone ' + fmtTime(l.client_preferred_at) : ''}</b></p>` : ''}
     ${l.decision_note ? `<p class="muted" style="margin:6px 0 0">Nota del cliente: ${esc(l.decision_note)}</p>` : ''}`;
   const acts = el.querySelector('.actions');
   const btn = (label, fn, cls = 'btn small') => { const b = document.createElement('button'); b.className = cls; b.textContent = label; b.onclick = fn; acts.appendChild(b); };
-  if (l.status === 'sent' || l.status === 'quoted') btn(l.status === 'sent' ? 'Responder' : 'Cambiar respuesta', () => respondLead(l));
+  if (l.status === 'sent' || l.status === 'quoted' || l.status === 'reschedule') btn(l.status === 'sent' ? 'Responder' : l.status === 'reschedule' ? 'Proponer cita nueva' : 'Cambiar respuesta', () => respondLead(l));
   if (l.status === 'accepted') btn('Abrir orden', () => convertLead(l));
   if (l.status === 'converted' && l.job_id) btn('Ver orden', () => { const j = jobs.find((x) => x.id === l.job_id); if (j) openJob(j); }, 'btn ghost small');
-  if (['sent', 'quoted', 'accepted', 'declined'].includes(l.status)) btn('Cerrar', () => closeLead(l), 'btn ghost small');
+  if (['sent', 'quoted', 'reschedule', 'accepted', 'declined'].includes(l.status)) btn('Cerrar', () => closeLead(l), 'btn ghost small');
   return el;
 }
 
@@ -580,12 +581,12 @@ function renderLeads() {
 }
 
 async function respondLead(l) {
-  const def = l.appointment_at ? new Date(l.appointment_at) : null;
+  const def = l.status === 'reschedule' && l.client_preferred_at ? new Date(l.client_preferred_at) : l.appointment_at ? new Date(l.appointment_at) : null;
   const local = def ? new Date(def.getTime() - def.getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '';
   const r = await dialog(`<h3>Responder a ${esc(l.customer_name || 'el cliente')}</h3>
     <label>Precio orientativo, IVA incluido (€)</label><input name="amount" inputmode="decimal" value="${l.quote_amount ?? ''}" required>
     <label>Qué incluye y comentarios</label><textarea name="text" rows="3">${esc(l.quote_text ?? '')}</textarea>
-    <label>Propón una cita (opcional)</label><input type="datetime-local" name="when" value="${local}">
+    <label>${l.status === 'reschedule' ? 'Cita nueva (el cliente propone esta hora; cámbiala si no te cuadra)' : 'Propón una cita (opcional)'}</label><input type="datetime-local" name="when" value="${local}">
     <p class="muted" style="font-size:13px">El cliente lo recibe en su móvil y puede aceptarlo. Al aceptar, tendrás acceso a su vehículo para abrir la orden.</p>`,
     'Enviar respuesta', (fd) => fd);
   if (!r) return;
