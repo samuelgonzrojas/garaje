@@ -235,6 +235,16 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 const sb = createClient('https://pzgqgligxmwnwvozfwcl.supabase.co', 'sb_publishable_zPxM3Ul4VYkudB1D_lhUZw_lUy6K52g');
 const form = document.getElementById('iosForm'), msg = document.getElementById('iosMsg'), input = document.getElementById('iosEmail');
+// Aviso flotante abajo, visible unos segundos (también en móvil, donde el texto bajo el formulario queda fuera de la vista).
+function toast(text, error = false) {
+  let el = document.getElementById('toast');
+  if (!el) { el = document.createElement('div'); el.id = 'toast'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
+  el.textContent = text;
+  el.classList.toggle('error', error);
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 4500);
+}
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   const email = input.value.trim();
@@ -242,8 +252,10 @@ form.addEventListener('submit', async (e) => {
   form.querySelector('button').disabled = true;
   const { data, error } = await sb.rpc('join_ios_waitlist', { p_email: email, p_source: 'web' });
   form.querySelector('button').disabled = false;
-  if (error) { msg.textContent = 'No se pudo guardar. Prueba otra vez en un momento.'; return; }
-  msg.textContent = data === 'ya' ? 'Ya estabas apuntado: te avisaremos.' : 'Apuntado. Te avisamos cuando Garaje esté para iPhone.';
+  if (error) { msg.textContent = 'No se pudo guardar. Prueba otra vez en un momento.'; toast('No se pudo guardar. Prueba otra vez en un momento.', true); return; }
+  const text = data === 'ya' ? 'Ya estabas apuntado: te avisaremos.' : '✓ Apuntado. Te avisamos cuando Garaje esté para iPhone.';
+  msg.textContent = text;
+  toast(text);
   input.value = '';
 });
 </script>
