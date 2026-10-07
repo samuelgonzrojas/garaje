@@ -44,6 +44,15 @@ nav a:hover{color:var(--ink)}
 .btn.play:hover{box-shadow:0 8px 20px rgba(0,0,0,.3)}
 .btn.play small{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;opacity:.85}
 .btn.play svg.gp{width:26px;height:26px}
+.btn.play svg.ap{width:24px;height:24px}
+.btn.play.soon{background:#3a3f47;color:#fff;cursor:pointer;position:relative}
+.btn.play.soon:hover{box-shadow:0 8px 20px rgba(0,0,0,.25)}
+.btn.play.soon::after{content:"pronto";position:absolute;top:-9px;right:-8px;background:var(--amber);color:#17313f;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 7px;border-radius:999px}
+.ios-head{display:flex;gap:22px;align-items:center;justify-content:space-between}
+.ios-badge{flex:0 0 auto;width:112px;height:112px;border-radius:28px;background:#111;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;box-shadow:0 14px 30px rgba(0,0,0,.25)}
+.ios-badge svg{width:40px;height:40px}
+.ios-badge span{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--amber)}
+@media (max-width:640px){.ios-head{flex-direction:column-reverse;align-items:flex-start}.ios-badge{width:96px;height:96px;border-radius:24px}.ios-badge svg{width:30px;height:30px}.ios-badge span{font-size:9px;letter-spacing:.04em}}
 
 /* Tarjetas y piezas comunes */
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow)}
