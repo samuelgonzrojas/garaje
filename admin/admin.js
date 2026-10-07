@@ -31,16 +31,24 @@ function leave() { show('login'); show('main', false); show('nav', false); }
 async function enter() {
   show('login', false); show('main'); show('nav');
   $('who').textContent = session.user.email;
-  const [fees, workshops, leads] = await Promise.all([sb.rpc('admin_lead_fees'), sb.rpc('admin_workshops'), sb.rpc('admin_leads')]);
+  const [fees, workshops, leads, ios] = await Promise.all([sb.rpc('admin_lead_fees'), sb.rpc('admin_workshops'), sb.rpc('admin_leads'), sb.rpc('admin_ios_waitlist')]);
   const err = fees.error || workshops.error || leads.error;
   if (err) { $('kpis').innerHTML = `<div class="kpi"><b>—</b><small>${esc(err.message)}</small></div>`; return; }
   if ((fees.data || []).length === 0 && (workshops.data || []).length === 0) {
     $('kpis').innerHTML = '<div class="kpi"><b>—</b><small>Esta cuenta no es administradora de Garaje, o aún no hay talleres.</small></div>';
   }
+  window.__ios = ios.data || [];
   renderKpis(fees.data || [], leads.data || []);
   renderByMonth(fees.data || []);
   renderWorkshops(workshops.data || []);
   renderLeads(leads.data || []);
+  renderIos(ios.data || []);
+}
+
+function renderIos(rows) {
+  const tb = $('ios').querySelector('tbody');
+  tb.innerHTML = rows.length ? '' : '<tr><td colspan="2" class="muted">Nadie todavía.</td></tr>';
+  for (const r of rows) tb.innerHTML += `<tr><td>${esc(r.email)}</td><td>${fmtTime(r.created_at)}</td></tr>`;
 }
 
 function renderKpis(fees, leads) {
@@ -53,6 +61,7 @@ function renderKpis(fees, leads) {
     [sum(fees, 'leads'), 'clientes enviados en total'],
     [eur(sum(fees, 'fees')), 'comisión total'],
     [leads.filter((l) => ['accepted', 'converted'].includes(l.status)).length, 'presupuestos aceptados'],
+    [(window.__ios || []).length, 'en lista de espera iPhone'],
   ].map(([v, t]) => `<div class="kpi"><b>${v}</b><small>${t}</small></div>`).join('');
 }
 

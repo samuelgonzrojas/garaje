@@ -200,3 +200,8 @@ footer a:hover{color:var(--ink)}
   .section{padding:40px 0}
   .float{display:none}
 }
+
+/* Lista de espera iPhone */
+.ios-form{display:flex;gap:10px;flex-wrap:wrap}
+.ios-form input{flex:1;min-width:220px;font:inherit;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.ios-form input:focus{outline:2px solid var(--brand);outline-offset:1px}

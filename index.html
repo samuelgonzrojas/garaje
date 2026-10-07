@@ -197,6 +197,20 @@
   <p style="margin-top:22px"><a class="btn play" href="https://play.google.com/store/apps/details?id=com.samuel.mantenimiento"><svg class="gp" viewBox="0 0 24 24" aria-hidden="true"><path fill="#00A0FF" d="M3 2l10 10L3 22z"/><path fill="#00F076" d="M3 2l13.5 7.5L13 12z"/><path fill="#FF3A44" d="M3 22l10-10 3.5 2.5z"/><path fill="#FFD500" d="M16.5 9.5L21 12l-4.5 2.5L13 12z"/></svg><span><small>Consíguelo en</small>Google Play</span></a></p>
 </section>
 
+<!-- IPHONE: lista de espera -->
+<section id="iphone" class="section" style="padding-top:0">
+  <div class="card reveal" style="padding:28px;max-width:720px">
+    <span class="eyebrow">¿Tienes iPhone?</span>
+    <h2 style="margin:8px 0 6px">Todavía no, pero te avisamos.</h2>
+    <p style="margin:0 0 14px">Garaje es solo para Android por ahora. Déjanos tu correo y te escribimos el día que salga para iPhone. Nada más: ni listas ni publicidad.</p>
+    <form id="iosForm" class="ios-form" novalidate>
+      <input id="iosEmail" type="email" autocomplete="email" placeholder="tu@correo.com" required>
+      <button class="btn" type="submit">Avisadme</button>
+    </form>
+    <p id="iosMsg" class="muted" style="margin:10px 0 0;font-size:14px"></p>
+  </div>
+</section>
+
 <!-- PREGUNTAS -->
 <section id="preguntas" class="faq section" style="padding-top:0">
   <div class="section-head reveal"><span class="eyebrow">Preguntas</span><h2>Lo que suele preguntar la gente.</h2></div>
@@ -216,6 +230,23 @@
   <div style="margin-top:10px">© 2026 Garaje · Hecho en España</div>
 </footer>
 </div>
+<script type="module">
+// Lista de espera para iPhone: un correo, sin cuenta (RPC join_ios_waitlist).
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const sb = createClient('https://pzgqgligxmwnwvozfwcl.supabase.co', 'sb_publishable_zPxM3Ul4VYkudB1D_lhUZw_lUy6K52g');
+const form = document.getElementById('iosForm'), msg = document.getElementById('iosMsg'), input = document.getElementById('iosEmail');
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = input.value.trim();
+  if (!input.checkValidity() || !email) { msg.textContent = 'Escribe un correo válido.'; return; }
+  form.querySelector('button').disabled = true;
+  const { data, error } = await sb.rpc('join_ios_waitlist', { p_email: email, p_source: 'web' });
+  form.querySelector('button').disabled = false;
+  if (error) { msg.textContent = 'No se pudo guardar. Prueba otra vez en un momento.'; return; }
+  msg.textContent = data === 'ya' ? 'Ya estabas apuntado: te avisaremos.' : 'Apuntado. Te avisamos cuando Garaje esté para iPhone.';
+  input.value = '';
+});
+</script>
 <script>
 // Aparición suave al hacer scroll (sin JS, todo se ve igual).
 (function(){
