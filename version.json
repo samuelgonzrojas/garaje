@@ -1,6 +1,6 @@
 {
-  "version": "1.0.21",
-  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.21/garaje-1.0.21-arm64.apk",
-  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.21/garaje-1.0.21.apk",
-  "notes": "Avisos al instante de tu taller (cambio de estado y mensajes), también con la app cerrada. Al tocarlos se abre la orden."
+  "version": "1.0.23",
+  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.23/garaje-1.0.23-arm64.apk",
+  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.23/garaje-1.0.23.apk",
+  "notes": "Cada vehículo tiene su propio Bluetooth para los viajes: el del coche y el del casco de la moto, y los km se suman al vehículo correcto."
 }
