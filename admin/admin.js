@@ -31,7 +31,7 @@ function leave() { show('login'); show('main', false); show('nav', false); }
 async function enter() {
   show('login', false); show('main'); show('nav');
   $('who').textContent = session.user.email;
-  const [fees, workshops, leads, ios] = await Promise.all([sb.rpc('admin_lead_fees'), sb.rpc('admin_workshops'), sb.rpc('admin_leads'), sb.rpc('admin_ios_waitlist')]);
+  const [fees, workshops, leads, ios, crashes] = await Promise.all([sb.rpc('admin_lead_fees'), sb.rpc('admin_workshops'), sb.rpc('admin_leads'), sb.rpc('admin_ios_waitlist'), sb.rpc('admin_crash_reports')]);
   const err = fees.error || workshops.error || leads.error;
   if (err) { $('kpis').innerHTML = `<div class="kpi"><b>—</b><small>${esc(err.message)}</small></div>`; return; }
   if ((fees.data || []).length === 0 && (workshops.data || []).length === 0) {
@@ -43,6 +43,25 @@ async function enter() {
   renderWorkshops(workshops.data || []);
   renderLeads(leads.data || []);
   renderIos(ios.data || []);
+  renderCrashes(crashes.data || [], crashes.error);
+}
+
+function renderCrashes(rows, error) {
+  const tb = $('crashes').querySelector('tbody');
+  if (error) { tb.innerHTML = `<tr><td colspan="4" class="muted">${esc(error.message)}</td></tr>`; return; }
+  tb.innerHTML = rows.length ? '' : '<tr><td colspan="4" class="muted">Ningún fallo en 90 días.</td></tr>';
+  for (const r of rows) {
+    const tr = document.createElement('tr');
+    tr.style.cursor = 'pointer';
+    tr.innerHTML = `<td>${fmtTime(r.last_at)}</td><td class="num">${r.times}</td><td>${esc(r.app_versions)}</td><td>${esc(String(r.message || '').split('\n')[0].slice(0, 120))}</td>`;
+    tr.onclick = () => {
+      const d = $('crashDetail');
+      d.textContent = `${r.kind} · ${r.os || ''}\n\n${r.message}\n\n${r.stack || ''}\n\n--- últimas acciones ---\n${r.breadcrumbs || ''}`;
+      d.classList.remove('hidden');
+      d.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    };
+    tb.appendChild(tr);
+  }
 }
 
 function renderIos(rows) {

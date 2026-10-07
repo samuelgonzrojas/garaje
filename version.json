@@ -1,6 +1,6 @@
 {
-  "version": "1.0.26",
-  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.26/garaje-1.0.26-arm64.apk",
-  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.26/garaje-1.0.26.apk",
-  "notes": "Si no te cuadra la hora del taller, propón otra desde el presupuesto, también con la cita ya aceptada. Al aceptar, añade la cita al calendario con un toque."
+  "version": "1.0.27",
+  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.27/garaje-1.0.27-arm64.apk",
+  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.27/garaje-1.0.27.apk",
+  "notes": "Garaje se adapta a las tablets: menú lateral y la pantalla de inicio a dos columnas."
 }
