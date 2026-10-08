@@ -56,7 +56,8 @@
     "gearbox": "Caja manual: 75W-80 GL-4 (de por vida según BMW; muchos la cambian a 100.000 km)",
     "diff": "Diferencial: 75W-90 GL-5, ~1,2 l",
     "battery": "80-90 Ah AGM si lleva start-stop (hay que registrarla)"
-   }
+   },
+   "typical_l100": 5.6
   },
   {
    "id": "bmw_n47_f2x",
@@ -112,7 +113,8 @@
     "coolant": "BMW azul, al 50 %",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "battery": "AGM 80-90 Ah con registro"
-   }
+   },
+   "typical_l100": 5.3
   },
   {
    "id": "bmw_b47",
@@ -163,7 +165,8 @@
     "coolant": "BMW azul o verde (según año), al 50 %",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "battery": "AGM con registro"
-   }
+   },
+   "typical_l100": 5.2
   },
   {
    "id": "bmw_n13",
@@ -209,7 +212,8 @@
     "coolant": "BMW azul",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "NGK SILZKBR8D8S (iridio), cada 60.000 km"
-   }
+   },
+   "typical_l100": 6.5
   },
   {
    "id": "vag_19tdi_pd",
@@ -280,7 +284,8 @@
     "coolant": "G12 / G12+ (rosa), al 50 %",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "timing": "Kit de distribución con bomba de agua y rodillos; polea del cigüeñal también si tiene km"
-   }
+   },
+   "typical_l100": 5.6
   },
   {
    "id": "vag_tdi_cr",
@@ -353,7 +358,8 @@
     "coolant": "G12++ / G13 (lila), al 50 %",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "timing": "Correa: 210.000 km según VW, 120.000 recomendado; con bomba de agua"
-   }
+   },
+   "typical_l100": 5.3
   },
   {
    "id": "vag_12_14_tsi_ea111",
@@ -411,7 +417,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "NGK PZFR6R / ZKR7AI-8 según motor, cada 60.000 km",
     "timing": "Cadena: vigilar el tensor (ruido en frío)"
-   }
+   },
+   "typical_l100": 6.6
   },
   {
    "id": "vag_tsi_ea211",
@@ -478,7 +485,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Cada 60.000 km",
     "timing": "Correa dentada: VW no fija cambio; 120.000 km o 8 años recomendado"
-   }
+   },
+   "typical_l100": 6.2
   },
   {
    "id": "vag_20_tfsi_ea888",
@@ -540,7 +548,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Cada 60.000 km (NGK PFR7S8EG o equivalente)",
     "timing": "Cadena: tensor rediseñado a partir de 2012"
-   }
+   },
+   "typical_l100": 8.0
   },
   {
    "id": "psa_16_hdi_dv6",
@@ -624,7 +633,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "timing": "Correa con bomba de agua y rodillos",
     "fap": "Aditivo Eolys / Powerflex: depósito cada ~120.000 km"
-   }
+   },
+   "typical_l100": 5.0
   },
   {
    "id": "psa_12_puretech",
@@ -700,7 +710,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Cada 40.000 km",
     "timing": "Correa en baño de aceite: PSA la fija a 100.000 km/6 años; revisarla a los 60.000 (se deshilacha)"
-   }
+   },
+   "typical_l100": 6.2
   },
   {
    "id": "psa_15_bluehdi_dv5",
@@ -771,7 +782,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "adblue": "AdBlue: depósito de 15-17 l, unos 1.000 km por litro",
     "timing": "Correa con bomba de agua"
-   }
+   },
+   "typical_l100": 4.7
   },
   {
    "id": "renault_15_dci_k9k",
@@ -851,7 +863,8 @@
     "coolant": "Glaceol RX Type D (amarillo), al 50 %",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "timing": "Correa con bomba de agua y correa de accesorios; 120.000 km / 5 años (60.000 en los primeros K9K)"
-   }
+   },
+   "typical_l100": 4.9
   },
   {
    "id": "renault_16_dci_r9m",
@@ -915,7 +928,8 @@
     "coolant": "Glaceol RX Type D",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "timing": "Cadena"
-   }
+   },
+   "typical_l100": 5.4
   },
   {
    "id": "renault_12_tce_h5ft",
@@ -977,7 +991,8 @@
     "plugs": "Cada 60.000 km",
     "timing": "Cadena",
     "notes": "Consumo de aceite conocido: comprobar nivel cada 1.000 km"
-   }
+   },
+   "typical_l100": 6.8
   },
   {
    "id": "renault_09_tce_h4bt",
@@ -1029,7 +1044,8 @@
     "coolant": "Glaceol RX Type D",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "timing": "Correa con bomba de agua; 120.000 km / 6 años"
-   }
+   },
+   "typical_l100": 6.0
   },
   {
    "id": "toyota_hybrid",
@@ -1098,7 +1114,8 @@
     "plugs": "Iridio, cada 120.000 km",
     "battery": "12 V AGM pequeña (auxiliar); la de tracción no se mantiene",
     "timing": "Cadena"
-   }
+   },
+   "typical_l100": 4.8
   },
   {
    "id": "ford_10_ecoboost",
@@ -1153,7 +1170,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Cada 60.000 km",
     "timing": "Correa en baño de aceite (240.000 km / 10 años según Ford; vigilar deshilachado) y correa de bomba de aceite"
-   }
+   },
+   "typical_l100": 6.4
   },
   {
    "id": "ford_15_tdci",
@@ -1204,7 +1222,8 @@
     "coolant": "Ford WSS-M97B44-D",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "timing": "Correa con bomba de agua"
-   }
+   },
+   "typical_l100": 4.9
   },
   {
    "id": "fiat_opel_13_multijet",
@@ -1271,7 +1290,8 @@
     "coolant": "Paraflu UP (rojo) / Opel dexcool",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "timing": "Cadena: cambiar tensor y cadena si suena (sobre 150.000 km)"
-   }
+   },
+   "typical_l100": 4.8
   },
   {
    "id": "opel_17_cdti",
@@ -1321,7 +1341,8 @@
     "coolant": "Opel / GM dexcool (naranja)",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "timing": "Correa con bomba de agua; 150.000 km / 10 años"
-   }
+   },
+   "typical_l100": 5.4
   },
   {
    "id": "opel_12_14_ecotec",
@@ -1367,7 +1388,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Cada 60.000 km",
     "timing": "Twinport: correa 90.000 km / 10 años · 1.4 Turbo: cadena"
-   }
+   },
+   "typical_l100": 6.9
   },
   {
    "id": "hyundai_kia_16_crdi_u2",
@@ -1426,7 +1448,8 @@
     "coolant": "Hyundai / Kia (verde), al 50 %",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "timing": "Cadena"
-   }
+   },
+   "typical_l100": 5.3
   },
   {
    "id": "hyundai_kia_gdi_tgdi",
@@ -1484,7 +1507,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Iridio, cada 60.000 km (T-GDi 40.000)",
     "timing": "Cadena"
-   }
+   },
+   "typical_l100": 6.6
   },
   {
    "id": "mercedes_om651",
@@ -1560,7 +1584,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "timing": "Cadena (trasera, cara: vigilar ruido)",
     "adblue": "AdBlue en versiones Euro 6"
-   }
+   },
+   "typical_l100": 5.9
   },
   {
    "id": "fiat_12_fire",
@@ -1615,7 +1640,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Cada 60.000 km",
     "timing": "Correa: 120.000 km / 5 años (60.000 si uso duro)"
-   }
+   },
+   "typical_l100": 6.5
   },
   {
    "id": "vag_tdi_10_14_ea288_small",
@@ -1674,7 +1700,8 @@
     "coolant": "G13",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "timing": "Correa con bomba de agua"
-   }
+   },
+   "typical_l100": 4.6
   },
   {
    "id": "nissan_16_dig_t_mr16ddt",
@@ -1717,7 +1744,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Cada 60.000 km",
     "timing": "Cadena"
-   }
+   },
+   "typical_l100": 7.5
   },
   {
    "id": "vag_20tdi_pd",
@@ -1782,7 +1810,8 @@
     "coolant": "G12+ / G12++",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "timing": "Correa con bomba de agua y rodillos"
-   }
+   },
+   "typical_l100": 6.2
   },
   {
    "id": "vag_30tdi_v6",
@@ -1842,7 +1871,8 @@
     "coolant": "G12++ / G13",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "timing": "Cadenas traseras (motor fuera para cambiarlas): vigilar ruido"
-   }
+   },
+   "typical_l100": 7.5
   },
   {
    "id": "bmw_m47_e46_e87",
@@ -1897,7 +1927,8 @@
     "coolant": "BMW azul",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "timing": "Cadena"
-   }
+   },
+   "typical_l100": 6.0
   },
   {
    "id": "bmw_m57",
@@ -1960,7 +1991,8 @@
     "coolant": "BMW azul",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "timing": "Cadena"
-   }
+   },
+   "typical_l100": 7.6
   },
   {
    "id": "mercedes_om642",
@@ -2026,7 +2058,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "timing": "Cadena",
     "notes": "Fugas de aceite por el enfriador (junta) muy típicas"
-   }
+   },
+   "typical_l100": 8.0
   },
   {
    "id": "mercedes_om640_om646",
@@ -2093,7 +2126,8 @@
     "coolant": "MB 325.0",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "timing": "Cadena"
-   }
+   },
+   "typical_l100": 6.4
   },
   {
    "id": "psa_ford_20_hdi_tdci_dw10",
@@ -2184,7 +2218,8 @@
     "coolant": "PSA G33 / Ford naranja",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "timing": "Correa con bomba de agua"
-   }
+   },
+   "typical_l100": 6.2
   },
   {
    "id": "psa_14_hdi_dv4",
@@ -2248,7 +2283,8 @@
     "coolant": "PSA G33",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "timing": "Correa con bomba de agua"
-   }
+   },
+   "typical_l100": 4.6
   },
   {
    "id": "renault_19_dci_f9q",
@@ -2313,7 +2349,8 @@
     "coolant": "Glaceol RX Type D",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "timing": "Correa con bomba de agua"
-   }
+   },
+   "typical_l100": 6.0
   },
   {
    "id": "renault_20_dci_m9r",
@@ -2370,7 +2407,8 @@
     "coolant": "Glaceol RX Type D",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "timing": "Cadena"
-   }
+   },
+   "typical_l100": 6.6
   },
   {
    "id": "toyota_14_d4d",
@@ -2419,7 +2457,8 @@
     "coolant": "Toyota Super Long Life (rosa)",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "timing": "Cadena"
-   }
+   },
+   "typical_l100": 4.9
   },
   {
    "id": "toyota_20_22_d4d",
@@ -2469,7 +2508,8 @@
     "coolant": "Toyota SLLC (rosa)",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "timing": "Cadena"
-   }
+   },
+   "typical_l100": 6.3
   },
   {
    "id": "honda_22_ictdi_idtec",
@@ -2515,7 +2555,8 @@
     "coolant": "Honda Type 2 (azul)",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "timing": "Cadena"
-   }
+   },
+   "typical_l100": 5.9
   },
   {
    "id": "hyundai_kia_20_crdi_d4ha",
@@ -2568,7 +2609,8 @@
     "coolant": "Hyundai / Kia (verde)",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "timing": "Cadena"
-   }
+   },
+   "typical_l100": 6.4
   },
   {
    "id": "hyundai_kia_20_crdi_d4ea",
@@ -2621,7 +2663,8 @@
     "coolant": "Hyundai / Kia (verde)",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "timing": "Correa con bomba de agua"
-   }
+   },
+   "typical_l100": 6.5
   },
   {
    "id": "fiat_16_20_multijet",
@@ -2685,7 +2728,8 @@
     "coolant": "Paraflu UP (rojo)",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "timing": "Correa con bomba de agua"
-   }
+   },
+   "typical_l100": 5.7
   },
   {
    "id": "fiat_opel_19_jtd_cdti",
@@ -2754,7 +2798,8 @@
     "coolant": "Paraflu UP / GM dexcool",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "timing": "Correa con bomba de agua"
-   }
+   },
+   "typical_l100": 6.0
   },
   {
    "id": "opel_16_cdti",
@@ -2808,7 +2853,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "timing": "Correa con bomba de agua",
     "adblue": "AdBlue en Euro 6"
-   }
+   },
+   "typical_l100": 5.1
   },
   {
    "id": "opel_20_cdti_a20dth",
@@ -2860,7 +2906,8 @@
     "coolant": "GM dexcool",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "timing": "Correa con bomba de agua"
-   }
+   },
+   "typical_l100": 6.3
   },
   {
    "id": "mazda_skyactiv_d",
@@ -2909,7 +2956,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "timing": "Cadena",
     "notes": "Nivel de aceite: vigilar que no suba (dilución por regeneraciones)"
-   }
+   },
+   "typical_l100": 5.6
   },
   {
    "id": "volvo_d4204t",
@@ -2963,7 +3011,8 @@
     "coolant": "Volvo (verde-azul)",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "timing": "Correa con bomba de agua"
-   }
+   },
+   "typical_l100": 5.5
   },
   {
    "id": "volvo_d5_5cyl",
@@ -3023,7 +3072,8 @@
     "coolant": "Volvo",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "timing": "Correa con bomba de agua"
-   }
+   },
+   "typical_l100": 7.2
   },
   {
    "id": "vag_16_mpi",
@@ -3086,7 +3136,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Cada 60.000 km",
     "timing": "Correa con bomba de agua"
-   }
+   },
+   "typical_l100": 7.4
   },
   {
    "id": "vag_12_12v_chain",
@@ -3139,7 +3190,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Cada 60.000 km",
     "timing": "Cadena: vigilar tensor (ruido al arrancar)"
-   }
+   },
+   "typical_l100": 6.6
   },
   {
    "id": "vag_14_16v_belt",
@@ -3198,7 +3250,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Cada 60.000 km",
     "timing": "Correa con bomba de agua"
-   }
+   },
+   "typical_l100": 6.9
   },
   {
    "id": "vag_18t_20v",
@@ -3260,7 +3313,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Cada 60.000 km (NGK BKR6EQUP o equivalente)",
     "timing": "Correa con bomba de agua"
-   }
+   },
+   "typical_l100": 8.8
   },
   {
    "id": "psa_mini_16_thp_prince",
@@ -3327,7 +3381,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Cada 40.000-60.000 km",
     "timing": "Cadena: tensor y guías con ruido en frío (\"muerte del diésel\")"
-   }
+   },
+   "typical_l100": 7.6
   },
   {
    "id": "psa_tu_14_16",
@@ -3385,7 +3440,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Cada 60.000 km",
     "timing": "Correa con bomba de agua"
-   }
+   },
+   "typical_l100": 7.0
   },
   {
    "id": "psa_vti_eb_3cyl",
@@ -3443,7 +3499,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Cada 40.000 km",
     "timing": "Correa en baño de aceite: revisar deshilachado"
-   }
+   },
+   "typical_l100": 5.9
   },
   {
    "id": "renault_16_16v_k4m",
@@ -3503,7 +3560,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Cada 60.000 km",
     "timing": "Correa con bomba de agua; 120.000 km / 6 años"
-   }
+   },
+   "typical_l100": 7.6
   },
   {
    "id": "renault_mb_13_tce_h5ht",
@@ -3570,7 +3628,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Cada 60.000 km",
     "timing": "Cadena"
-   }
+   },
+   "typical_l100": 6.6
   },
   {
    "id": "toyota_10_1kr",
@@ -3623,7 +3682,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Iridio, cada 100.000 km",
     "timing": "Cadena"
-   }
+   },
+   "typical_l100": 5.6
   },
   {
    "id": "toyota_13_16_18_vvti",
@@ -3669,7 +3729,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Iridio, cada 100.000 km",
     "timing": "Cadena"
-   }
+   },
+   "typical_l100": 6.8
   },
   {
    "id": "ford_sigma_125_16",
@@ -3726,7 +3787,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Cada 60.000 km",
     "timing": "Correa: 160.000 km / 10 años según Ford; 120.000 recomendado"
-   }
+   },
+   "typical_l100": 6.8
   },
   {
    "id": "ford_15_16_ecoboost",
@@ -3776,7 +3838,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Cada 60.000 km",
     "timing": "Correa con bomba de agua"
-   }
+   },
+   "typical_l100": 7.6
   },
   {
    "id": "hyundai_kia_gamma_mpi",
@@ -3827,7 +3890,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Cada 60.000 km",
     "timing": "Cadena"
-   }
+   },
+   "typical_l100": 7.0
   },
   {
    "id": "honda_ivtec_14_18",
@@ -3871,7 +3935,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Iridio, cada 100.000 km",
     "timing": "Cadena"
-   }
+   },
+   "typical_l100": 6.9
   },
   {
    "id": "mercedes_m271",
@@ -3934,7 +3999,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Cada 60.000 km",
     "timing": "Cadena: estiramiento conocido, vigilar ruido"
-   }
+   },
+   "typical_l100": 8.5
   },
   {
    "id": "mercedes_m272_m273",
@@ -3996,7 +4062,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Cada 100.000 km",
     "timing": "Cadena (piñón del árbol de equilibrado en M272 hasta 2006)"
-   }
+   },
+   "typical_l100": 10.5
   },
   {
    "id": "mercedes_m270_m274",
@@ -4066,7 +4133,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Cada 60.000 km",
     "timing": "Cadena"
-   }
+   },
+   "typical_l100": 7.4
   },
   {
    "id": "bmw_n42_n46",
@@ -4124,7 +4192,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Cada 60.000 km",
     "timing": "Cadena"
-   }
+   },
+   "typical_l100": 8.2
   },
   {
    "id": "bmw_n52_n53",
@@ -4185,7 +4254,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Cada 60.000 km",
     "timing": "Cadena"
-   }
+   },
+   "typical_l100": 9.5
   },
   {
    "id": "bmw_n20_n26",
@@ -4247,7 +4317,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Cada 60.000 km",
     "timing": "Cadena: guías con rotura conocida hasta 2015; vigilar ruido"
-   }
+   },
+   "typical_l100": 8.0
   },
   {
    "id": "fiat_14_tjet_multiair",
@@ -4312,7 +4383,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Cada 60.000 km (MultiAir: 30.000)",
     "timing": "Correa con bomba de agua"
-   }
+   },
+   "typical_l100": 7.2
   },
   {
    "id": "fiat_09_twinair",
@@ -4362,7 +4434,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Cada 60.000 km",
     "timing": "Cadena"
-   }
+   },
+   "typical_l100": 6.0
   },
   {
    "id": "nissan_hr16de",
@@ -4413,7 +4486,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Iridio, cada 100.000 km",
     "timing": "Cadena"
-   }
+   },
+   "typical_l100": 6.9
   },
   {
    "id": "suzuki_boosterjet_dualjet",
@@ -4462,7 +4536,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Cada 40.000 km (Boosterjet)",
     "timing": "Cadena"
-   }
+   },
+   "typical_l100": 5.8
   },
   {
    "id": "hyundai_kia_hybrid_16gdi",
@@ -4522,7 +4597,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Iridio, cada 100.000 km",
     "timing": "Cadena"
-   }
+   },
+   "typical_l100": 5.0
   },
   {
    "id": "mazda_skyactiv_g",
@@ -4567,7 +4643,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Iridio, cada 120.000 km",
     "timing": "Cadena"
-   }
+   },
+   "typical_l100": 6.6
   },
   {
    "id": "yamaha_cp2",
@@ -4623,7 +4700,8 @@
     "plugs": "NGK LMAR8A-9 ×2",
     "drive": "Cadena 525 × 108 eslabones (MT-07 / XSR700); Ténéré 525 × 118",
     "tyres": "120/70 ZR17 · 180/55 ZR17 (MT-07)"
-   }
+   },
+   "typical_l100": 4.3
   },
   {
    "id": "yamaha_cp3",
@@ -4676,7 +4754,8 @@
     "plugs": "NGK CPR9EA-9 ×3",
     "drive": "Cadena 525 × 110",
     "tyres": "120/70 ZR17 · 180/55 ZR17"
-   }
+   },
+   "typical_l100": 5.5
   },
   {
    "id": "yamaha_125_4t",
@@ -4727,7 +4806,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "NGK CR9E / CR9EK según año",
     "drive": "Cadena 428 × 132 (R125 / MT-125)"
-   }
+   },
+   "typical_l100": 2.6
   },
   {
    "id": "yamaha_bluecore_125",
@@ -4779,7 +4859,8 @@
     "plugs": "NGK CPR8EA-9",
     "drive": "Correa del variador y rodillos cada 20.000 km",
     "tyres": "110/70-13 · 130/70-13 (NMAX)"
-   }
+   },
+   "typical_l100": 2.4
   },
   {
    "id": "yamaha_300_scooter",
@@ -4828,7 +4909,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "drive": "Correa del variador y rodillos cada 24.000 km",
     "tyres": "120/70-15 · 140/70-14 (XMAX 300)"
-   }
+   },
+   "typical_l100": 3.3
   },
   {
    "id": "yamaha_tmax",
@@ -4881,7 +4963,8 @@
     "plugs": "NGK CR8E ×2",
     "drive": "Correa del variador (24.000) y correa dentada final (revisar tensión cada 10.000)",
     "tyres": "120/70 R15 · 160/60 R15"
-   }
+   },
+   "typical_l100": 5.0
   },
   {
    "id": "honda_cb500",
@@ -4936,7 +5019,8 @@
     "plugs": "NGK CPR8EA-9 ×2",
     "drive": "Cadena 520 × 112",
     "tyres": "120/70 ZR17 · 160/60 ZR17"
-   }
+   },
+   "typical_l100": 3.8
   },
   {
    "id": "honda_nc_series",
@@ -4993,7 +5077,8 @@
     "plugs": "NGK IFR6G-11K ×2 (iridio)",
     "drive": "Cadena 520 × 114",
     "tyres": "120/70 ZR17 · 160/60 ZR17"
-   }
+   },
+   "typical_l100": 3.5
   },
   {
    "id": "honda_esp_125",
@@ -5053,7 +5138,8 @@
     "plugs": "NGK CPR8EA-9",
     "drive": "Correa del variador y rodillos cada 24.000 km",
     "tyres": "100/80-16 · 120/80-16 (SH125)"
-   }
+   },
+   "typical_l100": 2.3
   },
   {
    "id": "honda_africa_twin",
@@ -5103,7 +5189,8 @@
     "plugs": "Iridio ×4 (SIMR8A9 o según año)",
     "drive": "Cadena 525 × 124",
     "tyres": "90/90-21 · 150/70 R18"
-   }
+   },
+   "typical_l100": 5.2
   },
   {
    "id": "honda_125_4t",
@@ -5155,7 +5242,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "NGK CPR8EA-9",
     "drive": "Cadena 428 × 118-124 según modelo"
-   }
+   },
+   "typical_l100": 2.5
   },
   {
    "id": "honda_cb650",
@@ -5204,7 +5292,8 @@
     "plugs": "NGK CR9EH-9 ×4",
     "drive": "Cadena 525 × 118",
     "tyres": "120/70 ZR17 · 180/55 ZR17"
-   }
+   },
+   "typical_l100": 5.3
   },
   {
    "id": "kawasaki_er6_650",
@@ -5260,7 +5349,8 @@
     "plugs": "NGK CR9EIA-9 ×2 (CR9EK en las primeras)",
     "drive": "Cadena 520 × 114",
     "tyres": "120/70 ZR17 · 160/60 ZR17"
-   }
+   },
+   "typical_l100": 4.6
   },
   {
    "id": "kawasaki_z900_1000",
@@ -5313,7 +5403,8 @@
     "plugs": "NGK CR9EIA-9 ×4",
     "drive": "Cadena 525 × 116",
     "tyres": "120/70 ZR17 · 180/55 ZR17"
-   }
+   },
+   "typical_l100": 6.0
   },
   {
    "id": "kawasaki_300_500",
@@ -5369,7 +5460,8 @@
     "plugs": "Según modelo (CR9EIA-9 / LMAR9G)",
     "drive": "Cadena 520 × 106-112",
     "tyres": "110/70 R17 · 150/60 R17 (Ninja 400)"
-   }
+   },
+   "typical_l100": 3.9
   },
   {
    "id": "bmw_boxer_lc",
@@ -5434,7 +5526,8 @@
     "plugs": "NGK LMAR8D-J ×4 (LC)",
     "drive": "Cardán: aceite 75W-90 GL-5, 180 ml, cada 20.000 km",
     "tyres": "120/70 R19 · 170/60 R17 (GS)"
-   }
+   },
+   "typical_l100": 5.4
   },
   {
    "id": "bmw_f_rotax",
@@ -5494,7 +5587,8 @@
     "plugs": "NGK DCPR8EKC ×2",
     "drive": "Cadena 525 × 116 (F 800 GS 525 × 116)",
     "tyres": "90/90-21 · 150/70 R17 (GS)"
-   }
+   },
+   "typical_l100": 4.4
   },
   {
    "id": "bmw_g310",
@@ -5541,7 +5635,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "drive": "Cadena 520 × 112",
     "tyres": "110/70 R17 · 150/60 R17 (R)"
-   }
+   },
+   "typical_l100": 3.4
   },
   {
    "id": "ktm_lc8c",
@@ -5593,7 +5688,8 @@
     "plugs": "NGK LMAR9AI-10 ×2",
     "drive": "Cadena 520 × 118",
     "tyres": "120/70 ZR17 · 180/55 ZR17 (Duke)"
-   }
+   },
+   "typical_l100": 5.0
   },
   {
    "id": "ktm_125_390",
@@ -5649,7 +5745,8 @@
     "plugs": "NGK LKAR8AI-9 (390)",
     "drive": "Cadena 520 × 118",
     "tyres": "110/70 R17 · 150/60 R17"
-   }
+   },
+   "typical_l100": 3.1
   },
   {
    "id": "ktm_lc4_690",
@@ -5705,7 +5802,8 @@
     "plugs": "Iridio (LKAR8BI-9 o según año)",
     "drive": "Cadena 520 × 116",
     "notes": "Dos filtros de aceite y tamiz: cambiarlos siempre juntos"
-   }
+   },
+   "typical_l100": 4.5
   },
   {
    "id": "ducati_testastretta_11",
@@ -5765,7 +5863,8 @@
     "plugs": "NGK MAR9A-J ×2",
     "drive": "Cadena 525 × 108-116",
     "notes": "Reglaje desmodrómico: solo en taller con galgas; filtro de aceite original recomendado"
-   }
+   },
+   "typical_l100": 5.8
   },
   {
    "id": "triumph_triple_660_765",
@@ -5818,7 +5917,8 @@
     "plugs": "675: NGK CR9EK ×3 · 765: LMAR9A-9 ×3",
     "drive": "Cadena 525 × 118 (675) · 520 (765)",
     "tyres": "120/70 ZR17 · 180/55 ZR17"
-   }
+   },
+   "typical_l100": 5.2
   },
   {
    "id": "suzuki_sv650",
@@ -5871,7 +5971,8 @@
     "plugs": "NGK CR8E ×2 (CR8EK en los primeros)",
     "drive": "Cadena 525 × 112 (SV) · 525 × 118 (V-Strom)",
     "tyres": "120/70 ZR17 · 160/60 ZR17 (SV650)"
-   }
+   },
+   "typical_l100": 4.6
   },
   {
    "id": "suzuki_burgman",
@@ -5920,7 +6021,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "NGK CR7E (400)",
     "drive": "Correa del variador y rodillos cada 20.000 km (400); el 650 cambia aceite del CVT"
-   }
+   },
+   "typical_l100": 3.6
   },
   {
    "id": "kymco_sym_125_300",
@@ -5979,7 +6081,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "NGK CR7E / CR8E según modelo",
     "drive": "Correa del variador y rodillos cada 15-20.000 km"
-   }
+   },
+   "typical_l100": 3.0
   },
   {
    "id": "sym_125_300",
@@ -6036,7 +6139,8 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "NGK CR7E / CR8E según modelo",
     "drive": "Correa del variador y rodillos cada 15-20.000 km"
-   }
+   },
+   "typical_l100": 3.0
   },
   {
    "id": "piaggio_iget",
@@ -6102,7 +6206,8 @@
     "plugs": "NGK CR8EB (125 i-get)",
     "drive": "Correa del variador y rodillos cada 20.000 km",
     "tyres": "110/70-12 · 120/70-12 (Primavera)"
-   }
+   },
+   "typical_l100": 3.0
   },
   {
    "id": "royal_enfield_650",
@@ -6152,7 +6257,8 @@
     "plugs": "×2, según manual",
     "drive": "Cadena 520 × 118",
     "tyres": "100/90-18 · 130/70-18"
-   }
+   },
+   "typical_l100": 4.6
   },
   {
    "id": "royal_enfield_350",
@@ -6201,8 +6307,10 @@
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "drive": "Cadena 520",
     "notes": "Refrigeración por aire: cambios de aceite cortos (5.000 km / 6 meses)"
-   }
+   },
+   "typical_l100": 3.0
   }
  ],
- "specs_note": "Especificaciones orientativas recopiladas de manuales y talleres: comprueba siempre el libro de tu vehículo antes de comprar."
+ "specs_note": "Especificaciones orientativas recopiladas de manuales y talleres: comprueba siempre el libro de tu vehículo antes de comprar.",
+ "typical_note": "typical_l100: consumo real orientativo (l/100 km, uso mixto) de la familia de motor; se usa para estimar el gasto de un viaje mientras no haya repostajes del vehículo."
 }

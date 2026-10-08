@@ -1,6 +1,6 @@
 {
-  "version": "1.0.27",
-  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.27/garaje-1.0.27-arm64.apk",
-  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.27/garaje-1.0.27.apk",
-  "notes": "Garaje se adapta a las tablets: menú lateral y la pantalla de inicio a dos columnas."
+  "version": "1.0.28",
+  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.28/garaje-1.0.28-arm64.apk",
+  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.28/garaje-1.0.28.apk",
+  "notes": "Gasolineras cerca con el precio de hoy, precio del litro automático al repostar, consumo y gasto estimados en cada viaje, repostaje apuntando lo pagado e invitar a un amigo."
 }
