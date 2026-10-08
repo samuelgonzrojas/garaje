@@ -1,6 +1,6 @@
 {
-  "version": "1.0.28",
-  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.28/garaje-1.0.28-arm64.apk",
-  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.28/garaje-1.0.28.apk",
-  "notes": "Gasolineras cerca con el precio de hoy, precio del litro automático al repostar, consumo y gasto estimados en cada viaje, repostaje apuntando lo pagado e invitar a un amigo."
+  "version": "1.0.29",
+  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.29/garaje-1.0.29-arm64.apk",
+  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.29/garaje-1.0.29.apk",
+  "notes": "Tour de bienvenida con lo básico de la app y una pantalla de Inicio más limpia: lo urgente arriba y lo que está al día en un resumen con lo próximo."
 }
