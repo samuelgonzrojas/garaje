@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Garaje para talleres · Clientes con cita y presupuesto aceptado</title>
+<meta name="description" content="Garaje te manda clientes de tu zona con lo que le toca a su coche, con cita y presupuesto aceptado desde el móvil. Panel gratis. Pagas solo por cliente enviado.">
+<link rel="icon" href="icon-192.png">
+<link rel="stylesheet" href="style.css?v=20261008b">
+<style>
+  .hero-t{padding:40px 0 10px;max-width:760px}
+  .hero-t h1{font-size:clamp(34px,5.5vw,56px);line-height:1.05;letter-spacing:-1.4px;margin:0 0 16px}
+  .hero-t .lead{font-size:19px;color:var(--muted);margin:0 0 24px}
+  .price{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:18px}
+  .price .card b{font-size:34px;display:block;letter-spacing:-1px}
+  .price .card small{color:var(--muted)}
+  .steps-t{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+  .steps-t .card h3{margin:0 0 6px}
+  .num{display:inline-flex;width:34px;height:34px;border-radius:50%;background:var(--brand-soft);color:var(--brand-deep);align-items:center;justify-content:center;font-weight:800;margin-bottom:10px}
+  .cta-t{display:flex;gap:10px;flex-wrap:wrap}
+  .btn.wa{background:#25D366;color:#fff}
+  .quote{border-left:4px solid var(--brand);padding:6px 16px;color:var(--muted);font-size:17px;margin:0}
+  .mock{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;font-size:14px}
+  .mock .row{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:12px;margin-bottom:8px;background:var(--card-2)}
+  .mock .tag{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:var(--brand-soft);color:var(--brand-deep)}
+  .mock .tag.ok{background:#DDF5E6;color:#1B7F45}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <a class="logo" href="./"><img src="icon-192.png" alt="">Garaje</a>
+  <nav><a href="#como">Cómo funciona</a><a href="#precio">Precio</a><a href="#preguntas">Preguntas</a><a href="taller/">Entrar al panel</a></nav>
+</header>
+
+<section class="hero-t">
+  <span class="eyebrow">Para talleres</span>
+  <h1>Clientes de tu zona, con cita y presupuesto aceptado.</h1>
+  <p class="lead">Garaje es la app que lleva el mantenimiento y la ITV de miles de coches. Cuando a uno de tu zona le toca algo, te pide presupuesto desde el móvil; tú respondes con precio y hora, y el cliente acepta con un toque. Solo pagas por cliente enviado.</p>
+  <div class="cta-t">
+    <a class="btn wa" href="https://wa.me/34000000000?text=Hola%2C%20quiero%20dar%20de%20alta%20mi%20taller%20en%20Garaje">Quiero darme de alta</a>
+    <a class="btn ghost" href="#como">Ver cómo funciona</a>
+  </div>
+</section>
+
+<section id="como" class="section">
+  <div class="section-head reveal"><span class="eyebrow">Cómo funciona</span><h2>Tres pasos y una orden de trabajo abierta.</h2></div>
+  <div class="steps-t">
+    <div class="card reveal"><span class="num">1</span><h3>Te llega la solicitud</h3><p>El cliente ve en su app que le toca el aceite, los frenos o la ITV, pulsa "Pedir presupuesto" y elige tu taller. Te llega al panel con el coche, el motor, los km y lo que necesita.</p></div>
+    <div class="card reveal"><span class="num">2</span><h3>Respondes con precio y hora</h3><p>Desde el panel, en un minuto: importe, fecha y hora. Si no le cuadra la hora, propone otra y la cerráis en dos toques.</p></div>
+    <div class="card reveal"><span class="num">3</span><h3>Acepta y ya tienes la orden</h3><p>Al aceptar, se abre sola la orden de trabajo en tu panel y el cliente tiene la cita en su calendario. Cuando terminas, el trabajo queda en su historial firmado por tu taller.</p></div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0">
+  <div class="spot">
+    <div>
+      <span class="eyebrow">El panel</span>
+      <h2>Un panel gratis, hecho para el día a día.</h2>
+      <p class="muted">Órdenes de trabajo, presupuestos, piezas y proveedores, agenda semanal y la ficha de cada coche con su historial. Funciona en el ordenador del taller y en el móvil, sin instalar nada.</p>
+      <p class="quote">"El cliente ve en su móvil lo que le has hecho, firmado por tu taller. Y la app le avisa cuando le toca volver."</p>
+    </div>
+    <div class="mock reveal">
+      <div class="row"><div><b>BMW 1 Series (2008) · 243.702 km</b><br><small>Líquido de frenos · Filtro de combustible</small></div><span class="tag">Nueva</span></div>
+      <div class="row"><div><b>Yamaha MT-07 (2019) · 31.200 km</b><br><small>Kit de transmisión</small></div><span class="tag">Respondida · 180 €</span></div>
+      <div class="row"><div><b>Seat León (2015) · 112.400 km</b><br><small>Aceite + filtros · mañana 10:00</small></div><span class="tag ok">Aceptada</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="precio" class="section">
+  <div class="section-head reveal"><span class="eyebrow">Precio</span><h2>Sin cuota. Pagas por cliente enviado.</h2><p>Un cliente enviado es una solicitud que acepta tu presupuesto con cita. Si no acepta, no pagas nada.</p></div>
+  <div class="price">
+    <div class="card reveal"><small>Panel de taller</small><b>0 €</b><small>Órdenes, presupuestos, piezas, agenda e historial. Para siempre.</small></div>
+    <div class="card reveal"><small>Por cliente enviado</small><b>9 €</b><small>Solo cuando el cliente acepta tu presupuesto con cita. Sin permanencia.</small></div>
+    <div class="card reveal"><small>Para empezar</small><b>3 gratis</b><small>Los tres primeros clientes enviados no se cobran. Para que lo pruebes sin riesgo.</small></div>
+  </div>
+  <p class="muted" style="margin-top:14px;font-size:14px">Se factura a mes vencido con el detalle de cada cliente enviado. Puedes darte de baja cuando quieras desde el panel.</p>
+</section>
+
+<section id="preguntas" class="faq section" style="padding-top:0">
+  <div class="section-head reveal"><span class="eyebrow">Preguntas</span><h2>Lo que suelen preguntar los talleres.</h2></div>
+  <details><summary>¿Qué tengo que instalar?</summary><p>Nada. El panel es una página web: entras con tu cuenta de Google desde el ordenador o el móvil.</p></details>
+  <details><summary>¿Y si el cliente no viene?</summary><p>Solo se cobra el cliente que acepta presupuesto con cita. Si luego no aparece, nos lo marcas en el panel y no se cobra.</p></details>
+  <details><summary>¿Puedo rechazar solicitudes?</summary><p>Sí. Cada solicitud la respondes, la rechazas o pides más datos. Nada es automático.</p></details>
+  <details><summary>¿Tengo que apuntar los trabajos en el panel?</summary><p>No es obligatorio, pero compensa: cada trabajo que apuntas queda en el historial del cliente con tu nombre, y la app le avisa cuando le toca volver. Es la mejor publicidad que puedes tener.</p></details>
+  <details><summary>¿Cuántos clientes me van a llegar?</summary><p>Depende de los conductores con Garaje en tu zona. Empezamos barrio a barrio: te decimos cuántos usuarios hay cerca de tu taller antes de darte de alta.</p></details>
+  <details><summary>¿Qué datos del cliente veo?</summary><p>Su coche (marca, modelo, motor, km), lo que necesita y, cuando acepta, su nombre y teléfono para la cita. Nada más.</p></details>
+</section>
+
+<section class="section" style="padding-top:0">
+  <div class="band reveal">
+    <div>
+      <h2 style="margin:0 0 8px">¿Hablamos?</h2>
+      <p style="margin:0 0 18px">Te damos de alta en el día y te enseñamos el panel en diez minutos.</p>
+      <div class="cta-t">
+        <a class="btn" href="https://wa.me/34000000000?text=Hola%2C%20quiero%20dar%20de%20alta%20mi%20taller%20en%20Garaje">WhatsApp</a>
+        <a class="btn" href="mailto:samuelgonzrojas@gmail.com?subject=Alta%20de%20taller%20en%20Garaje">Correo</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div><a href="privacidad.html">Privacidad</a> <a href="condiciones.html">Condiciones</a> <a href="./">Garaje para conductores</a></div>
+  <div>© 2026 Garaje · Hecho en España</div>
+</footer>
+</div>
+<script>
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
