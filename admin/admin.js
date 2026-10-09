@@ -33,6 +33,7 @@ async function enter() {
   $('who').textContent = session.user.email;
   const [fees, workshops, leads, ios, crashes] = await Promise.all([sb.rpc('admin_lead_fees'), sb.rpc('admin_workshops'), sb.rpc('admin_leads'), sb.rpc('admin_ios_waitlist'), sb.rpc('admin_crash_reports')]);
   sb.rpc('admin_usage').then(({ data, error }) => renderUsage(data, error));
+  sb.rpc('admin_feedback').then(({ data, error }) => renderFeedback(data || [], error));
   const err = fees.error || workshops.error || leads.error;
   if (err) { $('kpis').innerHTML = `<div class="kpi"><b>—</b><small>${esc(err.message)}</small></div>`; return; }
   if ((fees.data || []).length === 0 && (workshops.data || []).length === 0) {
@@ -45,6 +46,54 @@ async function enter() {
   renderLeads(leads.data || []);
   renderIos(ios.data || []);
   renderCrashes(crashes.data || [], crashes.error);
+}
+
+const FEEDBACK_KIND = { bug: 'Fallo', idea: 'Idea', otro: 'Otro' };
+const FEEDBACK_STATUS = { nuevo: 'Nuevo', visto: 'Visto', resuelto: 'Resuelto' };
+
+function renderFeedback(rows, error) {
+  const tb = $('feedback').querySelector('tbody');
+  if (error) { tb.innerHTML = `<tr><td colspan="5" class="muted">${esc(error.message)}</td></tr>`; return; }
+  tb.innerHTML = rows.length ? '' : '<tr><td colspan="5" class="muted">Nada todavía.</td></tr>';
+  for (const r of rows) {
+    const tr = document.createElement('tr');
+    tr.style.cursor = 'pointer';
+    if (r.status === 'nuevo') tr.style.fontWeight = '700';
+    const sel = Object.entries(FEEDBACK_STATUS).map(([k, v]) => `<option value="${k}"${k === r.status ? ' selected' : ''}>${v}</option>`).join('');
+    tr.innerHTML = `<td>${fmtTime(r.created_at)}</td><td>${FEEDBACK_KIND[r.kind] || esc(r.kind)}</td>`
+      + `<td>${esc(String(r.message).slice(0, 120))}</td><td class="num">${(r.images || []).length || ''}</td>`
+      + `<td><select>${sel}</select></td>`;
+    const select = tr.querySelector('select');
+    select.onclick = (e) => e.stopPropagation();
+    select.onchange = async () => {
+      const { error: err } = await sb.rpc('admin_set_feedback_status', { p_id: r.id, p_status: select.value });
+      if (err) { alert(err.message); return; }
+      r.status = select.value;
+      tr.style.fontWeight = r.status === 'nuevo' ? '700' : '';
+    };
+    tr.onclick = () => showFeedback(r);
+    tb.appendChild(tr);
+  }
+}
+
+async function showFeedback(r) {
+  const d = $('feedbackDetail');
+  d.classList.remove('hidden');
+  d.innerHTML = `<p><b>${FEEDBACK_KIND[r.kind] || esc(r.kind)}</b> · ${fmtTime(r.created_at)} · ${esc(r.app_version || '')} · ${esc(r.platform || '')}</p>`
+    + `<p style="white-space:pre-wrap">${esc(r.message)}</p>`
+    + (r.contact ? `<p>Contacto: <a href="mailto:${esc(r.contact)}">${esc(r.contact)}</a></p>` : '<p class="muted">Sin correo de contacto.</p>')
+    + '<div id="feedbackImages" style="display:flex;gap:8px;flex-wrap:wrap"></div>'
+    + (r.diagnostics ? `<details style="margin-top:8px"><summary>Datos técnicos</summary><pre style="white-space:pre-wrap;font-size:12px">${esc(r.diagnostics)}</pre></details>` : '');
+  d.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  const imgs = r.images || [];
+  if (!imgs.length) return;
+  const { data, error } = await sb.storage.from('feedback').createSignedUrls(imgs, 3600);
+  const box = $('feedbackImages');
+  if (error) { box.textContent = error.message; return; }
+  for (const s of data || []) {
+    if (!s.signedUrl) continue;
+    box.innerHTML += `<a href="${s.signedUrl}" target="_blank" rel="noopener"><img src="${s.signedUrl}" style="height:220px;border-radius:10px;border:1px solid var(--line)"></a>`;
+  }
 }
 
 function renderUsage(u, error) {

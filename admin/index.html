@@ -40,6 +40,13 @@
     <div class="kpis" id="kpis"></div>
 
     <div class="card">
+      <h2>Fallos e ideas de los usuarios</h2>
+      <p class="sub">Lo que envían desde Ajustes → "Contar un fallo o una idea". Toca uno para ver el texto completo, las capturas y los datos técnicos.</p>
+      <div style="overflow-x:auto"><table id="feedback"><thead><tr><th>Fecha</th><th>Tipo</th><th>Mensaje</th><th>Capturas</th><th>Estado</th></tr></thead><tbody></tbody></table></div>
+      <div id="feedbackDetail" class="hidden" style="margin-top:12px;border:1px solid var(--line);border-radius:12px;padding:12px"></div>
+    </div>
+
+    <div class="card">
       <h2>Uso de la app</h2>
       <p class="sub">Resumen anónimo que cada instalación envía una vez al día (si no lo ha desactivado en Ajustes). Totales de los últimos 30 días.</p>
       <div class="kpis" id="usageKpis"></div>

@@ -1,6 +1,6 @@
 {
-  "version": "1.0.30",
-  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.30/garaje-1.0.30-arm64.apk",
-  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.30/garaje-1.0.30.apk",
-  "notes": "Estadísticas de uso anónimas, solo si aceptas: nos ayudan a saber qué mejorar"
+  "version": "1.0.31",
+  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.31/garaje-1.0.31-arm64.apk",
+  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.31/garaje-1.0.31.apk",
+  "notes": "Nueva forma de contarnos un fallo o una idea, con capturas de pantalla (Ajustes)"
 }
