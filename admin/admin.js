@@ -32,6 +32,7 @@ async function enter() {
   show('login', false); show('main'); show('nav');
   $('who').textContent = session.user.email;
   const [fees, workshops, leads, ios, crashes] = await Promise.all([sb.rpc('admin_lead_fees'), sb.rpc('admin_workshops'), sb.rpc('admin_leads'), sb.rpc('admin_ios_waitlist'), sb.rpc('admin_crash_reports')]);
+  sb.rpc('admin_usage').then(({ data, error }) => renderUsage(data, error));
   const err = fees.error || workshops.error || leads.error;
   if (err) { $('kpis').innerHTML = `<div class="kpi"><b>—</b><small>${esc(err.message)}</small></div>`; return; }
   if ((fees.data || []).length === 0 && (workshops.data || []).length === 0) {
@@ -44,6 +45,35 @@ async function enter() {
   renderLeads(leads.data || []);
   renderIos(ios.data || []);
   renderCrashes(crashes.data || [], crashes.error);
+}
+
+function renderUsage(u, error) {
+  const tb = $('usage').querySelector('tbody');
+  if (error || !u) {
+    $('usageKpis').innerHTML = '';
+    tb.innerHTML = `<tr><td colspan="2" class="muted">${esc(error ? error.message : 'Sin datos todavía.')}</td></tr>`;
+    return;
+  }
+  const kpi = (n, label) => `<div class="kpi"><b>${n}</b><small>${label}</small></div>`;
+  $('usageKpis').innerHTML = kpi(u.active_1d, 'abiertas hoy') + kpi(u.active_7d, 'en 7 días') + kpi(u.active_30d, 'en 30 días')
+    + kpi(u.total, 'instalaciones en total') + kpi(u.new_7d, 'nuevas en 7 días');
+  const t = u.totals || {}, us = u.using || {};
+  const list = (o) => Object.entries(o || {}).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${esc(k)} ${v}`).join(' · ') || '—';
+  const rows = [
+    ['Vehículos', `${t.vehicles ?? 0} en ${us.vehicles ?? 0} instalaciones`],
+    ['Tipos', list(u.types)],
+    ['Marcas', list(u.makes)],
+    ['Trabajos apuntados', `${t.events ?? 0} · ${us.events ?? 0} instalaciones apuntan`],
+    ['Lecturas de km', `${t.readings ?? 0}`],
+    ['Repostajes', `${t.refuels ?? 0} · ${us.refuels ?? 0} instalaciones`],
+    ['Viajes medidos', `${t.trips ?? 0} · ${us.trips ?? 0} instalaciones`],
+    ['Adjuntos', `${t.attachments ?? 0} · ${us.attachments ?? 0} instalaciones`],
+    ['Con sesión iniciada', `${us.signed_in ?? 0}`],
+    ['Versiones', list(u.versions)],
+    ['Origen', list(u.platforms)],
+    ['Activas por día', (u.daily || []).map((d) => `${d.day.slice(8, 10)}/${d.day.slice(5, 7)}: ${d.n}`).join(' · ') || '—'],
+  ];
+  tb.innerHTML = rows.map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join('');
 }
 
 function renderCrashes(rows, error) {
