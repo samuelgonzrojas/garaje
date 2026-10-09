@@ -144,3 +144,9 @@ label.chk input{width:auto;margin:0}
 .appt b{display:block;font-size:14px}
 .appt small{color:var(--muted);display:block}
 @media (max-width:900px){.week{grid-template-columns:1fr}.day{min-height:0}}
+
+/* Foto del vehículo */
+.vphoto { object-fit: cover; border-radius: 12px; float: right; margin: 0 0 6px 10px; background: var(--line, #dde3ea); }
+.vphoto.big { float: none; width: 96px; height: 96px; margin: 0 14px 0 0; flex: none; border-radius: 16px; }
+.lead .top .vphoto { float: none; margin: 0 12px 0 0; flex: none; }
+.vphoto.hidden { display: none; }

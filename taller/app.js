@@ -83,6 +83,21 @@ function liveEvents(doc) {
   const deleted = new Set(doc.deleted || []);
   return (doc.events || []).filter((e) => !deleted.has(e.id)).sort((a, b) => b.at.localeCompare(a.at));
 }
+// Foto del vehículo (miniatura JPEG en base64 que pone el cliente en la app).
+function photoSrc(b64) {
+  return typeof b64 === 'string' && b64.length < 200000 && /^[A-Za-z0-9+/=]+$/.test(b64) ? 'data:image/jpeg;base64,' + b64 : null;
+}
+function photoImg(b64, size) {
+  const src = photoSrc(b64);
+  return src ? `<img class="vphoto" src="${src}" alt="" style="width:${size}px;height:${size}px">` : '';
+}
+function setPhoto(id, b64) {
+  const el = $(id);
+  const src = photoSrc(b64);
+  el.classList.toggle('hidden', !src);
+  if (src) el.src = src; else el.removeAttribute('src');
+}
+
 function summary(row) {
   const doc = row.data;
   const prof = profileOf(row);
@@ -96,6 +111,7 @@ function summary(row) {
     itv: doc.inspection?.due_date ?? null,
     last: events[0] ? `${fmtDate(events[0].at)} · ${itemName(events[0].catalog_id, prof)}` : '—',
     role: roles[row.id] || 'family',
+    photo: prof.photo || null,
     prof, events,
   };
 }
@@ -318,7 +334,7 @@ function renderGrid() {
     const open = jobs.find((j) => j.vehicle_id === row.id && !['delivered', 'cancelled'].includes(j.status));
     const el = document.createElement('div');
     el.className = 'card vcard';
-    el.innerHTML = `<h3>${esc(s.name)}</h3><span class="plate">${esc(s.plate)}</span><span class="badge ${s.role}">${roleName(s.role)}</span>
+    el.innerHTML = `${photoImg(s.photo, 64)}<h3>${esc(s.name)}</h3><span class="plate">${esc(s.plate)}</span><span class="badge ${s.role}">${roleName(s.role)}</span>
       ${open ? `<span class="status ${open.status}">${STATUS[open.status]}</span>` : ''}
       <div class="kv"><div><b>${fmtKm(s.km)}</b><small>${s.kmAt ? 'el ' + fmtDate(s.kmAt) : 'sin lectura'}</small></div>
       <div><b>${fmtDate(s.itv)}</b><small>ITV</small></div></div>
@@ -356,6 +372,7 @@ $('vNewJob').onclick = () => newJobFor(current);
 function renderVehicle() {
   const s = summary(current);
   $('vName').textContent = s.name;
+  setPhoto('vPhoto', s.photo);
   $('vPlate').textContent = s.plate;
   $('vRole').textContent = roleName(s.role); $('vRole').className = 'badge ' + s.role;
   $('vKm').textContent = fmtKm(s.km);
@@ -475,7 +492,7 @@ function jobCard(j) {
   const s = v ? summary(v) : { name: 'Coche sin acceso', plate: '' };
   const el = document.createElement('div');
   el.className = 'jcard';
-  el.innerHTML = `<span class="num-tag">OR ${j.number}</span>${j.lead_id ? '<span class="badge workshop">Garaje</span>' : ''}<b>${esc(s.name)}</b>
+  el.innerHTML = `${photoImg(s.photo, 44)}<span class="num-tag">OR ${j.number}</span>${j.lead_id ? '<span class="badge workshop">Garaje</span>' : ''}<b>${esc(s.name)}</b>
     <small>${esc(s.plate)}${j.customer_name ? ' · ' + esc(j.customer_name) : ''}</small>
     ${j.customer_request ? `<small>${esc(j.customer_request.slice(0, 80))}</small>` : ''}
     <span class="status ${j.status}">${STATUS[j.status]}</span>
@@ -550,7 +567,7 @@ function leadCard(l) {
   const items = (l.items || []).map((i) => esc(i.name)).join(', ');
   const el = document.createElement('div');
   el.className = 'card lead';
-  el.innerHTML = `<div class="top"><div><b>${esc(v.name || 'Vehículo')}</b> <span class="plate">${esc(v.plate || '')}</span> <span class="status ${l.status}">${LEAD_STATUS[l.status] || l.status}</span>
+  el.innerHTML = `<div class="top">${photoImg(v.photo, 64)}<div style="flex:1"><b>${esc(v.name || 'Vehículo')}</b> <span class="plate">${esc(v.plate || '')}</span> <span class="status ${l.status}">${LEAD_STATUS[l.status] || l.status}</span>
       <p class="muted" style="margin:4px 0 0;font-size:13px">${fmtTime(l.created_at)}${v.km ? ' · ' + fmtKm(v.km) : ''}${v.year ? ' · ' + esc(v.year) : ''}${v.fuel ? ' · ' + esc(v.fuel) : ''}</p></div>
       <div class="actions"></div></div>
     ${items ? `<p style="margin:8px 0 0"><b>Pide:</b> ${items}</p>` : ''}
@@ -704,6 +721,7 @@ for (const id of ['jKm', 'jFuel', 'jPromised', 'jCustomer', 'jPhone', 'jRequest'
 function renderJobHead() {
   const s = jobVehicle ? summary(jobVehicle) : { name: 'Coche', plate: '' };
   $('jTitle').textContent = `OR ${job.number} · ${s.name}`;
+  setPhoto('jPhoto', s.photo);
   $('jPlate').textContent = s.plate;
   $('jStatus').textContent = STATUS[job.status];
   $('jStatus').className = 'status ' + job.status;
