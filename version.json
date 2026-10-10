@@ -1,6 +1,6 @@
 {
-  "version": "1.0.32",
-  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.32/garaje-1.0.32-arm64.apk",
-  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.32/garaje-1.0.32.apk",
-  "notes": "Pon una foto de tu coche o tu moto (Mi coche → toca la foto). También la verá tu taller"
+  "version": "1.0.33",
+  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.33/garaje-1.0.33-arm64.apk",
+  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.33/garaje-1.0.33.apk",
+  "notes": "Ahora lee los cuentakilómetros de números rojos (Audi, VW y otros de los 2000)"
 }
