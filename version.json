@@ -1,6 +1,7 @@
 {
-  "version": "1.0.36",
-  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.36/garaje-1.0.36-arm64.apk",
-  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.36/garaje-1.0.36.apk",
-  "notes": "Icono nuevo con relieve. Puedes encuadrar la foto de tu coche. Arreglada la barra de abajo, que a veces marcaba otra pestaña"
+  "version": "1.0.37",
+  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.37/garaje-1.0.37-arm64.apk",
+  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.37/garaje-1.0.37.apk",
+  "notes": "Si hace tiempo que no apuntas los km, Inicio te lo recuerda. Desde ahora Garaje se actualiza en Google Play",
+  "play_url": "https://play.google.com/apps/testing/com.samuel.mantenimiento"
 }

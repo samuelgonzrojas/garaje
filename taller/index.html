@@ -7,7 +7,7 @@
 <meta name="description" content="El día a día del taller con Garaje: órdenes de trabajo, presupuestos que el cliente aprueba en su móvil, piezas, proveedores y el historial de cada coche.">
 <link rel="icon" href="../icon-192.png">
 <link rel="stylesheet" href="../style.css">
-<link rel="stylesheet" href="taller.css?v=20261009b">
+<link rel="stylesheet" href="taller.css?v=20261011">
 </head>
 <body>
 <div class="wrap panel">
@@ -63,6 +63,7 @@
     <div><h2 style="margin:0">Órdenes de trabajo</h2><p class="sub" style="margin:2px 0 0">Lo que hay hoy en el taller. El cliente ve el estado en su móvil.</p></div>
     <button class="btn" id="newJobBtn">+ Nueva orden</button>
   </div>
+  <div class="card onboard hidden" id="onboard"></div>
   <div class="board" id="board"></div>
   <details class="card" style="margin-top:16px"><summary>Entregadas y canceladas</summary><div id="doneJobs" style="margin-top:10px"></div></details>
 </section>
@@ -263,6 +264,6 @@
 </div>
 <datalist id="brands"></datalist>
 <datalist id="partNames"></datalist>
-<script type="module" src="app.js?v=20261009b"></script>
+<script type="module" src="app.js?v=20261011"></script>
 </body>
 </html>

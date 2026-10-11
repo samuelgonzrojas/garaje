@@ -500,7 +500,61 @@ function jobCard(j) {
   el.onclick = () => openJob(j);
   return el;
 }
+// Primeros pasos del taller: una lista que se va marcando sola y desaparece
+// cuando está todo hecho (o si el taller la cierra).
+const onboardKey = () => 'garaje.onboard.' + workshop.id;
+function onboardSteps() {
+  const w = workshop;
+  return [
+    { done: !!(w.tax_id && w.registry_no && w.address && w.phone), title: 'Completa los datos del taller',
+      text: 'NIF, nº de registro industrial, dirección y teléfono. Salen en los presupuestos y en la orden de reparación.', label: 'Ir a Mi taller', go: () => setTab('settings') },
+    { done: !!(w.listed && w.city), title: 'Aparece en la app Garaje',
+      text: 'Marca "Aparecer en la app" y pon tu ciudad: los conductores de tu zona te pedirán presupuesto desde el móvil.', label: 'Activarlo', go: () => setTab('settings') },
+    { done: vehicles.some((v) => roles[v.id] === 'workshop'), title: 'Recibe el primer coche',
+      text: 'El cliente abre Garaje → Mi coche → Compartir → Taller y te enseña un código de 6 letras. Lo escribes en Coches y ves su historial.', label: 'Tengo un código', go: () => { setTab('cars'); $('joinCode').focus(); } },
+    { done: jobs.length > 0, title: 'Abre tu primera orden de trabajo',
+      text: 'Recepción, presupuesto con mano de obra y piezas, y el cliente lo aprueba en su móvil. Al entregar, queda en el historial del coche.', label: '+ Nueva orden', go: () => $('newJobBtn').click() },
+    { done: suppliers.length > 0, title: 'Añade tus proveedores',
+      text: 'Tus distribuidores de recambios, para elegirlos en cada pieza y llamarlos o escribirles por WhatsApp con un toque.', label: 'Añadir proveedor', go: () => { setTab('suppliers'); editSupplier({}); } },
+  ];
+}
+function renderOnboard() {
+  const box = $('onboard');
+  const steps = workshop ? onboardSteps() : [];
+  const left = steps.filter((s) => !s.done).length;
+  let hidden = false;
+  try { hidden = localStorage.getItem(onboardKey()) === '1'; } catch { /* sin almacenamiento */ }
+  if (!workshop || left === 0 || hidden) { show('onboard', false); return; }
+  const done = steps.length - left;
+  box.innerHTML = `<div class="top"><div><h3 style="margin:0">Primeros pasos con Garaje</h3>
+      <p class="muted" style="margin:2px 0 0;font-size:14px">${done} de ${steps.length} hechos. Se marcan solos.</p></div>
+      <a href="#" class="muted" id="onboardHide" style="font-size:14px">Ocultar</a></div>
+    <div class="bar"><span style="width:${Math.round(done / steps.length * 100)}%"></span></div>
+    <ol class="ob-steps"></ol>`;
+  const ol = box.querySelector('.ob-steps');
+  for (const s of steps) {
+    const li = document.createElement('li');
+    li.className = s.done ? 'done' : '';
+    li.innerHTML = `<span class="tick">${s.done ? '✓' : ''}</span><div><b>${esc(s.title)}</b>${s.done ? '' : `<p class="muted">${esc(s.text)}</p>`}</div>`;
+    if (!s.done) {
+      const b = document.createElement('button');
+      b.className = 'btn ghost small';
+      b.textContent = s.label;
+      b.onclick = s.go;
+      li.appendChild(b);
+    }
+    ol.appendChild(li);
+  }
+  $('onboardHide').onclick = (e) => {
+    e.preventDefault();
+    try { localStorage.setItem(onboardKey(), '1'); } catch { /* sin almacenamiento */ }
+    show('onboard', false);
+  };
+  show('onboard');
+}
+
 function renderBoard() {
+  renderOnboard();
   const b = $('board');
   b.innerHTML = '';
   for (const [title, states] of COLUMNS) {
@@ -509,6 +563,10 @@ function renderBoard() {
     col.className = 'col';
     col.innerHTML = `<h4>${title}<span>${list.length}</span></h4>`;
     for (const j of list) col.appendChild(jobCard(j));
+    if (jobs.length === 0) {
+      const hint = { Entrada: 'Aquí entra cada coche que recibes, con "+ Nueva orden".', 'Esperando al cliente': 'Cuando envías el presupuesto, espera aquí a que el cliente lo apruebe desde su móvil.', 'En el taller': 'Lo aprobado y lo que estás reparando.', 'Listos para recoger': 'Al marcarlo listo, el cliente recibe un aviso para venir a por él.' }[title];
+      if (hint) col.insertAdjacentHTML('beforeend', `<p class="muted empty-col">${hint}</p>`);
+    }
     b.appendChild(col);
   }
   const done = $('doneJobs');
@@ -1044,6 +1102,7 @@ async function loadSuppliers() {
   const { data } = await sb.from('workshop_suppliers').select('*').eq('workshop_id', workshop.id).order('name');
   suppliers = data || [];
   if (tab === 'suppliers') renderSuppliers();
+  if (tab === 'jobs' && !job && workshop) renderOnboard();
 }
 function renderSuppliers() {
   const g = $('suppliersGrid');
