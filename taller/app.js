@@ -52,11 +52,15 @@ function contactButtons(phone, email, waText = '') {
   return (phone ? `<a class="btn small" href="tel:${esc(String(phone).replace(/\s/g, ''))}">Llamar</a><a class="btn ghost small" href="${esc(waUrl(phone) + t)}" target="_blank" rel="noopener">WhatsApp</a>` : '')
     + (email ? `<a class="btn ghost small" href="mailto:${esc(email)}">Correo</a>` : '');
 }
-/** El dueño del coche (o, si no lo hay, el primer familiar), sin contar al propio taller. */
+/** Dueño y familiares del coche (sin los talleres). */
+const peopleOf = (vehicleId) => (people[vehicleId] || []).filter((p) => p.role !== 'workshop');
+/** El dueño del coche (o, si no lo hay, el primer familiar). */
 function ownerOf(vehicleId) {
-  const list = (people[vehicleId] || []).filter((p) => p.user_id !== session?.user?.id && p.role !== 'workshop');
+  const list = peopleOf(vehicleId);
   return list.find((p) => p.role === 'owner') || list[0] || null;
 }
+const isMe = (p) => p.user_id === session?.user?.id;
+const personName = (p) => esc(p.display_name) + (isMe(p) ? ' <span class="muted">(tú)</span>' : '');
 
 const STATUS = {
   received: 'Recibido', diagnosis: 'En diagnóstico', quote_sent: 'Presupuesto enviado', approved: 'Aprobado',
@@ -358,8 +362,8 @@ function renderGrid() {
     const o = ownerOf(row.id);
     el.innerHTML = `${photoImg(s.photo, 64)}<h3>${esc(s.name)}</h3><span class="plate">${esc(s.plate)}</span><span class="badge ${s.role}">${roleName(s.role)}</span>
       ${open ? `<span class="status ${open.status}">${STATUS[open.status]}</span>` : ''}
-      ${o ? `<div class="owner"><b>${esc(o.display_name)}</b>${o.phone ? ` · ${esc(fmtPhone(o.phone))}` : ' · <span class="muted">sin teléfono</span>'}
-        ${o.phone ? `<div class="actions">${contactButtons(o.phone, null, `Hola ${o.display_name}, te escribo del taller por tu ${s.name}.`)}</div>` : ''}</div>` : ''}
+      ${o ? `<div class="owner"><b>${personName(o)}</b>${o.phone ? ` · ${esc(fmtPhone(o.phone))}` : ' · <span class="muted">sin teléfono</span>'}
+        ${o.phone && !isMe(o) ? `<div class="actions">${contactButtons(o.phone, null, `Hola ${o.display_name}, te escribo del taller por tu ${s.name}.`)}</div>` : ''}</div>` : ''}
       <div class="kv"><div><b>${fmtKm(s.km)}</b><small>${s.kmAt ? 'el ' + fmtDate(s.kmAt) : 'sin lectura'}</small></div>
       <div><b>${fmtDate(s.itv)}</b><small>ITV</small></div></div>
       <p class="muted" style="margin:10px 0 0;font-size:14px">Último: ${esc(s.last)}</p>`;
@@ -418,15 +422,15 @@ function renderVehicle() {
 
 /** Dueño y familiares del coche con sus datos de contacto. */
 function renderPeople(row, s) {
-  const list = (people[row.id] || []).filter((p) => p.user_id !== session?.user?.id && p.role !== 'workshop');
+  const list = peopleOf(row.id);
   const box = $('vPeople');
   if (list.length === 0) { box.innerHTML = ''; return; }
   box.innerHTML = list.map((p) => `<div class="person">
-      <div><b>${esc(p.display_name)}</b> <span class="badge ${p.role}">${roleName(p.role)}</span>
+      <div><b>${personName(p)}</b> <span class="badge ${p.role}">${roleName(p.role)}</span>
         <small>${[p.phone ? esc(fmtPhone(p.phone)) : '', p.email ? esc(p.email) : ''].filter(Boolean).join(' · ')}</small></div>
-      <div class="actions">${contactButtons(p.phone, p.email, `Hola ${p.display_name}, te escribo del taller por tu ${s.name}.`)}</div>
+      <div class="actions">${isMe(p) ? '' : contactButtons(p.phone, p.email, `Hola ${p.display_name}, te escribo del taller por tu ${s.name}.`)}</div>
     </div>`).join('')
-    + (list.some((p) => p.role === 'owner' && !p.phone) ? '<p class="muted" style="font-size:13px;margin:6px 0 0">El dueño no ha puesto su teléfono en Garaje. Puede añadirlo en la app: Ajustes → Tu nombre en Garaje.</p>' : '');
+    + (list.some((p) => p.role === 'owner' && !p.phone && !isMe(p)) ? '<p class="muted" style="font-size:13px;margin:6px 0 0">El dueño no ha puesto su teléfono en Garaje. Puede añadirlo en la app: Ajustes → Tu nombre en Garaje.</p>' : '');
 }
 
 function itemOptions(prof, selected) {
