@@ -252,7 +252,7 @@ function listingBlock(d) {
   const accepted = leads.filter((l) => ['accepted', 'converted'].includes(l.status)).length;
   const stats = leads.length ? ` Hasta ahora: ${leads.length} ${leads.length === 1 ? 'solicitud' : 'solicitudes'}, ${accepted} ${accepted === 1 ? 'aceptada' : 'aceptadas'}.` : '';
   const fee = num(d.lead_fee);
-  return `<h3 style="margin:18px 0 4px">Visible en la app Garaje</h3>
+  return `<h3 style="margin:0 0 4px">Visible en la app Garaje</h3>
     <p class="muted" style="font-size:13px;margin:0 0 8px">Si lo activas, los usuarios de Garaje de tu zona pueden pedirte presupuesto desde la app con lo que le toca a su vehículo. Cada solicitud es un cliente que te envía Garaje${fee ? ` (tarifa acordada: ${fmtEur(fee)} por cliente enviado)` : ''}.${stats}</p>
     <label class="chk"><input type="checkbox" name="listed" ${d.listed ? 'checked' : ''}> Aparecer en la app</label>
     <div class="row3">
@@ -270,12 +270,14 @@ function listingBlock(d) {
 function renderWsForm(formId, data, button) {
   const f = $(formId);
   const field = ([k, label, ph, req]) => `<div><label>${label}${req ? ' *' : ''}</label><input name="${k}" value="${esc(data[k] ?? '')}" placeholder="${esc(ph)}" ${req ? 'required' : ''} ${['labor_rate', 'vat', 'quote_validity_days'].includes(k) ? 'inputmode="decimal"' : ''}></div>`;
-  f.innerHTML = `${field(WS_FIELDS[0])}
+  f.innerHTML = `<div class="ws-cols"><div>
+    <h3 style="margin:0 0 4px">Datos del taller</h3>
+    ${field(WS_FIELDS[0])}
     <div class="row2">${field(WS_FIELDS[1])}${field(WS_FIELDS[2])}</div>
     ${field(WS_FIELDS[3])}${field(WS_FIELDS[4])}
     <div class="row2">${field(WS_FIELDS[5])}${field(WS_FIELDS[6])}</div>
     <div class="row3">${field(WS_FIELDS[7])}${field(WS_FIELDS[8])}${field(WS_FIELDS[9])}</div>
-    ${listingBlock(data)}
+    </div><div>${listingBlock(data)}</div></div>
     <div class="err" id="${formId}Err"></div>
     <button class="btn">${button}</button>`;
   f.onsubmit = async (e) => {

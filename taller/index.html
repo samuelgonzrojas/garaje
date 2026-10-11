@@ -7,7 +7,7 @@
 <meta name="description" content="El día a día del taller con Garaje: órdenes de trabajo, presupuestos que el cliente aprueba en su móvil, piezas, proveedores y el historial de cada coche.">
 <link rel="icon" href="../icon-192.png">
 <link rel="stylesheet" href="../style.css">
-<link rel="stylesheet" href="taller.css?v=20261011b">
+<link rel="stylesheet" href="taller.css?v=20261011c">
 </head>
 <body>
 <div class="wrap panel">
@@ -154,11 +154,8 @@
 
 <!-- COCHES -->
 <section id="tab-cars" class="tab hidden no-print">
-  <div class="card top">
-    <div>
-      <h2>Coches a los que tienes acceso</h2>
-      <p class="sub" style="margin:0">El dueño te da acceso desde la app: Mi coche → Compartir → Taller. Te enseñará un código o un QR.</p>
-    </div>
+  <div class="top" style="margin-bottom:14px">
+    <div><h2 style="margin:0">Coches</h2><p class="sub" style="margin:2px 0 0">Los que te han dado acceso desde la app (Mi coche → Compartir → Taller), con su dueño y su teléfono.</p></div>
     <form id="joinForm" style="display:flex;gap:8px;align-items:center">
       <input id="joinCode" placeholder="Código de 6 letras" style="width:170px;text-transform:uppercase" maxlength="6">
       <button class="btn small">Tengo un código</button>
@@ -242,10 +239,11 @@
 
 <!-- MI TALLER -->
 <section id="tab-settings" class="tab hidden no-print">
-  <div class="card" style="max-width:720px">
-    <h2>Mi taller</h2>
-    <p class="sub">Salen en presupuestos y órdenes de reparación, y el cliente los ve en su app.</p>
-    <form id="settingsForm" class="ws-form"></form>
+  <div class="top" style="margin-bottom:14px">
+    <div><h2 style="margin:0">Mi taller</h2><p class="sub" style="margin:2px 0 0">Salen en presupuestos y órdenes de reparación, y el cliente los ve en su app.</p></div>
+  </div>
+  <div class="card">
+    <form id="settingsForm" class="ws-form wide"></form>
     <div class="ok hidden" id="settingsOk">Guardado.</div>
   </div>
 </section>
@@ -265,6 +263,6 @@
 </div>
 <datalist id="brands"></datalist>
 <datalist id="partNames"></datalist>
-<script type="module" src="app.js?v=20261011b"></script>
+<script type="module" src="app.js?v=20261011c"></script>
 </body>
 </html>

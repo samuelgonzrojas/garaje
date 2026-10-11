@@ -5,7 +5,7 @@
 .card{margin-bottom:14px;padding:18px}
 .card h2{margin:0 0 6px;font-size:20px}
 .card h3{margin:0 0 10px;font-size:16px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
 .vcard{cursor:pointer;transition:transform .12s,box-shadow .12s}
 .vcard:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,0,0,.08)}
 .vcard h3{margin:0 0 2px;font-size:17px}
@@ -172,3 +172,11 @@ label.chk input{width:auto;margin:0}
 .people .person{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 0;border-top:1px solid var(--line)}
 .people .person small{display:block;color:var(--muted);margin-top:2px}
 .people .actions{display:flex;gap:6px;flex-wrap:wrap}
+
+/* Mi taller: datos a la izquierda y "Visible en la app" a la derecha en pantallas anchas */
+.ws-cols{display:grid;grid-template-columns:1fr;gap:18px}
+.ws-cols>div+div{border-top:1px solid var(--line);padding-top:16px}
+@media (min-width:900px){
+  .ws-form.wide .ws-cols{grid-template-columns:1fr 1fr;gap:32px}
+  .ws-form.wide .ws-cols>div+div{border-top:0;padding-top:0;border-left:1px solid var(--line);padding-left:32px}
+}
