@@ -650,7 +650,7 @@ function renderHero() {
     ['En el taller', open.filter((j) => ['received', 'diagnosis', 'approved', 'in_progress', 'waiting_parts'].includes(j.status)).length, 'jobs'],
     ['Esperando al cliente', open.filter((j) => ['quote_sent', 'rejected'].includes(j.status)).length, 'jobs'],
     ['Listos para recoger', open.filter((j) => j.status === 'ready').length, 'jobs'],
-    ['Solicitudes nuevas', leads.filter((l) => l.status === 'sent' || l.status === 'accepted').length, 'leads'],
+    ['Solicitudes por atender', leads.filter((l) => NEEDS_ACTION.includes(l.status)).length, 'leads'],
   ];
   const today = new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
   h.innerHTML = `<div class="ws-hero-top"><div><small>${esc(today)}</small><h2>${hello}, ${esc(workshop.name)}</h2></div></div>
@@ -719,7 +719,7 @@ async function loadLeads() {
   const { data, error } = await sb.from('leads').select('*').eq('workshop_id', workshop.id).order('created_at', { ascending: false }).limit(200);
   if (error) { console.warn(error); return; }
   leads = data || [];
-  const n = leads.filter((l) => l.status === 'sent' || l.status === 'accepted').length;
+  const n = leads.filter((l) => NEEDS_ACTION.includes(l.status)).length;
   const b = $('leadsBadge');
   b.textContent = n;
   b.classList.toggle('hidden', n === 0);
@@ -728,59 +728,103 @@ async function loadLeads() {
   if (tab === 'jobs' && !job) renderHero();
 }
 
-function leadCard(l) {
+/** "hace 5 min", "hace 3 h", "ayer a las 19:43", "el 7/10". */
+function ago(iso) {
+  const d = new Date(iso), mins = Math.round((Date.now() - d) / 60000);
+  if (mins < 1) return 'ahora mismo';
+  if (mins < 60) return `hace ${mins} min`;
+  if (mins < 24 * 60) return `hace ${Math.round(mins / 60)} h`;
+  const y = new Date(); y.setDate(y.getDate() - 1);
+  if (sameDay(d, y)) return 'ayer a las ' + d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  return 'el ' + d.toLocaleDateString('es-ES', { day: 'numeric', month: 'numeric' });
+}
+const NEEDS_ACTION = ['sent', 'reschedule', 'accepted'];
+// Grupos de la pestaña, en el orden en que conviene atenderlos.
+const LEAD_GROUPS = [
+  ['sent', 'Por responder', 'El cliente suele quedarse con el primer taller que contesta.'],
+  ['reschedule', 'Piden otra hora', 'Proponles una cita nueva.'],
+  ['accepted', 'Aceptadas · abre la orden', 'Ya tienes acceso al vehículo.'],
+  ['quoted', 'Esperando al cliente', 'Les ha llegado tu presupuesto al móvil.'],
+];
+
+function leadCard(l, compact = false) {
   const v = l.vehicle || {};
-  const items = (l.items || []).map((i) => esc(i.name)).join(', ');
   const el = document.createElement('div');
-  el.className = 'card lead';
-  el.innerHTML = `<div class="top">${photoImg(v.photo, 64)}<div style="flex:1"><b>${esc(v.name || 'Vehículo')}</b> <span class="plate">${esc(v.plate || '')}</span> <span class="status ${l.status}">${LEAD_STATUS[l.status] || l.status}</span>
-      <p class="muted" style="margin:4px 0 0;font-size:13px">${fmtTime(l.created_at)}${v.km ? ' · ' + fmtKm(v.km) : ''}${v.year ? ' · ' + esc(v.year) : ''}${v.fuel ? ' · ' + esc(v.fuel) : ''}</p></div>
+  el.className = 'card lead' + (compact ? ' compact' : '') + ' st-' + l.status;
+  const meta = [ago(l.created_at), v.km ? fmtKm(v.km) : '', v.year ? esc(v.year) : '', v.fuel ? esc(v.fuel) : ''].filter(Boolean).join(' · ');
+  const past = l.appointment_at && new Date(l.appointment_at) < new Date() && ['quoted', 'accepted'].includes(l.status);
+  const who = l.customer_name || 'Cliente de Garaje';
+  const wa = `Hola ${who}, te escribo de ${workshop?.name || 'el taller'} por tu solicitud de presupuesto${v.name ? ' para el ' + v.name : ''}.`;
+  const answer = l.quote_amount != null ? `<div class="lead-box answer"><small>Tu respuesta</small>
+      <div><b class="amount">${fmtEur(num(l.quote_amount))}</b>${l.appointment_at ? `<span class="when">${svgIcon('agenda')} ${fmtTime(l.appointment_at)}</span>` : ''}</div>
+      ${l.quote_text && !compact ? `<p>${esc(l.quote_text)}</p>` : ''}</div>` : '';
+  el.innerHTML = `<div class="top">${photoImg(v.photo, 64)}<div class="lead-head"><b>${esc(v.name || 'Vehículo')}</b> <span class="plate">${esc(v.plate || '')}</span> <span class="status ${l.status}">${LEAD_STATUS[l.status] || l.status}</span>
+      <small>${meta}</small></div>
       <div class="actions"></div></div>
-    ${items ? `<p style="margin:8px 0 0"><b>Pide:</b> ${items}</p>` : ''}
-    ${l.message ? `<p style="margin:6px 0 0">“${esc(l.message)}”</p>` : ''}
-    ${l.preferred ? `<p class="muted" style="margin:6px 0 0">Le viene bien: ${esc(l.preferred)}</p>` : ''}
-    <p class="muted" style="margin:6px 0 0">${esc(l.customer_name || 'Cliente de Garaje')}${l.customer_phone ? ` · <a href="tel:${esc(l.customer_phone)}">${esc(l.customer_phone)}</a>` : ''}</p>
-    ${l.quote_amount != null ? `<p style="margin:6px 0 0"><b>Tu respuesta:</b> ${fmtEur(num(l.quote_amount))}${l.appointment_at ? ' · cita ' + fmtTime(l.appointment_at) : ''}${l.quote_text ? '<br>' + esc(l.quote_text) : ''}</p>` : ''}
-    ${l.status === 'reschedule' ? `<p style="margin:6px 0 0"><b>Pide otra hora${l.client_preferred_at ? ': propone ' + fmtTime(l.client_preferred_at) : ''}</b></p>` : ''}
-    ${l.decision_note ? `<p class="muted" style="margin:6px 0 0">Nota del cliente: ${esc(l.decision_note)}</p>` : ''}`;
+    ${compact ? answer : `
+    ${(l.items || []).length ? `<div class="lead-items">${l.items.map((i) => `<span class="pill">${esc(i.name)}</span>`).join('')}</div>` : ''}
+    ${l.message ? `<p class="lead-msg">${esc(l.message)}</p>` : ''}
+    ${l.preferred ? `<p class="lead-pref">${svgIcon('agenda')} Le viene bien: <b>${esc(l.preferred)}</b></p>` : ''}
+    <div class="lead-who"><div><b>${esc(who)}</b>${l.customer_phone ? `<small>${esc(fmtPhone(l.customer_phone))}</small>` : '<small>Sin teléfono: responde desde aquí y le llega al móvil.</small>'}</div>
+      ${l.customer_phone ? `<div class="icons">${contactButtons(l.customer_phone, null, wa, who)}</div>` : ''}</div>
+    ${l.status === 'reschedule' ? `<div class="lead-box warn"><b>Pide otra hora${l.client_preferred_at ? ': propone ' + fmtTime(l.client_preferred_at) : ''}</b>${l.decision_note ? `<p>“${esc(l.decision_note)}”</p>` : ''}</div>` : ''}
+    ${l.status === 'accepted' ? `<div class="lead-box ok"><b>Ha aceptado tu presupuesto${l.quote_amount != null ? ' de ' + fmtEur(num(l.quote_amount)) : ''}${l.appointment_at ? ' · cita ' + fmtTime(l.appointment_at) : ''}</b><p>Abre la orden para recibir el vehículo: el cliente verá el estado en su móvil.</p></div>` : ''}
+    ${l.status === 'declined' ? `<div class="lead-box"><b>Ha rechazado el presupuesto</b>${l.decision_note ? `<p>“${esc(l.decision_note)}”</p>` : ''}</div>` : ''}
+    ${l.status === 'accepted' ? '' : answer}
+    ${past ? `<p class="lead-past">La cita que propusiste ya ha pasado. ${l.status === 'quoted' ? 'Cambia la respuesta con una fecha nueva.' : 'Llama al cliente para quedar otro día.'}</p>` : ''}`}`;
   const acts = el.querySelector('.actions');
   const btn = (label, fn, cls = 'btn small') => { const b = document.createElement('button'); b.className = cls; b.textContent = label; b.onclick = fn; acts.appendChild(b); };
-  if (l.status === 'sent' || l.status === 'quoted' || l.status === 'reschedule') btn(l.status === 'sent' ? 'Responder' : l.status === 'reschedule' ? 'Proponer cita nueva' : 'Cambiar respuesta', () => respondLead(l));
+  if (l.status === 'sent' || l.status === 'quoted' || l.status === 'reschedule') btn(l.status === 'sent' ? 'Responder' : l.status === 'reschedule' ? 'Proponer otra hora' : 'Cambiar respuesta', () => respondLead(l), l.status === 'quoted' ? 'btn ghost small' : 'btn small');
   if (l.status === 'accepted') btn('Abrir orden', () => convertLead(l));
   if (l.status === 'converted' && l.job_id) btn('Ver orden', () => { const j = jobs.find((x) => x.id === l.job_id); if (j) openJob(j); }, 'btn ghost small');
-  if (['sent', 'quoted', 'reschedule', 'accepted', 'declined'].includes(l.status)) btn('Cerrar', () => closeLead(l), 'btn ghost small');
+  if (['sent', 'quoted', 'reschedule', 'accepted', 'declined'].includes(l.status)) btn(l.status === 'declined' ? 'Archivar' : 'Cerrar', () => closeLead(l), 'btn ghost small');
   return el;
 }
 
 function renderLeads() {
   const list = $('leadsList');
   list.innerHTML = '';
-  const open = leads.filter((l) => LEAD_OPEN.includes(l.status));
+  const open = leads.filter((l) => LEAD_OPEN.includes(l.status) || l.status === 'declined');
   if (open.length === 0) {
     list.innerHTML = emptyState('leads', 'Ninguna solicitud pendiente', workshop?.listed
       ? 'Los conductores de tu zona pueden pedirte presupuesto desde la app. Cuando llegue una, la verás aquí y te avisaremos.'
       : 'Activa "Aparecer en la app" en Mi taller y los conductores de tu zona podrán pedirte presupuesto.');
   }
-  for (const l of open) list.appendChild(leadCard(l));
+  for (const [status, title, hint] of [...LEAD_GROUPS, ['declined', 'Rechazadas', 'Archívalas cuando las hayas visto.']]) {
+    // Las que esperan respuesta, la más antigua primero; el resto, la más reciente primero.
+    const group = open.filter((l) => l.status === status)
+      .sort((a, b) => status === 'sent' ? a.created_at.localeCompare(b.created_at) : b.updated_at.localeCompare(a.updated_at));
+    if (!group.length) continue;
+    list.insertAdjacentHTML('beforeend', `<div class="group-label">${title}<span>${group.length}</span><small>${hint}</small></div>`);
+    for (const l of group) list.appendChild(leadCard(l));
+  }
   const done = $('leadsDone');
   done.innerHTML = '';
-  const closed = leads.filter((l) => !LEAD_OPEN.includes(l.status)).slice(0, 30);
+  const closed = leads.filter((l) => !LEAD_OPEN.includes(l.status) && l.status !== 'declined').slice(0, 30);
   if (closed.length === 0) done.innerHTML = '<p class="muted">Ninguna todavía.</p>';
-  for (const l of closed) done.appendChild(leadCard(l));
+  for (const l of closed) done.appendChild(leadCard(l, true));
+  $('leadsDoneCount').textContent = closed.length ? `(${closed.length})` : '';
 }
 
 async function respondLead(l) {
   const def = l.status === 'reschedule' && l.client_preferred_at ? new Date(l.client_preferred_at) : l.appointment_at ? new Date(l.appointment_at) : null;
-  const local = def ? new Date(def.getTime() - def.getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '';
-  const r = await dialog(`<h3>Responder a ${esc(l.customer_name || 'el cliente')}</h3>
-    <label>Precio orientativo, IVA incluido (€)</label><input name="amount" inputmode="decimal" value="${l.quote_amount ?? ''}" required>
-    <label>Qué incluye y comentarios</label><textarea name="text" rows="3">${esc(l.quote_text ?? '')}</textarea>
-    <label>${l.status === 'reschedule' ? 'Cita nueva (el cliente propone esta hora; cámbiala si no te cuadra)' : 'Propón una cita (opcional)'}</label><input type="datetime-local" name="when" value="${local}">
-    <p class="muted" style="font-size:13px">El cliente lo recibe en su móvil y puede aceptarlo. Al aceptar, tendrás acceso a su vehículo para abrir la orden.</p>`,
+  const toLocal = (d) => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  const local = def && def > new Date() ? toLocal(def) : '';
+  const items = (l.items || []).map((i) => `<span class="pill">${esc(i.name)}</span>`).join('');
+  const r = await dialog(`<h3>${l.status === 'sent' ? 'Responder a' : 'Nueva respuesta para'} ${esc(l.customer_name || 'el cliente')}</h3>
+    <div class="dlg-ctx"><b>${esc(l.vehicle?.name || 'Vehículo')}</b>${items ? `<div class="lead-items">${items}</div>` : ''}
+      ${l.message ? `<p class="lead-msg">${esc(l.message)}</p>` : ''}
+      ${l.preferred ? `<p class="lead-pref">${svgIcon('agenda')} Le viene bien: <b>${esc(l.preferred)}</b></p>` : ''}
+      ${l.status === 'reschedule' && l.client_preferred_at ? `<p class="lead-pref">${svgIcon('agenda')} Propone: <b>${fmtTime(l.client_preferred_at)}</b></p>` : ''}</div>
+    <label>Precio orientativo, IVA incluido</label><div class="euro"><input name="amount" inputmode="decimal" value="${l.quote_amount ?? ''}" placeholder="0" required><span>€</span></div>
+    <label>Qué incluye y comentarios</label><textarea name="text" rows="3" placeholder="Mano de obra y piezas incluidas. Te confirmamos el precio final al ver el vehículo.">${esc(l.quote_text ?? '')}</textarea>
+    <label>${l.status === 'reschedule' ? 'Cita nueva (ya está puesta la hora que propone; cámbiala si no te cuadra)' : 'Propón una cita'}</label><input type="datetime-local" name="when" value="${local}" min="${toLocal(new Date())}">
+    <p class="muted" style="font-size:13px">Le llega al móvil al momento y puede aceptarlo con un toque. Al aceptar tendrás acceso a su vehículo para abrir la orden.</p>`,
     'Enviar respuesta', (fd) => fd);
   if (!r) return;
   const amount = num(r.amount);
-  if (amount == null) { alert('Pon un precio.'); return; }
+  if (amount == null || amount <= 0) { alert('Pon un precio orientativo.'); return respondLead(l); }
+  if (r.when && new Date(r.when) < new Date()) { alert('Esa hora ya ha pasado. Elige una cita futura.'); return respondLead(l); }
   const { error } = await sb.rpc('quote_lead', { p_lead: l.id, p_amount: amount, p_text: (r.text || '').trim() || null, p_appointment: r.when ? new Date(r.when).toISOString() : null });
   if (error) { alert('No se pudo responder: ' + error.message); return; }
   await loadLeads();
@@ -852,7 +896,12 @@ $('agNext').onclick = () => { agendaStart = monday(agendaStart || new Date()); a
 $('agToday').onclick = () => { agendaStart = monday(new Date()); renderAgenda(); };
 
 async function closeLead(l) {
-  if (!confirm('¿Cerrar esta solicitud? El cliente dejará de verla como pendiente.')) return;
+  const archive = l.status === 'declined';
+  const ok = await dialog(archive
+    ? `<h3>Archivar la solicitud</h3><p class="muted">Pasa a "Cerradas". El cliente ya la rechazó, así que no le llega nada.</p>`
+    : `<h3>¿Cerrar esta solicitud?</h3><p class="muted">Pasa a "Cerradas" y el cliente deja de verla como pendiente en su app. Si no puedes atenderle, mejor llámale o respóndele con otra fecha: es un cliente que te ha elegido.</p>`,
+    archive ? 'Archivar' : 'Cerrar solicitud', () => true);
+  if (!ok) return;
   const { error } = await sb.from('leads').update({ status: 'closed', updated_at: new Date().toISOString() }).eq('id', l.id);
   if (error) { alert('No se pudo cerrar: ' + error.message); return; }
   await loadLeads();
