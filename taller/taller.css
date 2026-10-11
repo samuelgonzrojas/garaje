@@ -509,3 +509,42 @@ button.appt{display:block;width:100%;text-align:left;font:inherit;color:var(--in
   .ag-today,.ag-late{min-width:0}
 }
 @media (max-width:720px){.day.past.empty-day{display:none}}
+
+/* Coches */
+.vchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.vchips:empty{display:none}
+.vchips .status{margin-top:0}
+.specs{margin:6px 0 0;color:var(--muted);font-size:14px}
+.specs:empty{display:none}
+.due-item{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)}
+.due-item:first-child{border-top:0}
+.due-item i{flex:none;width:12px;height:12px;border-radius:50%;margin-top:5px;background:var(--muted)}
+.due-item.red i{background:var(--red)}
+.due-item.amber i{background:var(--amber)}
+.due-item.green i{background:var(--green)}
+.due-item.unknown i{background:transparent;border:2px solid var(--muted)}
+.due-item small{display:block;color:var(--muted);font-size:13.5px}
+.due-more{margin-top:8px}
+.due-more summary{cursor:pointer;color:var(--muted);font-weight:600;font-size:14px;padding:6px 0}
+.vj-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;width:100%;text-align:left;font:inherit;color:var(--ink);background:none;border:0;border-top:1px solid var(--line);padding:12px 2px;cursor:pointer}
+.vj-row:first-child{border-top:0}
+.vj-row:hover{background:var(--card-2)}
+.vj-row b{flex:1;min-width:160px;font-weight:600}
+.vj-row .status{margin-top:0}
+.vj-row small{color:var(--muted);font-variant-numeric:tabular-nums}
+.vj-row .num-tag{color:var(--muted);font-size:12px;font-weight:800}
+table.hist td small{display:block;color:var(--muted)}
+.leave{text-align:center;margin:8px 0 20px}
+.leave a{color:var(--muted);font-size:14px}
+@media (max-width:720px){
+  table.hist td.h-what{padding-bottom:4px}
+  table.hist td.h-what b{font-size:15px}
+}
+@media (max-width:640px){
+  .line{grid-template-columns:1fr 96px 36px;padding:8px;border:1px solid var(--line);border-radius:14px;background:var(--card-2)}
+  .line>div:nth-child(1){grid-column:1}
+  .line>div:nth-child(2){grid-column:2}
+  .line>div:nth-child(3){grid-column:1/3}
+  .line .x{grid-column:3;grid-row:1}
+}
+#vLast{font-size:15px;max-width:260px}

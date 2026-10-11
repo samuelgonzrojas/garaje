@@ -7,7 +7,7 @@
 <meta name="description" content="El día a día del taller con Garaje: órdenes de trabajo, presupuestos que el cliente aprueba en su móvil, piezas, proveedores y el historial de cada coche.">
 <link rel="icon" href="../icon-192.png">
 <link rel="stylesheet" href="../style.css">
-<link rel="stylesheet" href="taller.css?v=20261011r">
+<link rel="stylesheet" href="taller.css?v=20261011t">
 </head>
 <body>
 <div class="wrap panel">
@@ -181,11 +181,12 @@
   <div class="top page-head">
     <div><h2 style="margin:0">Coches</h2><p class="sub" style="margin:2px 0 0">Los que te han dado acceso desde la app (Mi coche → Compartir → Taller), con su dueño y su teléfono.</p></div>
     <form id="joinForm" style="display:flex;gap:8px;align-items:center">
-      <input id="joinCode" placeholder="Código" style="width:170px;text-transform:uppercase" maxlength="6">
+      <input id="joinCode" placeholder="Código o enlace" style="width:190px" autocomplete="off">
       <button class="btn small">Tengo un código</button>
     </form>
   </div>
   <div class="err" id="listErr"></div>
+  <div class="board-tools"><input id="carSearch" type="search" placeholder="Buscar por matrícula, coche o dueño…" autocomplete="off"></div>
   <div class="grid" id="grid"></div>
   <div class="empty hidden" id="empty" data-icon="cars"><b>Aún no tienes coches</b><p>El cliente abre Garaje → Mi coche → Compartir → Taller y te enseña un código. Escríbelo arriba y verás su coche, su historial y su teléfono.</p></div>
 </section>
@@ -199,6 +200,7 @@
       <div>
         <h2 id="vName"></h2>
         <span class="plate" id="vPlate"></span><span class="badge" id="vRole"></span>
+        <p class="specs" id="vSpecs"></p>
       </div>
       <div class="kv">
         <div><b id="vKm"></b><small id="vKmSub"></small></div>
@@ -208,6 +210,17 @@
     </div>
     <div class="people" id="vPeople"></div>
     <div style="margin-top:12px" id="vJobActions"><button class="btn" id="vNewJob">+ Abrir orden de trabajo</button></div>
+  </div>
+
+  <div class="card" id="vDueCard">
+    <div class="top"><div><h2 style="margin:0">Lo que le toca</h2><p class="sub" style="margin:2px 0 0" id="vDueSub"></p></div>
+      <button class="btn small hidden" id="vDueJob">Abrir orden con esto</button></div>
+    <div id="vDue"></div>
+  </div>
+
+  <div class="card" id="vJobsCard">
+    <h2>Órdenes y citas</h2>
+    <div id="vJobs"></div>
   </div>
 
   <div class="card" id="quickLog">
@@ -227,12 +240,13 @@
 
   <div class="card">
     <h2>Historial</h2>
-    <table>
+    <table class="list hist">
       <thead><tr><th>Fecha</th><th>Trabajo</th><th>Km</th><th>Coste</th><th>Quién</th></tr></thead>
       <tbody id="history"></tbody>
     </table>
     <p class="muted hidden" id="noHistory">Sin registros todavía.</p>
   </div>
+  <p class="leave hidden" id="vLeaveWrap"><a href="#" id="vLeave">Dejar de ver este coche</a></p>
 </section>
 
 <!-- PIEZAS -->
@@ -296,6 +310,6 @@
 </div>
 <datalist id="brands"></datalist>
 <datalist id="partNames"></datalist>
-<script type="module" src="app.js?v=20261011r"></script>
+<script type="module" src="app.js?v=20261011t"></script>
 </body>
 </html>

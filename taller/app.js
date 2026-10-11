@@ -25,6 +25,7 @@ const ROLE_NAME = { owner: 'Dueño', manager: 'Encargado', mechanic: 'Mecánico'
 let roles = {};            // vehicle_id -> role
 let vehicles = [];         // filas de public.vehicles
 let people = {};           // vehicle_id -> personas con acceso (dueño, familia), de vehicle_people
+let vstatus = {};          // vehicle_id -> semáforo que publica la app del cliente (vehicle_status)
 let jobs = [];             // órdenes del taller
 let leads = [];            // solicitudes de presupuesto llegadas desde la app
 let agendaStart = null;    // lunes de la semana que se enseña en la agenda
@@ -412,6 +413,11 @@ async function loadVehicles() {
   const loaded = await Promise.all(vehicles.map((v) => people[v.id] ? null
     : sb.rpc('vehicle_people', { p_vehicle: v.id }).then(({ data }) => [v.id, data || []], () => [v.id, []])));
   for (const e of loaded) if (e) people[e[0]] = e[1];
+  // Lo que le toca a cada coche, tal como lo calcula la app del cliente.
+  if (vehicles.length) {
+    const { data: st } = await sb.from('vehicle_status').select('*').in('vehicle_id', vehicles.map((v) => v.id));
+    vstatus = Object.fromEntries((st || []).map((x) => [x.vehicle_id, x]));
+  }
   if (tab === 'cars' && !current) renderGrid();
   if (current) {
     const fresh = vehicles.find((v) => v.id === current.id);
@@ -419,18 +425,39 @@ async function loadVehicles() {
   }
   if (job) jobVehicle = vehicles.find((v) => v.id === job.vehicle_id) || jobVehicle;
 }
+/** ITV: "Caducada", "en N días" (si quedan menos de 45) o nada. */
+function itvBadge(iso) {
+  if (!iso) return '';
+  const days = Math.round((new Date(iso.length === 10 ? iso + 'T12:00:00' : iso) - new Date()) / 86400000);
+  if (days < 0) return '<span class="due late">ITV caducada</span>';
+  if (days <= 45) return `<span class="due today">ITV en ${days} ${days === 1 ? 'día' : 'días'}</span>`;
+  return '';
+}
+const attentionOf = (id) => (vstatus[id]?.items || []).filter((i) => i.level === 'red' || i.level === 'amber');
+
 function renderGrid() {
   const g = $('grid');
   g.innerHTML = '';
   show('empty', vehicles.length === 0);
-  for (const row of vehicles) {
+  const q = $('carSearch').value.trim().toLowerCase();
+  const openOf = (id) => jobs.find((j) => j.vehicle_id === id && !['delivered', 'cancelled'].includes(j.status));
+  const list = vehicles.filter((row) => {
+    if (!q) return true;
+    const s = summary(row); const o = ownerOf(row.id);
+    return [s.name, s.plate, (s.plate || '').replace(/\s/g, ''), o?.display_name, o?.phone].some((x) => (x || '').toLowerCase().includes(q));
+  }).sort((a, b) => (openOf(b.id) ? 1 : 0) - (openOf(a.id) ? 1 : 0) || attentionOf(b.id).length - attentionOf(a.id).length || b.updated_at.localeCompare(a.updated_at));
+  if (q && !list.length) g.innerHTML = '<p class="muted">Ningún coche coincide con la búsqueda.</p>';
+  for (const row of list) {
     const s = summary(row);
-    const open = jobs.find((j) => j.vehicle_id === row.id && !['delivered', 'cancelled'].includes(j.status));
+    const open = openOf(row.id);
+    const att = attentionOf(row.id);
+    const reds = att.filter((i) => i.level === 'red').length;
     const el = document.createElement('div');
     el.className = 'card vcard';
     const o = ownerOf(row.id);
-    el.innerHTML = `${photoImg(s.photo, 64)}<h3>${esc(s.name)}</h3><span class="plate">${esc(s.plate)}</span><span class="badge ${s.role}">${roleName(s.role)}</span>
-      ${open ? `<span class="status ${open.status}">${STATUS[open.status]}</span>` : ''}
+    el.innerHTML = `${photoImg(s.photo, 64)}<h3>${esc(s.name)}</h3><span class="plate">${esc(s.plate)}</span>${s.role !== 'workshop' ? `<span class="badge ${s.role}">${roleName(s.role)}</span>` : ''}
+      <div class="vchips">${open ? `<span class="status ${open.status}">OR ${open.number} · ${STATUS[open.status]}</span>` : ''}${itvBadge(s.itv)}
+        ${att.length ? `<span class="due ${reds ? 'late' : 'today'}">${att.length === 1 ? 'Le toca 1 cosa' : `Le tocan ${att.length} cosas`}</span>` : ''}</div>
       ${o ? `<div class="owner-line"><div class="who-line"><b>${personName(o)}</b><small>${o.phone ? esc(fmtPhone(o.phone)) : 'sin teléfono'}</small></div>
         ${isMe(o) ? '' : `<div class="icons">${contactButtons(o.phone, o.phone ? null : o.email, `Hola ${o.display_name}, te escribo del taller por tu ${s.name}.`, o.display_name)}</div>`}</div>` : ''}
       <div class="kv"><div><b>${fmtKm(s.km)}</b><small>${s.kmAt ? 'el ' + fmtDate(s.kmAt) : 'sin lectura'}</small></div>
@@ -441,11 +468,15 @@ function renderGrid() {
     g.appendChild(el);
   }
 }
+$('carSearch').addEventListener('input', () => renderGrid());
 
 $('joinForm').onsubmit = async (e) => {
   e.preventDefault();
-  const code = $('joinCode').value.trim().toUpperCase();
-  if (code.length < 6) return;
+  // Vale el código o el enlace que manda la app (…?c=ABC123).
+  const raw = $('joinCode').value.trim();
+  const code = ((raw.match(/[?&]c=([A-Za-z0-9]{6})/) || [])[1] || raw).toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (code.length !== 6) { $('listErr').textContent = 'El código tiene 6 letras o números. También puedes pegar el enlace que te ha mandado el cliente.'; return; }
+  $('listErr').textContent = '';
   const { error } = await sb.rpc('accept_invite', { p_code: code });
   if (error) { $('listErr').textContent = error.message; return; }
   $('joinCode').value = '';
@@ -478,16 +509,87 @@ function renderVehicle() {
   $('vItv').textContent = fmtDate(s.itv);
   $('vLast').textContent = s.last;
   renderPeople(current, s);
+  renderSpecs(s.prof);
+  renderDue(current);
+  renderVehicleJobs(current);
+  show('vLeaveWrap', isOwner() && s.role === 'workshop');
   const tb = $('history');
   tb.innerHTML = '';
   show('noHistory', s.events.length === 0);
   for (const e of s.events) {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${fmtDate(e.at)}</td><td>${esc(itemName(e.catalog_id, s.prof))}${e.note ? `<small>${esc(e.note)}</small>` : ''}</td>
-      <td>${e.reading_value != null ? fmtKm(e.reading_value) : ''}</td><td>${fmtEur(e.cost)}</td><td>${esc(e.author || '')}</td>`;
+    tr.innerHTML = `<td data-label="Fecha">${fmtDate(e.at)}</td><td class="h-what"><b>${esc(itemName(e.catalog_id, s.prof))}</b>${e.note ? `<small>${esc(e.note)}</small>` : ''}</td>
+      <td data-label="Km">${e.reading_value != null ? fmtKm(e.reading_value) : '—'}</td><td data-label="Coste">${fmtEur(e.cost) || '—'}</td><td data-label="Quién">${esc(e.author || '—')}</td>`;
     tb.appendChild(tr);
   }
 }
+
+const FUEL = { diesel: 'Diésel', gasoline: 'Gasolina', petrol: 'Gasolina', hybrid: 'Híbrido', phev: 'Híbrido enchufable', electric: 'Eléctrico', lpg: 'GLP', cng: 'GNC' };
+/** Motor, combustible, año, matriculación y bastidor. */
+function renderSpecs(prof) {
+  const eng = engines[prof.engine_id];
+  const bits = [eng?.engine || '', FUEL[prof.fuel] || prof.fuel || '', prof.year ? String(prof.year) : '',
+    prof.first_registration ? 'matriculado el ' + fmtDate(prof.first_registration) : '', prof.vin ? 'bastidor ' + prof.vin : ''].filter(Boolean);
+  $('vSpecs').textContent = bits.join(' · ');
+}
+/** "Lo que le toca", con el semáforo que publica la app del cliente. */
+function renderDue(row) {
+  const st = vstatus[row.id];
+  const box = $('vDue');
+  if (!st) {
+    $('vDueSub').textContent = '';
+    box.innerHTML = '<p class="muted">Cuando el dueño tenga la última versión de Garaje, aquí verás lo que le toca a su vehículo, con los mismos colores que ve él en su móvil.</p>';
+    show('vDueJob', false);
+    return;
+  }
+  $('vDueSub').textContent = `Según la app del dueño · actualizado ${ago(st.updated_at)}${st.km ? ' · ' + fmtKm(st.km) : ''}`;
+  const order = { red: 0, amber: 1, unknown: 2, green: 3 };
+  const items = [...(st.items || [])].sort((a, b) => order[a.level] - order[b.level] || (a.km_left ?? 1e9) - (b.km_left ?? 1e9));
+  const att = items.filter((i) => i.level === 'red' || i.level === 'amber');
+  const rest = items.filter((i) => i.level === 'unknown');
+  const ok = items.filter((i) => i.level === 'green');
+  const row1 = (i) => `<div class="due-item ${i.level}"><i></i><div><b>${esc(i.name)}</b><small>${esc(i.reason || '')}</small></div></div>`;
+  box.innerHTML = (att.length ? att.map(row1).join('') : '<p class="muted">Nada urgente ahora mismo.</p>')
+    + (rest.length ? `<details class="due-more"><summary>${rest.length} sin datos (no se sabe cuándo se hizo)</summary>${rest.map(row1).join('')}</details>` : '')
+    + (ok.length ? `<details class="due-more"><summary>${ok.length} al día</summary>${ok.map(row1).join('')}</details>` : '');
+  show('vDueJob', att.length > 0 && !!workshop);
+  $('vDueJob').onclick = () => newJobFor(row, {
+    customer_request: 'Lo que le toca según Garaje: ' + att.map((i) => i.name).join(', '),
+    lines: att.map((i) => ({ kind: 'labor', description: i.name, catalog_id: i.id.startsWith('custom:') ? '' : i.id, qty: 1, unit_price: workshop.labor_rate, discount: '' })),
+  });
+}
+/** Órdenes y citas de este coche. */
+function renderVehicleJobs(row) {
+  const js = jobs.filter((j) => j.vehicle_id === row.id).sort((a, b) => b.number - a.number);
+  const ap = appointments.filter((a) => a.vehicle_id === row.id && new Date(a.starts_at) >= new Date(Date.now() - 86400000)).sort((a, b) => a.starts_at.localeCompare(b.starts_at));
+  const box = $('vJobs');
+  box.innerHTML = '';
+  if (!js.length && !ap.length) { box.innerHTML = '<p class="muted">Ninguna todavía. Ábrele una orden o dale cita desde la Agenda.</p>'; return; }
+  for (const a of ap) {
+    const b = document.createElement('button');
+    b.className = 'vj-row';
+    b.innerHTML = `<span class="ag-kind cita">Cita</span><b>${esc(a.title)}</b><small>${fmtTime(a.starts_at)}</small>`;
+    b.onclick = () => { setTab('agenda'); agendaStart = monday(new Date(a.starts_at)); renderAgenda(); };
+    box.appendChild(b);
+  }
+  for (const j of js) {
+    const b = document.createElement('button');
+    b.className = 'vj-row';
+    b.innerHTML = `<span class="num-tag">OR ${j.number}</span><b>${esc(j.customer_request ? j.customer_request.slice(0, 70) : 'Orden de trabajo')}</b><span class="status ${j.status}">${STATUS[j.status]}</span>${isManager() && (j.lines || []).length ? `<small>${fmtEur(totals(j).total)}</small>` : ''}`;
+    b.onclick = () => openJob(j);
+    box.appendChild(b);
+  }
+}
+$('vLeave').onclick = async (e) => {
+  e.preventDefault();
+  const s = summary(current);
+  if (!(await dialog(`<h3>¿Dejar de ver ${esc(s.name)}?</h3><p class="muted">Tu taller ya no verá este vehículo ni su historial. Lo que ya apuntasteis sigue en el móvil del cliente. Para volver a verlo, el cliente tendría que darte otro código.</p>`, 'Dejar de verlo', () => true))) return;
+  const { error } = await sb.from('vehicle_members').delete().eq('vehicle_id', current.id).eq('user_id', session.user.id);
+  if (error) { alert('No se pudo: ' + error.message); return; }
+  current = null;
+  await loadVehicles();
+  setTab('cars');
+};
 
 /** Dueño y familiares del coche con sus datos de contacto. */
 function renderPeople(row, s) {
