@@ -282,7 +282,7 @@ async function loadWorkshop() {
   }
   const name = workshop?.name || profile.display_name || '';
   $('who').textContent = name;
-  $('avatar').textContent = (name.trim()[0] || '?').toUpperCase();
+  $('avatar').innerHTML = workshop?.logo ? `<img src="${esc(workshop.logo)}" alt="">` : esc((name.trim()[0] || '?').toUpperCase());
   $('roleChip').textContent = workshop && myRole !== 'owner' ? ROLE_NAME[myRole] : 'Taller';
   // Pestañas según el rol: el mecánico, órdenes, agenda y coches; el encargado,
   // todo menos los datos del taller; el dueño, todo.
@@ -329,26 +329,90 @@ function listingBlock(d) {
     <div><label>Qué haces mejor (sale en la app, opcional)</label><input name="description" value="${esc(d.description ?? '')}" placeholder="Mecánica general, diésel, neumáticos, ITV…" maxlength="140"></div>`;
 }
 
+/** Logo: se reduce en el navegador a ≤ 256 px y se guarda como data URL. */
+function shrinkLogo(file) {
+  return new Promise((ok, ko) => {
+    const img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, 256 / Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      const png = c.toDataURL('image/png');
+      ok(png.length < 150000 ? png : c.toDataURL('image/jpeg', 0.85));
+      URL.revokeObjectURL(img.src);
+    };
+    img.onerror = () => ko(new Error('No se pudo leer la imagen.'));
+    img.src = URL.createObjectURL(file);
+  });
+}
+
 function renderWsForm(formId, data, button) {
   const f = $(formId);
   const field = ([k, label, ph, req]) => `<div><label>${label}${req ? ' *' : ''}</label><input name="${k}" value="${esc(data[k] ?? '')}" placeholder="${esc(ph)}" ${req ? 'required' : ''} ${['labor_rate', 'vat', 'quote_validity_days'].includes(k) ? 'inputmode="decimal"' : ''}></div>`;
+  const maxNo = Math.max(0, ...jobs.map((j) => j.number || 0));
   f.innerHTML = `<div class="ws-cols"><div>
     <h3 style="margin:0 0 4px">Datos del taller</h3>
+    <div class="logo-row"><div class="logo-prev" id="${formId}LogoPrev"></div>
+      <div><label class="btn ghost small logo-btn">Subir logotipo<input type="file" accept="image/*" id="${formId}LogoFile" hidden></label>
+        <a href="#" class="muted logo-del" id="${formId}LogoDel">Quitar</a>
+        <p class="muted" style="font-size:12.5px;margin:4px 0 0">Sale en los presupuestos y órdenes que imprimes.</p></div>
+      <input type="hidden" name="logo" value="${esc(data.logo || '')}"></div>
     ${field(WS_FIELDS[0])}
     <div class="row2">${field(WS_FIELDS[1])}${field(WS_FIELDS[2])}</div>
     ${field(WS_FIELDS[3])}${field(WS_FIELDS[4])}
     <div class="row2">${field(WS_FIELDS[5])}${field(WS_FIELDS[6])}</div>
+    <div><label>Horario</label><input name="hours" value="${esc(data.hours || '')}" placeholder="L-V 8:30-13:30 y 15:30-19:00 · S 9-13"></div>
+    <h3 style="margin:22px 0 4px">Presupuestos y órdenes</h3>
     <div class="row3">${field(WS_FIELDS[7])}${field(WS_FIELDS[8])}${field(WS_FIELDS[9])}</div>
-    </div><div>${listingBlock(data)}</div></div>
+    <div class="row2"><div><label>Margen de las piezas (%)</label><input name="parts_margin" inputmode="decimal" value="${esc(data.parts_margin ?? 35)}"><small class="muted">Para calcular el PVP al importar o con "Calcular PVP".</small></div>
+      ${workshop ? `<div><label>Siguiente nº de orden</label><input name="next_job_no" inputmode="numeric" value="${esc(data.next_job_no ?? maxNo + 1)}"><small class="muted">Si vienes de otro programa, sigue su numeración.</small></div>` : ''}</div>
+    </div><div>${listingBlock(data)}
+      <div class="app-preview"><small>Así te ven los conductores en la app</small><div class="ap-card" id="${formId}Preview"></div></div>
+    </div></div>
     <div class="err" id="${formId}Err"></div>
     <button class="btn">${button}</button>`;
+  // Logo
+  const logoIn = f.querySelector('input[name=logo]');
+  const paintLogo = () => {
+    const v = logoIn.value, prev = $(formId + 'LogoPrev');
+    prev.innerHTML = v ? `<img src="${esc(v)}" alt="">` : `<span>${esc(((f.elements.namedItem('name')?.value || data.name || '?').trim()[0] || '?').toUpperCase())}</span>`;
+    show(formId + 'LogoDel', !!v);
+  };
+  $(formId + 'LogoFile').onchange = async (e) => {
+    const file = e.target.files[0]; if (!file) return;
+    try { logoIn.value = await shrinkLogo(file); paintLogo(); paintPreview(); } catch (err) { $(formId + 'Err').textContent = err.message; }
+  };
+  $(formId + 'LogoDel').onclick = (e) => { e.preventDefault(); logoIn.value = ''; paintLogo(); paintPreview(); };
+  // Vista previa de la ficha en la app
+  const paintPreview = () => {
+    const fd = Object.fromEntries(new FormData(f).entries());
+    const vt = ['car', 'moto'].filter((t) => fd['vt_' + t]);
+    $(formId + 'Preview').innerHTML = `<div class="ap-top">${fd.logo ? `<img src="${esc(fd.logo)}" alt="">` : `<span class="avatar">${esc(((fd.name || '?').trim()[0] || '?').toUpperCase())}</span>`}
+        <div><b>${esc(fd.name || 'Tu taller')}</b><small>${esc([fd.city, fd.province].filter(Boolean).join(', ') || 'Ciudad')}${vt.length ? ' · ' + vt.map((t) => (t === 'car' ? 'Coches' : 'Motos')).join(' y ') : ''}</small></div></div>
+      ${fd.description ? `<p>${esc(fd.description)}</p>` : '<p class="muted">Pon qué haces mejor: los conductores lo ven al elegir taller.</p>'}
+      ${fd.hours ? `<p class="muted">${svgIcon('agenda')} ${esc(fd.hours)}</p>` : ''}
+      <span class="ap-btn">Pedir presupuesto</span>
+      ${fd.listed ? '' : '<p class="ap-off">Ahora no apareces en la app: marca "Aparecer en la app".</p>'}`;
+  };
+  f.addEventListener('input', paintPreview);
+  f.addEventListener('change', paintPreview);
+  paintLogo(); paintPreview();
   f.onsubmit = async (e) => {
     e.preventDefault();
     const fd = Object.fromEntries(new FormData(f).entries());
-    const row = { owner_id: session.user.id, updated_at: new Date().toISOString() };
+    const row = { owner_id: workshop?.owner_id || session.user.id, updated_at: new Date().toISOString() };
     for (const [k] of WS_FIELDS) {
       const v = (fd[k] ?? '').trim();
       row[k] = ['labor_rate', 'vat'].includes(k) ? (num(v) ?? (k === 'vat' ? 21 : 45)) : k === 'quote_validity_days' ? (parseInt(v, 10) || 12) : (v || null);
+    }
+    row.hours = (fd.hours || '').trim() || null;
+    row.logo = fd.logo || null;
+    row.parts_margin = num(fd.parts_margin) ?? 35;
+    if (fd.next_job_no != null && workshop) {
+      const n = parseInt(fd.next_job_no, 10);
+      if (!(n > maxNo)) { $(formId + 'Err').textContent = `El siguiente nº de orden tiene que ser mayor que ${maxNo}, la última que tienes.`; return; }
+      row.next_job_no = n;
     }
     // Visible en la app (solicitudes de presupuesto).
     row.listed = !!fd.listed;
@@ -360,8 +424,8 @@ function renderWsForm(formId, data, button) {
     const q = workshop ? sb.from('workshops').update(row).eq('id', workshop.id) : sb.from('workshops').insert(row);
     const { error } = await q;
     if (error) { $(formId + 'Err').textContent = 'No se pudo guardar: ' + error.message; return; }
-    // El nombre del taller firma también los trabajos que apunta.
-    await sb.from('profiles').upsert({ user_id: session.user.id, display_name: row.name, is_workshop: true, phone: row.phone, updated_at: row.updated_at });
+    // Perfil: marca de taller; el nombre y el teléfono, solo si aún no tenía (no se pisa el nombre personal).
+    await sb.from('profiles').upsert({ user_id: session.user.id, display_name: profile.display_name || row.name, is_workshop: true, phone: profile.phone || row.phone, updated_at: row.updated_at });
     const first = !workshop;
     await loadWorkshop();
     if (first) { localStorage.removeItem('garaje.skipSetup'); enter(); } else { show('settingsOk'); setTimeout(() => show('settingsOk', false), 2000); }
@@ -815,6 +879,7 @@ function renderHero() {
 
 function renderBoard() {
   renderOnboard();
+  renderInstallCard();
   renderHero();
   // "Solo las mías" cuando hay equipo.
   show('mineWrap', team.filter((m) => m.joined).length > 1 || myRole === 'mechanic');
@@ -1720,7 +1785,7 @@ async function printDoc(kind) {
   const rows = (job.lines || []).map((l) => `<tr><td>${l.kind === 'labor' ? 'Mano de obra' : 'Pieza'}</td><td>${esc(l.description)}${l.brand || l.reference ? `<br><small>${esc([l.brand, l.reference].filter(Boolean).join(' · '))}</small>` : ''}</td>
     <td class="num">${esc(l.qty)}</td><td class="num">${fmtEur(num(l.unit_price))}</td><td class="num">${l.discount ? esc(l.discount) + ' %' : ''}</td><td class="num">${fmtEur(lineTotal(l))}</td></tr>`).join('');
   $('print').innerHTML = `<div class="doc">
-    <div class="head"><div><h1>${esc(w.name)}</h1>${w.legal_name ? esc(w.legal_name) + '<br>' : ''}${w.tax_id ? 'NIF ' + esc(w.tax_id) + '<br>' : ''}${esc(w.address || '')}<br>${esc([w.phone, w.email].filter(Boolean).join(' · '))}${w.registry_no ? '<br>Nº registro industrial: ' + esc(w.registry_no) : ''}</div>
+    <div class="head"><div>${w.logo ? `<img src="${esc(w.logo)}" alt="" class="doc-logo">` : ''}<h1>${esc(w.name)}</h1>${w.legal_name ? esc(w.legal_name) + '<br>' : ''}${w.tax_id ? 'NIF ' + esc(w.tax_id) + '<br>' : ''}${esc(w.address || '')}<br>${esc([w.phone, w.email].filter(Boolean).join(' · '))}${w.registry_no ? '<br>Nº registro industrial: ' + esc(w.registry_no) : ''}${w.hours ? '<br>Horario: ' + esc(w.hours) : ''}</div>
       <div style="text-align:right"><h1>${title}</h1>Nº ${job.number}<br>Fecha: ${fmtDate(new Date().toISOString())}${kind === 'quote' ? `<br>Válido ${w.quote_validity_days} días hábiles` : ''}${job.promised_at ? '<br>Entrega prevista: ' + fmtDate(job.promised_at) : ''}</div></div>
     <div class="boxes">
       <div class="box"><b>Cliente</b>${esc(job.customer_name || '')}<br>${esc(job.customer_phone || '')}</div>
@@ -2074,7 +2139,7 @@ async function applyMargin() {
   const withCost = parts.filter((p) => p.cost != null);
   if (!withCost.length) { await notice('<h3>Primero, los costes</h3><p class="muted">Pon el coste de las piezas (en la tabla o importando tu Excel) y aquí calculas el PVP de todas a la vez.</p>'); return; }
   const r = await dialog(`<h3>Calcular PVP con margen</h3>
-    <label>Margen sobre el coste (%)</label><input name="m" inputmode="decimal" value="35" required>
+    <label>Margen sobre el coste (%)</label><input name="m" inputmode="decimal" value="${workshop.parts_margin ?? 35}" required>
     <label class="chk"><input type="radio" name="scope" value="missing" checked> Solo las que no tienen PVP (${withCost.filter((p) => p.price == null).length})</label>
     <label class="chk"><input type="radio" name="scope" value="all"> Todas las que tienen coste (${withCost.length}): sustituye el PVP actual</label>`, 'Calcular', (fd) => fd);
   if (!r) return;
@@ -2259,15 +2324,18 @@ function renderTeam() {
     const me = m.user_id === session.user.id;
     const canChange = isOwner() && m.role !== 'owner';
     const canRemove = m.role !== 'owner' && (isOwner() || (myRole === 'manager' && m.role === 'mechanic') || me);
+    const openJobs = m.user_id ? jobs.filter((j) => j.assigned_to === m.user_id && !['delivered', 'cancelled'].includes(j.status)).length : 0;
     return `<div class="member">
       <span class="avatar">${esc((m.display_name || m.email || '?').trim()[0].toUpperCase())}</span>
       <div class="m-info"><b>${esc(m.joined ? m.display_name : m.email)}${me ? ' <span class="muted">(tú)</span>' : ''}</b>
-        <small>${m.joined ? esc(m.email) : 'Invitación pendiente: entrará cuando abra el panel con este correo'}${m.phone ? ' · ' + esc(fmtPhone(m.phone)) : ''}</small></div>
+        <small>${m.joined ? esc(m.email) : 'Invitación pendiente: entrará cuando abra el panel con este correo'}${m.phone ? ' · ' + esc(fmtPhone(m.phone)) : ''}${openJobs ? ` · ${openJobs} ${openJobs === 1 ? 'orden abierta' : 'órdenes abiertas'}` : ''}</small>
+        ${!m.joined && canInvite ? `<a href="#" class="m-resend" data-id="${m.id}">Volver a mandarle el enlace</a>` : ''}</div>
       ${canChange ? `<select class="m-role" data-id="${m.id}"><option value="manager" ${m.role === 'manager' ? 'selected' : ''}>Encargado</option><option value="mechanic" ${m.role === 'mechanic' ? 'selected' : ''}>Mecánico</option></select>`
         : `<span class="role-chip ${m.role}">${ROLE_NAME[m.role]}</span>`}
       ${canRemove ? `<button class="icon-btn m-remove" data-id="${m.id}" title="${me ? 'Salir del equipo' : 'Quitar del equipo'}" aria-label="Quitar">×</button>` : '<span class="m-gap"></span>'}
     </div>`;
   }).join('') + (rows.length <= 1 ? emptyState('team', 'Solo estás tú', 'Invita a tu encargado y a tus mecánicos con su correo. Cuando entren en el panel con ese correo, verán las órdenes y los coches del taller.') : '');
+  for (const a of box.querySelectorAll('.m-resend')) a.onclick = (e) => { e.preventDefault(); const m = team.find((x) => x.id === a.dataset.id); shareInvite(m.email, m.role); };
   for (const sel of box.querySelectorAll('.m-role')) sel.onchange = async () => {
     const { error } = await sb.rpc('set_member_role', { p_member: sel.dataset.id, p_role: sel.value });
     if (error) alert('No se pudo cambiar: ' + error.message);
@@ -2297,7 +2365,21 @@ $('inviteBtn').onclick = async () => {
   const { error } = await sb.rpc('invite_member', { w: workshop.id, p_email: r.email, p_role: r.role });
   if (error) { alert('No se pudo invitar: ' + error.message); return; }
   await loadTeam();
+  const joined = team.some((m) => m.email === r.email.trim().toLowerCase() && m.joined);
+  shareInvite(r.email.trim().toLowerCase(), r.role, joined);
 };
+/** Mensaje para avisar a la persona invitada (WhatsApp, correo o copiar). */
+async function shareInvite(email, role, joined = false) {
+  const url = 'https://samuelgonzrojas.github.io/garaje/taller/';
+  const text = `Hola, te he dado acceso al panel de ${workshop.name} en Garaje como ${ROLE_NAME[role].toLowerCase()}. Entra en ${url} con tu correo ${email} (con Google o con el código que te llega) y verás las órdenes y los coches del taller. En el móvil puedes añadirlo a la pantalla de inicio.`;
+  const choice = await choose(`<h3>${joined ? 'Ya está en el equipo' : 'Invitación lista'}</h3>
+    <p class="muted">${joined ? 'Ya tenía cuenta en Garaje, así que entra directamente.' : 'Entrará en cuanto abra el panel con ese correo.'} Mándale el enlace:</p>
+    <textarea id="inviteText" rows="5">${esc(text)}</textarea>`, [['wa', 'Enviar por WhatsApp', 'btn small'], ['mail', 'Enviar por correo', 'btn ghost small'], ['copy', 'Copiar', 'btn ghost small']]);
+  const body = $('inviteText')?.value || text;
+  if (choice === 'wa') window.open('https://wa.me/?text=' + encodeURIComponent(body), '_blank', 'noopener');
+  if (choice === 'mail') location.href = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent('Acceso al panel de ' + workshop.name)}&body=${encodeURIComponent(body)}`;
+  if (choice === 'copy') { try { await navigator.clipboard.writeText(body); } catch { /* sin permiso */ } }
+}
 
 /** Aviso con un solo botón. */
 const notice = (html, label = 'Vale') => dialog(html, label, () => true, (f) => f.querySelector('button[value=cancel]')?.remove());
@@ -2326,6 +2408,27 @@ function dialog(html, okLabel, pick, after) {
     dlg.showModal();
   });
 }
+
+// ------------------------------------------------------------------ instalar en el móvil
+// Android/Chrome avisa con beforeinstallprompt; en iPhone se explica cómo hacerlo.
+let installEvt = null;
+const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const installHidden = () => { try { return localStorage.getItem('garaje.installHidden') === '1'; } catch { return false; } };
+function renderInstallCard() {
+  const box = $('installCard');
+  const can = !standalone() && !installHidden() && (installEvt || (isIOS && window.innerWidth < 900));
+  if (!can) { show('installCard', false); return; }
+  box.innerHTML = `<img src="icons/icon-192.png" alt=""><div><b>Ten el panel como una app</b>
+      <p class="muted">${installEvt ? 'Instálalo y te queda un icono de Garaje Taller en el móvil o en el ordenador, a pantalla completa.' : 'En Safari, toca Compartir (el cuadrado con la flecha) y después "Añadir a pantalla de inicio".'}</p></div>
+    <div class="actions">${installEvt ? '<button class="btn small" id="installGo">Instalar</button>' : ''}<button class="btn ghost small" id="installNo">Ahora no</button></div>`;
+  show('installCard', true);
+  $('installNo').onclick = () => { try { localStorage.setItem('garaje.installHidden', '1'); } catch { /* sin almacenamiento */ } show('installCard', false); };
+  if (installEvt) $('installGo').onclick = async () => { installEvt.prompt(); await installEvt.userChoice; installEvt = null; renderInstallCard(); };
+}
+window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); installEvt = e; renderInstallCard(); });
+window.addEventListener('appinstalled', () => { installEvt = null; renderInstallCard(); });
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 
 // ------------------------------------------------------------------ arranque
 await loadStatic();

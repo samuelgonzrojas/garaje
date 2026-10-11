@@ -664,3 +664,37 @@ dialog#dlg{max-width:760px}
 .ag-allrow{position:sticky;z-index:3}
 .ag-head,.ag-allrow{box-shadow:0 1px 0 var(--line)}
 .ag-allrow{background:var(--card-2)}
+
+/* Mi taller */
+.logo-row{display:flex;align-items:center;gap:14px;margin:6px 0 4px}
+.logo-prev{width:64px;height:64px;border-radius:16px;border:1px solid var(--line);background:var(--card-2);display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none}
+.logo-prev img{width:100%;height:100%;object-fit:contain;background:#fff}
+.logo-prev span{font-size:26px;font-weight:800;color:var(--brand-2)}
+.logo-btn{cursor:pointer;margin:0}
+.logo-del{font-size:13px;margin-left:8px}
+.ws-form small.muted{display:block;font-size:12px;margin-top:3px}
+.app-preview{margin-top:18px}
+.app-preview>small{display:block;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.ap-card{border:1px solid var(--line);border-radius:18px;padding:14px;background:var(--card-2);max-width:380px}
+.ap-top{display:flex;gap:12px;align-items:center}
+.ap-top img{width:44px;height:44px;border-radius:12px;object-fit:contain;background:#fff}
+.ap-top .avatar{width:44px;height:44px;font-size:18px}
+.ap-top small{display:block;color:var(--muted);font-size:13px}
+.ap-card p{margin:8px 0 0;font-size:14px;display:flex;gap:6px;align-items:center}
+.ap-card p svg{width:15px;height:15px;fill:currentColor;flex:none}
+.ap-btn{display:inline-block;margin-top:10px;padding:8px 14px;border-radius:12px;background:var(--brand-2);color:#fff;font-weight:700;font-size:14px}
+.ap-off{color:#9a6400!important;font-weight:600}
+.avatar img{width:100%;height:100%;object-fit:contain;border-radius:50%;background:#fff}
+.doc-logo{max-height:56px;max-width:160px;display:block;margin-bottom:6px}
+/* Equipo */
+.m-resend{display:inline-block;font-size:13px;margin-top:3px}
+.roles-help{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:4px}
+.roles-help>div{padding:14px;border-radius:18px;border:1px solid var(--line);background:var(--card)}
+.roles-help p{margin:8px 0 0;font-size:13.5px;color:var(--muted)}
+/* Instalar */
+.install-card{display:flex;align-items:center;gap:14px;flex-wrap:wrap;border-color:var(--brand-2)}
+.install-card img{width:48px;height:48px;border-radius:12px}
+.install-card>div:nth-child(2){flex:1;min-width:200px}
+.install-card p{margin:2px 0 0;font-size:14px}
+@media (prefers-color-scheme:dark){.ap-off{color:#F5B94F!important}}
+@media (max-width:720px){.roles-help{grid-template-columns:1fr}}
