@@ -28,7 +28,8 @@ let people = {};           // vehicle_id -> personas con acceso (dueño, familia
 let vstatus = {};          // vehicle_id -> semáforo que publica la app del cliente (vehicle_status)
 let jobs = [];             // órdenes del taller
 let leads = [];            // solicitudes de presupuesto llegadas desde la app
-let agendaStart = null;    // lunes de la semana que se enseña en la agenda
+let agendaDate = new Date(); // día de referencia de la agenda (el que se ve, o dentro de la semana/mes)
+let agendaView = (() => { try { return localStorage.getItem('garaje.agendaView') || 'week'; } catch { return 'week'; } })();
 let appointments = [];     // citas propias del taller (workshop_appointments)
 let parts = [];            // biblioteca de piezas
 let suppliers = [];        // proveedores
@@ -569,7 +570,7 @@ function renderVehicleJobs(row) {
     const b = document.createElement('button');
     b.className = 'vj-row';
     b.innerHTML = `<span class="ag-kind cita">Cita</span><b>${esc(a.title)}</b><small>${fmtTime(a.starts_at)}</small>`;
-    b.onclick = () => { setTab('agenda'); agendaStart = monday(new Date(a.starts_at)); renderAgenda(); };
+    b.onclick = () => { agendaDate = new Date(a.starts_at); agendaView = 'day'; setTab('agenda'); };
     box.appendChild(b);
   }
   for (const j of js) {
@@ -1065,47 +1066,170 @@ function agendaItems() {
   return items;
 }
 
+const MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+const dayName = (d) => DAYS[(d.getDay() + 6) % 7];
+const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+
 function renderAgenda() {
-  agendaStart ||= monday(new Date());
-  const end = new Date(agendaStart); end.setDate(end.getDate() + 6);
-  $('agTitle').textContent = `Semana del ${fmtDate(agendaStart.toISOString())} al ${fmtDate(end.toISOString())}`;
   const now = new Date();
   const items = agendaItems();
-  // Resumen de hoy y entregas atrasadas (se ven aunque cambies de semana).
+  renderAgendaSummary(items, now);
+  for (const b of document.querySelectorAll('#agViews button')) b.classList.toggle('on', b.dataset.view === agendaView);
+  const w = $('agWeek');
+  w.innerHTML = '';
+  const d0 = new Date(agendaDate); d0.setHours(0, 0, 0, 0);
+  // En el móvil la semana con horas no cabe: se ve como lista de días.
+  const narrow = window.innerWidth < 720;
+  if (agendaView === 'month') {
+    $('agTitle').textContent = `${MONTHS[d0.getMonth()][0].toUpperCase()}${MONTHS[d0.getMonth()].slice(1)} de ${d0.getFullYear()}`;
+    w.className = 'ag-month';
+    renderMonth(w, d0, items, now);
+  } else if (agendaView === 'day') {
+    $('agTitle').textContent = `${dayName(d0)} ${d0.getDate()} de ${MONTHS[d0.getMonth()]}${d0.getFullYear() !== now.getFullYear() ? ' de ' + d0.getFullYear() : ''}`;
+    w.className = 'ag-grid days-1';
+    renderTimeGrid(w, [d0], items, now);
+  } else {
+    const start = monday(d0), end = addDays(start, 6);
+    $('agTitle').textContent = start.getMonth() === end.getMonth()
+      ? `${start.getDate()}–${end.getDate()} de ${MONTHS[end.getMonth()]}`
+      : `${start.getDate()} de ${MONTHS[start.getMonth()]} – ${end.getDate()} de ${MONTHS[end.getMonth()]}`;
+    const days = [...Array(7).keys()].map((i) => addDays(start, i));
+    if (narrow) { w.className = 'week'; renderDayList(w, days, items, now); }
+    else { w.className = 'ag-grid days-7'; renderTimeGrid(w, days, items, now); }
+  }
+}
+
+function renderAgendaSummary(items, now) {
   const todays = items.filter((it) => sameDay(it.at, now));
   const nCitas = todays.filter((it) => it.kind === 'cita' || it.kind === 'app').length;
   const nEnt = todays.filter((it) => it.kind === 'entrega').length;
   const late = jobs.filter((j) => j.promised_at && j.promised_at < today() && !['ready', 'delivered', 'cancelled'].includes(j.status));
   const nextUp = items.filter((it) => (it.kind === 'cita' || it.kind === 'app') && it.at > now).sort((a, b) => a.at - b.at)[0];
   $('agSummary').innerHTML = `<div class="ag-today"><small>Hoy</small><b>${nCitas ? `${nCitas} ${nCitas === 1 ? 'cita' : 'citas'}` : 'Sin citas'}${nEnt ? ` · ${nEnt} ${nEnt === 1 ? 'entrega' : 'entregas'}` : ''}</b>
-      ${nextUp ? `<span>Siguiente: ${sameDay(nextUp.at, now) ? 'hoy' : DAYS[(nextUp.at.getDay() + 6) % 7].toLowerCase() + ' ' + nextUp.at.getDate()} a las ${hhmm(nextUp.at)} · ${esc(nextUp.title)}</span>` : ''}</div>
+      ${nextUp ? `<span>Siguiente: ${sameDay(nextUp.at, now) ? 'hoy' : dayName(nextUp.at).toLowerCase() + ' ' + nextUp.at.getDate()} a las ${hhmm(nextUp.at)} · ${esc(nextUp.title)}</span>` : ''}</div>
     ${late.length ? `<div class="ag-late"><small>Entregas atrasadas</small>${late.map((j) => { const v = vehicleOf(j); return `<button class="late-chip" data-job="${j.id}">OR ${j.number} · ${esc(v ? summary(v).name : 'Coche')} · ${fmtDate(j.promised_at).slice(0, 5)}</button>`; }).join('')}</div>` : ''}`;
   for (const b of $('agSummary').querySelectorAll('[data-job]')) b.onclick = () => openJob(jobs.find((j) => j.id === b.dataset.job));
-  const w = $('agWeek');
-  w.innerHTML = '';
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(agendaStart); d.setDate(d.getDate() + i);
+}
+
+/** Botón de un elemento de la agenda (cita, propuesta, entrega). */
+function apptButton(it, compact = false) {
+  const el = document.createElement('button');
+  el.className = 'appt ' + it.kind + (compact ? ' compact' : '');
+  const endAt = new Date(it.at.getTime() + (it.minutes || 60) * 60000);
+  const when = it.allDay ? 'Entrega' : compact ? hhmm(it.at) : `${hhmm(it.at)}–${hhmm(endAt)}`;
+  el.innerHTML = compact
+    ? `<small>${when}</small> <b>${esc(it.title)}</b>`
+    : `<small>${when}${it.kind === 'propuesta' ? ' · propuesta' : it.kind === 'app' ? ' · app' : ''}</small><b>${esc(it.title)}</b>${it.sub ? `<small>${it.sub}</small>` : ''}`;
+  el.title = `${when} · ${it.title}`;
+  el.onclick = (e) => { e.stopPropagation(); openAgendaItem(it); };
+  return el;
+}
+
+/** Día y semana con horas: las citas ocupan su franja; las entregas, arriba. */
+const HOUR_PX = 52;
+function renderTimeGrid(w, days, items, now) {
+  const inRange = items.filter((it) => days.some((d) => sameDay(it.at, d)));
+  const timed = inRange.filter((it) => !it.allDay);
+  // Horario visible: de 8 a 20, ampliado si hay citas fuera.
+  let h0 = 8, h1 = 20;
+  for (const it of timed) { h0 = Math.min(h0, it.at.getHours()); h1 = Math.max(h1, Math.ceil(it.at.getHours() + it.at.getMinutes() / 60 + (it.minutes || 60) / 60)); }
+  h1 = Math.min(24, Math.max(h1, h0 + 1));
+  const cols = days.length;
+  const head = `<div class="ag-corner"></div>${days.map((d) => `<button class="ag-dayhead${sameDay(d, now) ? ' today' : ''}" data-day="${d.toISOString()}"><small>${dayName(d).slice(0, cols > 1 ? 3 : 20)}</small><b>${d.getDate()}</b></button>`).join('')}`;
+  const allDay = `<div class="ag-allday-label">Entregas</div>${days.map((d) => `<div class="ag-allday" data-day="${d.toISOString()}"></div>`).join('')}`;
+  const hours = [...Array(h1 - h0).keys()].map((i) => `<div class="ag-hour" style="height:${HOUR_PX}px"><span>${String(h0 + i).padStart(2, '0')}:00</span></div>`).join('');
+  w.style.setProperty('--cols', cols);
+  w.innerHTML = `<div class="ag-head">${head}</div><div class="ag-allrow">${allDay}</div>
+    <div class="ag-body"><div class="ag-hours">${hours}</div>${days.map((d) => `<div class="ag-col${sameDay(d, now) ? ' today' : ''}${d < now && !sameDay(d, now) ? ' past' : ''}" data-day="${d.toISOString()}" style="height:${(h1 - h0) * HOUR_PX}px"></div>`).join('')}</div>`;
+  for (const b of w.querySelectorAll('.ag-dayhead')) b.onclick = () => setAgendaView('day', new Date(b.dataset.day));
+  days.forEach((d, i) => {
+    const allBox = w.querySelectorAll('.ag-allday')[i];
+    const col = w.querySelectorAll('.ag-col')[i];
+    for (const it of inRange.filter((x) => x.allDay && sameDay(x.at, d))) allBox.appendChild(apptButton(it, true));
+    // Solapes: cada cita en su carril dentro de su grupo.
+    const list = timed.filter((x) => sameDay(x.at, d)).sort((a, b) => a.at - b.at);
+    const lanes = [];
+    let group = [], groupEnd = 0;
+    const flush = () => { const n = Math.max(1, ...group.map((g) => g.lane + 1)); for (const g of group) g.lanes = n; group = []; };
+    for (const it of list) {
+      const s = it.at.getTime(), e = s + (it.minutes || 60) * 60000;
+      if (s >= groupEnd) { flush(); lanes.length = 0; }
+      let lane = lanes.findIndex((end) => end <= s);
+      if (lane < 0) { lane = lanes.length; lanes.push(e); } else lanes[lane] = e;
+      it.lane = lane; group.push(it); groupEnd = Math.max(groupEnd, e);
+    }
+    flush();
+    for (const it of list) {
+      const startMin = (it.at.getHours() - h0) * 60 + it.at.getMinutes();
+      const el = apptButton(it, (it.minutes || 60) < 45);
+      el.classList.add('ag-ev');
+      el.style.top = `${startMin / 60 * HOUR_PX}px`;
+      el.style.height = `${Math.max(22, (it.minutes || 60) / 60 * HOUR_PX - 2)}px`;
+      el.style.left = `calc(${(it.lane / it.lanes) * 100}% + 2px)`;
+      el.style.width = `calc(${100 / it.lanes}% - 4px)`;
+      col.appendChild(el);
+    }
+    // Línea de "ahora".
+    if (sameDay(d, now) && now.getHours() >= h0 && now.getHours() < h1) {
+      col.insertAdjacentHTML('beforeend', `<div class="ag-now" style="top:${((now.getHours() - h0) * 60 + now.getMinutes()) / 60 * HOUR_PX}px"></div>`);
+    }
+    // Tocar un hueco: cita nueva a esa hora (redondeada a la media hora).
+    if (!(d < now && !sameDay(d, now))) {
+      col.onclick = (e) => {
+        if (e.target !== col) return;
+        const y = e.offsetY, mins = Math.floor((y / HOUR_PX * 60) / 30) * 30;
+        const at = new Date(d); at.setHours(h0, 0, 0, 0); at.setMinutes(mins);
+        editAppointment({ starts_at: at.toISOString() });
+      };
+      col.title = 'Toca un hueco para dar una cita';
+    }
+  });
+  // En el día de hoy, que se vea la hora actual sin tener que bajar.
+  // Entregas siempre visibles, justo debajo de los días.
+  const allrow = w.querySelector('.ag-allrow'), headEl = w.querySelector('.ag-head');
+  if (allrow && headEl) allrow.style.top = headEl.offsetHeight + 'px';
+  // Abre en la primera cita visible; si no hay, en la hora actual (hoy) o arriba.
+  const firstHour = timed.length ? Math.min(...timed.map((it) => it.at.getHours())) : null;
+  const target = firstHour != null ? firstHour : days.some((d) => sameDay(d, now)) ? now.getHours() - 1 : h0;
+  w.scrollTop = Math.max(0, (target - h0) * HOUR_PX - 8);
+}
+
+/** Mes: cuadrícula de semanas; en cada día, sus citas (o puntos en el móvil). */
+function renderMonth(w, d0, items, now) {
+  const first = new Date(d0.getFullYear(), d0.getMonth(), 1);
+  const start = monday(first);
+  const weeks = Math.ceil(((first.getDay() + 6) % 7 + new Date(d0.getFullYear(), d0.getMonth() + 1, 0).getDate()) / 7);
+  w.innerHTML = DAYS.map((n) => `<div class="m-head">${n.slice(0, 3)}</div>`).join('');
+  for (let i = 0; i < weeks * 7; i++) {
+    const d = addDays(start, i);
+    const list = items.filter((it) => sameDay(it.at, d)).sort((a, b) => (a.allDay ? 1 : 0) - (b.allDay ? 1 : 0) || a.at - b.at);
+    const cell = document.createElement('div');
+    cell.className = 'm-day' + (d.getMonth() !== d0.getMonth() ? ' other' : '') + (sameDay(d, now) ? ' today' : '') + (d < now && !sameDay(d, now) ? ' past' : '');
+    cell.innerHTML = `<button class="m-num" aria-label="Ver el día ${d.getDate()}">${d.getDate()}</button><div class="m-items"></div><div class="m-dots">${list.slice(0, 4).map((it) => `<i class="${it.kind}"></i>`).join('')}</div>`;
+    const box = cell.querySelector('.m-items');
+    for (const it of list.slice(0, 3)) box.appendChild(apptButton(it, true));
+    if (list.length > 3) box.insertAdjacentHTML('beforeend', `<span class="m-more">+${list.length - 3} más</span>`);
+    cell.onclick = () => setAgendaView('day', d);
+    w.appendChild(cell);
+  }
+}
+
+/** Semana en el móvil: lista de días (los pasados sin nada, ocultos). */
+function renderDayList(w, days, items, now) {
+  for (const d of days) {
     const col = document.createElement('div');
     const list = items.filter((it) => sameDay(it.at, d)).sort((a, b) => (a.allDay ? 1 : 0) - (b.allDay ? 1 : 0) || a.at - b.at);
     col.className = 'day' + (sameDay(d, now) ? ' today' : d < now && !sameDay(d, now) ? ' past' : '') + (list.length ? '' : ' empty-day');
-    col.innerHTML = `<h4>${DAYS[i]}<b>${d.getDate()}</b></h4>`;
+    col.innerHTML = `<h4>${dayName(d)}<b>${d.getDate()}</b></h4>`;
     if (list.length === 0) col.innerHTML += '<p class="muted" style="font-size:12px;margin:0 4px">—</p>';
-    for (const it of list) {
-      const el = document.createElement('button');
-      el.className = 'appt ' + it.kind;
-      const endAt = new Date(it.at.getTime() + (it.minutes || 60) * 60000);
-      const when = it.allDay ? 'Entrega' : `${hhmm(it.at)}–${hhmm(endAt)}`;
-      el.innerHTML = `<small>${when}${it.kind === 'propuesta' ? ' · propuesta' : it.kind === 'app' ? ' · app' : ''}</small><b>${esc(it.title)}</b>${it.sub ? `<small>${it.sub}</small>` : ''}`;
-      el.onclick = () => openAgendaItem(it);
-      col.appendChild(el);
-    }
-    // Añadir una cita ese día (no en días pasados).
+    for (const it of list) col.appendChild(apptButton(it));
     if (!(d < now && !sameDay(d, now))) {
       const add = document.createElement('button');
       add.className = 'day-add'; add.textContent = '+ Cita';
       add.onclick = () => editAppointment({ starts_at: new Date(d.getFullYear(), d.getMonth(), d.getDate(), sameDay(d, now) ? Math.min(now.getHours() + 1, 19) : 9).toISOString() });
       col.appendChild(add);
     }
+    col.querySelector('h4').onclick = () => setAgendaView('day', d);
     w.appendChild(col);
   }
 }
@@ -1189,7 +1313,7 @@ async function editAppointment(a = {}) {
   const q = a.id ? sb.from('workshop_appointments').update(row).eq('id', a.id) : sb.from('workshop_appointments').insert(row);
   const { error } = await q;
   if (error) { alert('No se pudo guardar la cita: ' + error.message); return; }
-  agendaStart = monday(startsAt);
+  agendaDate = startsAt;
   await loadAppointments();
 }
 $('newApptBtn').onclick = () => editAppointment({});
@@ -1209,9 +1333,24 @@ function downloadIcs(it, endAt, who, phone) {
   setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 }
 
-$('agPrev').onclick = () => { agendaStart = monday(agendaStart || new Date()); agendaStart.setDate(agendaStart.getDate() - 7); renderAgenda(); };
-$('agNext').onclick = () => { agendaStart = monday(agendaStart || new Date()); agendaStart.setDate(agendaStart.getDate() + 7); renderAgenda(); };
-$('agToday').onclick = () => { agendaStart = monday(new Date()); renderAgenda(); };
+function moveAgenda(dir) {
+  const d = new Date(agendaDate);
+  if (agendaView === 'day') d.setDate(d.getDate() + dir);
+  else if (agendaView === 'week') d.setDate(d.getDate() + 7 * dir);
+  else { d.setDate(1); d.setMonth(d.getMonth() + dir); }
+  agendaDate = d;
+  renderAgenda();
+}
+$('agPrev').onclick = () => moveAgenda(-1);
+$('agNext').onclick = () => moveAgenda(1);
+$('agToday').onclick = () => { agendaDate = new Date(); renderAgenda(); };
+function setAgendaView(v, date) {
+  agendaView = v;
+  if (date) agendaDate = date;
+  try { localStorage.setItem('garaje.agendaView', v); } catch { /* sin almacenamiento */ }
+  renderAgenda();
+}
+for (const b of document.querySelectorAll('#agViews button')) b.onclick = () => setAgendaView(b.dataset.view);
 
 async function closeLead(l) {
   const archive = l.status === 'declined';

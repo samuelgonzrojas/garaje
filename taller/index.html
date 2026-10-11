@@ -7,7 +7,7 @@
 <meta name="description" content="El día a día del taller con Garaje: órdenes de trabajo, presupuestos que el cliente aprueba en su móvil, piezas, proveedores y el historial de cada coche.">
 <link rel="icon" href="../icon-192.png">
 <link rel="stylesheet" href="../style.css">
-<link rel="stylesheet" href="taller.css?v=20261011x">
+<link rel="stylesheet" href="taller.css?v=20261011z">
 </head>
 <body>
 <div class="wrap panel">
@@ -101,8 +101,13 @@
   </div>
   <div class="ag-summary" id="agSummary"></div>
   <div class="ag-bar">
-    <h3 id="agTitle"></h3>
-    <div class="actions week-nav"><button class="btn ghost small" id="agPrev" aria-label="Semana anterior">‹<span> Semana anterior</span></button><button class="btn ghost small" id="agToday">Hoy</button><button class="btn ghost small" id="agNext" aria-label="Semana siguiente"><span>Semana siguiente </span>›</button></div>
+    <div class="ag-nav">
+      <button class="btn ghost small nav-arrow" id="agPrev" aria-label="Anterior">‹</button>
+      <button class="btn ghost small" id="agToday">Hoy</button>
+      <button class="btn ghost small nav-arrow" id="agNext" aria-label="Siguiente">›</button>
+      <h3 id="agTitle"></h3>
+    </div>
+    <div class="seg" id="agViews" role="tablist"><button data-view="day">Día</button><button data-view="week">Semana</button><button data-view="month">Mes</button></div>
   </div>
   <div class="ag-legend"><span class="lg cita">Cita del taller</span><span class="lg app">Cita desde la app</span><span class="lg propuesta">Propuesta, sin aceptar</span><span class="lg entrega">Entrega prevista</span></div>
   <div class="week" id="agWeek"></div>
@@ -318,6 +323,6 @@
 </div>
 <datalist id="brands"></datalist>
 <datalist id="partNames"></datalist>
-<script type="module" src="app.js?v=20261011x"></script>
+<script type="module" src="app.js?v=20261011z"></script>
 </body>
 </html>
