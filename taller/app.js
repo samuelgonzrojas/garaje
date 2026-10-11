@@ -550,7 +550,7 @@ function onboardSteps() {
     { done: !!(w.listed && w.city), title: 'Aparece en la app Garaje',
       text: 'Marca "Aparecer en la app" y pon tu ciudad: los conductores de tu zona te pedirán presupuesto desde el móvil.', label: 'Activarlo', go: () => setTab('settings') },
     { done: jobs.length > 0 || vehicles.some((v) => roles[v.id] === 'workshop'), title: 'Recibe el primer coche',
-      text: 'El cliente abre Garaje → Mi coche → Compartir → Taller y te enseña un código de 6 letras. Lo escribes en Coches y ves su historial.', label: 'Tengo un código', go: () => { setTab('cars'); $('joinCode').focus(); } },
+      text: 'El cliente abre Garaje → Mi coche → Compartir → Taller y te enseña un código. Lo escribes en Coches y ves su historial.', label: 'Tengo un código', go: () => { setTab('cars'); $('joinCode').focus(); } },
     { done: jobs.length > 0, title: 'Abre tu primera orden de trabajo',
       text: 'Recepción, presupuesto con mano de obra y piezas, y el cliente lo aprueba en su móvil. Al entregar, queda en el historial del coche.', label: '+ Nueva orden', go: () => $('newJobBtn').click() },
     { done: suppliers.length > 0, title: 'Añade tus proveedores',
