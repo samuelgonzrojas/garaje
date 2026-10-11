@@ -698,3 +698,15 @@ dialog#dlg{max-width:760px}
 .install-card p{margin:2px 0 0;font-size:14px}
 @media (prefers-color-scheme:dark){.ap-off{color:#F5B94F!important}}
 @media (max-width:720px){.roles-help{grid-template-columns:1fr}}
+
+/* Pasar a facturar (la factura se hace en el programa del taller) */
+.inv{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:#F2A51629;color:#9a6400}
+.inv.done{background:var(--line);color:var(--muted)}
+.inv-count{font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;background:#F2A51629;color:#9a6400;margin-left:6px}
+.done-tools{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-top:10px}
+.done-tools label.chk{margin:0}
+.inv-text{white-space:pre-wrap;word-break:break-word;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--card-2);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:12px 0 8px;max-height:260px;overflow:auto;color:var(--ink)}
+.inv-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:6px}
+.inv-actions .muted{font-size:13px}
+.inv-hint{font-size:13.5px;margin:10px 0 0;padding:9px 12px;border-radius:12px;background:#F2A51622;color:#8a5a00}
+@media (prefers-color-scheme:dark){.inv,.inv-count{color:#F5B94F}.inv-hint{color:#F5C46F}}

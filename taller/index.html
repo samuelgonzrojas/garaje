@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Garaje Taller">
 <link rel="stylesheet" href="../style.css">
-<link rel="stylesheet" href="taller.css?v=20261012a">
+<link rel="stylesheet" href="taller.css?v=20261012b">
 </head>
 <body>
 <div class="wrap panel">
@@ -87,7 +87,12 @@
     <label class="chk mine hidden" id="mineWrap"><input type="checkbox" id="onlyMine"> Solo las mías</label>
   </div>
   <div class="board" id="board"></div>
-  <details class="card" style="margin-top:16px"><summary>Entregadas y canceladas</summary><div id="doneJobs" style="margin-top:10px"></div></details>
+  <details class="card" style="margin-top:16px" id="doneBox"><summary>Entregadas y canceladas <span class="inv-count hidden" id="invCount"></span></summary>
+    <div class="done-tools hidden" id="doneTools">
+      <label class="chk"><input type="checkbox" id="onlyUninvoiced"> Solo las que faltan por facturar</label>
+      <button class="btn ghost small" id="exportInvoicing">Descargar para facturar (Excel)</button>
+    </div>
+    <div id="doneJobs" style="margin-top:10px"></div></details>
 </section>
 
 <!-- SOLICITUDES DE PRESUPUESTO (clientes enviados por Garaje) -->
@@ -149,6 +154,10 @@
           <div><label>Cliente</label><input id="jCustomer"></div>
           <div><label>Teléfono</label><div class="with-icons"><input id="jPhone" type="tel"><span class="icons" id="jPhoneIcons"></span></div></div>
           <div><label>Responsable</label><select id="jAssigned"></select></div>
+        </div>
+        <div class="row2 hidden" id="jBilling">
+          <div><label>NIF / CIF (para la factura)</label><input id="jTaxId" maxlength="20" autocomplete="off" placeholder="Si es empresa o autónomo"></div>
+          <div><label>Dirección (para la factura)</label><input id="jAddress" maxlength="300" autocomplete="off" placeholder="Opcional"></div>
         </div>
         <label>Lo que pide el cliente</label><textarea id="jRequest" rows="2"></textarea>
         <label>Estado del coche al recibirlo (golpes, testigos, objetos…)</label><textarea id="jIntake" rows="2"></textarea>
@@ -334,6 +343,6 @@
 </div>
 <datalist id="brands"></datalist>
 <datalist id="partNames"></datalist>
-<script type="module" src="app.js?v=20261012a"></script>
+<script type="module" src="app.js?v=20261012b"></script>
 </body>
 </html>

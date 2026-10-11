@@ -781,10 +781,11 @@ function jobCard(j) {
   el.className = 'jcard';
   const who = j.assigned_to ? nameOf(j.assigned_to) : '';
   const total = isManager() && (j.lines || []).length ? fmtEur(totals(j).total) : '';
+  const inv = isManager() && j.status === 'delivered' ? (j.invoice_ref ? `<span class="inv done" title="Factura ${esc(j.invoice_ref)}">Facturada</span>` : '<span class="inv">Sin facturar</span>') : '';
   el.innerHTML = `${photoImg(s.photo, 44)}<span class="num-tag">OR ${j.number}</span>${j.lead_id ? '<span class="badge workshop">Garaje</span>' : ''}<b>${esc(s.name)}</b>
     <small>${esc(s.plate)}${j.customer_name ? ' · ' + esc(j.customer_name) : ''}</small>
     ${j.customer_request ? `<small class="req">${esc(j.customer_request.slice(0, 80))}</small>` : ''}
-    <div class="jfoot"><span class="status ${j.status}">${STATUS[j.status]}</span>${dueBadge(j)}${total ? `<span class="jtotal">${total}</span>` : ''}
+    <div class="jfoot"><span class="status ${j.status}">${STATUS[j.status]}</span>${dueBadge(j)}${inv}${total ? `<span class="jtotal">${total}</span>` : ''}
       ${who ? `<span class="avatar mini" title="Responsable: ${esc(who)}">${esc(who.trim()[0].toUpperCase())}</span>` : ''}</div>`;
   el.onclick = () => openJob(j);
   return el;
@@ -901,8 +902,13 @@ function renderBoard() {
   }
   const done = $('doneJobs');
   done.innerHTML = '';
-  const closed = shown.filter((j) => ['delivered', 'cancelled'].includes(j.status)).slice(0, 30);
-  if (closed.length === 0) done.innerHTML = `<p class="muted">${$('jobSearch').value.trim() ? 'Ninguna coincide con la búsqueda.' : 'Ninguna todavía.'}</p>`;
+  const pending = uninvoiced();
+  show('doneTools', isManager() && jobs.some((j) => j.status === 'delivered'));
+  $('invCount').textContent = `${pending.length} sin facturar`;
+  show('invCount', isManager() && pending.length > 0);
+  const onlyPending = isManager() && $('onlyUninvoiced').checked;
+  const closed = shown.filter((j) => (onlyPending ? j.status === 'delivered' && !j.invoice_ref : ['delivered', 'cancelled'].includes(j.status))).slice(0, onlyPending ? 300 : 30);
+  if (closed.length === 0) done.innerHTML = `<p class="muted">${onlyPending ? 'Están todas facturadas.' : $('jobSearch').value.trim() ? 'Ninguna coincide con la búsqueda.' : 'Ninguna todavía.'}</p>`;
   for (const j of closed) done.appendChild(jobCard(j));
 }
 
@@ -1441,6 +1447,9 @@ function openJob(j) {
   $('jPromised').value = job.promised_at ?? '';
   $('jCustomer').value = job.customer_name ?? '';
   $('jPhone').value = job.customer_phone ?? '';
+  $('jTaxId').value = job.customer_tax_id ?? '';
+  $('jAddress').value = job.customer_address ?? '';
+  show('jBilling', isManager());
   $('jRequest').value = job.customer_request ?? '';
   $('jIntake').value = job.intake_notes ?? '';
   $('jAssigned').innerHTML = assigneeOptions(job.assigned_to);
@@ -1483,7 +1492,7 @@ function markDirty() {
 }
 window.addEventListener('beforeunload', (e) => { if (job && dirty) { e.preventDefault(); e.returnValue = ''; } });
 const isLocked = () => ['delivered', 'cancelled'].includes(job?.status);
-for (const id of ['jKm', 'jFuel', 'jPromised', 'jCustomer', 'jPhone', 'jRequest', 'jIntake', 'jAssigned']) $(id).addEventListener('input', markDirty);
+for (const id of ['jKm', 'jFuel', 'jPromised', 'jCustomer', 'jPhone', 'jTaxId', 'jAddress', 'jRequest', 'jIntake', 'jAssigned']) $(id).addEventListener('input', markDirty);
 $('jAssigned').addEventListener('change', markDirty);
 $('jPhone').addEventListener('input', renderPhoneIcons);
 $('jCustomer').addEventListener('input', renderPhoneIcons);
@@ -1502,7 +1511,7 @@ function renderProgress() {
   }).join('');
   // Avisos: retraso, rechazo, entregada o cancelada.
   const late = job.promised_at && job.promised_at < today() && !['ready', 'delivered', 'cancelled'].includes(st);
-  const alert = st === 'delivered' ? `<b>Entregada${job.delivered_at ? ' el ' + fmtDate(job.delivered_at) : ''}.</b> Los trabajos ya están en el historial del coche; la orden queda de solo lectura.`
+  const alert = st === 'delivered' ? `<b>Entregada${job.delivered_at ? ' el ' + fmtDate(job.delivered_at) : ''}.</b> Los trabajos ya están en el historial del coche; la orden queda de solo lectura.${isManager() && !job.invoice_ref ? ' <b>Falta pasarla a facturar.</b>' : ''}`
     : st === 'cancelled' ? '<b>Orden cancelada.</b> Queda de solo lectura.'
     : st === 'rejected' ? `<b>El cliente ha rechazado el presupuesto</b>${job.decision_note ? ': «' + esc(job.decision_note) + '»' : '.'} Cámbialo y vuelve a enviarlo, o llámale.`
     : late ? `<b>Va con retraso:</b> la entrega estaba prevista el ${fmtDate(job.promised_at)}. Avisa al cliente o cambia la fecha.` : '';
@@ -1526,6 +1535,7 @@ function renderJobHead() {
   if (job.quote_sent_at) bits.push(`presupuesto enviado el ${fmtDate(job.quote_sent_at)}`);
   if (job.decided_at) bits.push(`${job.decision === 'approved' ? 'aprobado' : 'rechazado'} el ${fmtDate(job.decided_at)}${job.decision_note ? ': «' + job.decision_note + '»' : ''}`);
   if (job.delivered_at) bits.push(`entregado el ${fmtDate(job.delivered_at)}`);
+  if (job.invoice_ref && isManager()) bits.push(`facturada (nº ${job.invoice_ref})${job.invoiced_at ? ' el ' + fmtDate(job.invoiced_at) : ''}`);
   if (job.assigned_to) bits.push(`responsable: ${nameOf(job.assigned_to) || 'otra persona'}`);
   $('jSub').textContent = bits.join(' · ');
   renderProgress();
@@ -1543,6 +1553,7 @@ function renderJobHead() {
   if (st === 'in_progress') { btn('Listo para recoger', () => setStatus('ready')); btn('Esperando piezas', () => setStatus('waiting_parts'), 'btn ghost small'); }
   if (st === 'waiting_parts') { btn('Han llegado: seguir', () => setStatus('in_progress')); btn('Listo para recoger', () => setStatus('ready'), 'btn ghost small'); }
   if (st === 'ready') btn('Entregar y pasar al historial', deliver);
+  if (['ready', 'delivered'].includes(st) && isManager()) btn(job.invoice_ref ? `Facturada · ${job.invoice_ref}` : 'Pasar a facturar', openInvoicing, st === 'delivered' && !job.invoice_ref ? 'btn small' : 'btn ghost small');
   if (!['delivered', 'cancelled'].includes(st) && isManager()) btn('Cancelar', async () => {
     if (await dialog('<h3>¿Cancelar esta orden?</h3><p class="muted">El cliente verá en su móvil que se ha cancelado. No se puede deshacer.</p>', 'Cancelar orden', () => true)) setStatus('cancelled');
   }, 'btn ghost small');
@@ -1658,6 +1669,8 @@ function collectJob() {
     promised_at: $('jPromised').value || null,
     customer_name: $('jCustomer').value.trim() || null,
     customer_phone: $('jPhone').value.trim() || null,
+    customer_tax_id: $('jTaxId').value.trim().toUpperCase() || null,
+    customer_address: $('jAddress').value.trim() || null,
     customer_request: $('jRequest').value.trim() || null,
     intake_notes: $('jIntake').value.trim() || null,
     assigned_to: $('jAssigned').value || null,
@@ -1804,6 +1817,118 @@ async function printDoc(kind) {
   document.title = `${title} ${job.number} · ${s.plate || s.name}`;
   window.print();
   document.title = old;
+}
+
+// ------------------------------------------------------------------ pasar a facturar
+// Garaje no emite facturas: así el panel no es un sistema de facturación (Verifactu).
+// El taller la hace en su programa con estos datos y apunta aquí el número.
+const uninvoiced = () => jobs.filter((j) => j.status === 'delivered' && !j.invoice_ref);
+const csvDec = (n) => (n == null || n === '' ? '' : String(Math.round(n * 100) / 100).replace('.', ','));
+const csvQ = (s) => `"${String(s ?? '').replace(/"/g, '""')}"`;
+function downloadCsv(name, header, rows) {
+  const text = [header.map(csvQ).join(';'), ...rows.map((r) => r.map((c) => (typeof c === 'number' ? csvDec(c) : csvQ(c))).join(';'))].join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿' + text], { type: 'text/csv;charset=utf-8' }));
+  a.download = name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+const slug = (t) => (t || 'taller').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+/** Una fila por línea de cada orden, para pegarla en el programa de facturación o dársela al gestor. */
+function invoicingRows(list) {
+  const rows = [];
+  for (const j of list) {
+    const v = vehicleOf(j); const s = v ? summary(v) : { name: '', plate: '' };
+    const when = j.delivered_at ? fmtDate(j.delivered_at) : '';
+    const vat = num(j.vat) ?? 21;
+    const head = [j.number, when, j.customer_name, j.customer_tax_id, j.customer_address, j.customer_phone, s.plate, s.name, j.km ?? ''];
+    const lines = (j.lines || []).length ? j.lines : [{ kind: 'labor', description: j.customer_request || 'Orden sin líneas', qty: '', unit_price: null }];
+    for (const l of lines) {
+      rows.push([...head, l.kind === 'part' ? 'Pieza' : 'Mano de obra', l.description || '', [l.brand, l.reference].filter(Boolean).join(' '),
+        num(l.qty) ?? '', num(l.unit_price) ?? '', num(l.discount) ?? '', lineTotal(l), vat]);
+    }
+  }
+  return rows;
+}
+const INVOICING_HEADER = ['Nº orden', 'Fecha entrega', 'Cliente', 'NIF/CIF', 'Dirección', 'Teléfono', 'Matrícula', 'Vehículo', 'Km',
+  'Tipo', 'Concepto', 'Marca y referencia', 'Cantidad', 'Precio sin IVA', 'Dto %', 'Importe sin IVA', 'IVA %'];
+$('exportInvoicing').onclick = () => {
+  const list = uninvoiced().sort((a, b) => a.number - b.number);
+  if (!list.length) { notice('<h3>Nada pendiente</h3><p class="muted">Todas las órdenes entregadas están marcadas como facturadas.</p>'); return; }
+  downloadCsv(`para-facturar-${slug(workshop.name)}-${today()}.csv`, INVOICING_HEADER, invoicingRows(list));
+};
+$('onlyUninvoiced').addEventListener('change', () => renderBoard());
+
+/** Texto con todo lo que hace falta para la factura, para copiarlo. */
+function invoiceText(j, taxId, address) {
+  const v = vehicleOf(j); const s = v ? summary(v) : { name: '', plate: '' };
+  const t = totals(j);
+  const out = [
+    `Cliente: ${j.customer_name || '—'}`,
+    `NIF/CIF: ${taxId || '—'}`,
+    ...(address ? [`Dirección: ${address}`] : []),
+    ...(j.customer_phone ? [`Teléfono: ${j.customer_phone}`] : []),
+    `Vehículo: ${[s.name, s.plate, j.km != null ? fmtKm(j.km) : ''].filter(Boolean).join(' · ')}`,
+    `Orden de reparación nº ${j.number}${j.delivered_at ? ' · entregado el ' + fmtDate(j.delivered_at) : ''}`,
+    '',
+    ...(!(j.lines || []).length ? ['(Sin líneas: añade la mano de obra y las piezas en el presupuesto de la orden)'] : []),
+    ...(j.lines || []).map((l) => {
+      const ref = [l.brand, l.reference].filter(Boolean).join(' ');
+      const unit = l.kind === 'labor' ? ' h' : '';
+      return `${l.kind === 'part' ? 'Pieza' : 'Mano de obra'} · ${l.description || ''}${ref ? ' (' + ref + ')' : ''} · ${String(num(l.qty) ?? 1).replace('.', ',')}${unit} × ${fmtEur(num(l.unit_price) ?? 0)}${num(l.discount) ? ` − ${String(num(l.discount)).replace('.', ',')} %` : ''} = ${fmtEur(lineTotal(l))}`;
+    }),
+    '',
+    `Base imponible: ${fmtEur(t.base)}`,
+    `IVA ${num(j.vat) ?? 21} %: ${fmtEur(t.vat)}`,
+    `Total: ${fmtEur(t.total)}`,
+  ];
+  return out.join('\n');
+}
+async function openInvoicing() {
+  if (dirty && !isLocked()) await saveJob({}, { quiet: true });
+  const j = job;
+  const t = totals(j);
+  const r = await dialog(`<h3>Pasar a facturar · OR ${j.number}</h3>
+    <p class="muted" style="margin-top:0">Garaje no hace facturas: hazla en tu programa de facturación (el que ya uses, adaptado a Verifactu) con estos datos, y apunta aquí su número para saber qué te falta por facturar.</p>
+    <div class="row2"><div><label>NIF / CIF del cliente</label><input name="tax" maxlength="20" value="${esc(j.customer_tax_id || '')}" placeholder="Si es empresa o autónomo" autocomplete="off"></div>
+      <div><label>Dirección del cliente</label><input name="addr" maxlength="300" value="${esc(j.customer_address || '')}" placeholder="Opcional" autocomplete="off"></div></div>
+    ${t.total > 400 ? '<p class="inv-hint">Pasa de 400 €: tiene que ser factura completa, no ticket. Lleva el nombre del cliente, y su NIF y dirección si es empresa o autónomo.</p>' : ''}
+    <pre class="inv-text" id="invText"></pre>
+    <div class="inv-actions"><button type="button" class="btn ghost small" id="invCopy">Copiar los datos</button>
+      <button type="button" class="btn ghost small" id="invCsv">Descargar las líneas (Excel)</button><span class="muted" id="invCopied"></span></div>
+    <label>Nº de factura en tu programa</label><input name="ref" maxlength="60" value="${esc(j.invoice_ref || '')}" placeholder="Ej.: F-2026-0123" autocomplete="off">
+    <p class="muted" style="font-size:13px;margin:4px 0 0">${j.invoice_ref ? 'Bórralo si te equivocaste y la orden vuelve a "Sin facturar".' : 'Cuando la tengas hecha. Si lo dejas vacío, sigue como "Sin facturar".'}</p>`,
+  'Guardar', (fd) => fd, (form) => {
+    const refresh = () => { form.querySelector('#invText').textContent = invoiceText(j, form.tax.value.trim().toUpperCase(), form.addr.value.trim()); };
+    refresh();
+    form.tax.addEventListener('input', refresh);
+    form.addr.addEventListener('input', refresh);
+    form.querySelector('#invCopy').onclick = async () => {
+      try { await navigator.clipboard.writeText(form.querySelector('#invText').textContent); form.querySelector('#invCopied').textContent = 'Copiado ✓'; }
+      catch { form.querySelector('#invCopied').textContent = 'Selecciónalo y cópialo a mano'; }
+    };
+    form.querySelector('#invCsv').onclick = () => {
+      const jj = { ...j, customer_tax_id: form.tax.value.trim().toUpperCase() || null, customer_address: form.addr.value.trim() || null };
+      downloadCsv(`orden-${j.number}-${slug(workshop.name)}.csv`, INVOICING_HEADER, invoicingRows([jj]));
+    };
+  });
+  if (!r) return;
+  const ref = (r.ref || '').trim();
+  const patch = {
+    customer_tax_id: (r.tax || '').trim().toUpperCase() || null,
+    customer_address: (r.addr || '').trim() || null,
+    invoice_ref: ref || null,
+    invoiced_at: ref ? (j.invoice_ref === ref && j.invoiced_at ? j.invoiced_at : new Date().toISOString()) : null,
+  };
+  const { data, error } = await sb.from('jobs').update(patch).eq('id', j.id).select('*').single();
+  if (error) { $('jErr').textContent = 'No se pudo guardar: ' + error.message; return; }
+  const i = jobs.findIndex((x) => x.id === data.id); if (i >= 0) jobs[i] = data;
+  if (job?.id === data.id) {
+    job = { ...data, lines: job.lines };
+    $('jTaxId').value = data.customer_tax_id ?? '';
+    $('jAddress').value = data.customer_address ?? '';
+    renderJobHead();
+  }
 }
 
 // ------------------------------------------------------------------ piezas
