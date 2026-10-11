@@ -1,6 +1,6 @@
 {
-  "version": "1.0.34",
-  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.34/garaje-1.0.34-arm64.apk",
-  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.34/garaje-1.0.34.apk",
-  "notes": "Arreglado un cierre al abrir la app tras un viaje en un coche sin kilómetros apuntados"
+  "version": "1.0.35",
+  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.35/garaje-1.0.35-arm64.apk",
+  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.35/garaje-1.0.35.apk",
+  "notes": "Puedes encuadrar la foto de tu coche moviéndola y ampliándola. Arreglada la barra de abajo, que a veces marcaba otra pestaña"
 }
