@@ -362,13 +362,13 @@ function renderGrid() {
     const o = ownerOf(row.id);
     el.innerHTML = `${photoImg(s.photo, 64)}<h3>${esc(s.name)}</h3><span class="plate">${esc(s.plate)}</span><span class="badge ${s.role}">${roleName(s.role)}</span>
       ${open ? `<span class="status ${open.status}">${STATUS[open.status]}</span>` : ''}
-      ${o ? `<div class="owner"><b>${personName(o)}</b>${o.phone ? ` · ${esc(fmtPhone(o.phone))}` : ' · <span class="muted">sin teléfono</span>'}
+      ${o ? `<div class="owner-line"><b>${personName(o)}</b>${o.phone ? ` · ${esc(fmtPhone(o.phone))}` : ' · <span class="muted">sin teléfono</span>'}
         ${o.phone && !isMe(o) ? `<div class="actions">${contactButtons(o.phone, null, `Hola ${o.display_name}, te escribo del taller por tu ${s.name}.`)}</div>` : ''}</div>` : ''}
       <div class="kv"><div><b>${fmtKm(s.km)}</b><small>${s.kmAt ? 'el ' + fmtDate(s.kmAt) : 'sin lectura'}</small></div>
       <div><b>${fmtDate(s.itv)}</b><small>ITV</small></div></div>
       <p class="muted" style="margin:10px 0 0;font-size:14px">Último: ${esc(s.last)}</p>`;
     el.onclick = () => openVehicle(row);
-    for (const a of el.querySelectorAll('.owner a')) a.onclick = (e) => e.stopPropagation();
+    for (const a of el.querySelectorAll('.owner-line a')) a.onclick = (e) => e.stopPropagation();
     g.appendChild(el);
   }
 }
