@@ -7,7 +7,7 @@
 <meta name="description" content="El día a día del taller con Garaje: órdenes de trabajo, presupuestos que el cliente aprueba en su móvil, piezas, proveedores y el historial de cada coche.">
 <link rel="icon" href="../icon-192.png">
 <link rel="stylesheet" href="../style.css">
-<link rel="stylesheet" href="taller.css?v=20261011p">
+<link rel="stylesheet" href="taller.css?v=20261011r">
 </head>
 <body>
 <div class="wrap panel">
@@ -96,10 +96,15 @@
 <!-- AGENDA: citas aceptadas desde la app y entregas previstas -->
 <section id="tab-agenda" class="tab hidden no-print">
   <div class="top page-head">
-    <div><h2 style="margin:0">Agenda</h2><p class="sub" style="margin:2px 0 0">Citas aceptadas por los clientes desde la app y entregas previstas de las órdenes. El cliente recibe un recordatorio el día antes.</p></div>
+    <div><h2 style="margin:0">Agenda</h2><p class="sub" style="margin:2px 0 0">Tus citas, las que llegan desde la app y las entregas de las órdenes. Al cliente de la app le llega un recordatorio el día antes.</p></div>
+    <button class="btn" id="newApptBtn">+ Nueva cita</button>
+  </div>
+  <div class="ag-summary" id="agSummary"></div>
+  <div class="ag-bar">
+    <h3 id="agTitle"></h3>
     <div class="actions week-nav"><button class="btn ghost small" id="agPrev" aria-label="Semana anterior">‹<span> Semana anterior</span></button><button class="btn ghost small" id="agToday">Hoy</button><button class="btn ghost small" id="agNext" aria-label="Semana siguiente"><span>Semana siguiente </span>›</button></div>
   </div>
-  <h3 id="agTitle" style="margin:0 0 10px"></h3>
+  <div class="ag-legend"><span class="lg cita">Cita del taller</span><span class="lg app">Cita desde la app</span><span class="lg propuesta">Propuesta, sin aceptar</span><span class="lg entrega">Entrega prevista</span></div>
   <div class="week" id="agWeek"></div>
 </section>
 
@@ -291,6 +296,6 @@
 </div>
 <datalist id="brands"></datalist>
 <datalist id="partNames"></datalist>
-<script type="module" src="app.js?v=20261011p"></script>
+<script type="module" src="app.js?v=20261011r"></script>
 </body>
 </html>

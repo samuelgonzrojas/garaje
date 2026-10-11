@@ -28,6 +28,7 @@ let people = {};           // vehicle_id -> personas con acceso (dueño, familia
 let jobs = [];             // órdenes del taller
 let leads = [];            // solicitudes de presupuesto llegadas desde la app
 let agendaStart = null;    // lunes de la semana que se enseña en la agenda
+let appointments = [];     // citas propias del taller (workshop_appointments)
 let parts = [];            // biblioteca de piezas
 let suppliers = [];        // proveedores
 let catalogNames = {};     // catalog_id -> nombre
@@ -237,7 +238,7 @@ async function enter() {
     show('setup');
   } else {
     show('tabs');
-    if (workshop) await Promise.all([loadJobs(), loadLeads(), loadParts(), loadSuppliers(), loadTeam()]);
+    if (workshop) await Promise.all([loadJobs(), loadLeads(), loadParts(), loadSuppliers(), loadTeam(), loadAppointments()]);
     setTab(workshop ? tab : 'cars');
   }
   subscribe();
@@ -249,6 +250,7 @@ function subscribe() {
     .on('postgres_changes', { event: '*', schema: 'public', table: 'vehicles' }, () => loadVehicles())
     .on('postgres_changes', { event: '*', schema: 'public', table: 'jobs' }, () => workshop && loadJobs())
     .on('postgres_changes', { event: '*', schema: 'public', table: 'leads' }, () => workshop && loadLeads())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'workshop_appointments' }, () => workshop && loadAppointments())
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'job_messages' }, (p) => {
       if (job && p.new.job_id === job.id) loadMessages();
     })
@@ -821,6 +823,7 @@ function leadCard(l, compact = false) {
   const v = l.vehicle || {};
   const el = document.createElement('div');
   el.className = 'card lead' + (compact ? ' compact' : '') + ' st-' + l.status;
+  el.dataset.id = l.id;
   const meta = [ago(l.created_at), v.km ? fmtKm(v.km) : '', v.year ? esc(v.year) : '', v.fuel ? esc(v.fuel) : ''].filter(Boolean).join(' · ');
   const past = l.appointment_at && new Date(l.appointment_at) < new Date() && ['quoted', 'accepted'].includes(l.status);
   const who = l.customer_name || 'Cliente de Garaje';
@@ -921,46 +924,189 @@ const monday = (d) => { const x = new Date(d); x.setHours(0, 0, 0, 0); x.setDate
 const sameDay = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
+async function loadAppointments() {
+  if (!workshop) return;
+  const since = new Date(); since.setDate(since.getDate() - 60);
+  const { data, error } = await sb.from('workshop_appointments').select('*').eq('workshop_id', workshop.id)
+    .gte('starts_at', since.toISOString()).order('starts_at').limit(800);
+  appointments = error ? [] : (data || []);
+  if (tab === 'agenda') renderAgenda();
+}
+const hhmm = (d) => d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+
+/** Todo lo que va en la agenda: citas del taller, de la app, propuestas y entregas. */
+function agendaItems() {
+  const items = [];
+  for (const a of appointments) {
+    const v = a.vehicle_id ? vehicles.find((x) => x.id === a.vehicle_id) : null;
+    items.push({ kind: 'cita', at: new Date(a.starts_at), minutes: a.minutes, title: a.title,
+      sub: [v ? summary(v).name : '', a.customer_name, a.assigned_to ? '→ ' + nameOf(a.assigned_to) : ''].filter(Boolean).join(' · '), appt: a });
+  }
+  for (const l of leads) {
+    const j = l.job_id ? jobs.find((x) => x.id === l.job_id) : null;
+    if (j && ['delivered', 'cancelled'].includes(j.status)) continue;
+    const v = l.vehicle || {};
+    const who = l.customer_name || 'Cliente de Garaje';
+    if (l.appointment_at && ['accepted', 'converted'].includes(l.status)) {
+      items.push({ kind: 'app', at: new Date(l.appointment_at), minutes: 60, title: v.name || 'Vehículo', sub: `${esc(who)}${j ? ' · OR ' + j.number : ' · abre la orden'}`, lead: l, job: j });
+    } else if (l.status === 'quoted' && l.appointment_at) {
+      items.push({ kind: 'propuesta', at: new Date(l.appointment_at), minutes: 60, title: v.name || 'Vehículo', sub: `${esc(who)} · esperando que acepte`, lead: l });
+    } else if (l.status === 'reschedule' && l.client_preferred_at) {
+      items.push({ kind: 'propuesta', at: new Date(l.client_preferred_at), minutes: 60, title: v.name || 'Vehículo', sub: `${esc(who)} · propone esta hora`, lead: l });
+    }
+  }
+  for (const j of jobs) {
+    if (!j.promised_at || ['delivered', 'cancelled'].includes(j.status)) continue;
+    const v = vehicleOf(j); const s = v ? summary(v) : { name: 'Coche' };
+    items.push({ kind: 'entrega', at: new Date(j.promised_at + 'T23:59:00'), allDay: true, title: s.name, sub: `OR ${j.number} · ${STATUS[j.status]}`, job: j });
+  }
+  return items;
+}
+
 function renderAgenda() {
   agendaStart ||= monday(new Date());
   const end = new Date(agendaStart); end.setDate(end.getDate() + 6);
   $('agTitle').textContent = `Semana del ${fmtDate(agendaStart.toISOString())} al ${fmtDate(end.toISOString())}`;
-  const today = new Date();
-  // Citas: solicitudes aceptadas o convertidas en orden, con hora.
-  const items = [];
-  for (const l of leads) {
-    if (!l.appointment_at || !['accepted', 'converted'].includes(l.status)) continue;
-    const j = l.job_id ? jobs.find((x) => x.id === l.job_id) : null;
-    if (j && ['delivered', 'cancelled'].includes(j.status)) continue;
-    const v = l.vehicle || {};
-    items.push({ at: new Date(l.appointment_at), kind: 'cita', title: v.name || 'Vehículo', sub: `${esc(l.customer_name || 'Cliente de Garaje')}${j ? ' · OR ' + j.number : ' · pendiente de abrir orden'}`, job: j, lead: l });
-  }
-  // Entregas previstas de las órdenes abiertas.
-  for (const j of jobs) {
-    if (!j.promised_at || ['delivered', 'cancelled'].includes(j.status)) continue;
-    const v = vehicleOf(j); const s = v ? summary(v) : { name: 'Coche' };
-    items.push({ at: new Date(j.promised_at + 'T18:00:00'), kind: 'entrega', title: s.name, sub: `Entrega prevista · OR ${j.number} · ${STATUS[j.status]}`, job: j });
-  }
+  const now = new Date();
+  const items = agendaItems();
+  // Resumen de hoy y entregas atrasadas (se ven aunque cambies de semana).
+  const todays = items.filter((it) => sameDay(it.at, now));
+  const nCitas = todays.filter((it) => it.kind === 'cita' || it.kind === 'app').length;
+  const nEnt = todays.filter((it) => it.kind === 'entrega').length;
+  const late = jobs.filter((j) => j.promised_at && j.promised_at < today() && !['ready', 'delivered', 'cancelled'].includes(j.status));
+  const nextUp = items.filter((it) => (it.kind === 'cita' || it.kind === 'app') && it.at > now).sort((a, b) => a.at - b.at)[0];
+  $('agSummary').innerHTML = `<div class="ag-today"><small>Hoy</small><b>${nCitas ? `${nCitas} ${nCitas === 1 ? 'cita' : 'citas'}` : 'Sin citas'}${nEnt ? ` · ${nEnt} ${nEnt === 1 ? 'entrega' : 'entregas'}` : ''}</b>
+      ${nextUp ? `<span>Siguiente: ${sameDay(nextUp.at, now) ? 'hoy' : DAYS[(nextUp.at.getDay() + 6) % 7].toLowerCase() + ' ' + nextUp.at.getDate()} a las ${hhmm(nextUp.at)} · ${esc(nextUp.title)}</span>` : ''}</div>
+    ${late.length ? `<div class="ag-late"><small>Entregas atrasadas</small>${late.map((j) => { const v = vehicleOf(j); return `<button class="late-chip" data-job="${j.id}">OR ${j.number} · ${esc(v ? summary(v).name : 'Coche')} · ${fmtDate(j.promised_at).slice(0, 5)}</button>`; }).join('')}</div>` : ''}`;
+  for (const b of $('agSummary').querySelectorAll('[data-job]')) b.onclick = () => openJob(jobs.find((j) => j.id === b.dataset.job));
   const w = $('agWeek');
   w.innerHTML = '';
   for (let i = 0; i < 7; i++) {
     const d = new Date(agendaStart); d.setDate(d.getDate() + i);
     const col = document.createElement('div');
-    const list = items.filter((it) => sameDay(it.at, d)).sort((a, b) => a.at - b.at);
-    col.className = 'day' + (sameDay(d, today) ? ' today' : d < today && !sameDay(d, today) ? ' past' : '') + (list.length ? '' : ' empty-day');
+    const list = items.filter((it) => sameDay(it.at, d)).sort((a, b) => (a.allDay ? 1 : 0) - (b.allDay ? 1 : 0) || a.at - b.at);
+    col.className = 'day' + (sameDay(d, now) ? ' today' : d < now && !sameDay(d, now) ? ' past' : '') + (list.length ? '' : ' empty-day');
     col.innerHTML = `<h4>${DAYS[i]}<b>${d.getDate()}</b></h4>`;
     if (list.length === 0) col.innerHTML += '<p class="muted" style="font-size:12px;margin:0 4px">—</p>';
     for (const it of list) {
-      const el = document.createElement('div');
-      el.className = 'appt' + (it.kind === 'entrega' ? ' delivery' : '');
-      const hour = it.kind === 'cita' ? it.at.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : 'Entrega';
-      el.innerHTML = `<small>${hour}</small><b>${esc(it.title)}</b><small>${it.sub}</small>`;
-      el.onclick = () => { if (it.job) openJob(it.job); else setTab('leads'); };
+      const el = document.createElement('button');
+      el.className = 'appt ' + it.kind;
+      const endAt = new Date(it.at.getTime() + (it.minutes || 60) * 60000);
+      const when = it.allDay ? 'Entrega' : `${hhmm(it.at)}–${hhmm(endAt)}`;
+      el.innerHTML = `<small>${when}${it.kind === 'propuesta' ? ' · propuesta' : it.kind === 'app' ? ' · app' : ''}</small><b>${esc(it.title)}</b>${it.sub ? `<small>${it.sub}</small>` : ''}`;
+      el.onclick = () => openAgendaItem(it);
       col.appendChild(el);
+    }
+    // Añadir una cita ese día (no en días pasados).
+    if (!(d < now && !sameDay(d, now))) {
+      const add = document.createElement('button');
+      add.className = 'day-add'; add.textContent = '+ Cita';
+      add.onclick = () => editAppointment({ starts_at: new Date(d.getFullYear(), d.getMonth(), d.getDate(), sameDay(d, now) ? Math.min(now.getHours() + 1, 19) : 9).toISOString() });
+      col.appendChild(add);
     }
     w.appendChild(col);
   }
 }
+
+/** Ficha de algo de la agenda, con lo que se puede hacer. */
+async function openAgendaItem(it) {
+  const a = it.appt, l = it.lead, j = it.job || (a?.job_id ? jobs.find((x) => x.id === a.job_id) : null);
+  const phone = a?.customer_phone || l?.customer_phone || j?.customer_phone;
+  const who = a?.customer_name || l?.customer_name || j?.customer_name || '';
+  const endAt = new Date(it.at.getTime() + (it.minutes || 60) * 60000);
+  const label = { cita: 'Cita del taller', app: 'Cita desde la app', propuesta: 'Propuesta, sin aceptar', entrega: 'Entrega prevista' }[it.kind];
+  const buttons = [];
+  if (j) buttons.push(['job', 'Ver orden', 'btn small']);
+  if (a && !j && a.vehicle_id && vehicles.some((v) => v.id === a.vehicle_id)) buttons.push(['open', 'Abrir orden', 'btn small']);
+  if (l && isManager()) buttons.push(['lead', 'Ver solicitud', j ? 'btn ghost small' : 'btn small']);
+  if (!it.allDay) buttons.push(['ics', 'Añadir a mi calendario', 'btn ghost small']);
+  if (a) buttons.push(['edit', 'Editar', 'btn ghost small'], ['del', 'Borrar', 'btn ghost small']);
+  const choice = await choose(`<small class="ag-kind ${it.kind}">${label}</small><h3>${esc(it.title)}</h3>
+    <p class="ag-when">${svgIcon('agenda')} ${it.allDay ? fmtDate(j.promised_at) : `${DAYS[(it.at.getDay() + 6) % 7]} ${it.at.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })}, ${hhmm(it.at)}–${hhmm(endAt)}`}</p>
+    ${it.sub ? `<p class="muted">${it.sub}</p>` : ''}
+    ${a?.notes ? `<p class="lead-msg">${esc(a.notes)}</p>` : ''}
+    ${phone ? `<div class="lead-who"><div><b>${esc(who || 'Cliente')}</b><small>${esc(fmtPhone(phone))}</small></div><div class="icons">${contactButtons(phone, null, `Hola${who ? ' ' + who : ''}, te escribo de ${workshop?.name || 'el taller'} por tu cita del ${it.at.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })}.`, who || 'el cliente')}</div></div>` : ''}`,
+    buttons);
+  if (choice === 'job') openJob(j);
+  if (choice === 'lead') {
+    setTab('leads');
+    const card = document.querySelector(`.lead[data-id="${l.id}"]`);
+    if (card) { card.scrollIntoView({ behavior: 'smooth', block: 'center' }); card.classList.add('flash'); setTimeout(() => card.classList.remove('flash'), 1800); }
+  }
+  if (choice === 'ics') downloadIcs(it, endAt, who, phone);
+  if (choice === 'edit') editAppointment(a);
+  if (choice === 'del' && await dialog('<h3>¿Borrar esta cita?</h3>', 'Borrar', () => true)) {
+    const { error } = await sb.from('workshop_appointments').delete().eq('id', a.id);
+    if (error) alert('No se pudo borrar: ' + error.message);
+    await loadAppointments();
+  }
+  if (choice === 'open') {
+    const row = vehicles.find((v) => v.id === a.vehicle_id);
+    const created = await newJobFor(row, { customer_request: [a.title, a.notes].filter(Boolean).join('. '), customer_name: a.customer_name, customer_phone: a.customer_phone, assigned_to: a.assigned_to });
+    if (created) { await sb.from('workshop_appointments').update({ job_id: created.id, updated_at: new Date().toISOString() }).eq('id', a.id); loadAppointments(); }
+  }
+}
+
+/** Nueva cita o editar una. */
+async function editAppointment(a = {}) {
+  // Por defecto, la siguiente hora en punto (o mañana a las 9 si ya es tarde).
+  const start = a.starts_at ? new Date(a.starts_at) : (() => {
+    const d = new Date(); d.setMinutes(0, 0, 0); d.setHours(d.getHours() + 1);
+    if (d.getHours() >= 20 || d.getHours() < 8) { if (d.getHours() >= 20) d.setDate(d.getDate() + 1); d.setHours(9); }
+    return d;
+  })();
+  const local = new Date(start.getTime() - start.getTimezoneOffset() * 60000).toISOString();
+  const durs = [[15, '15 min'], [30, '30 min'], [45, '45 min'], [60, '1 hora'], [90, '1 h 30 min'], [120, '2 horas'], [180, '3 horas'], [240, '4 horas'], [480, 'Todo el día']];
+  const carOpts = '<option value="">Sin coche en Garaje</option>' + vehicles.map((v) => { const s = summary(v); const o = ownerOf(v.id); return `<option value="${v.id}" ${v.id === a.vehicle_id ? 'selected' : ''}>${esc(s.name)}${s.plate ? ' · ' + esc(s.plate) : ''}${o ? ' · ' + esc(o.display_name) : ''}</option>`; }).join('');
+  const r = await dialog(`<h3>${a.id ? 'Editar cita' : 'Nueva cita'}</h3>
+    <label>Qué</label><input name="title" required maxlength="200" value="${esc(a.title || '')}" placeholder="Revisión, ITV, cambio de ruedas…">
+    <div class="row3"><div><label>Día</label><input name="day" type="date" required value="${local.slice(0, 10)}"></div>
+      <div><label>Hora</label><input name="time" type="time" required step="900" value="${local.slice(11, 16)}"></div>
+      <div><label>Duración</label><select name="minutes">${durs.map(([m, t]) => `<option value="${m}" ${m === (a.minutes || 60) ? 'selected' : ''}>${t}</option>`).join('')}</select></div></div>
+    <label>Coche</label><select name="vehicle">${carOpts}</select>
+    <div class="row2"><div><label>Cliente</label><input name="name" value="${esc(a.customer_name || '')}"></div>
+      <div><label>Teléfono</label><input name="phone" type="tel" value="${esc(a.customer_phone || '')}"></div></div>
+    ${team.filter((m) => m.joined).length > 1 ? `<label>Responsable</label><select name="who">${assigneeOptions(a.assigned_to)}</select>` : ''}
+    <label>Notas</label><textarea name="notes" rows="2">${esc(a.notes || '')}</textarea>`,
+    a.id ? 'Guardar' : 'Crear cita', (fd) => fd, (form) => {
+      // Al elegir un coche, se rellenan el cliente y el teléfono de su dueño.
+      form.vehicle.onchange = () => {
+        const o = ownerOf(form.vehicle.value);
+        if (o && !form.name.value) form.name.value = o.display_name || '';
+        if (o?.phone && !form.phone.value) form.phone.value = o.phone;
+      };
+    });
+  if (!r) return;
+  const startsAt = new Date(`${r.day}T${r.time}`);
+  if (isNaN(startsAt)) { alert('Revisa el día y la hora.'); return; }
+  const row = {
+    workshop_id: workshop.id, title: r.title.trim(), starts_at: startsAt.toISOString(), minutes: parseInt(r.minutes, 10) || 60,
+    vehicle_id: r.vehicle || null, customer_name: (r.name || '').trim() || null, customer_phone: (r.phone || '').trim() || null,
+    assigned_to: r.who || a.assigned_to || null, notes: (r.notes || '').trim() || null, updated_at: new Date().toISOString(),
+  };
+  const q = a.id ? sb.from('workshop_appointments').update(row).eq('id', a.id) : sb.from('workshop_appointments').insert(row);
+  const { error } = await q;
+  if (error) { alert('No se pudo guardar la cita: ' + error.message); return; }
+  agendaStart = monday(startsAt);
+  await loadAppointments();
+}
+$('newApptBtn').onclick = () => editAppointment({});
+
+/** Archivo .ics para añadir la cita al calendario del móvil o del ordenador. */
+function downloadIcs(it, endAt, who, phone) {
+  const f = (d) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+  const txt = (x) => String(x || '').replace(/[\\;,]/g, (c) => '\\' + c).replace(/\n/g, '\\n');
+  const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Garaje//Panel de taller//ES', 'BEGIN:VEVENT',
+    `UID:${(it.appt?.id || it.lead?.id || Date.now())}@garaje`, `DTSTAMP:${f(new Date())}`, `DTSTART:${f(it.at)}`, `DTEND:${f(endAt)}`,
+    `SUMMARY:${txt(it.title + (who ? ' · ' + who : ''))}`, `DESCRIPTION:${txt([it.appt?.notes, phone ? 'Tel. ' + phone : ''].filter(Boolean).join('\n'))}`,
+    workshop?.address ? `LOCATION:${txt(workshop.address)}` : '', 'END:VEVENT', 'END:VCALENDAR'].filter(Boolean).join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
+  a.download = 'cita-garaje.ics';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
 $('agPrev').onclick = () => { agendaStart = monday(agendaStart || new Date()); agendaStart.setDate(agendaStart.getDate() - 7); renderAgenda(); };
 $('agNext').onclick = () => { agendaStart = monday(agendaStart || new Date()); agendaStart.setDate(agendaStart.getDate() + 7); renderAgenda(); };
 $('agToday').onclick = () => { agendaStart = monday(new Date()); renderAgenda(); };
@@ -1497,6 +1643,17 @@ $('inviteBtn').onclick = async () => {
   if (error) { alert('No se pudo invitar: ' + error.message); return; }
   await loadTeam();
 };
+
+/** Diálogo con varios botones; devuelve el que se pulse (o null). */
+function choose(html, buttons) {
+  return new Promise((resolve) => {
+    const dlg = $('dlg'), form = $('dlgForm');
+    form.innerHTML = html + `<div class="dlg-actions wrap">${buttons.map(([v, label, cls]) => `<button class="${cls}" value="${v}">${label}</button>`).join('')}<button class="btn ghost small" value="cancel" formnovalidate>Cerrar</button></div>`;
+    dlg.onclose = () => resolve(dlg.returnValue && dlg.returnValue !== 'cancel' ? dlg.returnValue : null);
+    dlg.returnValue = '';
+    dlg.showModal();
+  });
+}
 
 function dialog(html, okLabel, pick, after) {
   return new Promise((resolve) => {
