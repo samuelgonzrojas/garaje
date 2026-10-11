@@ -465,3 +465,7 @@ table.list td[data-label]>span small{display:inline;margin-left:8px}
   .progress i{width:24px;height:24px;font-size:12px}
   .progress li::before{top:11px}
 }
+.with-icons .icons{gap:4px}
+.with-icons .ic{width:32px;height:32px}
+.with-icons .ic svg{width:16px;height:16px}
+.with-icons input{padding-left:10px;padding-right:8px}
