@@ -164,3 +164,11 @@ label.chk input{width:auto;margin:0}
 .onboard li.done .tick{background:#2EBD6B;border-color:#2EBD6B}
 .empty-col{font-size:13px;margin:4px 6px 8px}
 @media (max-width:640px){.onboard .ob-steps li{flex-wrap:wrap}.onboard .ob-steps li>div{flex:1 1 calc(100% - 40px)}.onboard .ob-steps li .btn{margin-left:36px}}
+
+/* Dueño y contacto */
+.vcard .owner{margin:10px 0 0;padding:10px 0 0;border-top:1px solid var(--line);font-size:14px}
+.vcard .owner .actions{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
+.people{margin-top:12px}
+.people .person{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 0;border-top:1px solid var(--line)}
+.people .person small{display:block;color:var(--muted);margin-top:2px}
+.people .actions{display:flex;gap:6px;flex-wrap:wrap}

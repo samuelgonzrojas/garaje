@@ -19,6 +19,7 @@ let profile = null;        // { display_name, is_workshop }
 let workshop = null;       // fila de public.workshops (null si no es taller)
 let roles = {};            // vehicle_id -> role
 let vehicles = [];         // filas de public.vehicles
+let people = {};           // vehicle_id -> personas con acceso (dueño, familia), de vehicle_people
 let jobs = [];             // órdenes del taller
 let leads = [];            // solicitudes de presupuesto llegadas desde la app
 let agendaStart = null;    // lunes de la semana que se enseña en la agenda
@@ -42,6 +43,20 @@ const num = (v) => { const n = parseFloat(String(v ?? '').replace(',', '.')); re
 const newId = () => (Date.now() * 1000).toString(36) + '-' + Math.floor(Math.random() * 2 ** 30).toString(36);
 const today = () => new Date().toISOString().slice(0, 10);
 const roleName = (r) => r === 'owner' ? 'propietario' : r === 'workshop' ? 'taller' : 'familiar';
+// WhatsApp: número en formato internacional; los de 9 cifras se dan por españoles.
+const waUrl = (phone) => 'https://wa.me/' + String(phone).replace(/\D/g, '').replace(/^00/, '').replace(/^(\d{9})$/, '34$1');
+const fmtPhone = (phone) => String(phone).replace(/\s+/g, ' ').trim();
+/** Botones para contactar con alguien: llamar, WhatsApp y correo (los que haya). */
+function contactButtons(phone, email, waText = '') {
+  const t = waText ? '?text=' + encodeURIComponent(waText) : '';
+  return (phone ? `<a class="btn small" href="tel:${esc(String(phone).replace(/\s/g, ''))}">Llamar</a><a class="btn ghost small" href="${esc(waUrl(phone) + t)}" target="_blank" rel="noopener">WhatsApp</a>` : '')
+    + (email ? `<a class="btn ghost small" href="mailto:${esc(email)}">Correo</a>` : '');
+}
+/** El dueño del coche (o, si no lo hay, el primer familiar), sin contar al propio taller. */
+function ownerOf(vehicleId) {
+  const list = (people[vehicleId] || []).filter((p) => p.user_id !== session?.user?.id && p.role !== 'workshop');
+  return list.find((p) => p.role === 'owner') || list[0] || null;
+}
 
 const STATUS = {
   received: 'Recibido', diagnosis: 'En diagnóstico', quote_sent: 'Presupuesto enviado', approved: 'Aprobado',
@@ -318,6 +333,10 @@ async function loadVehicles() {
   if (error) { $('listErr').textContent = 'No se pudieron cargar los coches: ' + error.message; return; }
   roles = Object.fromEntries((myRoles || []).map((r) => [r.vehicle_id, r.role]));
   vehicles = rows || [];
+  // Quién es el dueño de cada coche y cómo contactarle (nombre y teléfono de su perfil en la app).
+  const loaded = await Promise.all(vehicles.map((v) => people[v.id] ? null
+    : sb.rpc('vehicle_people', { p_vehicle: v.id }).then(({ data }) => [v.id, data || []], () => [v.id, []])));
+  for (const e of loaded) if (e) people[e[0]] = e[1];
   if (tab === 'cars' && !current) renderGrid();
   if (current) {
     const fresh = vehicles.find((v) => v.id === current.id);
@@ -334,12 +353,16 @@ function renderGrid() {
     const open = jobs.find((j) => j.vehicle_id === row.id && !['delivered', 'cancelled'].includes(j.status));
     const el = document.createElement('div');
     el.className = 'card vcard';
+    const o = ownerOf(row.id);
     el.innerHTML = `${photoImg(s.photo, 64)}<h3>${esc(s.name)}</h3><span class="plate">${esc(s.plate)}</span><span class="badge ${s.role}">${roleName(s.role)}</span>
       ${open ? `<span class="status ${open.status}">${STATUS[open.status]}</span>` : ''}
+      ${o ? `<div class="owner"><b>${esc(o.display_name)}</b>${o.phone ? ` · ${esc(fmtPhone(o.phone))}` : ' · <span class="muted">sin teléfono</span>'}
+        ${o.phone ? `<div class="actions">${contactButtons(o.phone, null, `Hola ${o.display_name}, te escribo del taller por tu ${s.name}.`)}</div>` : ''}</div>` : ''}
       <div class="kv"><div><b>${fmtKm(s.km)}</b><small>${s.kmAt ? 'el ' + fmtDate(s.kmAt) : 'sin lectura'}</small></div>
       <div><b>${fmtDate(s.itv)}</b><small>ITV</small></div></div>
       <p class="muted" style="margin:10px 0 0;font-size:14px">Último: ${esc(s.last)}</p>`;
     el.onclick = () => openVehicle(row);
+    for (const a of el.querySelectorAll('.owner a')) a.onclick = (e) => e.stopPropagation();
     g.appendChild(el);
   }
 }
@@ -379,6 +402,7 @@ function renderVehicle() {
   $('vKmSub').textContent = s.kmAt ? 'el ' + fmtDate(s.kmAt) : 'sin lectura';
   $('vItv').textContent = fmtDate(s.itv);
   $('vLast').textContent = s.last;
+  renderPeople(current, s);
   const tb = $('history');
   tb.innerHTML = '';
   show('noHistory', s.events.length === 0);
@@ -388,6 +412,19 @@ function renderVehicle() {
       <td>${e.reading_value != null ? fmtKm(e.reading_value) : ''}</td><td>${fmtEur(e.cost)}</td><td>${esc(e.author || '')}</td>`;
     tb.appendChild(tr);
   }
+}
+
+/** Dueño y familiares del coche con sus datos de contacto. */
+function renderPeople(row, s) {
+  const list = (people[row.id] || []).filter((p) => p.user_id !== session?.user?.id && p.role !== 'workshop');
+  const box = $('vPeople');
+  if (list.length === 0) { box.innerHTML = ''; return; }
+  box.innerHTML = list.map((p) => `<div class="person">
+      <div><b>${esc(p.display_name)}</b> <span class="badge ${p.role}">${roleName(p.role)}</span>
+        <small>${[p.phone ? esc(fmtPhone(p.phone)) : '', p.email ? esc(p.email) : ''].filter(Boolean).join(' · ')}</small></div>
+      <div class="actions">${contactButtons(p.phone, p.email, `Hola ${p.display_name}, te escribo del taller por tu ${s.name}.`)}</div>
+    </div>`).join('')
+    + (list.some((p) => p.role === 'owner' && !p.phone) ? '<p class="muted" style="font-size:13px;margin:6px 0 0">El dueño no ha puesto su teléfono en Garaje. Puede añadirlo en la app: Ajustes → Tu nombre en Garaje.</p>' : '');
 }
 
 function itemOptions(prof, selected) {
@@ -510,7 +547,7 @@ function onboardSteps() {
       text: 'NIF, nº de registro industrial, dirección y teléfono. Salen en los presupuestos y en la orden de reparación.', label: 'Ir a Mi taller', go: () => setTab('settings') },
     { done: !!(w.listed && w.city), title: 'Aparece en la app Garaje',
       text: 'Marca "Aparecer en la app" y pon tu ciudad: los conductores de tu zona te pedirán presupuesto desde el móvil.', label: 'Activarlo', go: () => setTab('settings') },
-    { done: vehicles.some((v) => roles[v.id] === 'workshop'), title: 'Recibe el primer coche',
+    { done: jobs.length > 0 || vehicles.some((v) => roles[v.id] === 'workshop'), title: 'Recibe el primer coche',
       text: 'El cliente abre Garaje → Mi coche → Compartir → Taller y te enseña un código de 6 letras. Lo escribes en Coches y ves su historial.', label: 'Tengo un código', go: () => { setTab('cars'); $('joinCode').focus(); } },
     { done: jobs.length > 0, title: 'Abre tu primera orden de trabajo',
       text: 'Recepción, presupuesto con mano de obra y piezas, y el cliente lo aprueba en su móvil. Al entregar, queda en el historial del coche.', label: '+ Nueva orden', go: () => $('newJobBtn').click() },
@@ -1114,7 +1151,7 @@ function renderSuppliers() {
     el.className = 'card';
     el.innerHTML = `<h3 style="margin:0 0 4px">${esc(s.name)}</h3>
       <p class="muted" style="margin:0 0 10px;font-size:14px">${n} ${n === 1 ? 'pieza' : 'piezas'} en tu biblioteca${s.notes ? ' · ' + esc(s.notes) : ''}</p>
-      <div class="actions">${s.phone ? `<a class="btn small" href="tel:${esc(s.phone)}">Llamar</a>` : ''}${s.phone ? `<a class="btn ghost small" href="https://wa.me/${esc(s.phone.replace(/\D/g, '').replace(/^(?!34)(\d{9})$/, '34$1'))}" target="_blank" rel="noopener">WhatsApp</a>` : ''}${s.email ? `<a class="btn ghost small" href="mailto:${esc(s.email)}">Correo</a>` : ''}${s.web ? `<a class="btn ghost small" href="${esc(/^https?:/.test(s.web) ? s.web : 'https://' + s.web)}" target="_blank" rel="noopener">Web ↗</a>` : ''}<a class="btn ghost small" href="#" data-edit>Editar</a></div>`;
+      <div class="actions">${s.phone ? `<a class="btn small" href="tel:${esc(s.phone)}">Llamar</a>` : ''}${s.phone ? `<a class="btn ghost small" href="${esc(waUrl(s.phone))}" target="_blank" rel="noopener">WhatsApp</a>` : ''}${s.email ? `<a class="btn ghost small" href="mailto:${esc(s.email)}">Correo</a>` : ''}${s.web ? `<a class="btn ghost small" href="${esc(/^https?:/.test(s.web) ? s.web : 'https://' + s.web)}" target="_blank" rel="noopener">Web ↗</a>` : ''}<a class="btn ghost small" href="#" data-edit>Editar</a></div>`;
     el.querySelector('[data-edit]').onclick = (e) => { e.preventDefault(); editSupplier(s); };
     g.appendChild(el);
   }
