@@ -1308,6 +1308,7 @@ function renderProgress() {
   const locked = isLocked();
   for (const el of document.querySelectorAll('#job input:not(#jMsg), #job select, #job textarea')) el.disabled = locked || (el.id === 'jAssigned' && !isManager());
   for (const id of ['addLabor', 'addPart', 'jSave']) show(id, !locked);
+  show('orderPartsBtn', !locked && isManager());
 }
 
 function renderJobHead() {
@@ -1618,15 +1619,22 @@ async function loadParts() {
   if (tab === 'parts') renderParts();
 }
 $('partSearch').addEventListener('input', () => renderParts());
+$('partSupplier').addEventListener('change', () => renderParts());
 const dec2 = (n) => (n == null || n === '' ? '' : Number(n).toFixed(2).replace('.', ','));
 function renderParts() {
   const q = normTxt($('partSearch').value);
-  const list = parts.filter((p) => !q || [p.description, p.brand, p.reference, normRef(p.reference)].some((x) => normTxt(x).includes(q)));
+  // Filtro por proveedor (se rellena con los que hay).
+  const ps = $('partSupplier'), keep = ps.value;
+  ps.innerHTML = '<option value="">Todos los proveedores</option><option value="none">Sin proveedor</option>' + suppliers.map((s) => `<option value="${s.id}">${esc(s.name)}</option>`).join('');
+  ps.value = keep;
+  const supF = ps.value;
+  const list = parts.filter((p) => (!supF || (supF === 'none' ? !p.supplier_id : p.supplier_id === supF))
+    && (!q || [p.description, p.brand, p.reference, normRef(p.reference)].some((x) => normTxt(x).includes(q))));
   const tb = $('partsBody');
   tb.innerHTML = '';
   show('noParts', parts.length === 0);
   const noPrice = parts.filter((p) => p.price == null).length;
-  $('partsCount').textContent = parts.length ? `${parts.length} ${parts.length === 1 ? 'pieza' : 'piezas'}${noPrice ? ` · ${noPrice} sin PVP` : ''}${q ? ` · ${list.length} con "${$('partSearch').value.trim()}"` : ''}` : '';
+  $('partsCount').textContent = parts.length ? `${parts.length} ${parts.length === 1 ? 'pieza' : 'piezas'}${noPrice ? ` · ${noPrice} sin PVP` : ''}${q || supF ? ` · ${list.length} con este filtro` : ''}` : '';
   for (const p of list.slice(0, 400)) {
     const sup = suppliers.find((s) => s.id === p.supplier_id);
     const tr = document.createElement('tr');
@@ -1976,11 +1984,17 @@ function renderSuppliers() {
   for (const s of suppliers) {
     const n = parts.filter((p) => p.supplier_id === s.id).length;
     const el = document.createElement('div');
-    el.className = 'card';
-    el.innerHTML = `<h3 style="margin:0 0 4px">${esc(s.name)}</h3>
-      <p class="muted" style="margin:0 0 10px;font-size:14px">${n} ${n === 1 ? 'pieza' : 'piezas'} en tu biblioteca${s.notes ? ' · ' + esc(s.notes) : ''}</p>
-      <div class="supplier-actions"><div class="icons">${contactButtons(s.phone, s.email, '', s.name)}${s.web ? iconLink('web', /^https?:/.test(s.web) ? s.web : 'https://' + s.web, 'Web de ' + s.name, true) : ''}</div><a class="btn ghost small" href="#" data-edit>Editar</a></div>`;
+    el.className = 'card sup-card';
+    const who = [s.contact_name, s.customer_no ? 'cliente nº ' + s.customer_no : ''].filter(Boolean).join(' · ');
+    el.innerHTML = `<h3 style="margin:0 0 2px">${esc(s.name)}</h3>
+      ${who ? `<p class="sup-who">${esc(who)}</p>` : ''}
+      ${s.notes ? `<p class="sup-notes">${esc(s.notes)}</p>` : ''}
+      <div class="supplier-actions"><div class="icons">${contactButtons(s.phone, s.email, '', s.name)}${s.web ? iconLink('web', /^https?:/.test(s.web) ? s.web : 'https://' + s.web, 'Web de ' + s.name, true) : ''}</div><a class="btn ghost small" href="#" data-edit>Editar</a></div>
+      <div class="sup-foot"><button class="btn small" data-order ${s.phone || s.email ? '' : 'disabled title="Pon su teléfono o correo para pedirle por WhatsApp o correo"'}>Hacer pedido</button>
+        <button class="btn ghost small" data-parts>${n === 1 ? 'Ver su pieza' : n ? `Ver sus ${n} piezas` : 'Sin piezas aún'}</button></div>`;
     el.querySelector('[data-edit]').onclick = (e) => { e.preventDefault(); editSupplier(s); };
+    el.querySelector('[data-order]').onclick = () => orderFromSupplier(s);
+    el.querySelector('[data-parts]').onclick = () => { $('partSupplier').value = s.id; setTab('parts'); };
     g.appendChild(el);
   }
 }
@@ -1988,18 +2002,103 @@ $('newSupplierBtn').onclick = () => editSupplier({});
 async function editSupplier(s) {
   const res = await dialog(`<h3>${s.id ? 'Editar proveedor' : 'Nuevo proveedor'}</h3>
     <label>Nombre *</label><input name="name" value="${esc(s.name || '')}" required placeholder="Recambios del Sur">
-    <div class="row2"><div><label>Teléfono</label><input name="phone" type="tel" value="${esc(s.phone || '')}"></div><div><label>Correo</label><input name="email" type="email" value="${esc(s.email || '')}"></div></div>
+    <div class="row2"><div><label>Teléfono o WhatsApp</label><input name="phone" type="tel" value="${esc(s.phone || '')}"></div><div><label>Correo</label><input name="email" type="email" value="${esc(s.email || '')}"></div></div>
+    <div class="row2"><div><label>Persona de contacto</label><input name="contact_name" value="${esc(s.contact_name || '')}" placeholder="Luis, el comercial"></div><div><label>Tu nº de cliente</label><input name="customer_no" value="${esc(s.customer_no || '')}" placeholder="Va en los pedidos"></div></div>
     <label>Web o tienda online</label><input name="web" value="${esc(s.web || '')}">
-    <label>Notas (horario de reparto, comercial…)</label><input name="notes" value="${esc(s.notes || '')}">
+    <label>Notas (horario de reparto, descuentos…)</label><input name="notes" value="${esc(s.notes || '')}" placeholder="Reparto 11:00 y 17:00">
     ${s.id ? '<p style="margin-top:14px"><a href="#" id="delSup" style="color:#E5484D">Borrar este proveedor</a></p>' : ''}`, 'Guardar', (fd) => fd, (form) => {
     const d = form.querySelector('#delSup');
-    if (d) d.onclick = async (e) => { e.preventDefault(); if (!confirm('¿Borrar el proveedor? Sus piezas se quedan sin proveedor.')) return; await sb.from('workshop_suppliers').delete().eq('id', s.id); $('dlg').close(); await loadSuppliers(); };
+    if (d) d.onclick = (e) => { e.preventDefault(); $('dlg').close(); deleteSupplier(s); };
   });
   if (!res) return;
-  const row = { workshop_id: workshop.id, name: res.name.trim(), phone: res.phone.trim() || null, email: res.email.trim() || null, web: res.web.trim() || null, notes: res.notes.trim() || null };
+  const row = { workshop_id: workshop.id, name: res.name.trim(), phone: res.phone.trim() || null, email: res.email.trim() || null, web: res.web.trim() || null, notes: res.notes.trim() || null,
+    contact_name: res.contact_name.trim() || null, customer_no: res.customer_no.trim() || null };
   const { error } = s.id ? await sb.from('workshop_suppliers').update(row).eq('id', s.id) : await sb.from('workshop_suppliers').insert(row);
   if (error) alert('No se pudo guardar: ' + error.message);
   await loadSuppliers();
+}
+async function deleteSupplier(s) {
+  const n = parts.filter((p) => p.supplier_id === s.id).length;
+  if (!(await dialog(`<h3>¿Borrar ${esc(s.name)}?</h3><p class="muted">${n ? `Sus ${n} piezas se quedan en tu biblioteca, sin proveedor.` : 'No tiene piezas en tu biblioteca.'}</p>`, 'Borrar', () => true))) return;
+  await sb.from('workshop_suppliers').delete().eq('id', s.id);
+  await Promise.all([loadSuppliers(), loadParts()]);
+}
+
+// --- pedir piezas por WhatsApp o correo
+/** Mensaje de pedido con las piezas, el nº de cliente y la orden. */
+function orderMessage(sup, items, ctx) {
+  const lines = items.map((i) => `• ${i.qty} × ${i.description}${[i.brand, i.reference].filter(Boolean).length ? ' · ' + [i.brand, i.reference].filter(Boolean).join(' ') : ''}`);
+  return `Hola${sup.contact_name ? ' ' + sup.contact_name.split(/[ ,]/)[0] : ''}, soy ${workshop.name}${sup.customer_no ? ` (cliente nº ${sup.customer_no})` : ''}. Os pido:\n${lines.join('\n')}\n${ctx ? ctx + '\n' : ''}¿Me confirmáis precio y cuándo llega? Gracias.`;
+}
+/** Enseña el mensaje (se puede retocar) y lo manda por WhatsApp o correo, o lo copia. */
+async function sendOrder(sup, items, ctx, subject) {
+  const text = orderMessage(sup, items, ctx);
+  const buttons = [];
+  if (sup.phone) buttons.push(['wa', 'Enviar por WhatsApp', 'btn small']);
+  if (sup.email) buttons.push(['mail', 'Enviar por correo', sup.phone ? 'btn ghost small' : 'btn small']);
+  buttons.push(['copy', 'Copiar', 'btn ghost small']);
+  const choice = await choose(`<h3>Pedido a ${esc(sup.name)}</h3><p class="muted">Revísalo y retócalo si quieres antes de enviarlo.</p>
+    <textarea id="orderText" rows="${Math.min(14, items.length + 5)}">${esc(text)}</textarea>`, buttons);
+  const body = $('orderText')?.value || text;
+  if (choice === 'wa') window.open(waUrl(sup.phone) + '?text=' + encodeURIComponent(body), '_blank', 'noopener');
+  if (choice === 'mail') location.href = `mailto:${encodeURIComponent(sup.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  if (choice === 'copy') { try { await navigator.clipboard.writeText(body); } catch { /* sin permiso */ } }
+  return !!choice;
+}
+/** Desde una orden: las piezas del presupuesto, agrupadas por proveedor. */
+async function orderPartsFromJob() {
+  const lines = (job.lines || []).filter((l) => l.kind === 'part' && (l.description || '').trim());
+  if (!lines.length) { await notice('<h3>No hay piezas en el presupuesto</h3><p class="muted">Añade las piezas con "+ Pieza" (con su proveedor) y aquí preparas el pedido.</p>'); return; }
+  const v = jobVehicle ? summary(jobVehicle) : null;
+  const ctx = `Es para la OR ${job.number}${v ? `: ${v.name}${v.plate ? ', ' + v.plate : ''}` : ''}.`;
+  const groups = new Map();
+  for (const l of lines) { const k = l.supplier_id || ''; if (!groups.has(k)) groups.set(k, []); groups.get(k).push({ qty: num(l.qty) ?? 1, description: l.description.trim(), brand: l.brand, reference: l.reference }); }
+  let sentAny = false;
+  for (;;) {
+    const buttons = [...groups.entries()].map(([k, items]) => [k || 'none', `${k ? 'Pedir a ' + (suppliers.find((s) => s.id === k)?.name || 'proveedor') : 'Sin proveedor'} (${items.length})`, k ? 'btn small' : 'btn ghost small']);
+    const pick = groups.size === 1 && !sentAny ? buttons[0][0] : await choose(`<h3>Pedir piezas de la OR ${job.number}</h3><p class="muted">${sentAny ? 'Hecho. ¿Pides a otro proveedor?' : 'Agrupadas por proveedor. Elige a quién pedir.'}</p>`, buttons);
+    if (!pick) break;
+    let sup = suppliers.find((s) => s.id === pick);
+    const items = groups.get(pick === 'none' ? '' : pick);
+    if (!sup) {
+      const withContact = suppliers.filter((s) => s.phone || s.email);
+      if (!withContact.length) { await notice('<h3>Primero, un proveedor</h3><p class="muted">Añade en Proveedores a quién compras, con su teléfono o correo.</p>'); break; }
+      const r = await dialog(`<h3>¿A quién se lo pides?</h3><label>Proveedor</label><select name="s">${withContact.map((s) => `<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select>`, 'Seguir', (fd) => fd.s);
+      if (!r) continue;
+      sup = suppliers.find((s) => s.id === r);
+    }
+    if (!sup.phone && !sup.email) { await notice(`<h3>${esc(sup.name)} no tiene teléfono ni correo</h3><p class="muted">Añádelos en Proveedores → Editar.</p>`); continue; }
+    if (await sendOrder(sup, items, ctx, `Pedido de ${workshop.name} · OR ${job.number}`)) sentAny = true;
+    if (groups.size === 1) break;
+  }
+  if (sentAny && ['approved', 'in_progress'].includes(job.status)) {
+    if (await dialog('<h3>¿Pasar la orden a "Esperando piezas"?</h3><p class="muted">El cliente lo verá en su móvil.</p>', 'Sí, esperando piezas', () => true)) setStatus('waiting_parts');
+  }
+}
+$('orderPartsBtn').onclick = () => orderPartsFromJob();
+/** Desde un proveedor: elegir piezas de la biblioteca y cantidades. */
+async function orderFromSupplier(sup) {
+  const mine = parts.filter((p) => p.supplier_id === sup.id);
+  const others = parts.filter((p) => p.supplier_id !== sup.id);
+  const row = (p) => `<label class="pick-row" data-txt="${esc(normTxt([p.description, p.brand, p.reference].join(' ')))}"><input type="number" min="0" step="1" name="q_${p.id}" value="" placeholder="0" inputmode="numeric"><span><b>${esc(p.description)}</b><small>${esc([p.brand, p.reference].filter(Boolean).join(' '))}</small></span></label>`;
+  const qty = await dialog(`<h3>Pedido a ${esc(sup.name)}</h3>
+    <input type="search" id="pickSearch" placeholder="Buscar pieza…" autocomplete="off">
+    <div class="pick-list">${mine.length ? `<div class="pick-h">Suyas</div>${mine.map(row).join('')}` : ''}${others.length ? `<div class="pick-h">Otras de tu biblioteca</div>${others.slice(0, 300).map(row).join('')}` : ''}
+      ${parts.length ? '' : '<p class="muted">Tu biblioteca está vacía: escribe el pedido a mano en el siguiente paso.</p>'}</div>
+    <p class="muted" style="font-size:13px">Pon la cantidad de cada pieza que necesites. En el siguiente paso puedes retocar el mensaje y añadir lo que no esté en la lista.</p>`,
+    'Preparar mensaje', (fd) => fd, (form) => {
+      form.querySelector('#pickSearch').oninput = (e) => {
+        const q = normTxt(e.target.value);
+        for (const r of form.querySelectorAll('.pick-row')) r.style.display = !q || r.dataset.txt.includes(q) ? '' : 'none';
+      };
+    });
+  if (!qty) return;
+  const items = Object.entries(qty).filter(([k, v]) => k.startsWith('q_') && parseInt(v, 10) > 0).map(([k, v]) => {
+    const p = parts.find((x) => x.id === k.slice(2));
+    return { qty: parseInt(v, 10), description: p.description, brand: p.brand, reference: p.reference };
+  });
+  if (!items.length) items.push({ qty: 1, description: '(escribe aquí la pieza)', brand: '', reference: '' });
+  await sendOrder(sup, items, '', `Pedido de ${workshop.name}`);
 }
 
 // ------------------------------------------------------------------ diálogo

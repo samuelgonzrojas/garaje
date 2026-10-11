@@ -584,3 +584,17 @@ dialog#dlg{max-width:760px}
   table.list td[data-label] .cell-in{text-align:right}
 }
 @media (max-width:720px){table.list td[data-label="PVP"]{flex-wrap:wrap}table.list td[data-label="PVP"] .marg{flex-basis:100%;text-align:right;margin-top:0}}
+
+/* Proveedores y pedidos */
+.sup-card{display:flex;flex-direction:column;gap:8px}
+.sup-who{margin:0;font-size:14px;font-weight:600;color:var(--ink)}
+.sup-notes{margin:0;color:var(--muted);font-size:14px}
+.sup-foot{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:10px;border-top:1px solid var(--line)}
+.sup-foot .btn:disabled{opacity:.5}
+.part-sup{width:auto;min-width:180px}
+.pick-list{max-height:46vh;overflow:auto;margin:10px 0;border:1px solid var(--line);border-radius:12px;padding:4px 10px}
+.pick-h{font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin:10px 0 4px}
+.pick-row{display:flex;align-items:center;gap:10px;margin:0;padding:8px 0;border-top:1px solid var(--line);font-weight:500;color:var(--ink);cursor:pointer}
+.pick-row input{width:64px;flex:none;text-align:center;padding:6px}
+.pick-row small{display:block;color:var(--muted);font-size:12.5px}
+#orderText{font-size:14.5px;line-height:1.5}

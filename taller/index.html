@@ -7,7 +7,7 @@
 <meta name="description" content="El día a día del taller con Garaje: órdenes de trabajo, presupuestos que el cliente aprueba en su móvil, piezas, proveedores y el historial de cada coche.">
 <link rel="icon" href="../icon-192.png">
 <link rel="stylesheet" href="../style.css">
-<link rel="stylesheet" href="taller.css?v=20261011v">
+<link rel="stylesheet" href="taller.css?v=20261011x">
 </head>
 <body>
 <div class="wrap panel">
@@ -145,7 +145,7 @@
 
       <div class="card">
         <div class="top"><h3 style="margin:0">Presupuesto</h3>
-          <div><button class="btn ghost small" id="addLabor">+ Mano de obra</button> <button class="btn ghost small" id="addPart">+ Pieza</button></div></div>
+          <div><button class="btn ghost small" id="orderPartsBtn">Pedir piezas</button> <button class="btn ghost small" id="addLabor">+ Mano de obra</button> <button class="btn ghost small" id="addPart">+ Pieza</button></div></div>
         <div id="jLines"></div>
         <div class="totals" id="jTotals"></div>
         <div class="top" style="margin-top:12px">
@@ -257,6 +257,7 @@
   </div>
   <div class="board-tools parts-tools">
     <input id="partSearch" type="search" placeholder="Buscar por descripción, marca o referencia…" autocomplete="off">
+    <select id="partSupplier" class="part-sup"><option value="">Todos los proveedores</option></select>
     <button class="btn ghost small" id="starterPartsBtn">+ Piezas habituales</button>
     <button class="btn ghost small" id="marginBtn">Calcular PVP</button>
     <button class="btn ghost small" id="exportPartsBtn">Descargar Excel</button>
@@ -275,7 +276,7 @@
 <!-- PROVEEDORES -->
 <section id="tab-suppliers" class="tab hidden no-print">
   <div class="top page-head">
-    <div><h2 style="margin:0">Proveedores</h2><p class="sub" style="margin:2px 0 0">Tus distribuidores de recambios, a un toque de llamada o correo.</p></div>
+    <div><h2 style="margin:0">Proveedores</h2><p class="sub" style="margin:2px 0 0">Tus distribuidores de recambios. Pídeles piezas por WhatsApp o correo con el mensaje ya escrito, desde aquí o desde cada orden.</p></div>
     <button class="btn" id="newSupplierBtn">+ Proveedor</button>
   </div>
   <div class="grid" id="suppliersGrid"></div>
@@ -317,6 +318,6 @@
 </div>
 <datalist id="brands"></datalist>
 <datalist id="partNames"></datalist>
-<script type="module" src="app.js?v=20261011v"></script>
+<script type="module" src="app.js?v=20261011x"></script>
 </body>
 </html>
