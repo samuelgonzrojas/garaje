@@ -597,19 +597,44 @@ async function loadJobs() {
   }
 }
 function vehicleOf(j) { return vehicles.find((v) => v.id === j.vehicle_id); }
+/** Entrega prevista: "hoy", "atrasada" o la fecha. */
+function dueBadge(j) {
+  if (!j.promised_at || ['delivered', 'cancelled'].includes(j.status)) return '';
+  const t = today();
+  if (j.status !== 'ready' && j.promised_at < t) return `<span class="due late">Atrasada · ${fmtDate(j.promised_at).slice(0, 5)}</span>`;
+  if (j.promised_at === t) return '<span class="due today">Entrega hoy</span>';
+  return `<span class="due">Entrega ${fmtDate(j.promised_at).slice(0, 5)}</span>`;
+}
 function jobCard(j) {
   const v = vehicleOf(j);
   const s = v ? summary(v) : { name: 'Coche sin acceso', plate: '' };
   const el = document.createElement('div');
   el.className = 'jcard';
+  const who = j.assigned_to ? nameOf(j.assigned_to) : '';
+  const total = isManager() && (j.lines || []).length ? fmtEur(totals(j).total) : '';
   el.innerHTML = `${photoImg(s.photo, 44)}<span class="num-tag">OR ${j.number}</span>${j.lead_id ? '<span class="badge workshop">Garaje</span>' : ''}<b>${esc(s.name)}</b>
     <small>${esc(s.plate)}${j.customer_name ? ' · ' + esc(j.customer_name) : ''}</small>
-    ${j.customer_request ? `<small>${esc(j.customer_request.slice(0, 80))}</small>` : ''}
-    <span class="status ${j.status}">${STATUS[j.status]}</span>
-    ${j.promised_at ? `<small>Entrega: ${fmtDate(j.promised_at)}</small>` : ''}`;
+    ${j.customer_request ? `<small class="req">${esc(j.customer_request.slice(0, 80))}</small>` : ''}
+    <div class="jfoot"><span class="status ${j.status}">${STATUS[j.status]}</span>${dueBadge(j)}${total ? `<span class="jtotal">${total}</span>` : ''}
+      ${who ? `<span class="avatar mini" title="Responsable: ${esc(who)}">${esc(who.trim()[0].toUpperCase())}</span>` : ''}</div>`;
   el.onclick = () => openJob(j);
   return el;
 }
+/** Órdenes que pasan el buscador y "Solo las mías". */
+function visibleJobs() {
+  const q = $('jobSearch').value.trim().toLowerCase();
+  const mine = $('onlyMine').checked;
+  return jobs.filter((j) => {
+    if (mine && j.assigned_to !== session.user.id) return false;
+    if (!q) return true;
+    const v = vehicleOf(j); const s = v ? summary(v) : {};
+    return [`or ${j.number}`, String(j.number), s.name, s.plate, (s.plate || '').replace(/\s/g, ''), j.customer_name, j.customer_request]
+      .some((x) => (x || '').toLowerCase().includes(q));
+  });
+}
+$('jobSearch').addEventListener('input', () => renderBoard());
+$('onlyMine').addEventListener('change', () => renderBoard());
+
 // Primeros pasos del taller: una lista que se va marcando sola y desaparece
 // cuando está todo hecho (o si el taller la cierra).
 const onboardKey = () => 'garaje.onboard.' + workshop.id;
@@ -686,10 +711,14 @@ function renderHero() {
 function renderBoard() {
   renderOnboard();
   renderHero();
+  // "Solo las mías" cuando hay equipo.
+  show('mineWrap', team.filter((m) => m.joined).length > 1 || myRole === 'mechanic');
+  const shown = visibleJobs();
   const b = $('board');
   b.innerHTML = '';
   for (const [title, states] of COLUMNS) {
-    const list = jobs.filter((j) => states.includes(j.status));
+    const list = shown.filter((j) => states.includes(j.status))
+      .sort((x, y) => (x.promised_at || '9999').localeCompare(y.promised_at || '9999') || x.number - y.number);
     const col = document.createElement('div');
     col.className = 'col';
     col.innerHTML = `<h4>${title}<span>${list.length}</span></h4>`;
@@ -702,17 +731,34 @@ function renderBoard() {
   }
   const done = $('doneJobs');
   done.innerHTML = '';
-  const closed = jobs.filter((j) => ['delivered', 'cancelled'].includes(j.status)).slice(0, 30);
-  if (closed.length === 0) done.innerHTML = '<p class="muted">Ninguna todavía.</p>';
+  const closed = shown.filter((j) => ['delivered', 'cancelled'].includes(j.status)).slice(0, 30);
+  if (closed.length === 0) done.innerHTML = `<p class="muted">${$('jobSearch').value.trim() ? 'Ninguna coincide con la búsqueda.' : 'Ninguna todavía.'}</p>`;
   for (const j of closed) done.appendChild(jobCard(j));
 }
 
 $('newJobBtn').onclick = async () => {
-  if (vehicles.length === 0) { alert('Primero necesitas acceso a algún coche: pide al cliente el código de taller (pestaña Coches).'); return; }
-  const opts = vehicles.map((v) => { const s = summary(v); return `<option value="${v.id}">${esc(s.name)}${s.plate ? ' · ' + esc(s.plate) : ''}</option>`; }).join('');
-  const id = await dialog(`<h3>Nueva orden de trabajo</h3><label>Coche</label><select name="v">${opts}</select>
-    <p class="muted" style="font-size:13px">¿No está? Pide al cliente el código de taller y escríbelo en la pestaña Coches.</p>`, 'Abrir orden', (fd) => fd.v);
-  if (id) newJobFor(vehicles.find((v) => v.id === id));
+  if (vehicles.length === 0) {
+    await dialog('<h3>Primero, un coche</h3><p class="muted">Para abrir una orden necesitas acceso al coche: el cliente abre Garaje → Mi coche → Compartir → Taller y te da un código. Escríbelo en la pestaña Coches.</p>', 'Ir a Coches', () => true) && setTab('cars');
+    return;
+  }
+  const opts = vehicles.map((v) => { const s = summary(v); const o = ownerOf(v.id); return `<option value="${v.id}">${esc(s.name)}${s.plate ? ' · ' + esc(s.plate) : ''}${o ? ' · ' + esc(o.display_name) : ''}</option>`; }).join('');
+  const r = await dialog(`<h3>Nueva orden de trabajo</h3>
+    <label>Coche</label><select name="v">${opts}</select>
+    <p class="muted" style="font-size:13px;margin:4px 0 0">¿No está? Pide al cliente el código de taller y escríbelo en la pestaña Coches.</p>
+    <label>Lo que pide el cliente</label><textarea name="req" rows="2" placeholder="Cambio de aceite, ruido al frenar…"></textarea>
+    <div class="row2"><div><label>Km al recibirlo</label><input name="km" inputmode="numeric" placeholder="Opcional"></div>
+      <div><label>Entrega prevista</label><input name="promised" type="date" min="${today()}"></div></div>
+    ${isManager() && team.filter((m) => m.joined).length > 1 ? `<label>Responsable</label><select name="who">${assigneeOptions(null)}</select>` : ''}`,
+    'Abrir orden', (fd) => fd);
+  if (!r) return;
+  const row = vehicles.find((v) => v.id === r.v);
+  const km = parseInt(String(r.km || '').replace(/\D/g, ''), 10);
+  newJobFor(row, {
+    customer_request: (r.req || '').trim() || null,
+    km: Number.isFinite(km) ? km : null,
+    promised_at: r.promised || null,
+    assigned_to: r.who || (myRole === 'mechanic' ? session.user.id : null),
+  });
 };
 
 async function newJobFor(row, extra = {}) {
@@ -945,19 +991,76 @@ function openJob(j) {
   $('jPhone').value = job.customer_phone ?? '';
   $('jRequest').value = job.customer_request ?? '';
   $('jIntake').value = job.intake_notes ?? '';
-  $('jErr').textContent = ''; show('jSaved', false);
+  $('jAssigned').innerHTML = assigneeOptions(job.assigned_to);
+  $('jAssigned').disabled = !isManager();
+  $('jErr').textContent = ''; setSaveState('');
+  renderPhoneIcons();
   renderJobHead();
   renderLines();
   renderRecs();
   loadMessages();
   window.scrollTo(0, 0);
 }
+/** Opciones de "Responsable": el equipo que ya ha entrado en el panel. */
+function assigneeOptions(selected) {
+  const people = team.filter((m) => m.joined && m.user_id);
+  return `<option value="">Sin asignar</option>` + people.map((m) => `<option value="${m.user_id}" ${m.user_id === selected ? 'selected' : ''}>${esc(m.display_name)} · ${ROLE_NAME[m.role]}</option>`).join('')
+    + (selected && !people.some((m) => m.user_id === selected) ? `<option value="${selected}" selected>Otra persona</option>` : '');
+}
+const nameOf = (uid) => team.find((m) => m.user_id === uid)?.display_name || '';
+function renderPhoneIcons() {
+  const phone = $('jPhone').value.trim();
+  const v = jobVehicle ? summary(jobVehicle).name : 'tu vehículo';
+  const name = $('jCustomer').value.trim();
+  $('jPhoneIcons').innerHTML = phone ? contactButtons(phone, null, `Hola${name ? ' ' + name : ''}, te escribo de ${workshop?.name || 'el taller'} por tu ${v} (OR ${job?.number ?? ''}).`, name || 'el cliente') : '';
+}
 $('jobBack').onclick = async (e) => {
   e.preventDefault();
-  if (dirty && confirm('¿Guardar los cambios de la orden antes de salir?')) await saveJob();
+  clearTimeout(autoSaveTimer);
+  if (dirty) await saveJob({}, { quiet: true });
   job = null; setTab('jobs');
 };
-for (const id of ['jKm', 'jFuel', 'jPromised', 'jCustomer', 'jPhone', 'jRequest', 'jIntake']) $(id).addEventListener('input', () => { dirty = true; show('jSaved', false); });
+// Guardado automático: al dejar de escribir un momento, se guarda solo.
+let autoSaveTimer = null;
+function setSaveState(text, cls = '') { const el = $('jSaved'); el.textContent = text; el.className = 'save-state ' + cls; }
+function markDirty() {
+  dirty = true;
+  setSaveState('Sin guardar…', 'pending');
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(() => { if (job && dirty && !isLocked()) saveJob({}, { quiet: true }); }, 1500);
+}
+window.addEventListener('beforeunload', (e) => { if (job && dirty) { e.preventDefault(); e.returnValue = ''; } });
+const isLocked = () => ['delivered', 'cancelled'].includes(job?.status);
+for (const id of ['jKm', 'jFuel', 'jPromised', 'jCustomer', 'jPhone', 'jRequest', 'jIntake', 'jAssigned']) $(id).addEventListener('input', markDirty);
+$('jAssigned').addEventListener('change', markDirty);
+$('jPhone').addEventListener('input', renderPhoneIcons);
+$('jCustomer').addEventListener('input', renderPhoneIcons);
+
+// Pasos de una orden, como los ve el cliente en su móvil.
+const STEPS = [['Recibido', ['received', 'diagnosis']], ['Presupuesto', ['quote_sent', 'rejected']], ['Aprobado', ['approved']],
+  ['En reparación', ['in_progress', 'waiting_parts']], ['Listo', ['ready']], ['Entregado', ['delivered']]];
+function renderProgress() {
+  const st = job.status;
+  const at = STEPS.findIndex(([, sts]) => sts.includes(st));
+  $('jProgress').className = 'progress' + (st === 'cancelled' ? ' cancelled' : '');
+  $('jProgress').innerHTML = STEPS.map(([label], i) => {
+    const cls = st === 'cancelled' ? '' : i < at ? 'done' : i === at ? 'now' + (st === 'rejected' || st === 'waiting_parts' ? ' warn' : '') : '';
+    const sub = i === at && st === 'rejected' ? 'Rechazado' : i === at && st === 'waiting_parts' ? 'Esperando piezas' : i === at && st === 'diagnosis' ? 'En diagnóstico' : '';
+    return `<li class="${cls}"><i>${i < at && st !== 'cancelled' ? '✓' : i + 1}</i><span>${label}${sub ? `<small>${sub}</small>` : ''}</span></li>`;
+  }).join('');
+  // Avisos: retraso, rechazo, entregada o cancelada.
+  const late = job.promised_at && job.promised_at < today() && !['ready', 'delivered', 'cancelled'].includes(st);
+  const alert = st === 'delivered' ? `<b>Entregada${job.delivered_at ? ' el ' + fmtDate(job.delivered_at) : ''}.</b> Los trabajos ya están en el historial del coche; la orden queda de solo lectura.`
+    : st === 'cancelled' ? '<b>Orden cancelada.</b> Queda de solo lectura.'
+    : st === 'rejected' ? `<b>El cliente ha rechazado el presupuesto</b>${job.decision_note ? ': «' + esc(job.decision_note) + '»' : '.'} Cámbialo y vuelve a enviarlo, o llámale.`
+    : late ? `<b>Va con retraso:</b> la entrega estaba prevista el ${fmtDate(job.promised_at)}. Avisa al cliente o cambia la fecha.` : '';
+  $('jAlert').innerHTML = alert;
+  $('jAlert').className = 'job-alert' + (alert ? '' : ' hidden') + (late || st === 'rejected' ? ' warn' : '');
+  // Solo lectura cuando ya está entregada o cancelada.
+  const locked = isLocked();
+  for (const el of document.querySelectorAll('#job input:not(#jMsg), #job select, #job textarea')) el.disabled = locked || (el.id === 'jAssigned' && !isManager());
+  for (const id of ['addLabor', 'addPart', 'jSave']) show(id, !locked);
+}
 
 function renderJobHead() {
   const s = jobVehicle ? summary(jobVehicle) : { name: 'Coche', plate: '' };
@@ -970,7 +1073,9 @@ function renderJobHead() {
   if (job.quote_sent_at) bits.push(`presupuesto enviado el ${fmtDate(job.quote_sent_at)}`);
   if (job.decided_at) bits.push(`${job.decision === 'approved' ? 'aprobado' : 'rechazado'} el ${fmtDate(job.decided_at)}${job.decision_note ? ': «' + job.decision_note + '»' : ''}`);
   if (job.delivered_at) bits.push(`entregado el ${fmtDate(job.delivered_at)}`);
+  if (job.assigned_to) bits.push(`responsable: ${nameOf(job.assigned_to) || 'otra persona'}`);
   $('jSub').textContent = bits.join(' · ');
+  renderProgress();
   const a = $('jActions');
   a.innerHTML = '';
   const btn = (label, fn, cls = 'btn small') => { const b = document.createElement('button'); b.className = cls; b.textContent = label; b.onclick = fn; a.appendChild(b); };
@@ -985,7 +1090,9 @@ function renderJobHead() {
   if (st === 'in_progress') { btn('Listo para recoger', () => setStatus('ready')); btn('Esperando piezas', () => setStatus('waiting_parts'), 'btn ghost small'); }
   if (st === 'waiting_parts') { btn('Han llegado: seguir', () => setStatus('in_progress')); btn('Listo para recoger', () => setStatus('ready'), 'btn ghost small'); }
   if (st === 'ready') btn('Entregar y pasar al historial', deliver);
-  if (!['delivered', 'cancelled'].includes(st) && isManager()) btn('Cancelar', () => { if (confirm('¿Cancelar esta orden?')) setStatus('cancelled'); }, 'btn ghost small');
+  if (!['delivered', 'cancelled'].includes(st) && isManager()) btn('Cancelar', async () => {
+    if (await dialog('<h3>¿Cancelar esta orden?</h3><p class="muted">El cliente verá en su móvil que se ha cancelado. No se puede deshacer.</p>', 'Cancelar orden', () => true)) setStatus('cancelled');
+  }, 'btn ghost small');
 }
 
 // --- líneas del presupuesto
@@ -997,7 +1104,9 @@ function totals(j) {
 }
 function renderLines() {
   const box = $('jLines');
-  box.innerHTML = (job.lines || []).length ? '' : '<p class="muted">Añade mano de obra y piezas. Las piezas de tu biblioteca se autocompletan al escribir.</p>';
+  box.innerHTML = (job.lines || []).length
+    ? '<div class="qhead"><span>Tipo</span><span>Descripción</span><span>Cant. / horas</span><span>€/u sin IVA</span><span>Dto %</span><span>Total</span><span></span></div>'
+    : '<p class="muted">Añade mano de obra y piezas. Las piezas de tu biblioteca se autocompletan al escribir.</p>';
   const prof = jobVehicle ? profileOf(jobVehicle) : {};
   const supOpts = (sel) => `<option value="">Proveedor</option>` + suppliers.map((s) => `<option value="${s.id}" ${s.id === sel ? 'selected' : ''}>${esc(s.name)}</option>`).join('');
   (job.lines || []).forEach((l, i) => {
@@ -1022,9 +1131,10 @@ function renderLines() {
       </div>`;
     for (const inp of row.querySelectorAll('[data-k]')) {
       inp.addEventListener('change', () => { l[inp.dataset.k] = inp.value; afterLineEdit(inp.dataset.k === 'kind' || inp.dataset.k === 'reference', l, inp.dataset.k); });
-      inp.addEventListener('input', () => { l[inp.dataset.k] = inp.value; dirty = true; show('jSaved', false); row.querySelector('.tot').textContent = fmtEur(lineTotal(l)); renderTotals(); });
+      inp.addEventListener('input', () => { l[inp.dataset.k] = inp.value; markDirty(); row.querySelector('.tot').textContent = fmtEur(lineTotal(l)); renderTotals(); });
     }
-    row.querySelector('.x').onclick = () => { job.lines.splice(i, 1); dirty = true; renderLines(); };
+    row.querySelector('.x').onclick = () => { job.lines.splice(i, 1); markDirty(); renderLines(); };
+    if (isLocked()) row.querySelector('.x').remove();
     box.appendChild(row);
   });
   // Autocompletar descripciones con la biblioteca de piezas.
@@ -1032,7 +1142,7 @@ function renderLines() {
   renderTotals();
 }
 function afterLineEdit(rerender, l, key) {
-  dirty = true; show('jSaved', false);
+  markDirty();
   // Al elegir una descripción de la biblioteca, se rellenan marca, ref. y precio.
   if (key === 'description' && l.kind === 'part') {
     const p = parts.find((x) => x.description === l.description);
@@ -1047,7 +1157,7 @@ function renderTotals() {
     <span><b>Total</b></span><span><b>${fmtEur(t.total)}</b></span>`;
 }
 const partToLine = (p) => ({ kind: 'part', description: p.description, catalog_id: p.catalog_id || '', brand: p.brand || '', reference: p.reference || '', supplier_id: p.supplier_id || '', qty: 1, unit_price: p.price ?? '', discount: '', part_id: p.id });
-function addJobLine(l) { job.lines ||= []; job.lines.push(l); dirty = true; renderLines(); }
+function addJobLine(l) { job.lines ||= []; job.lines.push(l); markDirty(); renderLines(); }
 $('addLabor').onclick = () => addJobLine({ kind: 'labor', description: '', catalog_id: '', qty: 1, unit_price: workshop.labor_rate, discount: '' });
 $('addPart').onclick = () => addJobLine({ kind: 'part', description: '', catalog_id: '', brand: '', reference: '', supplier_id: '', qty: 1, unit_price: '', discount: '' });
 
@@ -1097,20 +1207,27 @@ function collectJob() {
     customer_phone: $('jPhone').value.trim() || null,
     customer_request: $('jRequest').value.trim() || null,
     intake_notes: $('jIntake').value.trim() || null,
+    assigned_to: $('jAssigned').value || null,
     lines: (job.lines || []).filter((l) => (l.description || '').trim() || num(l.unit_price)).map((l) => ({
       ...l, qty: num(l.qty) ?? 1, unit_price: num(l.unit_price), discount: num(l.discount),
       supplier: suppliers.find((s) => s.id === l.supplier_id)?.name || l.supplier || null,
     })),
   };
 }
-async function saveJob(extra = {}) {
+async function saveJob(extra = {}, { quiet = false } = {}) {
+  clearTimeout(autoSaveTimer);
   $('jErr').textContent = '';
+  setSaveState('Guardando…', 'pending');
   const patch = { ...collectJob(), ...extra, updated_at: new Date().toISOString() };
   const { data, error } = await sb.from('jobs').update(patch).eq('id', job.id).select('*').single();
-  if (error) { $('jErr').textContent = 'No se pudo guardar: ' + error.message; return false; }
-  job = data; dirty = false;
-  const i = jobs.findIndex((j) => j.id === job.id); if (i >= 0) jobs[i] = data;
-  show('jSaved'); renderJobHead(); renderLines();
+  if (error) { $('jErr').textContent = 'No se pudo guardar: ' + error.message; setSaveState('Sin guardar', 'bad'); return false; }
+  const i = jobs.findIndex((j) => j.id === data.id); if (i >= 0) jobs[i] = data;
+  if (!job || job.id !== data.id) return true; // ya se ha salido de la orden
+  // Guardado automático mientras se escribe: no se repinta (se perdería el foco).
+  job = quiet ? { ...data, lines: job.lines } : data;
+  dirty = false;
+  setSaveState('Guardado ✓', 'ok');
+  if (!quiet) { renderJobHead(); renderLines(); }
   return true;
 }
 $('jSave').onclick = () => saveJob();
@@ -1123,14 +1240,14 @@ async function sendQuote() {
   const c = collectJob();
   if (c.lines.length === 0) { $('jErr').textContent = 'Añade al menos una línea al presupuesto.'; return; }
   const t = totals({ ...job, lines: c.lines });
-  if (!confirm(`Se enviará el presupuesto (${fmtEur(t.total)} con IVA) al móvil del cliente para que lo apruebe. ¿Enviar?`)) return;
+  if (!(await dialog(`<h3>Enviar el presupuesto</h3><p class="muted">Le llega al móvil del cliente para que lo apruebe o lo rechace.</p><p class="big-total">${fmtEur(t.total)} <small>con IVA</small></p>`, 'Enviar al cliente', () => true))) return;
   if (!(await saveJob({ status: 'quote_sent', quote_sent_at: new Date().toISOString(), decision: null, decided_at: null, decision_note: null }))) return;
   await postMessage(`Te hemos enviado el presupuesto: ${fmtEur(t.total)} con IVA. Puedes aprobarlo o rechazarlo desde la app.`, true);
 }
 
 // Entregar: pasa los trabajos al historial del coche y enseña a la biblioteca.
 async function deliver() {
-  if (!confirm('Se marcará como entregado y los trabajos pasarán al historial del coche en el móvil del cliente. ¿Continuar?')) return;
+  if (!(await dialog('<h3>Entregar el vehículo</h3><p class="muted">Se marca como entregado y los trabajos pasan al historial del coche en el móvil del cliente, con la firma del taller. Después la orden queda de solo lectura.</p>', 'Entregar', () => true))) return;
   if (!(await saveJob())) return;
   try {
     if (!job.history_written) {
@@ -1329,6 +1446,7 @@ async function loadTeam() {
   const { data, error } = await sb.rpc('workshop_team', { w: workshop.id });
   team = error ? [] : (data || []);
   if (tab === 'team') renderTeam();
+  if (tab === 'jobs' && !job) renderBoard();
 }
 function renderTeam() {
   const box = $('teamList');

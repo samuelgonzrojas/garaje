@@ -414,3 +414,54 @@ table.list td[data-label]>span small{display:inline;margin-left:8px}
 .m-remove{font-size:20px;line-height:1}
 @media (prefers-color-scheme:dark){.role-chip.manager{color:#B5A3FF}.role-chip.mechanic{color:#5FD394}}
 @media (max-width:720px){.member{flex-wrap:wrap}.m-info{flex-basis:calc(100% - 52px)}.member .m-role,.member .role-chip{margin-left:52px}}
+
+/* Órdenes: tablero */
+.board-tools{display:flex;align-items:center;gap:12px;margin:0 0 12px}
+.board-tools input[type=search]{flex:1}
+.board-tools .mine{margin:0;white-space:nowrap}
+.jcard .req{margin-top:4px}
+.jfoot{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-top:8px}
+.jfoot .status{margin-top:0}
+.due{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--line);color:var(--muted)}
+.due.today{background:#F2A51629;color:#9a6400}
+.due.late{background:#E5484D22;color:#c23238}
+.jtotal{margin-left:auto;font-weight:800;font-size:14px;font-variant-numeric:tabular-nums}
+.avatar.mini{width:24px;height:24px;font-size:11px}
+.jtotal+.avatar.mini{margin-left:0}
+.jfoot .avatar.mini:first-of-type:last-child{margin-left:auto}
+
+/* Órdenes: una orden */
+.progress{list-style:none;display:flex;gap:4px;margin:16px 0 0;padding:0;counter-reset:none}
+.progress li{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;position:relative;text-align:center;font-size:12.5px;color:var(--muted);font-weight:600}
+.progress li::before{content:"";position:absolute;top:13px;left:-50%;right:50%;height:3px;background:var(--line);z-index:0}
+.progress li:first-child::before{display:none}
+.progress li.done::before,.progress li.now::before{background:var(--brand-2)}
+.progress i{position:relative;z-index:1;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-style:normal;font-weight:800;background:var(--card-2);border:2px solid var(--line);color:var(--muted)}
+.progress li.done i{background:var(--brand-2);border-color:var(--brand-2);color:#fff}
+.progress li.now i{border-color:var(--brand-2);color:var(--brand-2);box-shadow:0 0 0 4px rgba(91,163,230,.18)}
+.progress li.now{color:var(--ink)}
+.progress li.now.warn i{border-color:var(--amber);color:#C98500;box-shadow:0 0 0 4px rgba(242,165,22,.18)}
+.progress li small{display:block;font-size:11px;color:var(--muted);font-weight:500}
+.progress.cancelled{opacity:.55}
+.job-alert{margin-top:14px;padding:10px 14px;border-radius:14px;background:var(--card-2);border:1px solid var(--line);font-size:14px}
+.job-alert.warn{background:#E5484D14;border-color:#E5484D40}
+.with-icons{display:flex;gap:8px;align-items:center}
+.with-icons input{flex:1;min-width:0}
+.with-icons .icons{flex:none}
+.save-state{font-size:13px;font-weight:600;color:var(--muted);margin-right:6px}
+.save-state.ok{color:var(--green)}
+.save-state.bad{color:var(--red)}
+.qhead{display:grid;grid-template-columns:128px 1fr 64px 84px 64px 92px 26px;gap:6px;padding:0 9px 6px;font-size:11.5px;font-weight:700;color:var(--muted);letter-spacing:.3px}
+.qhead span:nth-child(6){text-align:right}
+.big-total{font-size:30px;font-weight:800;margin:10px 0 0;font-variant-numeric:tabular-nums}
+.big-total small{font-size:14px;color:var(--muted);font-weight:600}
+#job input:disabled,#job select:disabled,#job textarea:disabled{opacity:.75;cursor:default}
+@media (prefers-color-scheme:dark){.due.today{color:#F5B94F}.due.late{color:#FF8A8E}}
+@media (max-width:980px){.qhead{display:none}}
+@media (max-width:720px){
+  .board-tools{flex-wrap:wrap}
+  .progress li span{font-size:10.5px}
+  .progress li small{display:none}
+  .progress i{width:24px;height:24px;font-size:12px}
+  .progress li::before{top:11px}
+}

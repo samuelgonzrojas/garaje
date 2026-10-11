@@ -7,7 +7,7 @@
 <meta name="description" content="El día a día del taller con Garaje: órdenes de trabajo, presupuestos que el cliente aprueba en su móvil, piezas, proveedores y el historial de cada coche.">
 <link rel="icon" href="../icon-192.png">
 <link rel="stylesheet" href="../style.css">
-<link rel="stylesheet" href="taller.css?v=20261011m">
+<link rel="stylesheet" href="taller.css?v=20261011o">
 </head>
 <body>
 <div class="wrap panel">
@@ -76,6 +76,10 @@
     <button class="btn" id="newJobBtn">+ Nueva orden</button>
   </div>
   <div class="card onboard hidden" id="onboard"></div>
+  <div class="board-tools">
+    <input id="jobSearch" type="search" placeholder="Buscar por matrícula, coche, cliente o nº de orden…" autocomplete="off">
+    <label class="chk mine hidden" id="mineWrap"><input type="checkbox" id="onlyMine"> Solo las mías</label>
+  </div>
   <div class="board" id="board"></div>
   <details class="card" style="margin-top:16px"><summary>Entregadas y canceladas</summary><div id="doneJobs" style="margin-top:10px"></div></details>
 </section>
@@ -112,6 +116,8 @@
       </div>
       <div class="actions" id="jActions"></div>
     </div>
+    <ol class="progress" id="jProgress"></ol>
+    <div class="job-alert hidden" id="jAlert"></div>
   </div>
 
   <div class="job-grid">
@@ -123,9 +129,10 @@
           <div><label>Combustible</label><select id="jFuel"><option value="">—</option><option>Reserva</option><option>1/4</option><option>1/2</option><option>3/4</option><option>Lleno</option></select></div>
           <div><label>Entrega prevista</label><input id="jPromised" type="date"></div>
         </div>
-        <div class="row2">
+        <div class="row3">
           <div><label>Cliente</label><input id="jCustomer"></div>
-          <div><label>Teléfono</label><input id="jPhone" type="tel"></div>
+          <div><label>Teléfono</label><div class="with-icons"><input id="jPhone" type="tel"><span class="icons" id="jPhoneIcons"></span></div></div>
+          <div><label>Responsable</label><select id="jAssigned"></select></div>
         </div>
         <label>Lo que pide el cliente</label><textarea id="jRequest" rows="2"></textarea>
         <label>Estado del coche al recibirlo (golpes, testigos, objetos…)</label><textarea id="jIntake" rows="2"></textarea>
@@ -138,7 +145,7 @@
         <div class="totals" id="jTotals"></div>
         <div class="top" style="margin-top:12px">
           <div class="err" id="jErr"></div>
-          <div><span class="ok hidden" id="jSaved">Guardado</span> <button class="btn" id="jSave">Guardar</button></div>
+          <div><span class="save-state" id="jSaved"></span> <button class="btn" id="jSave">Guardar</button></div>
         </div>
       </div>
     </div>
@@ -284,6 +291,6 @@
 </div>
 <datalist id="brands"></datalist>
 <datalist id="partNames"></datalist>
-<script type="module" src="app.js?v=20261011m"></script>
+<script type="module" src="app.js?v=20261011o"></script>
 </body>
 </html>
