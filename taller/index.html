@@ -7,36 +7,45 @@
 <meta name="description" content="El día a día del taller con Garaje: órdenes de trabajo, presupuestos que el cliente aprueba en su móvil, piezas, proveedores y el historial de cada coche.">
 <link rel="icon" href="../icon-192.png">
 <link rel="stylesheet" href="../style.css">
-<link rel="stylesheet" href="taller.css?v=20261011g">
+<link rel="stylesheet" href="taller.css?v=20261011i">
 </head>
 <body>
 <div class="wrap panel">
 <header class="no-print">
-  <a class="logo" href="../"><img src="../icon-192.png" alt=""> Garaje <span class="muted" style="font-weight:500;font-size:15px;margin-left:4px">· Panel de taller</span></a>
-  <nav id="nav" class="hidden"><span class="who"><b id="who"></b> · <a href="#" id="logout">salir</a></span></nav>
+  <a class="logo" href="../"><img src="../icon-192.png" alt=""> Garaje <span class="chip-taller">Taller</span></a>
+  <div id="nav" class="userbox hidden">
+    <span class="avatar" id="avatar" aria-hidden="true"></span>
+    <b id="who"></b>
+    <a href="#" id="logout" class="icon-btn" title="Salir" aria-label="Salir"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg></a>
+  </div>
 </header>
 
+<!-- Navegación: arriba con iconos en pantallas anchas; barra fija abajo en el móvil, como la app. -->
 <nav id="tabs" class="tabs hidden no-print">
-  <button data-tab="jobs" class="on">Órdenes</button>
-  <button data-tab="leads">Solicitudes<span class="badge workshop hidden" id="leadsBadge"></span></button>
-  <button data-tab="agenda">Agenda</button>
-  <button data-tab="cars">Coches</button>
-  <button data-tab="parts">Piezas</button>
-  <button data-tab="suppliers">Proveedores</button>
-  <button data-tab="settings">Mi taller</button>
+  <button data-tab="jobs" data-icon="jobs" class="on"><span>Órdenes</span></button>
+  <button data-tab="leads" data-icon="leads"><span>Solicitudes</span><i class="nbadge hidden" id="leadsBadge"></i></button>
+  <button data-tab="agenda" data-icon="agenda"><span>Agenda</span></button>
+  <button data-tab="cars" data-icon="cars"><span>Coches</span></button>
+  <button data-tab="parts" data-icon="parts" class="secondary"><span>Piezas</span></button>
+  <button data-tab="suppliers" data-icon="suppliers" class="secondary"><span>Proveedores</span></button>
+  <button data-tab="settings" data-icon="settings" class="secondary"><span>Mi taller</span></button>
+  <button data-more data-icon="more" class="more-btn"><span>Más</span></button>
 </nav>
+<dialog id="moreSheet" class="ws-sheet no-print"><div class="handle"></div><div id="moreList"></div></dialog>
 
 <!-- ACCESO -->
 <section id="login" class="no-print">
-  <div class="card" style="max-width:460px;margin:30px auto">
-    <h2>Entrar</h2>
-    <p class="sub">Para talleres: órdenes de trabajo, presupuestos que el cliente aprueba en su móvil, piezas y proveedores. También para familiares que quieran apuntar trabajos desde el ordenador.</p>
+  <div class="welcome">
+    <img src="../icon-192.png" alt="" class="welcome-logo">
+    <h2>Panel de taller</h2>
+    <p class="sub">Órdenes de trabajo, presupuestos que el cliente aprueba en su móvil, piezas, proveedores y clientes que te llegan desde la app Garaje.</p>
     <div id="stepEmail">
+      <button class="btn white" id="google"><b class="g">G</b> Continuar con Google</button>
+      <div class="or"><span>o con tu correo</span></div>
       <label for="email">Tu correo</label>
       <input id="email" type="email" autocomplete="email" placeholder="taller@ejemplo.com">
-      <p class="muted" style="font-size:13px">Te enviamos un código de 6 cifras. Usa el mismo correo con el que entras en la app, si la tienes.</p>
-      <button class="btn" id="sendCode">Enviarme el código</button>
-      <button class="btn ghost" id="google">Entrar con Google</button>
+      <p class="hint">Te enviamos un código de 6 cifras. Usa el mismo correo con el que entras en la app, si la tienes.</p>
+      <button class="btn outline-white" id="sendCode">Enviarme el código</button>
     </div>
     <div id="stepCode" class="hidden">
       <label for="code">Código que te ha llegado a <span id="sentTo"></span></label>
@@ -59,7 +68,8 @@
 
 <!-- ÓRDENES -->
 <section id="tab-jobs" class="tab hidden no-print">
-  <div class="top" style="margin-bottom:14px">
+  <div class="ws-hero" id="ws-hero"></div>
+  <div class="top page-head">
     <div><h2 style="margin:0">Órdenes de trabajo</h2><p class="sub" style="margin:2px 0 0">Lo que hay hoy en el taller. El cliente ve el estado en su móvil.</p></div>
     <button class="btn" id="newJobBtn">+ Nueva orden</button>
   </div>
@@ -70,7 +80,7 @@
 
 <!-- SOLICITUDES DE PRESUPUESTO (clientes enviados por Garaje) -->
 <section id="tab-leads" class="tab hidden no-print">
-  <div class="top" style="margin-bottom:14px">
+  <div class="top page-head">
     <div><h2 style="margin:0">Solicitudes de presupuesto</h2><p class="sub" style="margin:2px 0 0">Clientes que te llegan desde la app Garaje. Responde con precio y cita; cuando acepten, abre la orden desde aquí.</p></div>
   </div>
   <div id="leadsList"></div>
@@ -79,9 +89,9 @@
 
 <!-- AGENDA: citas aceptadas desde la app y entregas previstas -->
 <section id="tab-agenda" class="tab hidden no-print">
-  <div class="top" style="margin-bottom:14px">
+  <div class="top page-head">
     <div><h2 style="margin:0">Agenda</h2><p class="sub" style="margin:2px 0 0">Citas aceptadas por los clientes desde la app y entregas previstas de las órdenes. El cliente recibe un recordatorio el día antes.</p></div>
-    <div class="actions"><button class="btn ghost small" id="agPrev">‹ Semana anterior</button><button class="btn ghost small" id="agToday">Hoy</button><button class="btn ghost small" id="agNext">Semana siguiente ›</button></div>
+    <div class="actions week-nav"><button class="btn ghost small" id="agPrev" aria-label="Semana anterior">‹<span> Semana anterior</span></button><button class="btn ghost small" id="agToday">Hoy</button><button class="btn ghost small" id="agNext" aria-label="Semana siguiente"><span>Semana siguiente </span>›</button></div>
   </div>
   <h3 id="agTitle" style="margin:0 0 10px"></h3>
   <div class="week" id="agWeek"></div>
@@ -154,7 +164,7 @@
 
 <!-- COCHES -->
 <section id="tab-cars" class="tab hidden no-print">
-  <div class="top" style="margin-bottom:14px">
+  <div class="top page-head">
     <div><h2 style="margin:0">Coches</h2><p class="sub" style="margin:2px 0 0">Los que te han dado acceso desde la app (Mi coche → Compartir → Taller), con su dueño y su teléfono.</p></div>
     <form id="joinForm" style="display:flex;gap:8px;align-items:center">
       <input id="joinCode" placeholder="Código" style="width:170px;text-transform:uppercase" maxlength="6">
@@ -163,7 +173,7 @@
   </div>
   <div class="err" id="listErr"></div>
   <div class="grid" id="grid"></div>
-  <p class="muted hidden" id="empty">Todavía no tienes acceso a ningún coche. Pide al dueño un código de taller y escríbelo arriba.</p>
+  <div class="empty hidden" id="empty" data-icon="cars"><b>Aún no tienes coches</b><p>El cliente abre Garaje → Mi coche → Compartir → Taller y te enseña un código. Escríbelo arriba y verás su coche, su historial y su teléfono.</p></div>
 </section>
 
 <!-- UN COCHE -->
@@ -213,7 +223,7 @@
 
 <!-- PIEZAS -->
 <section id="tab-parts" class="tab hidden no-print">
-  <div class="top" style="margin-bottom:14px">
+  <div class="top page-head">
     <div><h2 style="margin:0">Piezas</h2><p class="sub" style="margin:2px 0 0">Tu biblioteca: se llena sola con las piezas de las órdenes entregadas y aprende en qué motores las montas.</p></div>
     <button class="btn" id="newPartBtn">+ Pieza</button>
   </div>
@@ -223,23 +233,23 @@
       <thead><tr><th>Pieza</th><th>Marca y referencia</th><th>Proveedor</th><th class="num">Coste</th><th class="num">PVP</th><th class="num">Usos</th><th></th></tr></thead>
       <tbody id="partsBody"></tbody>
     </table>
-    <p class="muted hidden" id="noParts" style="padding:16px">Aún no hay piezas. Se añaden solas al entregar órdenes, o con "+ Pieza".</p>
+    <div class="empty hidden" id="noParts" data-icon="parts"><b>Tu biblioteca de piezas está vacía</b><p>Se llena sola con las piezas de las órdenes que entregas, o añádelas con "+ Pieza".</p></div>
   </div>
 </section>
 
 <!-- PROVEEDORES -->
 <section id="tab-suppliers" class="tab hidden no-print">
-  <div class="top" style="margin-bottom:14px">
+  <div class="top page-head">
     <div><h2 style="margin:0">Proveedores</h2><p class="sub" style="margin:2px 0 0">Tus distribuidores de recambios, a un toque de llamada o correo.</p></div>
     <button class="btn" id="newSupplierBtn">+ Proveedor</button>
   </div>
   <div class="grid" id="suppliersGrid"></div>
-  <p class="muted hidden" id="noSuppliers">Añade los distribuidores a los que compras: luego los eliges en cada pieza.</p>
+  <div class="empty hidden" id="noSuppliers" data-icon="suppliers"><b>Sin proveedores todavía</b><p>Añade los distribuidores a los que compras: luego los eliges en cada pieza y los llamas con un toque.</p></div>
 </section>
 
 <!-- MI TALLER -->
 <section id="tab-settings" class="tab hidden no-print">
-  <div class="top" style="margin-bottom:14px">
+  <div class="top page-head">
     <div><h2 style="margin:0">Mi taller</h2><p class="sub" style="margin:2px 0 0">Salen en presupuestos y órdenes de reparación, y el cliente los ve en su app.</p></div>
   </div>
   <div class="card">
@@ -263,6 +273,6 @@
 </div>
 <datalist id="brands"></datalist>
 <datalist id="partNames"></datalist>
-<script type="module" src="app.js?v=20261011g"></script>
+<script type="module" src="app.js?v=20261011i"></script>
 </body>
 </html>

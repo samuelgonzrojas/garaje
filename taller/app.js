@@ -53,6 +53,24 @@ const ICON = {
   mail: '<path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5-8-5V6l8 5 8-5z"/>',
   web: '<path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm6.9 6h-2.9a15.7 15.7 0 0 0-1.4-3.6A8 8 0 0 1 18.9 8zM12 4c.8 1.2 1.5 2.5 1.9 4h-3.8c.4-1.4 1.1-2.8 1.9-4zM4.3 14a8.2 8.2 0 0 1 0-4h3.4a16.5 16.5 0 0 0 0 4zm.8 2h2.9c.3 1.3.8 2.5 1.4 3.6A8 8 0 0 1 5.1 16zM8 8H5.1a8 8 0 0 1 4.3-3.6C8.8 5.5 8.3 6.7 8 8zm4 12c-.8-1.2-1.5-2.5-1.9-4h3.8c-.4 1.4-1.1 2.8-1.9 4zm2.3-6H9.7a14.7 14.7 0 0 1 0-4h4.6a14.7 14.7 0 0 1 0 4zm.3 5.6c.6-1.1 1.1-2.3 1.4-3.6h2.9a8 8 0 0 1-4.3 3.6zm1.7-5.6a16.5 16.5 0 0 0 0-4h3.4a8.2 8.2 0 0 1 0 4z"/>',
 };
+// Iconos de la navegación y de las pantallas vacías (los mismos que la app).
+const NAV_ICON = {
+  jobs: '<path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/>',
+  leads: '<path d="M19 3H4.99C3.88 3 3.01 3.89 3.01 5L3 19c0 1.1.88 2 1.99 2H19c1.1 0 2-.9 2-2V5c0-1.11-.9-2-2-2zm0 12h-4c0 1.66-1.35 3-3 3s-3-1.34-3-3H4.99V5H19v10z"/>',
+  agenda: '<path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/>',
+  cars: '<path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>',
+  parts: '<path d="M20 2H4c-1 0-2 .9-2 2v3.01c0 .72.43 1.34 1 1.69V20c0 1.1 1.1 2 2 2h14c.9 0 2-.9 2-2V8.7c.57-.35 1-.97 1-1.69V4c0-1.1-1-2-2-2zm-5 12H9v-2h6v2zm5-7H4V4h16v3z"/>',
+  suppliers: '<path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>',
+  settings: '<path d="M20 4H4v2h16V4zm1 10v-2l-1-5H4l-1 5v2h1v6h10v-6h4v6h2v-6h1zm-9 4H6v-4h6v4z"/>',
+  more: '<path d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>',
+  logout: '<path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>',
+};
+const svgIcon = (k) => `<svg viewBox="0 0 24 24" aria-hidden="true">${NAV_ICON[k] || ''}</svg>`;
+for (const el of document.querySelectorAll('.tabs [data-icon]')) el.insertAdjacentHTML('afterbegin', `<i class="ni">${svgIcon(el.dataset.icon)}</i>`);
+for (const el of document.querySelectorAll('.empty[data-icon]')) el.insertAdjacentHTML('afterbegin', `<i class="empty-ic">${svgIcon(el.dataset.icon)}</i>`);
+/** Pantalla vacía con icono, como en la app. */
+const emptyState = (icon, title, text) => `<div class="empty"><i class="empty-ic">${svgIcon(icon)}</i><b>${title}</b><p>${text}</p></div>`;
+
 const iconLink = (kind, href, label, external = false) =>
   `<a class="ic ${kind}" href="${esc(href)}" title="${esc(label)}" aria-label="${esc(label)}"${external ? ' target="_blank" rel="noopener"' : ''}><svg viewBox="0 0 24 24" aria-hidden="true">${ICON[kind]}</svg></a>`;
 /** Botones de contacto con icono: llamar, WhatsApp y correo (los que haya). */
@@ -240,11 +258,14 @@ async function ensureProfile() {
 async function loadWorkshop() {
   const { data } = await sb.from('workshops').select('*').eq('owner_id', session.user.id).maybeSingle();
   workshop = data;
-  $('who').textContent = workshop?.name || profile.display_name;
+  const name = workshop?.name || profile.display_name || '';
+  $('who').textContent = name;
+  $('avatar').textContent = (name.trim()[0] || '?').toUpperCase();
   // Solo el taller ve las pestañas de órdenes, piezas, proveedores y taller.
   for (const t of ['jobs', 'parts', 'suppliers', 'settings']) {
     document.querySelector(`.tabs [data-tab="${t}"]`).classList.toggle('hidden', !workshop);
   }
+  document.querySelector('.tabs .more-btn').classList.toggle('no-more', !workshop);
   show('vJobActions', !!workshop);
 }
 
@@ -322,10 +343,22 @@ function renderWsForm(formId, data, button) {
 $('skipSetup').onclick = (e) => { e.preventDefault(); localStorage.setItem('garaje.skipSetup', '1'); enter(); };
 
 // ------------------------------------------------------------------ pestañas
-for (const b of document.querySelectorAll('.tabs button')) b.onclick = () => setTab(b.dataset.tab);
+for (const b of document.querySelectorAll('.tabs button[data-tab]')) b.onclick = () => setTab(b.dataset.tab);
+// "Más" (móvil): Piezas, Proveedores, Mi taller y salir en una hoja desde abajo.
+document.querySelector('.tabs .more-btn').onclick = () => {
+  const items = [...document.querySelectorAll('.tabs button.secondary')].filter((b) => !b.classList.contains('hidden'));
+  $('moreList').innerHTML = items.map((b) => `<button class="sheet-item" data-go="${b.dataset.tab}"><i class="ni">${svgIcon(b.dataset.icon)}</i>${esc(b.textContent.trim())}</button>`).join('')
+    + `<button class="sheet-item" data-go="logout"><i class="ni">${svgIcon('logout')}</i>Salir</button>`;
+  for (const it of $('moreList').querySelectorAll('[data-go]')) {
+    it.onclick = () => { $('moreSheet').close(); if (it.dataset.go === 'logout') $('logout').click(); else setTab(it.dataset.go); };
+  }
+  $('moreSheet').showModal();
+};
+$('moreSheet').onclick = (e) => { if (e.target === $('moreSheet')) $('moreSheet').close(); };
 function setTab(t) {
   tab = t;
-  for (const b of document.querySelectorAll('.tabs button')) b.classList.toggle('on', b.dataset.tab === t);
+  for (const b of document.querySelectorAll('.tabs button[data-tab]')) b.classList.toggle('on', b.dataset.tab === t);
+  document.querySelector('.tabs .more-btn').classList.toggle('on', ['parts', 'suppliers', 'settings'].includes(t));
   for (const id of ['tab-jobs', 'tab-leads', 'tab-agenda', 'tab-cars', 'tab-parts', 'tab-suppliers', 'tab-settings', 'job', 'vehicle']) show(id, false);
   show('tab-' + t);
   if (t === 'jobs') renderBoard();
@@ -606,8 +639,29 @@ function renderOnboard() {
   show('onboard');
 }
 
+/** Tarjeta de arriba de Órdenes, como la de kilómetros de la app: saludo y lo que hay hoy. */
+function renderHero() {
+  const h = $('ws-hero');
+  if (!workshop) { h.innerHTML = ''; return; }
+  const hour = new Date().getHours();
+  const hello = hour < 14 ? 'Buenos días' : hour < 21 ? 'Buenas tardes' : 'Buenas noches';
+  const open = jobs.filter((j) => !['delivered', 'cancelled'].includes(j.status));
+  const tiles = [
+    ['En el taller', open.filter((j) => ['received', 'diagnosis', 'approved', 'in_progress', 'waiting_parts'].includes(j.status)).length, 'jobs'],
+    ['Esperando al cliente', open.filter((j) => ['quote_sent', 'rejected'].includes(j.status)).length, 'jobs'],
+    ['Listos para recoger', open.filter((j) => j.status === 'ready').length, 'jobs'],
+    ['Solicitudes nuevas', leads.filter((l) => l.status === 'sent' || l.status === 'accepted').length, 'leads'],
+  ];
+  const today = new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+  h.innerHTML = `<div class="ws-hero-top"><div><small>${esc(today)}</small><h2>${hello}, ${esc(workshop.name)}</h2></div></div>
+    <div class="ws-hero-tiles">${tiles.map(([label, n, go]) => `<button class="htile${n ? '' : ' zero'}" data-go="${go}"><b>${n}</b><span>${label}</span></button>`).join('')}</div>`;
+  for (const t of h.querySelectorAll('[data-go="leads"]')) t.onclick = () => setTab('leads');
+  for (const t of h.querySelectorAll('[data-go="jobs"]')) t.onclick = () => $('board').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 function renderBoard() {
   renderOnboard();
+  renderHero();
   const b = $('board');
   b.innerHTML = '';
   for (const [title, states] of COLUMNS) {
@@ -671,6 +725,7 @@ async function loadLeads() {
   b.classList.toggle('hidden', n === 0);
   if (tab === 'leads') renderLeads();
   if (tab === 'agenda') renderAgenda();
+  if (tab === 'jobs' && !job) renderHero();
 }
 
 function leadCard(l) {
@@ -702,7 +757,9 @@ function renderLeads() {
   list.innerHTML = '';
   const open = leads.filter((l) => LEAD_OPEN.includes(l.status));
   if (open.length === 0) {
-    list.innerHTML = `<p class="muted">Ninguna pendiente. ${workshop?.listed ? 'Los usuarios de Garaje de tu zona pueden pedirte presupuesto desde la app.' : 'Activa "Aparecer en la app" en Mi taller para recibir solicitudes.'}</p>`;
+    list.innerHTML = emptyState('leads', 'Ninguna solicitud pendiente', workshop?.listed
+      ? 'Los conductores de tu zona pueden pedirte presupuesto desde la app. Cuando llegue una, la verás aquí y te avisaremos.'
+      : 'Activa "Aparecer en la app" en Mi taller y los conductores de tu zona podrán pedirte presupuesto.');
   }
   for (const l of open) list.appendChild(leadCard(l));
   const done = $('leadsDone');
@@ -775,9 +832,9 @@ function renderAgenda() {
   for (let i = 0; i < 7; i++) {
     const d = new Date(agendaStart); d.setDate(d.getDate() + i);
     const col = document.createElement('div');
-    col.className = 'day' + (sameDay(d, today) ? ' today' : d < today && !sameDay(d, today) ? ' past' : '');
-    col.innerHTML = `<h4>${DAYS[i]}<b>${d.getDate()}</b></h4>`;
     const list = items.filter((it) => sameDay(it.at, d)).sort((a, b) => a.at - b.at);
+    col.className = 'day' + (sameDay(d, today) ? ' today' : d < today && !sameDay(d, today) ? ' past' : '') + (list.length ? '' : ' empty-day');
+    col.innerHTML = `<h4>${DAYS[i]}<b>${d.getDate()}</b></h4>`;
     if (list.length === 0) col.innerHTML += '<p class="muted" style="font-size:12px;margin:0 4px">—</p>';
     for (const it of list) {
       const el = document.createElement('div');
@@ -1123,9 +1180,9 @@ function renderParts() {
     const sup = suppliers.find((s) => s.id === p.supplier_id);
     const tr = document.createElement('tr');
     tr.innerHTML = `<td><b>${esc(p.description)}</b>${p.catalog_id ? `<small>${esc(itemName(p.catalog_id))}</small>` : ''}${(p.engine_ids || []).length ? `<small>Motores: ${esc(p.engine_ids.map((id) => engines[id]?.engine || id).join(', '))}</small>` : ''}</td>
-      <td>${esc(p.brand || '')}${p.reference ? `<small><a href="${searchUrl(p.brand, p.reference)}" target="_blank" rel="noopener">${esc(p.reference)} ↗</a></small>` : ''}</td>
-      <td>${esc(sup?.name || '')}</td><td class="num">${fmtEur(p.cost)}</td><td class="num">${fmtEur(p.price)}</td><td class="num">${p.uses}</td>
-      <td><a href="#" data-edit>Editar</a></td>`;
+      <td data-label="Marca"><span>${esc(p.brand || '')}${p.reference ? `<small><a href="${searchUrl(p.brand, p.reference)}" target="_blank" rel="noopener">${esc(p.reference)} ↗</a></small>` : ''}</span></td>
+      <td data-label="Proveedor">${esc(sup?.name || '')}</td><td class="num" data-label="Coste">${fmtEur(p.cost)}</td><td class="num" data-label="PVP">${fmtEur(p.price)}</td><td class="num" data-label="Usos">${p.uses}</td>
+      <td class="edit"><a href="#" data-edit>Editar</a></td>`;
     tr.querySelector('[data-edit]').onclick = (e) => { e.preventDefault(); editPart(p); };
     tb.appendChild(tr);
   }
