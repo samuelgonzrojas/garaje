@@ -548,3 +548,39 @@ table.hist td small{display:block;color:var(--muted)}
   .line .x{grid-column:3;grid-row:1}
 }
 #vLast{font-size:15px;max-width:260px}
+
+/* Piezas */
+.parts-tools{flex-wrap:wrap}
+.parts-tools input[type=search]{min-width:240px}
+.parts-count{margin:-4px 2px 10px;font-size:13.5px}
+.parts-count:empty{display:none}
+.cell-in{width:84px;padding:6px 8px;text-align:right;font-variant-numeric:tabular-nums;background:transparent;border-color:transparent;border-radius:10px}
+.cell-in:hover{border-color:var(--line);background:var(--card-2)}
+.cell-in:focus{background:var(--card-2)}
+.cell-in.saved{border-color:var(--green);box-shadow:0 0 0 3px rgba(46,189,107,.18)}
+.cell-in.bad{border-color:var(--red)}
+.marg{display:block;color:var(--muted);font-size:11.5px;margin-top:2px}
+.imp-src{display:grid;grid-template-columns:auto auto 1fr;gap:12px;align-items:stretch;margin:12px 0}
+.imp-file{display:flex;align-items:center;justify-content:center;margin:0;padding:14px 18px;border:1.5px dashed var(--line);border-radius:14px;cursor:pointer;color:var(--ink);text-align:center}
+.imp-file:hover{border-color:var(--brand-2)}
+.imp-file input{display:none}
+.imp-file span{font-weight:700}
+.imp-file small{display:block;font-weight:500;color:var(--muted);font-size:12px}
+.imp-or{align-self:center;color:var(--muted);font-size:13px}
+.imp-sum{margin:6px 0}
+.imp-table{overflow-x:auto;border:1px solid var(--line);border-radius:12px;margin-bottom:8px}
+.imp-table table{font-size:13px}
+.imp-table th{padding:6px;vertical-align:top;min-width:120px}
+.imp-table th select{padding:6px 8px;font-size:13px}
+.imp-table th small{display:block;color:var(--muted);font-weight:500;margin-top:3px}
+.imp-table td{padding:6px 8px;white-space:nowrap;max-width:220px;overflow:hidden;text-overflow:ellipsis}
+.imp-margin{width:70px;display:inline-block;padding:6px 8px}
+.starter-list{display:flex;flex-wrap:wrap;gap:6px;max-height:220px;overflow:auto;margin-top:8px}
+dialog#dlg{max-width:760px}
+@media (max-width:720px){
+  .imp-src{grid-template-columns:1fr}
+  .imp-or{text-align:center}
+  .cell-in{width:96px}
+  table.list td[data-label] .cell-in{text-align:right}
+}
+@media (max-width:720px){table.list td[data-label="PVP"]{flex-wrap:wrap}table.list td[data-label="PVP"] .marg{flex-basis:100%;text-align:right;margin-top:0}}

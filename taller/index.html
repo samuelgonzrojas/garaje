@@ -7,7 +7,7 @@
 <meta name="description" content="El día a día del taller con Garaje: órdenes de trabajo, presupuestos que el cliente aprueba en su móvil, piezas, proveedores y el historial de cada coche.">
 <link rel="icon" href="../icon-192.png">
 <link rel="stylesheet" href="../style.css">
-<link rel="stylesheet" href="taller.css?v=20261011t">
+<link rel="stylesheet" href="taller.css?v=20261011v">
 </head>
 <body>
 <div class="wrap panel">
@@ -252,16 +252,23 @@
 <!-- PIEZAS -->
 <section id="tab-parts" class="tab hidden no-print">
   <div class="top page-head">
-    <div><h2 style="margin:0">Piezas</h2><p class="sub" style="margin:2px 0 0">Tu biblioteca: se llena sola con las piezas de las órdenes entregadas y aprende en qué motores las montas.</p></div>
-    <button class="btn" id="newPartBtn">+ Pieza</button>
+    <div><h2 style="margin:0">Piezas</h2><p class="sub" style="margin:2px 0 0">Tu biblioteca: importa tu Excel o empieza con las habituales. También se llena sola con las piezas de las órdenes que entregas.</p></div>
+    <div class="actions"><button class="btn ghost" id="importPartsBtn">Importar Excel</button><button class="btn" id="newPartBtn">+ Pieza</button></div>
   </div>
-  <input id="partSearch" placeholder="Buscar por descripción, marca o referencia…" style="margin-bottom:12px">
+  <div class="board-tools parts-tools">
+    <input id="partSearch" type="search" placeholder="Buscar por descripción, marca o referencia…" autocomplete="off">
+    <button class="btn ghost small" id="starterPartsBtn">+ Piezas habituales</button>
+    <button class="btn ghost small" id="marginBtn">Calcular PVP</button>
+    <button class="btn ghost small" id="exportPartsBtn">Descargar Excel</button>
+  </div>
+  <p class="muted parts-count" id="partsCount"></p>
   <div class="card" style="padding:0;overflow-x:auto">
     <table class="list">
       <thead><tr><th>Pieza</th><th>Marca y referencia</th><th>Proveedor</th><th class="num">Coste</th><th class="num">PVP</th><th class="num">Usos</th><th></th></tr></thead>
       <tbody id="partsBody"></tbody>
     </table>
-    <div class="empty hidden" id="noParts" data-icon="parts"><b>Tu biblioteca de piezas está vacía</b><p>Se llena sola con las piezas de las órdenes que entregas, o añádelas con "+ Pieza".</p></div>
+    <div class="empty hidden" id="noParts" data-icon="parts"><b>Tu biblioteca de piezas está vacía</b><p>La forma más rápida: importa el Excel de tu programa de gestión o la tarifa de tu proveedor (o copia y pega las celdas). O empieza con las piezas habituales y ponles precio.</p>
+      <div class="actions" style="justify-content:center;margin-top:12px"><button class="btn" data-go="import">Importar Excel</button><button class="btn ghost" data-go="starter">+ Piezas habituales</button></div></div>
   </div>
 </section>
 
@@ -310,6 +317,6 @@
 </div>
 <datalist id="brands"></datalist>
 <datalist id="partNames"></datalist>
-<script type="module" src="app.js?v=20261011t"></script>
+<script type="module" src="app.js?v=20261011v"></script>
 </body>
 </html>

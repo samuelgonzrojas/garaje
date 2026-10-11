@@ -1604,27 +1604,60 @@ async function printDoc(kind) {
 // ------------------------------------------------------------------ piezas
 async function loadParts() {
   if (!isManager()) { parts = []; return; }
-  const { data } = await sb.from('workshop_parts').select('*').eq('workshop_id', workshop.id).order('uses', { ascending: false }).limit(2000);
-  parts = data || [];
+  // Por páginas: Supabase devuelve como mucho 1.000 filas por consulta y una
+  // tarifa de proveedor puede tener miles de referencias.
+  const all = [];
+  for (let from = 0; from < 20000; from += 1000) {
+    const { data, error } = await sb.from('workshop_parts').select('*').eq('workshop_id', workshop.id)
+      .order('uses', { ascending: false }).order('description').range(from, from + 999);
+    if (error || !data) break;
+    all.push(...data);
+    if (data.length < 1000) break;
+  }
+  parts = all;
   if (tab === 'parts') renderParts();
 }
 $('partSearch').addEventListener('input', () => renderParts());
+const dec2 = (n) => (n == null || n === '' ? '' : Number(n).toFixed(2).replace('.', ','));
 function renderParts() {
-  const q = $('partSearch').value.trim().toLowerCase();
-  const list = parts.filter((p) => !q || [p.description, p.brand, p.reference].some((x) => (x || '').toLowerCase().includes(q)));
+  const q = normTxt($('partSearch').value);
+  const list = parts.filter((p) => !q || [p.description, p.brand, p.reference, normRef(p.reference)].some((x) => normTxt(x).includes(q)));
   const tb = $('partsBody');
   tb.innerHTML = '';
   show('noParts', parts.length === 0);
-  for (const p of list) {
+  const noPrice = parts.filter((p) => p.price == null).length;
+  $('partsCount').textContent = parts.length ? `${parts.length} ${parts.length === 1 ? 'pieza' : 'piezas'}${noPrice ? ` · ${noPrice} sin PVP` : ''}${q ? ` · ${list.length} con "${$('partSearch').value.trim()}"` : ''}` : '';
+  for (const p of list.slice(0, 400)) {
     const sup = suppliers.find((s) => s.id === p.supplier_id);
     const tr = document.createElement('tr');
+    const marg = p.cost && p.price ? Math.round((p.price / p.cost - 1) * 100) : null;
     tr.innerHTML = `<td><b>${esc(p.description)}</b>${p.catalog_id ? `<small>${esc(itemName(p.catalog_id))}</small>` : ''}${(p.engine_ids || []).length ? `<small>Motores: ${esc(p.engine_ids.map((id) => engines[id]?.engine || id).join(', '))}</small>` : ''}</td>
       <td data-label="Marca"><span>${esc(p.brand || '')}${p.reference ? `<small><a href="${searchUrl(p.brand, p.reference)}" target="_blank" rel="noopener">${esc(p.reference)} ↗</a></small>` : ''}</span></td>
-      <td data-label="Proveedor">${esc(sup?.name || '')}</td><td class="num" data-label="Coste">${fmtEur(p.cost)}</td><td class="num" data-label="PVP">${fmtEur(p.price)}</td><td class="num" data-label="Usos">${p.uses}</td>
+      <td data-label="Proveedor">${esc(sup?.name || '')}</td>
+      <td class="num" data-label="Coste"><input class="cell-in" data-k="cost" inputmode="decimal" value="${dec2(p.cost)}" placeholder="—" aria-label="Coste de ${esc(p.description)}"></td>
+      <td class="num" data-label="PVP"><input class="cell-in" data-k="price" inputmode="decimal" value="${dec2(p.price)}" placeholder="—" aria-label="PVP de ${esc(p.description)}">${marg != null ? `<small class="marg">${marg >= 0 ? '+' : ''}${marg} %</small>` : ''}</td>
+      <td class="num" data-label="Usos">${p.uses}</td>
       <td class="edit"><a href="#" data-edit>Editar</a></td>`;
     tr.querySelector('[data-edit]').onclick = (e) => { e.preventDefault(); editPart(p); };
+    // Precio directamente en la tabla: se guarda al salir del campo.
+    for (const inp of tr.querySelectorAll('.cell-in')) {
+      inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') inp.blur(); });
+      inp.addEventListener('change', async () => {
+        const v = money(inp.value);
+        inp.value = dec2(v);
+        const { error } = await sb.from('workshop_parts').update({ [inp.dataset.k]: v }).eq('id', p.id);
+        if (error) { inp.classList.add('bad'); return; }
+        p[inp.dataset.k] = v;
+        inp.classList.add('saved'); setTimeout(() => inp.classList.remove('saved'), 900);
+        const m = p.cost && p.price ? Math.round((p.price / p.cost - 1) * 100) : null;
+        const td = tr.querySelector('td[data-label="PVP"]');
+        td.querySelector('.marg')?.remove();
+        if (m != null) td.insertAdjacentHTML('beforeend', `<small class="marg">${m >= 0 ? '+' : ''}${m} %</small>`);
+      });
+    }
     tb.appendChild(tr);
   }
+  if (list.length > 400) tb.insertAdjacentHTML('beforeend', `<tr><td colspan="7" class="muted">Se muestran 400 de ${list.length}. Busca para afinar.</td></tr>`);
 }
 $('newPartBtn').onclick = () => editPart({});
 async function editPart(p) {
@@ -1645,6 +1678,288 @@ async function editPart(p) {
   if (error) alert('No se pudo guardar: ' + error.message);
   await loadParts();
 }
+
+// ------------------------------------------------------------------ importar piezas
+/** Importe con formato español o inglés: "1.234,56 €", "12,5", "12.50". */
+function money(v) {
+  if (v == null || v === '') return null;
+  if (typeof v === 'number') return Number.isFinite(v) ? Math.round(v * 100) / 100 : null;
+  let t = String(v).replace(/[€\s]/g, '').replace(/eur$/i, '');
+  if (t.includes(',') && t.includes('.')) t = t.lastIndexOf(',') > t.lastIndexOf('.') ? t.replace(/\./g, '').replace(',', '.') : t.replace(/,/g, '');
+  else t = t.replace(',', '.');
+  const n = parseFloat(t);
+  return Number.isFinite(n) ? Math.round(n * 100) / 100 : null;
+}
+const normRef = (x) => String(x || '').toLowerCase().replace(/[\s.\-/]/g, '');
+const normTxt = (x) => String(x || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
+
+/** Trabajo del plan que corresponde a una pieza, por su descripción. */
+const PART_KEYWORDS = [
+  [/caja.*autom|atf/, 'gearbox_oil_auto'], [/caja|transmision manual|valvulina/, 'gearbox_oil_manual'], [/diferencial/, 'diff_oil'],
+  [/horquilla/, 'fork_oil'], [/filtro.*(aceite)|aceite.*filtro/, 'oil'], [/aceite|lubricante/, 'oil'],
+  [/habitaculo|polen|antipolen|cabina/, 'cabin_filter'], [/filtro.*(combustible|gasoil|gasoleo|diesel|gasolina)/, 'fuel_filter'],
+  [/filtro.*aire|aire.*filtro/, 'air_filter'], [/liquido.*fren|dot ?[345]/, 'brake_fluid'], [/anticongelante|refrigerante/, 'coolant'],
+  [/distribucion.*cadena|cadena.*distribucion/, 'timing_chain'], [/distribucion|bomba.*agua/, 'timing_belt'], [/accesorios|poly.?v|alternador.*correa|correa.*alternador/, 'aux_belt'],
+  [/kit.*transmision|pinon|corona|cadena/, 'chain_kit'], [/variador|rodillos/, 'cvt_belt'], [/bujia/, 'spark_plugs'], [/calentador/, 'glow_plugs'],
+  [/escobilla|limpiaparabrisas/, 'wipers'], [/pastilla|disco.*fren|freno/, 'brake_pads'], [/bateria/, 'battery'], [/amortiguador/, 'shocks'],
+  [/embrague/, 'clutch'], [/bieleta|rotula|silentblock|brazo/, 'suspension_joints'], [/lampara|bombilla|h[1-7]\b|led/, 'lights'],
+  [/neumatico|cubierta|rueda/, 'tyres'], [/gas.*(a\/?c|aire acond)|r134|r1234|aire acondicionado/, 'ac_service'], [/fap|dpf|particulas/, 'dpf'],
+  [/inyector/, 'injectors'], [/egr|turbo/, 'turbo_egr'],
+];
+function guessCatalog(desc) {
+  const d = normTxt(desc);
+  for (const [re, id] of PART_KEYWORDS) if (re.test(d)) return catalogNames[id] ? id : null;
+  return null;
+}
+
+/** Filas (array de arrays) de un texto pegado o un CSV. */
+function parseDelimited(text) {
+  const firstLine = text.split(/\r?\n/).find((l) => l.trim()) || '';
+  const sep = firstLine.includes('\t') ? '\t' : (firstLine.split(';').length > firstLine.split(',').length ? ';' : ',');
+  const rows = []; let row = [], cell = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) {
+      if (c === '"' && text[i + 1] === '"') { cell += '"'; i++; } else if (c === '"') q = false; else cell += c;
+    } else if (c === '"' && cell === '') q = true;
+    else if (c === sep) { row.push(cell); cell = ''; }
+    else if (c === '\n' || c === '\r') { if (c === '\r' && text[i + 1] === '\n') i++; row.push(cell); rows.push(row); row = []; cell = ''; }
+    else cell += c;
+  }
+  if (cell !== '' || row.length) { row.push(cell); rows.push(row); }
+  return rows.map((r) => r.map((x) => String(x).trim())).filter((r) => r.some((x) => x !== ''));
+}
+/** Hoja de cálculo (.xlsx, .xls, .ods) con SheetJS, cargado solo si hace falta. */
+async function parseSpreadsheet(file) {
+  if (!window.XLSX) {
+    await new Promise((ok, ko) => { const sc = document.createElement('script'); sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'; sc.onload = ok; sc.onerror = () => ko(new Error('No se pudo cargar el lector de Excel. Revisa la conexión.')); document.head.appendChild(sc); });
+  }
+  const wb = window.XLSX.read(await file.arrayBuffer(), { type: 'array' });
+  const sh = wb.Sheets[wb.SheetNames[0]];
+  return window.XLSX.utils.sheet_to_json(sh, { header: 1, raw: true, defval: '' })
+    .map((r) => r.map((x) => (typeof x === 'string' ? x.trim() : x))).filter((r) => r.some((x) => x !== '' && x != null));
+}
+
+const FIELDS = [['', 'No importar'], ['description', 'Descripción'], ['brand', 'Marca'], ['reference', 'Referencia'], ['cost', 'Coste'], ['price', 'PVP'], ['supplier', 'Proveedor']];
+const HEADER_WORDS = {
+  description: /descrip|articulo|nombre|denomin|producto|concepto|pieza|designacion/,
+  brand: /marca|fabricante|brand/,
+  reference: /^ref|referencia|codigo|cod\.?|^sku|part ?n|n[ºo°]? ?pieza|oem/,
+  cost: /coste|costo|compra|neto|p\.? ?c\b|precio coste|tarifa neta/,
+  price: /pvp|venta|precio(?!.*(coste|compra|neto))|p\.? ?v\b|tarifa/,
+  supplier: /proveedor|distribuidor|suministr/,
+};
+/** Qué es cada columna: por la cabecera o, sin cabecera, por el contenido. */
+function guessColumns(rows) {
+  const first = rows[0] || [];
+  const isHeader = first.some((x) => typeof x === 'string' && Object.values(HEADER_WORDS).some((re) => re.test(normTxt(x)))) && !first.some((x) => typeof x === 'number');
+  const ncol = Math.max(...rows.slice(0, 50).map((r) => r.length));
+  const map = new Array(ncol).fill('');
+  if (isHeader) {
+    first.forEach((h, i) => {
+      const t = normTxt(h);
+      for (const f of ['supplier', 'cost', 'price', 'brand', 'reference', 'description']) if (!map.includes(f) && HEADER_WORDS[f].test(t)) { map[i] = f; break; }
+    });
+  } else {
+    const body = rows.slice(0, 30);
+    const numeric = (i) => body.filter((r) => money(r[i]) != null && !/[a-z]/i.test(String(r[i]).replace(/eur|€/gi, ''))).length / body.length > .7;
+    const avgLen = (i) => body.reduce((a, r) => a + String(r[i] ?? '').length, 0) / body.length;
+    const nums = [...Array(ncol).keys()].filter(numeric);
+    if (nums[0] != null) map[nums[0]] = nums.length > 1 ? 'cost' : 'price';
+    if (nums[1] != null) map[nums[1]] = 'price';
+    const texts = [...Array(ncol).keys()].filter((i) => !nums.includes(i)).sort((a, b) => avgLen(b) - avgLen(a));
+    if (texts[0] != null) map[texts[0]] = 'description';
+    const refLike = texts.slice(1).find((i) => body.filter((r) => /\d/.test(String(r[i] ?? ''))).length / body.length > .5);
+    if (refLike != null) map[refLike] = 'reference';
+    const rest = texts.slice(1).filter((i) => i !== refLike);
+    if (rest[0] != null) map[rest[0]] = 'brand';
+  }
+  return { map, header: isHeader };
+}
+
+/** Diálogo de importar: pegar celdas o subir un archivo, vista previa y guardar. */
+async function importParts() {
+  let rows = null, guess = null;
+  const ok = await dialog(`<h3>Importar piezas</h3>
+    <p class="muted">Desde el Excel de tu programa de gestión, la tarifa de tu proveedor o cualquier lista. Columnas útiles: descripción, marca, referencia, coste, PVP y proveedor (en cualquier orden).</p>
+    <div class="imp-src">
+      <label class="imp-file"><input type="file" id="impFile" accept=".xlsx,.xls,.ods,.csv,.txt"><span>Subir archivo<small>Excel, CSV</small></span></label>
+      <div class="imp-or">o</div>
+      <textarea id="impPaste" rows="4" placeholder="Copia las celdas en Excel (incluida la fila de títulos si la tiene) y pégalas aquí"></textarea>
+    </div>
+    <div id="impPreview"></div>
+    <div class="err" id="impErr"></div>`, 'Importar', () => true, (form) => {
+    const okBtn = form.querySelector('button[value=ok]');
+    okBtn.disabled = true;
+    const render = () => {
+      const box = form.querySelector('#impPreview');
+      if (!rows || !rows.length) { box.innerHTML = ''; okBtn.disabled = true; return; }
+      const body = rows.slice(guess.header ? 1 : 0);
+      const cols = guess.map.length;
+      const sel = (i) => `<select data-col="${i}">${FIELDS.map(([v, t]) => `<option value="${v}" ${guess.map[i] === v ? 'selected' : ''}>${t}</option>`).join('')}</select>`;
+      box.innerHTML = `<p class="imp-sum"><b>${body.length}</b> filas. Revisa qué es cada columna:</p>
+        <div class="imp-table"><table><thead><tr>${[...Array(cols).keys()].map((i) => `<th>${sel(i)}${guess.header ? `<small>${esc(rows[0][i] ?? '')}</small>` : ''}</th>`).join('')}</tr></thead>
+        <tbody>${body.slice(0, 6).map((r) => `<tr>${[...Array(cols).keys()].map((i) => `<td>${esc(r[i] ?? '')}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+        <label class="chk"><input type="checkbox" id="impHeader" ${guess.header ? 'checked' : ''}> La primera fila son títulos</label>
+        <label class="chk"><input type="checkbox" id="impMarginOn" checked> Si falta el PVP, calcularlo con un margen del</label> <input id="impMargin" inputmode="decimal" value="${workshop.parts_margin ?? 35}" class="imp-margin"> %`;
+      for (const s of box.querySelectorAll('select[data-col]')) s.onchange = () => { guess.map[s.dataset.col] = s.value; validate(); };
+      box.querySelector('#impHeader').onchange = (e) => { guess.header = e.target.checked; render(); };
+      validate();
+    };
+    const validate = () => {
+      const has = guess.map.includes('description') || guess.map.includes('reference');
+      okBtn.disabled = !has;
+      form.querySelector('#impErr').textContent = has ? '' : 'Indica al menos qué columna es la descripción o la referencia.';
+    };
+    const load = (r) => { rows = r; guess = guessColumns(rows); render(); };
+    form.querySelector('#impPaste').addEventListener('input', (e) => { const t = e.target.value; if (t.trim()) load(parseDelimited(t)); else { rows = null; render(); } });
+    form.querySelector('#impFile').onchange = async (e) => {
+      const f = e.target.files[0]; if (!f) return;
+      form.querySelector('#impErr').textContent = 'Leyendo…';
+      try {
+        load(/\.(csv|txt)$/i.test(f.name) ? parseDelimited(await f.text()) : await parseSpreadsheet(f));
+        form.querySelector('.imp-file span').firstChild.textContent = f.name;
+      } catch (err) { form.querySelector('#impErr').textContent = err.message || String(err); }
+    };
+  });
+  if (!ok || !rows) return;
+  const marginOn = $('impMarginOn')?.checked, margin = money($('impMargin')?.value) ?? 35;
+  const body = rows.slice(guess.header ? 1 : 0);
+  const col = (f) => guess.map.indexOf(f);
+  const get = (r, f) => (col(f) >= 0 ? r[col(f)] : '');
+  const items = body.map((r) => {
+    const cost = money(get(r, 'cost'));
+    let price = money(get(r, 'price'));
+    if (price == null && cost != null && marginOn) price = Math.round(cost * (1 + margin / 100) * 100) / 100;
+    const description = String(get(r, 'description') || '').trim() || String(get(r, 'reference') || '').trim();
+    return { description, brand: String(get(r, 'brand') || '').trim() || null, reference: String(get(r, 'reference') || '').trim() || null, cost, price, supplier: String(get(r, 'supplier') || '').trim() };
+  }).filter((x) => x.description);
+  await saveImported(items);
+}
+
+/** Guarda las piezas: actualiza las que ya están (misma marca + referencia, o misma
+ *  descripción sin referencia), crea las nuevas y los proveedores que falten. */
+async function saveImported(items) {
+  const status = (t) => { $('partsCount').textContent = t; };
+  status(`Importando ${items.length} piezas…`);
+  // Proveedores que no existen todavía.
+  const supByName = new Map(suppliers.map((s) => [normTxt(s.name), s.id]));
+  const newSup = [...new Set(items.map((x) => x.supplier).filter((n) => n && !supByName.has(normTxt(n))))];
+  if (newSup.length) {
+    const { data, error } = await sb.from('workshop_suppliers').insert(newSup.map((name) => ({ workshop_id: workshop.id, name }))).select('id,name');
+    if (error) { alert('No se pudieron crear los proveedores: ' + error.message); return; }
+    for (const s of data) supByName.set(normTxt(s.name), s.id);
+  }
+  const byRef = new Map(parts.filter((p) => p.reference).map((p) => [normTxt(p.brand) + '|' + normRef(p.reference), p]));
+  const byDesc = new Map(parts.filter((p) => !p.reference).map((p) => [normTxt(p.description), p]));
+  const inserts = [], updates = [];
+  const seen = new Set();
+  for (const x of items) {
+    const key = x.reference ? normTxt(x.brand) + '|' + normRef(x.reference) : 'd|' + normTxt(x.description);
+    if (seen.has(key)) continue;   // repetida en el propio archivo
+    seen.add(key);
+    const supplier_id = x.supplier ? supByName.get(normTxt(x.supplier)) : null;
+    const existing = x.reference ? byRef.get(key) : byDesc.get(normTxt(x.description));
+    if (existing) {
+      const patch = {};
+      if (x.cost != null) patch.cost = x.cost;
+      if (x.price != null) patch.price = x.price;
+      if (supplier_id) patch.supplier_id = supplier_id;
+      if (x.brand && !existing.brand) patch.brand = x.brand;
+      if (Object.keys(patch).length) updates.push([existing.id, patch]);
+    } else {
+      inserts.push({ workshop_id: workshop.id, description: x.description.slice(0, 300), brand: x.brand, reference: x.reference, cost: x.cost, price: x.price, supplier_id, catalog_id: guessCatalog(x.description) });
+    }
+  }
+  let failed = 0;
+  for (let i = 0; i < inserts.length; i += 500) {
+    status(`Guardando… ${Math.min(i + 500, inserts.length)} de ${inserts.length}`);
+    const { error } = await sb.from('workshop_parts').insert(inserts.slice(i, i + 500));
+    if (error) { failed += Math.min(500, inserts.length - i); console.warn(error); }
+  }
+  for (let i = 0; i < updates.length; i += 20) {
+    status(`Actualizando precios… ${Math.min(i + 20, updates.length)} de ${updates.length}`);
+    await Promise.all(updates.slice(i, i + 20).map(([id, patch]) => sb.from('workshop_parts').update(patch).eq('id', id)));
+  }
+  await Promise.all([loadParts(), loadSuppliers()]);
+  await notice(`<h3>Importación terminada</h3>
+    <p><b>${inserts.length - failed}</b> piezas nuevas${updates.length ? ` y <b>${updates.length}</b> actualizadas` : ''}${newSup.length ? `. Proveedores creados: ${newSup.map(esc).join(', ')}` : ''}.</p>
+    ${failed ? `<p class="err">${failed} no se pudieron guardar. Vuelve a intentarlo.</p>` : ''}
+    <p class="muted">Las piezas con un trabajo del plan reconocido (filtros, aceite, frenos…) te saldrán como sugerencia en las órdenes de cada coche.</p>`);
+}
+
+// Piezas habituales para empezar: las típicas, enlazadas a los trabajos del plan.
+const STARTER_CAR = [
+  ['Filtro de aceite', 'oil'], ['Aceite motor 5W-30 (litro)', 'oil'], ['Aceite motor 5W-40 (litro)', 'oil'], ['Aceite motor 0W-20 (litro)', 'oil'],
+  ['Filtro de aire', 'air_filter'], ['Filtro de habitáculo', 'cabin_filter'], ['Filtro de combustible', 'fuel_filter'],
+  ['Líquido de frenos DOT 4 (litro)', 'brake_fluid'], ['Anticongelante / refrigerante (litro)', 'coolant'],
+  ['Kit de distribución con bomba de agua', 'timing_belt'], ['Correa de accesorios', 'aux_belt'],
+  ['Aceite caja de cambios manual (litro)', 'gearbox_oil_manual'], ['Aceite caja automática ATF (litro)', 'gearbox_oil_auto'],
+  ['Bujía', 'spark_plugs'], ['Calentador', 'glow_plugs'], ['Escobillas delanteras', 'wipers'], ['Escobilla trasera', 'wipers'],
+  ['Gas aire acondicionado R134a / R1234yf', 'ac_service'], ['Pastillas de freno delanteras', 'brake_pads'], ['Pastillas de freno traseras', 'brake_pads'],
+  ['Discos de freno delanteros (par)', 'brake_pads'], ['Discos de freno traseros (par)', 'brake_pads'], ['Batería 12 V', 'battery'],
+  ['Amortiguador delantero', 'shocks'], ['Amortiguador trasero', 'shocks'], ['Kit de embrague', 'clutch'],
+  ['Bieleta de suspensión', 'suspension_joints'], ['Rótula de dirección', 'suspension_joints'], ['Lámpara H7', 'lights'], ['Lámpara H4', 'lights'],
+  ['Neumático', 'tyres'], ['Válvula de neumático', 'tyres'], ['Líquido limpiaparabrisas', 'fluids'], ['Aditivo FAP', 'dpf'],
+];
+const STARTER_MOTO = [
+  ['Filtro de aceite (moto)', 'moto_oil'], ['Aceite moto 10W-40 (litro)', 'moto_oil'], ['Filtro de aire (moto)', 'moto_air_filter'],
+  ['Bujía (moto)', 'moto_spark_plugs'], ['Kit de transmisión (cadena, piñón y corona)', 'chain_kit'], ['Pastillas de freno (moto)', 'moto_brake_pads'],
+  ['Neumático (moto)', 'moto_tyres'], ['Aceite de horquilla (litro)', 'fork_oil'], ['Correa y rodillos del variador', 'cvt_belt'],
+];
+async function addStarterParts() {
+  const vt = workshop.vehicle_types || ['car'];
+  const list = [...(vt.includes('car') ? STARTER_CAR : []), ...(vt.includes('moto') ? STARTER_MOTO : [])];
+  const have = new Set(parts.map((p) => normTxt(p.description)));
+  const missing = list.filter(([d]) => !have.has(normTxt(d)));
+  if (!missing.length) { await notice('<h3>Ya las tienes</h3><p class="muted">Todas las piezas habituales ya están en tu biblioteca.</p>'); return; }
+  const ok = await dialog(`<h3>Añadir ${missing.length} piezas habituales</h3>
+    <p class="muted">Filtros, aceites, frenos, batería, escobillas…${vt.includes('moto') ? ' y las de moto' : ''}, sin marca ni precio. Después pones los precios directamente en la tabla (o usa "Calcular PVP").</p>
+    <div class="starter-list">${missing.map(([d]) => `<span class="pill">${esc(d)}</span>`).join('')}</div>`, 'Añadirlas', () => true);
+  if (!ok) return;
+  const { error } = await sb.from('workshop_parts').insert(missing.map(([description, catalog_id]) => ({ workshop_id: workshop.id, description, catalog_id: catalogNames[catalog_id] ? catalog_id : null })));
+  if (error) { alert('No se pudieron añadir: ' + error.message); return; }
+  await loadParts();
+}
+
+/** PVP de todas las piezas a partir del coste y un margen. */
+async function applyMargin() {
+  const withCost = parts.filter((p) => p.cost != null);
+  if (!withCost.length) { await notice('<h3>Primero, los costes</h3><p class="muted">Pon el coste de las piezas (en la tabla o importando tu Excel) y aquí calculas el PVP de todas a la vez.</p>'); return; }
+  const r = await dialog(`<h3>Calcular PVP con margen</h3>
+    <label>Margen sobre el coste (%)</label><input name="m" inputmode="decimal" value="35" required>
+    <label class="chk"><input type="radio" name="scope" value="missing" checked> Solo las que no tienen PVP (${withCost.filter((p) => p.price == null).length})</label>
+    <label class="chk"><input type="radio" name="scope" value="all"> Todas las que tienen coste (${withCost.length}): sustituye el PVP actual</label>`, 'Calcular', (fd) => fd);
+  if (!r) return;
+  const m = money(r.m);
+  if (m == null || m < 0) { alert('Pon un margen válido.'); return; }
+  const list = withCost.filter((p) => r.scope === 'all' || p.price == null);
+  for (let i = 0; i < list.length; i += 20) {
+    $('partsCount').textContent = `Calculando… ${Math.min(i + 20, list.length)} de ${list.length}`;
+    await Promise.all(list.slice(i, i + 20).map((p) => sb.from('workshop_parts').update({ price: Math.round(p.cost * (1 + m / 100) * 100) / 100 }).eq('id', p.id)));
+  }
+  await loadParts();
+}
+
+/** CSV para abrir en Excel (con ; y comas decimales), editar y volver a importar. */
+function exportParts() {
+  const dec = (n) => (n == null ? '' : String(n).replace('.', ','));
+  const q = (s) => `"${String(s ?? '').replace(/"/g, '""')}"`;
+  const lines = [['Descripción', 'Marca', 'Referencia', 'Proveedor', 'Coste', 'PVP', 'Trabajo del plan', 'Usos'].map(q).join(';')];
+  for (const p of parts) {
+    lines.push([q(p.description), q(p.brand), q(p.reference), q(suppliers.find((s) => s.id === p.supplier_id)?.name), dec(p.cost), dec(p.price), q(p.catalog_id ? itemName(p.catalog_id) : ''), p.uses].join(';'));
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' }));
+  a.download = `piezas-${(workshop.name || 'taller').toLowerCase().replace(/[^a-z0-9]+/gi, '-')}.csv`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+$('importPartsBtn').onclick = importParts;
+$('starterPartsBtn').onclick = addStarterParts;
+$('marginBtn').onclick = applyMargin;
+$('exportPartsBtn').onclick = exportParts;
+for (const b of document.querySelectorAll('#noParts [data-go]')) b.onclick = () => (b.dataset.go === 'import' ? importParts() : addStarterParts());
 
 // ------------------------------------------------------------------ proveedores
 async function loadSuppliers() {
@@ -1745,6 +2060,9 @@ $('inviteBtn').onclick = async () => {
   if (error) { alert('No se pudo invitar: ' + error.message); return; }
   await loadTeam();
 };
+
+/** Aviso con un solo botón. */
+const notice = (html, label = 'Vale') => dialog(html, label, () => true, (f) => f.querySelector('button[value=cancel]')?.remove());
 
 /** Diálogo con varios botones; devuelve el que se pulse (o null). */
 function choose(html, buttons) {
