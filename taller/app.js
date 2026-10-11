@@ -46,11 +46,21 @@ const roleName = (r) => r === 'owner' ? 'propietario' : r === 'workshop' ? 'tall
 // WhatsApp: número en formato internacional; los de 9 cifras se dan por españoles.
 const waUrl = (phone) => 'https://wa.me/' + String(phone).replace(/\D/g, '').replace(/^00/, '').replace(/^(\d{9})$/, '34$1');
 const fmtPhone = (phone) => String(phone).replace(/\s+/g, ' ').trim();
-/** Botones para contactar con alguien: llamar, WhatsApp y correo (los que haya). */
-function contactButtons(phone, email, waText = '') {
+// Iconos (24×24) para los botones de contacto.
+const ICON = {
+  call: '<path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/>',
+  whatsapp: '<path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.15l-.3-.18-3 .78.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.25-.12-1.46-.72-1.69-.8s-.39-.12-.55.12-.63.8-.78.97-.29.18-.53.06a6.7 6.7 0 0 1-3.34-2.92c-.25-.43.25-.4.72-1.34a.45.45 0 0 0-.02-.43c-.06-.12-.55-1.33-.76-1.82s-.4-.41-.55-.42h-.47a.9.9 0 0 0-.65.3 2.74 2.74 0 0 0-.86 2.04 4.76 4.76 0 0 0 1 2.53 10.9 10.9 0 0 0 4.18 3.69c1.55.67 2.16.73 2.94.61a2.5 2.5 0 0 0 1.65-1.16 2.04 2.04 0 0 0 .14-1.16c-.06-.1-.22-.16-.47-.28z"/>',
+  mail: '<path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5-8-5V6l8 5 8-5z"/>',
+  web: '<path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm6.9 6h-2.9a15.7 15.7 0 0 0-1.4-3.6A8 8 0 0 1 18.9 8zM12 4c.8 1.2 1.5 2.5 1.9 4h-3.8c.4-1.4 1.1-2.8 1.9-4zM4.3 14a8.2 8.2 0 0 1 0-4h3.4a16.5 16.5 0 0 0 0 4zm.8 2h2.9c.3 1.3.8 2.5 1.4 3.6A8 8 0 0 1 5.1 16zM8 8H5.1a8 8 0 0 1 4.3-3.6C8.8 5.5 8.3 6.7 8 8zm4 12c-.8-1.2-1.5-2.5-1.9-4h3.8c-.4 1.4-1.1 2.8-1.9 4zm2.3-6H9.7a14.7 14.7 0 0 1 0-4h4.6a14.7 14.7 0 0 1 0 4zm.3 5.6c.6-1.1 1.1-2.3 1.4-3.6h2.9a8 8 0 0 1-4.3 3.6zm1.7-5.6a16.5 16.5 0 0 0 0-4h3.4a8.2 8.2 0 0 1 0 4z"/>',
+};
+const iconLink = (kind, href, label, external = false) =>
+  `<a class="ic ${kind}" href="${esc(href)}" title="${esc(label)}" aria-label="${esc(label)}"${external ? ' target="_blank" rel="noopener"' : ''}><svg viewBox="0 0 24 24" aria-hidden="true">${ICON[kind]}</svg></a>`;
+/** Botones de contacto con icono: llamar, WhatsApp y correo (los que haya). */
+function contactButtons(phone, email, waText = '', who = '') {
   const t = waText ? '?text=' + encodeURIComponent(waText) : '';
-  return (phone ? `<a class="btn small" href="tel:${esc(String(phone).replace(/\s/g, ''))}">Llamar</a><a class="btn ghost small" href="${esc(waUrl(phone) + t)}" target="_blank" rel="noopener">WhatsApp</a>` : '')
-    + (email ? `<a class="btn ghost small" href="mailto:${esc(email)}">Correo</a>` : '');
+  const to = who ? ' a ' + who : '';
+  return (phone ? iconLink('call', 'tel:' + String(phone).replace(/\s/g, ''), 'Llamar' + to) + iconLink('whatsapp', waUrl(phone) + t, 'WhatsApp' + to, true) : '')
+    + (email ? iconLink('mail', 'mailto:' + email, 'Correo' + to) : '');
 }
 /** Dueño y familiares del coche (sin los talleres). */
 const peopleOf = (vehicleId) => (people[vehicleId] || []).filter((p) => p.role !== 'workshop');
@@ -362,8 +372,8 @@ function renderGrid() {
     const o = ownerOf(row.id);
     el.innerHTML = `${photoImg(s.photo, 64)}<h3>${esc(s.name)}</h3><span class="plate">${esc(s.plate)}</span><span class="badge ${s.role}">${roleName(s.role)}</span>
       ${open ? `<span class="status ${open.status}">${STATUS[open.status]}</span>` : ''}
-      ${o ? `<div class="owner-line"><b>${personName(o)}</b>${o.phone ? ` · ${esc(fmtPhone(o.phone))}` : ' · <span class="muted">sin teléfono</span>'}
-        ${o.phone && !isMe(o) ? `<div class="actions">${contactButtons(o.phone, null, `Hola ${o.display_name}, te escribo del taller por tu ${s.name}.`)}</div>` : ''}</div>` : ''}
+      ${o ? `<div class="owner-line"><div class="who-line"><b>${personName(o)}</b><small>${o.phone ? esc(fmtPhone(o.phone)) : 'sin teléfono'}</small></div>
+        ${isMe(o) ? '' : `<div class="icons">${contactButtons(o.phone, o.phone ? null : o.email, `Hola ${o.display_name}, te escribo del taller por tu ${s.name}.`, o.display_name)}</div>`}</div>` : ''}
       <div class="kv"><div><b>${fmtKm(s.km)}</b><small>${s.kmAt ? 'el ' + fmtDate(s.kmAt) : 'sin lectura'}</small></div>
       <div><b>${fmtDate(s.itv)}</b><small>ITV</small></div></div>
       <p class="muted" style="margin:10px 0 0;font-size:14px">Último: ${esc(s.last)}</p>`;
@@ -428,7 +438,7 @@ function renderPeople(row, s) {
   box.innerHTML = list.map((p) => `<div class="person">
       <div><b>${personName(p)}</b> <span class="badge ${p.role}">${roleName(p.role)}</span>
         <small>${[p.phone ? esc(fmtPhone(p.phone)) : '', p.email ? esc(p.email) : ''].filter(Boolean).join(' · ')}</small></div>
-      <div class="actions">${isMe(p) ? '' : contactButtons(p.phone, p.email, `Hola ${p.display_name}, te escribo del taller por tu ${s.name}.`)}</div>
+      <div class="icons">${isMe(p) ? '' : contactButtons(p.phone, p.email, `Hola ${p.display_name}, te escribo del taller por tu ${s.name}.`, p.display_name)}</div>
     </div>`).join('')
     + (list.some((p) => p.role === 'owner' && !p.phone && !isMe(p)) ? '<p class="muted" style="font-size:13px;margin:6px 0 0">El dueño no ha puesto su teléfono en Garaje. Puede añadirlo en la app: Ajustes → Tu nombre en Garaje.</p>' : '');
 }
@@ -1157,7 +1167,7 @@ function renderSuppliers() {
     el.className = 'card';
     el.innerHTML = `<h3 style="margin:0 0 4px">${esc(s.name)}</h3>
       <p class="muted" style="margin:0 0 10px;font-size:14px">${n} ${n === 1 ? 'pieza' : 'piezas'} en tu biblioteca${s.notes ? ' · ' + esc(s.notes) : ''}</p>
-      <div class="actions">${s.phone ? `<a class="btn small" href="tel:${esc(s.phone)}">Llamar</a>` : ''}${s.phone ? `<a class="btn ghost small" href="${esc(waUrl(s.phone))}" target="_blank" rel="noopener">WhatsApp</a>` : ''}${s.email ? `<a class="btn ghost small" href="mailto:${esc(s.email)}">Correo</a>` : ''}${s.web ? `<a class="btn ghost small" href="${esc(/^https?:/.test(s.web) ? s.web : 'https://' + s.web)}" target="_blank" rel="noopener">Web ↗</a>` : ''}<a class="btn ghost small" href="#" data-edit>Editar</a></div>`;
+      <div class="supplier-actions"><div class="icons">${contactButtons(s.phone, s.email, '', s.name)}${s.web ? iconLink('web', /^https?:/.test(s.web) ? s.web : 'https://' + s.web, 'Web de ' + s.name, true) : ''}</div><a class="btn ghost small" href="#" data-edit>Editar</a></div>`;
     el.querySelector('[data-edit]').onclick = (e) => { e.preventDefault(); editSupplier(s); };
     g.appendChild(el);
   }

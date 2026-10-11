@@ -166,12 +166,14 @@ label.chk input{width:auto;margin:0}
 @media (max-width:640px){.onboard .ob-steps li{flex-wrap:wrap}.onboard .ob-steps li>div{flex:1 1 calc(100% - 40px)}.onboard .ob-steps li .btn{margin-left:36px}}
 
 /* Dueño y contacto */
-.vcard .owner-line{margin:10px 0 0;padding:10px 0 0;border-top:1px solid var(--line);font-size:14px}
-.vcard .owner-line .actions{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
+.vcard .owner-line{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0 2px;padding:10px 0 0;border-top:1px solid var(--line);font-size:14px}
+.who-line{min-width:0}
+.who-line b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.who-line small{color:var(--muted)}
 .people{margin-top:12px}
 .people .person{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 0;border-top:1px solid var(--line)}
 .people .person small{display:block;color:var(--muted);margin-top:2px}
-.people .actions{display:flex;gap:6px;flex-wrap:wrap}
+
 
 /* Mi taller: datos a la izquierda y "Visible en la app" a la derecha en pantallas anchas */
 .ws-cols{display:grid;grid-template-columns:1fr;gap:18px}
@@ -179,4 +181,17 @@ label.chk input{width:auto;margin:0}
 @media (min-width:900px){
   .ws-form.wide .ws-cols{grid-template-columns:1fr 1fr;gap:32px}
   .ws-form.wide .ws-cols>div+div{border-top:0;padding-top:0;border-left:1px solid var(--line);padding-left:32px}
+}
+
+/* Botones redondos con icono (llamar, WhatsApp, correo, web) */
+.icons{display:flex;gap:8px;flex:none}
+.ic{width:38px;height:38px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);background:var(--card-2);color:var(--ink);transition:transform .12s,background .12s}
+.ic svg{width:19px;height:19px;fill:currentColor}
+.ic:hover{transform:translateY(-1px)}
+.ic.call{background:var(--brand-2);border-color:transparent;color:#fff}
+.ic.whatsapp{background:#25D366;border-color:transparent;color:#fff}
+.supplier-actions{display:flex;align-items:center;justify-content:space-between;gap:8px}
+@media (prefers-color-scheme:dark){
+  .badge.workshop{background:#F2A51629;color:#F5B94F}
+  .badge.owner{background:#2EBD6B29;color:#5FD394}
 }
