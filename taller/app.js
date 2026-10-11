@@ -17,6 +17,11 @@ const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<
 let session = null;
 let profile = null;        // { display_name, is_workshop }
 let workshop = null;       // fila de public.workshops (null si no es taller)
+let myRole = null;         // 'owner' | 'manager' | 'mechanic' en ese taller (supabase/019_workshop_team.sql)
+let team = [];             // equipo del taller (workshop_team)
+const isOwner = () => myRole === 'owner';
+const isManager = () => myRole === 'owner' || myRole === 'manager';
+const ROLE_NAME = { owner: 'Dueño', manager: 'Encargado', mechanic: 'Mecánico' };
 let roles = {};            // vehicle_id -> role
 let vehicles = [];         // filas de public.vehicles
 let people = {};           // vehicle_id -> personas con acceso (dueño, familia), de vehicle_people
@@ -62,6 +67,7 @@ const NAV_ICON = {
   parts: '<path d="M20 2H4c-1 0-2 .9-2 2v3.01c0 .72.43 1.34 1 1.69V20c0 1.1 1.1 2 2 2h14c.9 0 2-.9 2-2V8.7c.57-.35 1-.97 1-1.69V4c0-1.1-1-2-2-2zm-5 12H9v-2h6v2zm5-7H4V4h16v3z"/>',
   suppliers: '<path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>',
   settings: '<path d="M20 4H4v2h16V4zm1 10v-2l-1-5H4l-1 5v2h1v6h10v-6h4v6h2v-6h1zm-9 4H6v-4h6v4z"/>',
+  team: '<path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>',
   more: '<path d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>',
   logout: '<path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>',
 };
@@ -214,7 +220,7 @@ sb.auth.onAuthStateChange((_event, s) => {
 });
 
 function hideAll() {
-  for (const id of ['login', 'setup', 'tabs', 'tab-jobs', 'tab-cars', 'tab-parts', 'tab-suppliers', 'tab-settings', 'job', 'vehicle']) show(id, false);
+  for (const id of ['login', 'setup', 'tabs', 'tab-jobs', 'tab-leads', 'tab-agenda', 'tab-cars', 'tab-parts', 'tab-suppliers', 'tab-team', 'tab-settings', 'job', 'vehicle']) show(id, false);
 }
 function leave() {
   hideAll(); show('login'); show('nav', false);
@@ -231,7 +237,7 @@ async function enter() {
     show('setup');
   } else {
     show('tabs');
-    if (workshop) await Promise.all([loadJobs(), loadLeads(), loadParts(), loadSuppliers()]);
+    if (workshop) await Promise.all([loadJobs(), loadLeads(), loadParts(), loadSuppliers(), loadTeam()]);
     setTab(workshop ? tab : 'cars');
   }
   subscribe();
@@ -256,15 +262,32 @@ async function ensureProfile() {
   profile = data || { display_name: session.user.email.split('@')[0], is_workshop: false };
 }
 async function loadWorkshop() {
+  // ¿Dueño de un taller? Si no, ¿me han invitado a uno (por mi correo)?
   const { data } = await sb.from('workshops').select('*').eq('owner_id', session.user.id).maybeSingle();
-  workshop = data;
+  workshop = data; myRole = data ? 'owner' : null;
+  if (!workshop) {
+    let wid = null;
+    try { ({ data: wid } = await sb.rpc('claim_workshop_invite')); } catch { /* sin equipos todavía */ }
+    if (wid) {
+      const [{ data: ws }, { data: me }] = await Promise.all([
+        sb.from('workshops').select('*').eq('id', wid).maybeSingle(),
+        sb.from('workshop_members').select('role').eq('workshop_id', wid).eq('user_id', session.user.id).maybeSingle(),
+      ]);
+      if (ws && me) { workshop = ws; myRole = me.role; }
+    }
+  }
   const name = workshop?.name || profile.display_name || '';
   $('who').textContent = name;
   $('avatar').textContent = (name.trim()[0] || '?').toUpperCase();
-  // Solo el taller ve las pestañas de órdenes, piezas, proveedores y taller.
-  for (const t of ['jobs', 'parts', 'suppliers', 'settings']) {
-    document.querySelector(`.tabs [data-tab="${t}"]`).classList.toggle('hidden', !workshop);
-  }
+  $('roleChip').textContent = workshop && myRole !== 'owner' ? ROLE_NAME[myRole] : 'Taller';
+  // Pestañas según el rol: el mecánico, órdenes, agenda y coches; el encargado,
+  // todo menos los datos del taller; el dueño, todo.
+  const allowed = !workshop ? ['cars', 'agenda']
+    : myRole === 'mechanic' ? ['jobs', 'agenda', 'cars']
+    : myRole === 'manager' ? ['jobs', 'leads', 'agenda', 'cars', 'parts', 'suppliers', 'team']
+    : ['jobs', 'leads', 'agenda', 'cars', 'parts', 'suppliers', 'team', 'settings'];
+  for (const b of document.querySelectorAll('.tabs button[data-tab]')) b.classList.toggle('hidden', !allowed.includes(b.dataset.tab));
+  if (!allowed.includes(tab)) tab = allowed[0];
   document.querySelector('.tabs .more-btn').classList.toggle('no-more', !workshop);
   show('vJobActions', !!workshop);
 }
@@ -358,8 +381,8 @@ $('moreSheet').onclick = (e) => { if (e.target === $('moreSheet')) $('moreSheet'
 function setTab(t) {
   tab = t;
   for (const b of document.querySelectorAll('.tabs button[data-tab]')) b.classList.toggle('on', b.dataset.tab === t);
-  document.querySelector('.tabs .more-btn').classList.toggle('on', ['parts', 'suppliers', 'settings'].includes(t));
-  for (const id of ['tab-jobs', 'tab-leads', 'tab-agenda', 'tab-cars', 'tab-parts', 'tab-suppliers', 'tab-settings', 'job', 'vehicle']) show(id, false);
+  document.querySelector('.tabs .more-btn').classList.toggle('on', ['parts', 'suppliers', 'team', 'settings'].includes(t));
+  for (const id of ['tab-jobs', 'tab-leads', 'tab-agenda', 'tab-cars', 'tab-parts', 'tab-suppliers', 'tab-team', 'tab-settings', 'job', 'vehicle']) show(id, false);
   show('tab-' + t);
   if (t === 'jobs') renderBoard();
   if (t === 'leads') renderLeads();
@@ -368,6 +391,7 @@ function setTab(t) {
   if (t === 'parts') renderParts();
   if (t === 'suppliers') renderSuppliers();
   if (t === 'settings') renderWsForm('settingsForm', workshop || {}, 'Guardar');
+  if (t === 'team') renderTeam();
   job = null; current = null;
   window.scrollTo(0, 0);
 }
@@ -610,7 +634,7 @@ function renderOnboard() {
   const left = steps.filter((s) => !s.done).length;
   let hidden = false;
   try { hidden = localStorage.getItem(onboardKey()) === '1'; } catch { /* sin almacenamiento */ }
-  if (!workshop || left === 0 || hidden) { show('onboard', false); return; }
+  if (!workshop || !isOwner() || left === 0 || hidden) { show('onboard', false); return; }
   const done = steps.length - left;
   box.innerHTML = `<div class="top"><div><h3 style="margin:0">Primeros pasos con Garaje</h3>
       <p class="muted" style="margin:2px 0 0;font-size:14px">${done} de ${steps.length} hechos. Se marcan solos.</p></div>
@@ -650,10 +674,10 @@ function renderHero() {
     ['En el taller', open.filter((j) => ['received', 'diagnosis', 'approved', 'in_progress', 'waiting_parts'].includes(j.status)).length, 'jobs'],
     ['Esperando al cliente', open.filter((j) => ['quote_sent', 'rejected'].includes(j.status)).length, 'jobs'],
     ['Listos para recoger', open.filter((j) => j.status === 'ready').length, 'jobs'],
-    ['Solicitudes por atender', leads.filter((l) => NEEDS_ACTION.includes(l.status)).length, 'leads'],
+    ...(isManager() ? [['Solicitudes por atender', leads.filter((l) => NEEDS_ACTION.includes(l.status)).length, 'leads']] : [['Entregas previstas hoy', open.filter((j) => j.promised_at === today()).length, 'jobs']]),
   ];
-  const today = new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
-  h.innerHTML = `<div class="ws-hero-top"><div><small>${esc(today)}</small><h2>${hello}, ${esc(workshop.name)}</h2></div></div>
+  const dateStr = new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+  h.innerHTML = `<div class="ws-hero-top"><div><small>${esc(dateStr)}</small><h2>${hello}, ${esc(workshop.name)}</h2></div></div>
     <div class="ws-hero-tiles">${tiles.map(([label, n, go]) => `<button class="htile${n ? '' : ' zero'}" data-go="${go}"><b>${n}</b><span>${label}</span></button>`).join('')}</div>`;
   for (const t of h.querySelectorAll('[data-go="leads"]')) t.onclick = () => setTab('leads');
   for (const t of h.querySelectorAll('[data-go="jobs"]')) t.onclick = () => $('board').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -715,7 +739,7 @@ async function newJobFor(row, extra = {}) {
 
 // ------------------------------------------------------------------ solicitudes (clientes enviados por Garaje)
 async function loadLeads() {
-  if (!workshop) return;
+  if (!workshop || !isManager()) return;
   const { data, error } = await sb.from('leads').select('*').eq('workshop_id', workshop.id).order('created_at', { ascending: false }).limit(200);
   if (error) { console.warn(error); return; }
   leads = data || [];
@@ -952,16 +976,16 @@ function renderJobHead() {
   const btn = (label, fn, cls = 'btn small') => { const b = document.createElement('button'); b.className = cls; b.textContent = label; b.onclick = fn; a.appendChild(b); };
   const st = job.status;
   if (['received', 'diagnosis', 'rejected'].includes(st)) {
-    btn('Enviar presupuesto al cliente', sendQuote);
+    if (isManager()) btn('Enviar presupuesto al cliente', sendQuote);
     if (st === 'received') btn('En diagnóstico', () => setStatus('diagnosis'), 'btn ghost small');
-    btn('Aprobado en persona', () => setStatus('approved', { decision: 'approved', decided_at: new Date().toISOString(), decision_note: 'Aprobado en el taller' }), 'btn ghost small');
+    if (isManager()) btn('Aprobado en persona', () => setStatus('approved', { decision: 'approved', decided_at: new Date().toISOString(), decision_note: 'Aprobado en el taller' }), 'btn ghost small');
   }
-  if (st === 'quote_sent') btn('Aprobado por teléfono', () => setStatus('approved', { decision: 'approved', decided_at: new Date().toISOString(), decision_note: 'Aprobado por teléfono' }), 'btn ghost small');
+  if (st === 'quote_sent' && isManager()) btn('Aprobado por teléfono', () => setStatus('approved', { decision: 'approved', decided_at: new Date().toISOString(), decision_note: 'Aprobado por teléfono' }), 'btn ghost small');
   if (st === 'approved') btn('Empezar la reparación', () => setStatus('in_progress'));
   if (st === 'in_progress') { btn('Listo para recoger', () => setStatus('ready')); btn('Esperando piezas', () => setStatus('waiting_parts'), 'btn ghost small'); }
   if (st === 'waiting_parts') { btn('Han llegado: seguir', () => setStatus('in_progress')); btn('Listo para recoger', () => setStatus('ready'), 'btn ghost small'); }
   if (st === 'ready') btn('Entregar y pasar al historial', deliver);
-  if (!['delivered', 'cancelled'].includes(st)) btn('Cancelar', () => { if (confirm('¿Cancelar esta orden?')) setStatus('cancelled'); }, 'btn ghost small');
+  if (!['delivered', 'cancelled'].includes(st) && isManager()) btn('Cancelar', () => { if (confirm('¿Cancelar esta orden?')) setStatus('cancelled'); }, 'btn ghost small');
 }
 
 // --- líneas del presupuesto
@@ -993,7 +1017,7 @@ function renderLines() {
         <select data-k="catalog_id" title="Trabajo del plan de mantenimiento (para el historial)"><option value="">Trabajo del plan…</option>${itemOptions(prof, l.catalog_id)}</select>
         ${part ? `<input data-k="brand" value="${esc(l.brand)}" list="brands" placeholder="Marca">
         <input data-k="reference" value="${esc(l.reference)}" placeholder="Referencia">
-        <select data-k="supplier_id">${supOpts(l.supplier_id)}</select>` : ''}
+        ${isManager() ? `<select data-k="supplier_id">${supOpts(l.supplier_id)}</select>` : ''}` : ''}
         ${part && l.reference ? `<a class="search" href="${searchUrl(l.brand, l.reference)}" target="_blank" rel="noopener">Buscar ${esc(l.reference)} ↗</a>` : ''}
       </div>`;
     for (const inp of row.querySelectorAll('[data-k]')) {
@@ -1122,7 +1146,7 @@ async function deliver() {
       const lines = [...byItem.values()].map((g) => ({ catalogId: g.catalogId, cost: Math.round(g.cost * 100) / 100, note: `OR ${job.number}: ${g.notes.join('; ')}`.slice(0, 500) }));
       if (lines.length === 0) lines.push({ catalogId: null, cost: null, note: `OR ${job.number}` });
       await writeHistory(job.vehicle_id, new Date().toISOString(), job.km, lines);
-      await learnParts(eng);
+      if (isManager()) await learnParts(eng);
     }
     await setStatus('delivered', { delivered_at: new Date().toISOString(), history_written: true });
     await loadVehicles();
@@ -1214,6 +1238,7 @@ async function printDoc(kind) {
 
 // ------------------------------------------------------------------ piezas
 async function loadParts() {
+  if (!isManager()) { parts = []; return; }
   const { data } = await sb.from('workshop_parts').select('*').eq('workshop_id', workshop.id).order('uses', { ascending: false }).limit(2000);
   parts = data || [];
   if (tab === 'parts') renderParts();
@@ -1258,6 +1283,7 @@ async function editPart(p) {
 
 // ------------------------------------------------------------------ proveedores
 async function loadSuppliers() {
+  if (!isManager()) { suppliers = []; return; }
   const { data } = await sb.from('workshop_suppliers').select('*').eq('workshop_id', workshop.id).order('name');
   suppliers = data || [];
   if (tab === 'suppliers') renderSuppliers();
@@ -1297,6 +1323,63 @@ async function editSupplier(s) {
 }
 
 // ------------------------------------------------------------------ diálogo
+// ------------------------------------------------------------------ equipo
+async function loadTeam() {
+  if (!workshop) return;
+  const { data, error } = await sb.rpc('workshop_team', { w: workshop.id });
+  team = error ? [] : (data || []);
+  if (tab === 'team') renderTeam();
+}
+function renderTeam() {
+  const box = $('teamList');
+  const canInvite = isManager();
+  show('inviteBtn', canInvite);
+  const order = { owner: 0, manager: 1, mechanic: 2 };
+  const rows = [...team].sort((a, b) => order[a.role] - order[b.role] || (a.display_name || '').localeCompare(b.display_name || ''));
+  box.innerHTML = rows.map((m) => {
+    const me = m.user_id === session.user.id;
+    const canChange = isOwner() && m.role !== 'owner';
+    const canRemove = m.role !== 'owner' && (isOwner() || (myRole === 'manager' && m.role === 'mechanic') || me);
+    return `<div class="member">
+      <span class="avatar">${esc((m.display_name || m.email || '?').trim()[0].toUpperCase())}</span>
+      <div class="m-info"><b>${esc(m.joined ? m.display_name : m.email)}${me ? ' <span class="muted">(tú)</span>' : ''}</b>
+        <small>${m.joined ? esc(m.email) : 'Invitación pendiente: entrará cuando abra el panel con este correo'}${m.phone ? ' · ' + esc(fmtPhone(m.phone)) : ''}</small></div>
+      ${canChange ? `<select class="m-role" data-id="${m.id}"><option value="manager" ${m.role === 'manager' ? 'selected' : ''}>Encargado</option><option value="mechanic" ${m.role === 'mechanic' ? 'selected' : ''}>Mecánico</option></select>`
+        : `<span class="role-chip ${m.role}">${ROLE_NAME[m.role]}</span>`}
+      ${canRemove ? `<button class="icon-btn m-remove" data-id="${m.id}" title="${me ? 'Salir del equipo' : 'Quitar del equipo'}" aria-label="Quitar">×</button>` : '<span class="m-gap"></span>'}
+    </div>`;
+  }).join('') + (rows.length <= 1 ? emptyState('team', 'Solo estás tú', 'Invita a tu encargado y a tus mecánicos con su correo. Cuando entren en el panel con ese correo, verán las órdenes y los coches del taller.') : '');
+  for (const sel of box.querySelectorAll('.m-role')) sel.onchange = async () => {
+    const { error } = await sb.rpc('set_member_role', { p_member: sel.dataset.id, p_role: sel.value });
+    if (error) alert('No se pudo cambiar: ' + error.message);
+    await loadTeam();
+  };
+  for (const b of box.querySelectorAll('.m-remove')) b.onclick = async () => {
+    const m = team.find((x) => x.id === b.dataset.id);
+    const me = m.user_id === session.user.id;
+    const ok = await dialog(me ? '<h3>¿Salir del equipo?</h3><p class="muted">Dejarás de ver las órdenes y los coches del taller.</p>'
+      : `<h3>¿Quitar a ${esc(m.joined ? m.display_name : m.email)}?</h3><p class="muted">Dejará de ver las órdenes, los coches y los clientes del taller.</p>`, me ? 'Salir' : 'Quitar', () => true);
+    if (!ok) return;
+    const { error } = await sb.rpc('remove_member', { p_member: m.id });
+    if (error) { alert('No se pudo: ' + error.message); return; }
+    if (me) location.reload(); else await loadTeam();
+  };
+}
+$('inviteBtn').onclick = async () => {
+  const roleOpts = isOwner()
+    ? '<option value="mechanic">Mecánico: órdenes y coches; ve el presupuesto, no los costes</option><option value="manager">Encargado: el día a día, solicitudes, piezas e invita mecánicos</option>'
+    : '<option value="mechanic">Mecánico: órdenes y coches; ve el presupuesto, no los costes</option>';
+  const r = await dialog(`<h3>Invitar al equipo</h3>
+    <label>Su correo (el de Google o el que use para entrar)</label><input name="email" type="email" required placeholder="nombre@ejemplo.com">
+    <label>Rol</label><select name="role">${roleOpts}</select>
+    <p class="muted" style="font-size:13px">Cuando entre en este panel con ese correo (samuelgonzrojas.github.io/garaje/taller), pasará a ser del equipo. Mándale el enlace por WhatsApp.</p>`,
+    'Invitar', (fd) => fd);
+  if (!r) return;
+  const { error } = await sb.rpc('invite_member', { w: workshop.id, p_email: r.email, p_role: r.role });
+  if (error) { alert('No se pudo invitar: ' + error.message); return; }
+  await loadTeam();
+};
+
 function dialog(html, okLabel, pick, after) {
   return new Promise((resolve) => {
     const dlg = $('dlg'), form = $('dlgForm');

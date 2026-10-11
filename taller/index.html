@@ -7,12 +7,12 @@
 <meta name="description" content="El día a día del taller con Garaje: órdenes de trabajo, presupuestos que el cliente aprueba en su móvil, piezas, proveedores y el historial de cada coche.">
 <link rel="icon" href="../icon-192.png">
 <link rel="stylesheet" href="../style.css">
-<link rel="stylesheet" href="taller.css?v=20261011k">
+<link rel="stylesheet" href="taller.css?v=20261011m">
 </head>
 <body>
 <div class="wrap panel">
 <header class="no-print">
-  <a class="logo" href="../"><img src="../icon-192.png" alt=""> Garaje <span class="chip-taller">Taller</span></a>
+  <a class="logo" href="../"><img src="../icon-192.png" alt=""> Garaje <span class="chip-taller" id="roleChip">Taller</span></a>
   <div id="nav" class="userbox hidden">
     <span class="avatar" id="avatar" aria-hidden="true"></span>
     <b id="who"></b>
@@ -28,6 +28,7 @@
   <button data-tab="cars" data-icon="cars"><span>Coches</span></button>
   <button data-tab="parts" data-icon="parts" class="secondary"><span>Piezas</span></button>
   <button data-tab="suppliers" data-icon="suppliers" class="secondary"><span>Proveedores</span></button>
+  <button data-tab="team" data-icon="team" class="secondary"><span>Equipo</span></button>
   <button data-tab="settings" data-icon="settings" class="secondary"><span>Mi taller</span></button>
   <button data-more data-icon="more" class="more-btn"><span>Más</span></button>
 </nav>
@@ -62,7 +63,8 @@
     <h2>Da de alta tu taller</h2>
     <p class="sub">Estos datos salen en los presupuestos y órdenes de reparación, y el cliente los ve en su app. Puedes cambiarlos cuando quieras en "Mi taller".</p>
     <form id="setupForm" class="ws-form"></form>
-    <p class="muted" style="font-size:14px;margin-top:14px">¿No eres un taller? <a href="#" id="skipSetup">Solo quiero apuntar trabajos de un coche</a>.</p>
+    <p class="muted" style="font-size:14px;margin-top:14px">¿Trabajas en un taller que ya usa Garaje? Pide al dueño que te invite con este mismo correo y vuelve a entrar.</p>
+    <p class="muted" style="font-size:14px;margin-top:4px">¿No eres un taller? <a href="#" id="skipSetup">Solo quiero apuntar trabajos de un coche</a>.</p>
   </div>
 </section>
 
@@ -247,6 +249,15 @@
   <div class="empty hidden" id="noSuppliers" data-icon="suppliers"><b>Sin proveedores todavía</b><p>Añade los distribuidores a los que compras: luego los eliges en cada pieza y los llamas con un toque.</p></div>
 </section>
 
+<!-- EQUIPO -->
+<section id="tab-team" class="tab hidden no-print">
+  <div class="top page-head">
+    <div><h2 style="margin:0">Equipo</h2><p class="sub" style="margin:2px 0 0">Quién trabaja en el taller y qué puede hacer cada uno. El encargado lleva el día a día; el mecánico ve las órdenes y los coches, sin costes ni solicitudes.</p></div>
+    <button class="btn" id="inviteBtn">+ Invitar</button>
+  </div>
+  <div class="card team-card" id="teamList"></div>
+</section>
+
 <!-- MI TALLER -->
 <section id="tab-settings" class="tab hidden no-print">
   <div class="top page-head">
@@ -273,6 +284,6 @@
 </div>
 <datalist id="brands"></datalist>
 <datalist id="partNames"></datalist>
-<script type="module" src="app.js?v=20261011k"></script>
+<script type="module" src="app.js?v=20261011m"></script>
 </body>
 </html>

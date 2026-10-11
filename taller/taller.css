@@ -396,3 +396,21 @@ table.list td[data-label]>span small{display:inline;margin-left:8px}
   .lead-who{flex-wrap:wrap}
   .group-label small{flex-basis:100%}
 }
+
+/* Equipo */
+.team-card{padding:6px 18px}
+.member{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+.member:first-child{border-top:0}
+.member .avatar{width:40px;height:40px;font-size:16px}
+.m-info{flex:1;min-width:0}
+.m-info b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.m-info small{display:block;color:var(--muted);font-size:13px}
+.m-role{width:auto;padding:8px 10px;font-size:14px}
+.m-gap{width:38px;flex:none}
+.role-chip{font-size:12.5px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--line);white-space:nowrap}
+.role-chip.owner{background:var(--brand-soft);color:var(--brand-2)}
+.role-chip.manager{background:#7C5CFF26;color:#5a3fd6}
+.role-chip.mechanic{background:#2EBD6B26;color:#1b7a44}
+.m-remove{font-size:20px;line-height:1}
+@media (prefers-color-scheme:dark){.role-chip.manager{color:#B5A3FF}.role-chip.mechanic{color:#5FD394}}
+@media (max-width:720px){.member{flex-wrap:wrap}.m-info{flex-basis:calc(100% - 52px)}.member .m-role,.member .role-chip{margin-left:52px}}
