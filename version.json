@@ -1,7 +1,7 @@
 {
-  "version": "1.0.37",
-  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.37/garaje-1.0.37-arm64.apk",
-  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.37/garaje-1.0.37.apk",
-  "notes": "Si hace tiempo que no apuntas los km, Inicio te lo recuerda. Desde ahora Garaje se actualiza en Google Play",
+  "version": "1.0.38",
+  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.38/garaje-1.0.38-arm64.apk",
+  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.38/garaje-1.0.38.apk",
+  "notes": "Bienvenida nueva: entras con tu cuenta de Google o tu correo y pones tu nombre y teléfono, para que tu familia y tu taller sepan de quién es cada vehículo. Si trabajas en un taller: el panel de taller se abre desde la app, con un resumen en Inicio de las solicitudes y los coches, y los avisos del taller te llevan directos.",
   "play_url": "https://play.google.com/apps/testing/com.samuel.mantenimiento"
 }
