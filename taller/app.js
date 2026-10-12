@@ -242,9 +242,22 @@ async function enter() {
     show('tabs');
     if (workshop) await Promise.all([loadJobs(), loadLeads(), loadParts(), loadSuppliers(), loadTeam(), loadAppointments()]);
     setTab(workshop ? tab : 'cars');
+    openDeepLink();
   }
   subscribe();
 }
+
+// Desde la app Garaje (modo taller y avisos): #leads abre Solicitudes y
+// #job=<id>, esa orden. Otros # (p. ej. los del inicio de sesión) no se tocan.
+function openDeepLink() {
+  const h = location.hash.slice(1);
+  if (!workshop || !(h === 'leads' || h.startsWith('job='))) return;
+  history.replaceState(null, '', location.pathname + location.search);
+  if (h === 'leads') { if (isManager()) setTab('leads'); return; }
+  const j = jobs.find((x) => x.id === h.slice(4));
+  if (j) { setTab('jobs'); openJob(j); }
+}
+window.addEventListener('hashchange', () => { if (session) openDeepLink(); });
 
 function subscribe() {
   if (channel) return;
