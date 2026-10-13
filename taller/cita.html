@@ -9,31 +9,31 @@
 <meta name="theme-color" content="#1D4B70">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="stylesheet" href="../style.css">
-<link rel="stylesheet" href="cita.css?v=20261013a">
+<link rel="stylesheet" href="cita.css?v=20261013b">
 </head>
 <body class="cita">
 <main class="cita-wrap">
-  <header class="cita-head" id="head">
+  <div class="cita-head" id="head">
     <div class="cita-logo" id="logo"></div>
     <div><h1 id="wsName">Pedir cita</h1><p id="wsInfo" class="muted"></p></div>
-  </header>
+  </div>
 
   <div id="loading" class="cita-card"><p class="muted">Cargando…</p></div>
   <div id="closed" class="cita-card hidden"><h2>Cita online no disponible</h2><p class="muted">Este taller no tiene la cita online activada. Llámales por teléfono.</p></div>
 
   <form id="form" class="hidden" novalidate>
     <section class="cita-card">
-      <h2><span class="step">1</span> Qué necesitas</h2>
+      <h2><span class="cstep">1</span> Qué necesitas</h2>
       <div class="chips" id="services"></div>
     </section>
     <section class="cita-card">
-      <h2><span class="step">2</span> Elige día y hora</h2>
+      <h2><span class="cstep">2</span> Elige día y hora</h2>
       <div class="days" id="days"></div>
       <div class="slots" id="slots"></div>
       <p class="muted small" id="slotHint">Las horas en gris ya están cogidas.</p>
     </section>
     <section class="cita-card">
-      <h2><span class="step">3</span> Tus datos</h2>
+      <h2><span class="cstep">3</span> Tus datos</h2>
       <label>Nombre *</label><input name="name" required maxlength="120" autocomplete="name">
       <label>Teléfono *</label><input name="phone" required type="tel" maxlength="30" autocomplete="tel" placeholder="Para confirmarte la cita">
       <label>Matrícula</label><input name="plate" maxlength="12" placeholder="1234 ABC" autocapitalize="characters">
@@ -58,6 +58,6 @@
   </div>
   <p class="powered">Cita online con <a href="../" target="_blank" rel="noopener">Garaje</a></p>
 </main>
-<script type="module" src="cita.js?v=20261013a"></script>
+<script type="module" src="cita.js?v=20261013b"></script>
 </body>
 </html>
