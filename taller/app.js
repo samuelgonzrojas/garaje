@@ -339,6 +339,8 @@ async function loadWorkshop() {
     : myRole === 'mechanic' ? ['jobs', 'agenda', 'cars', 'customers']
     : myRole === 'manager' ? ['jobs', 'leads', 'agenda', 'cars', 'customers', 'parts', 'suppliers', 'team', ...(invoicing ? ['invoices'] : [])]
     : ['jobs', 'leads', 'agenda', 'cars', 'customers', 'parts', 'suppliers', 'team', 'settings', ...(invoicing ? ['invoices'] : [])];
+  const off = [...(toolOn('parts') ? [] : ['parts', 'suppliers']), ...(toolOn('team') ? [] : ['team'])];
+  for (let i = allowed.length - 1; i >= 0; i--) if (off.includes(allowed[i])) allowed.splice(i, 1);
   for (const b of document.querySelectorAll('.tabs button[data-tab]')) b.classList.toggle('hidden', !allowed.includes(b.dataset.tab));
   if (!allowed.includes(tab)) tab = allowed[0];
   document.querySelector('.tabs .more-btn').classList.toggle('no-more', !workshop);
@@ -363,8 +365,7 @@ function listingBlock(d) {
   const accepted = leads.filter((l) => ['accepted', 'converted'].includes(l.status)).length;
   const stats = leads.length ? ` Hasta ahora: ${leads.length} ${leads.length === 1 ? 'solicitud' : 'solicitudes'}, ${accepted} ${accepted === 1 ? 'aceptada' : 'aceptadas'}.` : '';
   const fee = num(d.lead_fee);
-  return `<h3 style="margin:0 0 4px">Visible en la app Garaje</h3>
-    <p class="muted" style="font-size:13px;margin:0 0 8px">Si lo activas, los usuarios de Garaje de tu zona pueden pedirte presupuesto desde la app con lo que le toca a su vehículo. Cada solicitud es un cliente que te envía Garaje${fee ? ` (tarifa acordada: ${fmtEur(fee)} por cliente enviado)` : ''}.${stats}</p>
+  return `<p class="muted" style="font-size:13px;margin:0 0 8px">Si lo activas, los usuarios de Garaje de tu zona pueden pedirte presupuesto desde la app con lo que le toca a su vehículo. Cada solicitud es un cliente que te envía Garaje${fee ? ` (tarifa acordada: ${fmtEur(fee)} por cliente enviado)` : ''}.${stats}</p>
     <label class="chk"><input type="checkbox" name="listed" ${d.listed ? 'checked' : ''}> Aparecer en la app</label>
     <div class="row3">
       <div><label>Ciudad</label><input name="city" value="${esc(d.city ?? '')}" placeholder="Madrid"></div>
@@ -396,13 +397,20 @@ function shrinkLogo(file) {
   });
 }
 
+// --- herramientas opcionales (supabase/035_workshop_tools.sql): lo básico siempre;
+// piezas/proveedores y equipo, si el dueño los activa. null = todas.
+const TOOLS = [
+  ['parts', 'Piezas, tarifas y proveedores', 'Tu biblioteca de piezas con costes y PVP, las tarifas de tus distribuidores y los pedidos por WhatsApp.'],
+  ['team', 'Equipo', 'Encargados y mecánicos con su propio acceso al panel.'],
+];
+const toolOn = (k) => !workshop || workshop.tools == null || workshop.tools.includes(k);
+
 // --- cita online (supabase/031_online_booking.sql)
 const BOOKING_DEFAULT = ['Revisión y cambio de aceite', 'Pre-ITV', 'Frenos', 'Neumáticos', 'Diagnosis (testigo encendido)', 'Aire acondicionado', 'Otro'];
 const bookingUrl = () => (workshop ? new URL('cita.html?t=' + workshop.id, location.href.split('#')[0].replace(/\?.*$/, '')).href : '');
 function bookingBlock(d) {
   const services = (d.booking_services?.length ? d.booking_services : BOOKING_DEFAULT).join('\n');
-  return `<h3 style="margin:22px 0 4px">Cita online</h3>
-    <p class="muted" style="font-size:13.5px;margin:0 0 6px">Un enlace para tu web, tu ficha de Google Maps o WhatsApp: cualquier cliente, aunque no use Garaje, te pide cita en una hora libre y la confirmas tú.</p>
+  return `<p class="muted" style="font-size:13.5px;margin:0 0 6px">Un enlace para tu web, tu ficha de Google Maps o WhatsApp: cualquier cliente, aunque no use Garaje, te pide cita en una hora libre y la confirmas tú.</p>
     <label class="chk"><input type="checkbox" name="booking_enabled" ${d.booking_enabled ? 'checked' : ''}> Dejar que los clientes me pidan cita por internet</label>
     <label>Servicios que pueden pedir (uno por línea)</label><textarea name="booking_services" rows="5">${esc(services)}</textarea>
     <div class="row2"><div><label>Horas para citas</label><input name="booking_hours" value="${esc(d.booking_hours || '09:00-13:30,15:30-19:00')}" placeholder="09:00-13:30,15:30-19:00"></div>
@@ -440,13 +448,19 @@ function renderWsForm(formId, data, button) {
     ${field(WS_FIELDS[3])}${field(WS_FIELDS[4])}
     <div class="row2">${field(WS_FIELDS[5])}${field(WS_FIELDS[6])}</div>
     <div><label>Horario</label><input name="hours" value="${esc(data.hours || '')}" placeholder="L-V 8:30-13:30 y 15:30-19:00 · S 9-13"></div>
-    <h3 style="margin:22px 0 4px">Presupuestos y órdenes</h3>
+    <details class="ws-sec"><summary>Presupuestos y órdenes</summary>
     <div class="row3">${field(WS_FIELDS[7])}${field(WS_FIELDS[8])}${field(WS_FIELDS[9])}</div>
     <div class="row2"><div><label>Margen de las piezas (%)</label><input name="parts_margin" inputmode="decimal" value="${esc(data.parts_margin ?? 35)}"><small class="muted">Para calcular el PVP al importar o con "Calcular PVP".</small></div>
       ${workshop ? `<div><label>Siguiente nº de orden</label><input name="next_job_no" inputmode="numeric" value="${esc(data.next_job_no ?? maxNo + 1)}"><small class="muted">Si vienes de otro programa, sigue su numeración.</small></div>` : ''}</div>
-    </div><div>${listingBlock(data)}
-      ${bookingBlock(data)}
-      <div class="app-preview"><small>Así te ven los conductores en la app</small><div class="ap-card" id="${formId}Preview"></div></div>
+    </details>
+    </div><div>
+      <details class="ws-sec" ${data.listed ? '' : 'open'}><summary>Aparecer en la app Garaje</summary>${listingBlock(data)}
+        <div class="app-preview"><small>Así te ven los conductores en la app</small><div class="ap-card" id="${formId}Preview"></div></div></details>
+      <details class="ws-sec"><summary>Cita online${data.booking_enabled ? ' <span class="sec-on">activada</span>' : ''}</summary>${bookingBlock(data)}</details>
+      <details class="ws-sec"><summary>Más herramientas</summary>
+        <p class="muted" style="font-size:13.5px;margin:0 0 6px">Actívalas cuando las necesites; así el panel solo enseña lo que usas.</p>
+        ${TOOLS.map(([k, t, d]) => `<label class="chk tool-chk"><input type="checkbox" name="tool_${k}" ${(data.id ? (data.tools == null || data.tools.includes(k)) : false) ? 'checked' : ''}><span><b>${t}</b><small>${d}</small></span></label>`).join('')}
+      </details>
     </div></div>
     ${workshop ? '' : `<label class="chk terms-chk"><input type="checkbox" name="terms" required> He leído y acepto las <a href="../condiciones.html#talleres" target="_blank" rel="noopener">condiciones para talleres</a> (Garaje trata los datos de mis clientes por mi cuenta, como encargado del tratamiento) y la <a href="../privacidad.html#talleres" target="_blank" rel="noopener">política de privacidad</a>.</label>`}
     <div class="err" id="${formId}Err"></div>
@@ -498,6 +512,8 @@ function renderWsForm(formId, data, button) {
     row.listed = !!fd.listed;
     for (const k of ['city', 'province', 'postal_code', 'description']) row[k] = (fd[k] ?? '').trim() || null;
     row.vehicle_types = ['car', 'moto'].filter((t) => fd['vt_' + t]);
+    // Herramientas que enseña el panel
+    row.tools = TOOLS.map(([k]) => k).filter((k) => fd['tool_' + k]);
     // Cita online
     row.booking_enabled = !!fd.booking_enabled;
     row.booking_saturday = !!fd.booking_saturday;
@@ -906,15 +922,15 @@ function onboardSteps() {
   const w = workshop;
   return [
     { done: !!(w.tax_id && w.registry_no && w.address && w.phone), title: 'Completa los datos del taller',
-      text: 'NIF, nº de registro industrial, dirección y teléfono. Salen en los presupuestos y en la orden de reparación.', label: 'Ir a Mi taller', go: () => setTab('settings') },
+      text: 'NIF, nº de registro industrial, dirección y teléfono. Salen en los presupuestos, las órdenes y las facturas.', label: 'Ir a Mi taller', go: () => setTab('settings') },
+    { done: wsCustomers.length > 0 || vehicles.some((v) => roles[v.id] === 'workshop'), title: 'Trae a tus clientes',
+      text: 'Importa el Excel de clientes y coches de tu programa de gestión (y su historial), o crea los primeros a mano.', label: 'Importar', go: () => { setTab('customers'); importFromDms(); } },
+    { done: jobs.length > 0, title: 'Abre tu primera orden',
+      text: 'Recepción con fotos y firma, presupuesto con mano de obra y piezas, y al entregar queda en el historial del coche.', label: '+ Nueva orden', go: () => $('newJobBtn').click() },
+    { done: !!w.booking_enabled, title: 'Activa la cita online',
+      text: 'Un enlace para tu web, Google Maps o WhatsApp: tus clientes te piden cita en una hora libre y la confirmas tú.', label: 'Activarla', go: () => setTab('settings') },
     { done: !!(w.listed && w.city), title: 'Aparece en la app Garaje',
-      text: 'Marca "Aparecer en la app" y pon tu ciudad: los conductores de tu zona te pedirán presupuesto desde el móvil.', label: 'Activarlo', go: () => setTab('settings') },
-    { done: jobs.length > 0 || vehicles.some((v) => roles[v.id] === 'workshop'), title: 'Recibe el primer coche',
-      text: 'El cliente abre Garaje → Mi coche → Compartir → Taller y te enseña un código. Lo escribes en Coches y ves su historial.', label: 'Tengo un código', go: () => { setTab('cars'); $('joinCode').focus(); } },
-    { done: jobs.length > 0, title: 'Abre tu primera orden de trabajo',
-      text: 'Recepción, presupuesto con mano de obra y piezas, y el cliente lo aprueba en su móvil. Al entregar, queda en el historial del coche.', label: '+ Nueva orden', go: () => $('newJobBtn').click() },
-    { done: suppliers.length > 0, title: 'Añade tus proveedores',
-      text: 'Tus distribuidores de recambios, para elegirlos en cada pieza y llamarlos o escribirles por WhatsApp con un toque.', label: 'Añadir proveedor', go: () => { setTab('suppliers'); editSupplier({}); } },
+      text: 'Los conductores de tu zona te piden presupuesto desde el móvil con lo que le toca a su coche.', label: 'Activarlo', go: () => setTab('settings') },
   ];
 }
 function renderOnboard() {
@@ -1652,7 +1668,7 @@ function renderProgress() {
   const locked = isLocked();
   for (const el of document.querySelectorAll('#job input:not(#jMsg), #job select, #job textarea')) el.disabled = locked || (el.id === 'jAssigned' && !isManager());
   for (const id of ['addLabor', 'addPart', 'jSave']) show(id, !locked);
-  show('orderPartsBtn', !locked && isManager());
+  show('orderPartsBtn', !locked && isManager() && toolOn('parts'));
 }
 
 function renderJobHead() {
@@ -3783,6 +3799,24 @@ function dialog(html, okLabel, pick, after) {
     dlg.showModal();
   });
 }
+
+// ------------------------------------------------------------------ comentarios del taller
+// Fallos, ideas y lo que echan en falta: van al mismo buzón que los de la app
+// (tabla feedback, supabase/017) y le llegan avisados al equipo de Garaje.
+$('feedbackBtn').onclick = async (e) => {
+  e.preventDefault();
+  const r = await dialog(`<h3>Cuéntanos</h3>
+    <p class="muted" style="margin-top:0">Algo que falla, que no se entiende o que echas en falta. Lo lee el equipo de Garaje y te contestamos.</p>
+    <div class="pay-methods"><label class="chk"><input type="radio" name="kind" value="bug" checked> Algo falla</label><label class="chk"><input type="radio" name="kind" value="idea"> Una idea o algo que falta</label><label class="chk"><input type="radio" name="kind" value="otro"> Otra cosa</label></div>
+    <label>Qué pasa</label><textarea name="msg" rows="5" maxlength="5000" required placeholder="En qué pantalla estabas, qué hiciste y qué esperabas que pasara…"></textarea>
+    <label>Correo para contestarte</label><input name="contact" type="email" value="${esc(session?.user?.email || '')}">`,
+  'Enviar', (fd) => fd);
+  if (!r || !(r.msg || '').trim()) return;
+  const diag = [`Panel de taller ${document.querySelector('script[src*="app.js"]')?.src.split('v=')[1] || ''}`, `Taller: ${workshop?.name || '—'} (${myRole || 'sin taller'})`, `Pestaña: ${tab}${job ? ' · OR ' + job.number : ''}`, navigator.userAgent].join('\n');
+  const { error } = await sb.from('feedback').insert({ id: crypto.randomUUID(), kind: r.kind || 'bug', message: r.msg.trim(), contact: (r.contact || '').trim() || null,
+    diagnostics: diag, app_version: 'panel', platform: 'web-taller', user_id: session?.user?.id || null });
+  await notice(error ? `<h3>No se pudo enviar</h3><p>${esc(error.message)}</p>` : '<h3>¡Gracias!</h3><p class="muted">Nos ha llegado. Si hace falta, te escribimos a tu correo.</p>');
+};
 
 // ------------------------------------------------------------------ instalar en el móvil
 // Android/Chrome avisa con beforeinstallprompt; en iPhone se explica cómo hacerlo.

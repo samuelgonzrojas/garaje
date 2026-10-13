@@ -849,3 +849,16 @@ dialog#dlg{max-width:760px}
 .doc-photos img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:4px}
 .doc-photos figcaption{font-size:10px;color:#555}
 .doc-sig{display:block;height:60px;margin:0 auto 4px}
+
+/* Mi taller por apartados plegables */
+.ws-sec{border:1px solid var(--line);border-radius:16px;padding:0 14px;margin:14px 0;background:var(--card)}
+.ws-sec>summary{cursor:pointer;font-weight:700;font-size:16px;padding:12px 0;list-style:none;display:flex;align-items:center;gap:8px}
+.ws-sec>summary::-webkit-details-marker{display:none}
+.ws-sec>summary::after{content:'›';margin-left:auto;font-size:22px;color:var(--muted);transition:transform .15s}
+.ws-sec[open]>summary::after{transform:rotate(90deg)}
+.ws-sec[open]{padding-bottom:12px}
+.sec-on{font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;background:#1a7f4b22;color:#1a7f4b}
+.tool-chk{align-items:flex-start;margin:8px 0}
+.tool-chk span{display:flex;flex-direction:column}
+.tool-chk small{font-weight:400;color:var(--muted);font-size:13px}
+@media (prefers-color-scheme:dark){.sec-on{color:#5BD49A}}
