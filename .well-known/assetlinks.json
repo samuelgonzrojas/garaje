@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.samuel.mantenimiento",
+    "sha256_cert_fingerprints": ["DD:52:45:7E:DF:66:2E:AD:D9:81:E9:33:76:76:52:B0:77:06:5B:46:50:FB:38:65:54:E0:AF:38:F6:57:55:CB"]
+  }
+}]

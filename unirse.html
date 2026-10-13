@@ -28,6 +28,7 @@
   <p style="color:var(--muted)">Con este código verás su mantenimiento y podrás apuntar trabajos y kilómetros desde tu móvil.</p>
   <div class="code" id="code">······</div>
   <p style="color:var(--muted);font-size:14px;margin-top:0">Caduca a los 7 días de crearse.</p>
+  <a class="btn" id="openApp" href="#" hidden>Abrir en Garaje</a>
   <ol>
     <li>Abre Garaje e inicia sesión (Ajustes → Iniciar sesión).</li>
     <li>Toca <b>Tengo un código</b> y escribe el código, o escanea el QR otra vez desde ahí.</li>
@@ -46,6 +47,13 @@
 (function(){
   var c=(new URLSearchParams(location.search).get('c')||'').toUpperCase();
   if(/^[A-Z0-9]{6}$/.test(c)) document.getElementById('code').textContent=c;
+  // En Android, si Garaje está instalada se abre con el código ya puesto
+  // (si no, Chrome lleva a Google Play).
+  if(/^[A-Z0-9]{6}$/.test(c) && /Android/i.test(navigator.userAgent)){
+    var a=document.getElementById('openApp');
+    a.href='intent://garajeapp.es/unirse.html?c='+c+'#Intent;scheme=https;package=com.samuel.mantenimiento;end';
+    a.hidden=false;
+  }
 })();
 </script>
 </body>
