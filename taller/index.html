@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Garaje Taller">
 <link rel="stylesheet" href="../style.css">
-<link rel="stylesheet" href="taller.css?v=20261013i">
+<link rel="stylesheet" href="taller.css?v=20261013k">
 </head>
 <body>
 <div class="wrap panel">
@@ -31,7 +31,7 @@
   <button data-tab="leads" data-icon="leads"><span>Solicitudes</span><i class="nbadge hidden" id="leadsBadge"></i></button>
   <button data-tab="agenda" data-icon="agenda"><span>Agenda</span><i class="nbadge hidden" id="agendaBadge"></i></button>
   <button data-tab="cars" data-icon="cars"><span>Coches</span></button>
-  <button data-tab="customers" data-icon="customers" class="secondary"><span>Clientes</span></button>
+  <button data-tab="customers" data-icon="customers" class="secondary"><span>Clientes</span><i class="nbadge hidden" id="custBadge"></i></button>
   <button data-tab="invoices" data-icon="invoices" class="secondary hidden"><span>Facturas</span></button>
   <button data-tab="parts" data-icon="parts" class="secondary"><span>Piezas</span></button>
   <button data-tab="suppliers" data-icon="suppliers" class="secondary"><span>Proveedores</span></button>
@@ -163,6 +163,15 @@
         </div>
         <label>Lo que pide el cliente</label><textarea id="jRequest" rows="2"></textarea>
         <label>Estado del coche al recibirlo (golpes, testigos, objetos…)</label><textarea id="jIntake" rows="2"></textarea>
+        <div class="intake-media">
+          <div class="photo-grid" id="jPhotos"></div>
+          <div class="intake-btns">
+            <label class="btn ghost small">Foto de daños<input type="file" accept="image/*" capture="environment" multiple hidden class="jPhotoIn" data-kind="damage"></label>
+            <label class="btn ghost small">Foto del cuadro<input type="file" accept="image/*" capture="environment" hidden class="jPhotoIn" data-kind="dashboard"></label>
+            <button type="button" class="btn ghost small" id="jSignBtn">Firma del cliente</button>
+          </div>
+          <div class="signed" id="jSigned"></div>
+        </div>
       </div>
 
       <div class="card">
@@ -311,6 +320,7 @@
     <div><h2 style="margin:0">Clientes</h2><p class="sub" style="margin:2px 0 0">Tus clientes y sus coches, también los que no usan Garaje. Tráelos de tu programa de gestión y ábreles órdenes como a cualquiera.</p></div>
     <div class="head-btns"><button class="btn ghost" id="importCustomersBtn">Importar de mi programa</button> <button class="btn" id="newCustomerBtn">+ Cliente</button></div>
   </div>
+  <div id="nudgeBox"></div>
   <div class="board-tools"><input id="custSearch" type="search" placeholder="Buscar por nombre, teléfono, NIF o matrícula…" autocomplete="off"></div>
   <p class="muted" id="custCount" style="font-size:14px"></p>
   <div class="cust-list" id="custList"></div>
@@ -373,6 +383,6 @@
 </div>
 <datalist id="brands"></datalist>
 <datalist id="partNames"></datalist>
-<script type="module" src="app.js?v=20261013i"></script>
+<script type="module" src="app.js?v=20261013k"></script>
 </body>
 </html>

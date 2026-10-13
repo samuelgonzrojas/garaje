@@ -269,7 +269,8 @@ async function enter() {
     openDeepLink();
   }
   subscribe();
-  askTerms();
+  if (workshop) loadNudges();
+  askTerms().then(() => checkGarajeLinks());
 }
 
 // Desde la app Garaje (modo taller y avisos): #leads abre Solicitudes y
@@ -551,7 +552,7 @@ function setTab(t) {
   if (t === 'settings') renderWsForm('settingsForm', workshop || {}, 'Guardar');
   if (t === 'team') renderTeam();
   if (t === 'invoices') renderInvoices();
-  if (t === 'customers') renderCustomers();
+  if (t === 'customers') { renderCustomers(); renderNudges(); }
   job = null; current = null;
   window.scrollTo(0, 0);
 }
@@ -639,6 +640,7 @@ $('joinForm').onsubmit = async (e) => {
   $('joinCode').value = '';
   await loadVehicles();
   renderGrid();
+  checkGarajeLinks();
 };
 
 function openVehicle(row) {
@@ -1006,7 +1008,7 @@ function renderBoard() {
 
 $('newJobBtn').onclick = async () => {
   const garajeOpts = vehicles.map((v) => { const s = summary(v); const o = ownerOf(v.id); return `<option value="${v.id}">${esc(s.name)}${s.plate ? ' · ' + esc(s.plate) : ''}${o ? ' · ' + esc(o.display_name) : ''}</option>`; }).join('');
-  const wsOpts = wsVehicles.slice().sort((a, b) => normPlate(a.plate).localeCompare(normPlate(b.plate))).map((v) => { const s = summary(pseudoVehicle(v)); const c = customerOfVehicle(v); return `<option value="${wsKey(v.id)}">${esc(s.plate || 'Sin matrícula')} · ${esc(s.name)}${c ? ' · ' + esc(c.name) : ''}</option>`; }).join('');
+  const wsOpts = wsVehicles.filter((v) => !v.linked_vehicle_id).sort((a, b) => normPlate(a.plate).localeCompare(normPlate(b.plate))).map((v) => { const s = summary(pseudoVehicle(v)); const c = customerOfVehicle(v); return `<option value="${wsKey(v.id)}">${esc(s.plate || 'Sin matrícula')} · ${esc(s.name)}${c ? ' · ' + esc(c.name) : ''}</option>`; }).join('');
   const opts = `<option value="new">➕ Cliente y coche nuevos (sin Garaje)…</option>`
     + (garajeOpts ? `<optgroup label="Con Garaje">${garajeOpts}</optgroup>` : '')
     + (wsOpts ? `<optgroup label="Clientes del taller">${wsOpts}</optgroup>` : '');
@@ -1204,6 +1206,7 @@ async function loadAppointments() {
   const { data, error } = await sb.from('workshop_appointments').select('*').eq('workshop_id', workshop.id)
     .gte('starts_at', since.toISOString()).order('starts_at').limit(800);
   appointments = error ? [] : (data || []);
+  if (nudges) renderNudges();
   const asked = appointments.filter((a) => a.status === 'requested' && new Date(a.starts_at) > new Date()).length;
   $('agendaBadge').textContent = asked; show('agendaBadge', asked > 0);
   if (tab === 'agenda') renderAgenda();
@@ -1587,6 +1590,7 @@ function openJob(j) {
   renderLines();
   renderRecs();
   loadMessages();
+  jobPhotos = []; renderIntakeMedia(); loadJobPhotos();
   window.scrollTo(0, 0);
 }
 /** Opciones de "Responsable": el equipo que ya ha entrado en el panel. */
@@ -1961,13 +1965,17 @@ async function printDoc(kind) {
     </div>
     ${job.customer_request ? `<div class="box" style="margin-bottom:10px"><b>Trabajos solicitados</b>${esc(job.customer_request)}</div>` : ''}
     ${kind === 'order' && job.intake_notes ? `<div class="box" style="margin-bottom:10px"><b>Estado del vehículo a la recepción</b>${esc(job.intake_notes)}</div>` : ''}
+    ${kind === 'order' && jobPhotos.some((p) => p.kind !== 'signature' && p.url) ? `<div class="doc-photos">${jobPhotos.filter((p) => p.kind !== 'signature' && p.url).slice(0, 6).map((p) => `<figure><img src="${esc(p.url)}" alt=""><figcaption>${PHOTO_KIND[p.kind]}</figcaption></figure>`).join('')}</div>` : ''}
     ${rows ? `<table><thead><tr><th>Tipo</th><th>Concepto</th><th class="num">Cant.</th><th class="num">Precio</th><th class="num">Dto.</th><th class="num">Importe</th></tr></thead><tbody>${rows}</tbody></table>
     <div class="tot"><div><span>Base imponible</span><span>${fmtEur(t.base)}</span></div><div><span>IVA ${num(job.vat)} %</span><span>${fmtEur(t.vat)}</span></div><div class="big"><span>Total</span><span>${fmtEur(t.total)}</span></div></div>` : ''}
     <div class="legal">${kind === 'quote'
       ? 'Presupuesto conforme al Real Decreto 1457/1986. El usuario puede aceptarlo firmando este documento o desde la app Garaje. Las piezas sustituidas se entregarán al cliente si así lo solicita. Este presupuesto no es una factura.'
       : 'El usuario autoriza la reparación descrita y deposita el vehículo en el taller. Este documento sirve como resguardo de depósito (Real Decreto 1457/1986): preséntelo para retirar el vehículo. No es una factura.'}</div>
-    <div class="sign"><div>Firma del taller</div><div>Conforme, firma del cliente</div></div>
+    <div class="sign"><div>Firma del taller</div><div>${(() => { const sig = kind === 'order' ? jobPhotos.filter((p) => p.kind === 'signature' && p.url).pop() : null;
+      return sig ? `<img class="doc-sig" src="${esc(sig.url)}" alt="">Firmado por ${esc(job.intake_signed_name || 'el cliente')}${job.intake_signed_at ? ' · ' + fmtDate(job.intake_signed_at) : ''}` : 'Conforme, firma del cliente'; })()}</div></div>
   </div>`;
+  // Que las fotos y la firma estén cargadas antes de imprimir.
+  await Promise.all([...$('print').querySelectorAll('img')].map((i) => i.decode().catch(() => {})));
   const old = document.title;
   document.title = `${title} ${job.number} · ${s.plate || s.name}`;
   window.print();
@@ -2740,7 +2748,7 @@ function renderCustomers() {
     return;
   }
   box.innerHTML = '';
-  const carChip = (v) => `<button class="car-chip" data-car="${v.id}"><b>${esc(v.plate || '—')}</b> ${esc([v.make, v.model].filter(Boolean).join(' '))}</button>`;
+  const carChip = (v) => `<button class="car-chip${v.linked_vehicle_id ? ' linked' : ''}" data-car="${v.id}" ${v.linked_vehicle_id ? 'title="Usa Garaje"' : ''}><b>${esc(v.plate || '—')}</b> ${esc([v.make, v.model].filter(Boolean).join(' '))}${v.linked_vehicle_id ? ' ✓' : ''}</button>`;
   for (const c of list.slice(0, 300)) {
     const el = document.createElement('div');
     el.className = 'card cust-card';
@@ -2831,13 +2839,18 @@ async function openWsVehicle(v) {
     <p class="muted" style="margin-top:0"><span class="plate">${esc(s.plate || 'Sin matrícula')}</span> ${esc([v.version, v.vin ? 'VIN ' + v.vin : '', v.km != null ? fmtKm(v.km) : ''].filter(Boolean).join(' · '))}</p>
     ${c ? `<div class="lead-who"><div><b>${esc(c.name)}</b><small>${esc([c.phone, c.tax_id].filter(Boolean).join(' · '))}</small></div><div class="icons">${contactButtons(c.phone, c.email, `Hola ${c.name.split(' ')[0]}, te escribo de ${workshop.name} por tu ${s.name}.`, c.name)}</div></div>` : '<p class="muted">Sin cliente asignado.</p>'}
     ${v.notes ? `<p class="lead-msg">${esc(v.notes)}</p>` : ''}
+    ${v.linked_vehicle_id ? '<p class="muted">✓ Este cliente ya usa Garaje: su coche está enlazado.</p>' : v.invited_at ? `<p class="muted">Invitado a Garaje el ${fmtDate(v.invited_at)}.</p>` : ''}
     <h4 style="margin:14px 0 6px">Historial</h4>
     ${vjobs.length || (hist || []).length ? `<ul class="hist-list">${vjobs.map((j) => `<li><span>${fmtDate(j.delivered_at || j.created_at)} · <b>OR ${j.number}</b> · ${esc(STATUS[j.status])}</span><small>${esc(j.customer_request || '')}</small></li>`).join('')}
       ${(hist || []).filter((h) => h.source !== 'job').map((h) => `<li><span>${fmtDate(h.at)}${h.km != null ? ' · ' + fmtKm(h.km) : ''}${h.doc_ref ? ' · ' + esc(h.doc_ref) : ''}${isManager() && h.amount != null ? ` · <b>${fmtEur(num(h.amount))}</b>` : ''}</span><small>${esc(h.description)}</small></li>`).join('')}</ul>`
       : '<p class="muted">Sin trabajos todavía.</p>'}`,
-  [[open ? 'job' : 'new', open ? `Ver OR ${open.number}` : 'Abrir orden', 'btn small'], ['edit', 'Editar', 'btn ghost small'], ...(vjobs.length ? [] : [['del', 'Borrar', 'btn ghost small']])]);
+  [...(v.linked_vehicle_id && vehicles.some((x) => x.id === v.linked_vehicle_id) ? [['garaje', 'Ver su coche en Garaje', 'btn small']] : [[open ? 'job' : 'new', open ? `Ver OR ${open.number}` : 'Abrir orden', 'btn small']]),
+    ...(!v.linked_vehicle_id && c?.phone ? [['invite', v.invited_at ? 'Invitar otra vez a Garaje' : 'Invitar a Garaje', 'btn ghost small']] : []),
+    ['edit', 'Editar', 'btn ghost small'], ...(vjobs.length ? [] : [['del', 'Borrar', 'btn ghost small']])]);
   if (choice === 'job') openJob(open);
   if (choice === 'new') newJobFor(pseudoVehicle(v), { assigned_to: myRole === 'mechanic' ? session.user.id : null });
+  if (choice === 'garaje') { setTab('cars'); openVehicle(vehicles.find((x) => x.id === v.linked_vehicle_id)); }
+  if (choice === 'invite') inviteToGaraje(v);
   if (choice === 'edit') { const saved = await editWsVehicle(v); if (saved) openWsVehicle(saved); }
   if (choice === 'del' && window.confirm('¿Borrar este coche y su historial importado?')) {
     const { error } = await sb.from('workshop_vehicles').delete().eq('id', v.id);
@@ -3060,6 +3073,279 @@ async function importHistoryRows(rows, g, createCars) {
     await notice(`<h3>La importación se ha cortado</h3><p>${esc(e.message)}</p><p class="muted">Vuelve a subir el archivo: lo que ya se guardó no se duplica.</p>`);
   }
 }
+
+// ------------------------------------------------------------------ avisos a clientes
+// Lo que conviene avisar hoy (supabase/034): citas de mañana, coches listos de
+// clientes sin Garaje, lo que le toca a los coches con Garaje (su semáforo) y
+// los coches del taller que llevan un año sin venir. Por WhatsApp (mensaje ya
+// escrito) o por la app; cada aviso queda apuntado para no repetirlo.
+let nudges = [];
+let lastVisit = new Map();   // coche del taller -> última visita (aaaa-mm-dd)
+const NUDGE_ICON = { appointment: 'agenda', ready: 'jobs', maintenance: 'parts', itv: 'cars', yearly: 'agenda', invite: 'customers' };
+const firstName = (n) => String(n || '').replace(/,.*$/, '').trim().split(/\s+/)[0] || '';
+const waText = (phone, text) => waUrl(phone) + '?text=' + encodeURIComponent(text);
+async function loadNudges() {
+  if (!workshop) return;
+  const since = new Date(Date.now() - 400 * 86400e3).toISOString();
+  const { data } = await sb.from('workshop_nudges').select('kind,ref,channel,created_at').eq('workshop_id', workshop.id).gte('created_at', since).order('created_at', { ascending: false }).limit(5000);
+  nudges = data || [];
+  const m = new Map();
+  for (let from = 0; from < 40000; from += 1000) {
+    const { data: h } = await sb.from('workshop_history').select('ws_vehicle_id,at').eq('workshop_id', workshop.id).range(from, from + 999);
+    for (const x of h || []) if (!m.has(x.ws_vehicle_id) || x.at > m.get(x.ws_vehicle_id)) m.set(x.ws_vehicle_id, x.at);
+    if (!h || h.length < 1000) break;
+  }
+  lastVisit = m;
+  renderNudges();
+}
+function nudgeSuggestions() {
+  if (!workshop) return [];
+  const done = new Set(nudges.map((n) => n.ref));
+  const out = [];
+  const tomorrow = addDays(new Date(), 1);
+  const link = workshop.booking_enabled ? ` Pide cita aquí: ${bookingUrl()}` : '';
+  // 1. Citas de mañana
+  for (const a of appointments) {
+    if (a.status === 'declined' || a.status === 'requested') continue;
+    const at = new Date(a.starts_at);
+    if (!sameDay(at, tomorrow)) continue;
+    const ref = 'appt:' + a.id;
+    if (done.has(ref)) continue;
+    const garaje = a.vehicle_id && vehicles.some((v) => v.id === a.vehicle_id) ? a.vehicle_id : null;
+    const wsv = a.ws_vehicle_id ? wsVehicles.find((v) => v.id === a.ws_vehicle_id) : null;
+    const phone = a.customer_phone || (garaje ? ownerOf(garaje)?.phone : null) || customerOfVehicle(wsv)?.phone;
+    if (!phone && !garaje) continue;
+    const name = a.customer_name || (garaje ? ownerOf(garaje)?.display_name : '') || customerOfVehicle(wsv)?.name || '';
+    out.push({ kind: 'appointment', ref, title: `Cita mañana a las ${hhmm(at)} · ${a.title}`, who: name, phone, vehicle_id: garaje, ws_vehicle_id: wsv?.id || null,
+      text: `Hola${name ? ' ' + firstName(name) : ''}, te recordamos tu cita en ${workshop.name} mañana a las ${hhmm(at)} (${a.title}). Si no puedes venir, avísanos. ¡Gracias!` });
+  }
+  // 2. Coches listos de clientes sin Garaje (a los de Garaje ya les avisa la app)
+  for (const j of jobs) {
+    if (j.status !== 'ready' || !j.ws_vehicle_id) continue;
+    const ref = 'ready:' + j.id;
+    if (done.has(ref)) continue;
+    const v = wsVehicles.find((x) => x.id === j.ws_vehicle_id);
+    const c = customerOfVehicle(v);
+    const phone = j.customer_phone || c?.phone;
+    if (!v || !phone) continue;
+    const s = summary(pseudoVehicle(v));
+    const name = j.customer_name || c?.name || '';
+    out.push({ kind: 'ready', ref, title: `Listo para recoger · OR ${j.number} · ${s.name}`, who: name, phone, ws_vehicle_id: v.id,
+      text: `Hola${name ? ' ' + firstName(name) : ''}, tu ${s.name}${s.plate ? ' (' + s.plate + ')' : ''} ya está listo para recoger en ${workshop.name}.${workshop.hours ? ' Horario: ' + workshop.hours + '.' : ''} ¡Gracias!` });
+  }
+  // 3. Lo que le toca a los coches con Garaje (el semáforo que publica su app)
+  const month = today().slice(0, 7);
+  for (const v of vehicles) {
+    if (roles[v.id] !== 'workshop') continue;
+    const due = (vstatus[v.id]?.items || []).filter((i) => i.level === 'red' || i.level === 'amber');
+    if (!due.length) continue;
+    const ref = `mnt:${v.id}:${month}`;
+    if (done.has(ref)) continue;
+    const o = ownerOf(v.id);
+    const s = summary(v);
+    const names = due.slice(0, 3).map((i) => String(i.name || '').toLowerCase()).filter(Boolean).join(', ');
+    out.push({ kind: due.some((i) => /itv/i.test(`${i.id} ${i.name}`)) ? 'itv' : 'maintenance', ref, title: `${s.name} · le toca: ${names}`, who: o?.display_name || '', phone: o?.phone || null, vehicle_id: v.id,
+      text: `Hola${o?.display_name ? ' ' + firstName(o.display_name) : ''}, somos ${workshop.name}: a tu ${s.name} le toca ${names}. ¿Te damos cita?${link}` });
+  }
+  // 4. Coches del taller con un año sin venir
+  for (const v of wsVehicles) {
+    if (v.linked_vehicle_id) continue;
+    const last = lastVisit.get(v.id);
+    if (!last) continue;
+    const days = (Date.now() - new Date(last).getTime()) / 86400e3;
+    if (days < 335 || days > 730) continue;
+    const ref = `year:${v.id}:${today().slice(0, 4)}`;
+    if (done.has(ref)) continue;
+    const c = customerOfVehicle(v);
+    if (!c?.phone) continue;
+    const s = summary(pseudoVehicle(v));
+    out.push({ kind: 'yearly', ref, title: `${s.name}${s.plate ? ' · ' + s.plate : ''} · última visita ${fmtDate(last)}`, who: c.name, phone: c.phone, ws_vehicle_id: v.id,
+      text: `Hola ${firstName(c.name)}, hace un año que vimos tu ${s.name} en ${workshop.name}. ¿Le hacemos la revisión?${link}` });
+  }
+  return out;
+}
+function renderNudges() {
+  const list = nudgeSuggestions();
+  $('custBadge').textContent = list.length;
+  show('custBadge', list.length > 0);
+  const box = $('nudgeBox');
+  if (!list.length) { box.innerHTML = ''; return; }
+  box.innerHTML = `<div class="card nudge-card"><div class="nudge-head"><b>Avisos para hoy</b><small>${list.length} ${list.length === 1 ? 'cliente al que conviene escribir' : 'clientes a los que conviene escribir'}. El mensaje ya va escrito.</small></div><ul class="nudge-list"></ul></div>`;
+  const ul = box.querySelector('ul');
+  for (const n of list.slice(0, 50)) {
+    const li = document.createElement('li');
+    li.innerHTML = `<i class="ni">${svgIcon(NUDGE_ICON[n.kind] || 'customers')}</i><div class="nudge-txt"><b>${esc(n.title)}</b><small>${esc(n.who || '')}${n.phone ? ' · ' + esc(fmtPhone(n.phone)) : ''}</small></div>
+      <div class="nudge-btns">${n.phone ? '<button class="btn small" data-wa>WhatsApp</button>' : ''}${n.vehicle_id ? '<button class="btn ghost small" data-app>Por la app</button>' : ''}<button class="btn ghost small" data-no title="No avisar">×</button></div>`;
+    li.querySelector('[data-wa]')?.addEventListener('click', () => { window.open(waText(n.phone, n.text), '_blank', 'noopener'); logNudge(n, 'whatsapp'); });
+    li.querySelector('[data-app]')?.addEventListener('click', async () => {
+      const text = await dialog(`<h3>Aviso por la app</h3><p class="muted" style="margin-top:0">Le llega como notificación al móvil (a él y a su familia, si comparten el coche).</p><textarea name="t" rows="4" maxlength="300">${esc(n.text)}</textarea>`, 'Enviar', (fd) => (fd.t || '').trim());
+      if (text) logNudge(n, 'app', text);
+    });
+    li.querySelector('[data-no]').onclick = () => logNudge(n, 'dismissed');
+    ul.appendChild(li);
+  }
+}
+async function logNudge(n, channel, body) {
+  const { error } = await sb.from('workshop_nudges').insert({ workshop_id: workshop.id, kind: n.kind, ref: n.ref, vehicle_id: n.vehicle_id || null,
+    ws_vehicle_id: n.ws_vehicle_id || null, channel, body: String(body ?? n.text ?? '').slice(0, channel === 'app' ? 300 : 500) || null });
+  if (error) { await notice(`<h3>No se pudo apuntar el aviso</h3><p>${esc(error.message)}</p>`); return; }
+  nudges.unshift({ kind: n.kind, ref: n.ref, channel });
+  renderNudges();
+}
+
+// ------------------------------------------------------------------ invitar a Garaje
+// El cliente sin Garaje recibe por WhatsApp el enlace; cuando añade su coche y
+// lo comparte con el taller, el panel reconoce la matrícula y ofrece enlazarlo
+// y pasarle su historial.
+const GARAJE_URL = new URL('../', location.href.split('#')[0]).href;
+async function inviteToGaraje(v) {
+  const c = customerOfVehicle(v);
+  if (!c?.phone) { await notice('<h3>Falta el teléfono</h3><p class="muted">Ponle un teléfono al cliente para mandarle la invitación por WhatsApp.</p>'); return; }
+  const s = summary(pseudoVehicle(v));
+  const text = `Hola ${firstName(c.name)}, en ${workshop.name} usamos Garaje: te avisa de lo que le toca a tu ${s.name} y de la ITV, y verás cada reparación en el móvil. Es gratis: ${GARAJE_URL} . Cuando la tengas, añade el coche y compártelo con nosotros (Mi coche → Compartir → Taller) y te pasamos todo su historial.`;
+  window.open(waText(c.phone, text), '_blank', 'noopener');
+  await sb.from('workshop_vehicles').update({ invited_at: new Date().toISOString() }).eq('id', v.id);
+  await logNudge({ kind: 'invite', ref: `invite:${v.id}:${today()}`, ws_vehicle_id: v.id, text }, 'whatsapp');
+  await loadCustomers();
+}
+const linkAsked = new Set();
+/** Coches de Garaje compartidos con el taller que coinciden en matrícula con uno del taller sin enlazar. */
+async function checkGarajeLinks() {
+  if (!workshop || !wsVehicles.length) return;
+  for (const g of vehicles) {
+    if (roles[g.id] !== 'workshop') continue;
+    const plate = normPlate(profileOf(g).plate);
+    if (!plate) continue;
+    const ws = wsVehicles.find((v) => !v.linked_vehicle_id && normPlate(v.plate) === plate);
+    if (!ws || linkAsked.has(ws.id)) continue;
+    linkAsked.add(ws.id);
+    try { if (localStorage.getItem('garaje.nolink.' + ws.id) === '1') continue; } catch { /* sin almacenamiento */ }
+    const c = customerOfVehicle(ws);
+    const { count } = await sb.from('workshop_history').select('id', { count: 'exact', head: true }).eq('ws_vehicle_id', ws.id);
+    const choice = await choose(`<h3>${esc(summary(g).plate || plate)} ya está en Garaje</h3>
+      <p class="muted">Es el coche de tu cliente <b>${esc(c?.name || 'sin nombre')}</b>. ¿Lo enlazamos? ${count ? `Su historial (${count} ${count === 1 ? 'trabajo' : 'trabajos'}) pasa a su Garaje firmado por tu taller y las` : 'Las'} próximas órdenes irán a su coche de Garaje: verá cada paso en el móvil.</p>`,
+      [['link', 'Enlazar', 'btn small'], ['never', 'No es el mismo coche', 'btn ghost small']]);
+    if (choice === 'never') { try { localStorage.setItem('garaje.nolink.' + ws.id, '1'); } catch { /* sin almacenamiento */ } continue; }
+    if (choice === 'link') await linkToGaraje(ws, g);
+  }
+}
+async function linkToGaraje(ws, g) {
+  try {
+    const { data: hist } = await sb.from('workshop_history').select('*').eq('ws_vehicle_id', ws.id).order('at');
+    if ((hist || []).length) {
+      const author = workshop.name;
+      await withRetry(g.id, async (row) => {
+        const doc = structuredClone(row.data);
+        doc.events ||= []; doc.readings ||= [];
+        for (const h of hist) {
+          const id = newId();
+          const at = new Date(h.at + 'T12:00:00').toISOString();
+          doc.events.push({ id, catalog_id: null, at, reading_value: h.km, person_id: null, cost: h.amount != null ? num(h.amount) : null,
+            note: [h.description, h.doc_ref].filter(Boolean).join(' · ').slice(0, 500), author });
+          if (h.km != null) doc.readings.push({ id: id + '-km', value: h.km, at, source: 'event' });
+        }
+        return doc;
+      });
+    }
+    await sb.from('workshop_vehicles').update({ linked_vehicle_id: g.id, updated_at: new Date().toISOString() }).eq('id', ws.id);
+    await Promise.all([loadCustomers(), loadVehicles()]);
+    await notice(`<h3>Enlazado</h3><p class="muted">${(hist || []).length ? 'Su historial ya está en su Garaje. ' : ''}Las próximas órdenes ábrelas desde su coche de Garaje (en Coches o en Clientes).</p>`);
+  } catch (e) {
+    await notice(`<h3>No se pudo enlazar</h3><p>${esc(e.message || String(e))}</p>`);
+  }
+}
+
+// ------------------------------------------------------------------ recepción: fotos y firma
+let jobPhotos = [];
+const PHOTO_KIND = { damage: 'Daños', dashboard: 'Cuadro', fuel: 'Combustible', other: 'Foto', signature: 'Firma' };
+async function loadJobPhotos() {
+  const j = job;
+  if (!j) return;
+  const { data } = await sb.from('job_photos').select('*').eq('job_id', j.id).order('created_at');
+  const list = data || [];
+  if (list.length) {
+    const { data: urls } = await sb.storage.from('job-photos').createSignedUrls(list.map((p) => p.path), 3600);
+    for (const p of list) p.url = (urls || []).find((u) => u.path === p.path)?.signedUrl || '';
+  }
+  if (job?.id !== j.id) return;
+  jobPhotos = list;
+  renderIntakeMedia();
+}
+function renderIntakeMedia() {
+  const locked = isLocked();
+  const photos = jobPhotos.filter((p) => p.kind !== 'signature');
+  const sig = jobPhotos.filter((p) => p.kind === 'signature').pop();
+  $('jPhotos').innerHTML = photos.map((p) => `<figure><a href="${esc(p.url)}" target="_blank" rel="noopener"><img src="${esc(p.url)}" alt="${PHOTO_KIND[p.kind]}" loading="lazy"></a><figcaption>${PHOTO_KIND[p.kind]}</figcaption>${locked ? '' : `<button type="button" class="x" data-del="${p.id}" title="Quitar">×</button>`}</figure>`).join('');
+  for (const b of $('jPhotos').querySelectorAll('[data-del]')) b.onclick = async () => {
+    if (!window.confirm('¿Quitar esta foto?')) return;
+    const p = jobPhotos.find((x) => x.id === b.dataset.del);
+    await sb.storage.from('job-photos').remove([p.path]);
+    await sb.from('job_photos').delete().eq('id', p.id);
+    loadJobPhotos();
+  };
+  $('jSigned').innerHTML = sig ? `<img src="${esc(sig.url)}" alt="Firma del cliente"><small>Firmado por ${esc(job.intake_signed_name || 'el cliente')}${job.intake_signed_at ? ` el ${fmtDate(job.intake_signed_at)} a las ${hhmm(new Date(job.intake_signed_at))}` : ''}</small>` : '';
+  $('jSignBtn').textContent = sig ? 'Volver a firmar' : 'Firma del cliente';
+  for (const el of document.querySelectorAll('.intake-btns .btn')) el.classList.toggle('hidden', locked);
+}
+/** Foto a JPEG de como mucho 1600 px (las del móvil pesan mucho). */
+async function shrinkPhoto(file, max = 1600) {
+  const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' }).catch(() => createImageBitmap(file));
+  const k = Math.min(1, max / Math.max(bmp.width, bmp.height));
+  const c = document.createElement('canvas');
+  c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+  c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+  return new Promise((ok, ko) => c.toBlob((b) => (b ? ok(b) : ko(new Error('No se pudo leer la foto'))), 'image/jpeg', 0.75));
+}
+async function uploadJobFile(blob, kind, ext = 'jpg', type = 'image/jpeg') {
+  const path = `${workshop.id}/${job.id}/${newId()}.${ext}`;
+  const { error } = await sb.storage.from('job-photos').upload(path, blob, { contentType: type });
+  if (error) throw new Error(error.message);
+  const { error: e2 } = await sb.from('job_photos').insert({ workshop_id: workshop.id, job_id: job.id, path, kind });
+  if (e2) throw new Error(e2.message);
+}
+for (const inp of document.querySelectorAll('.jPhotoIn')) inp.onchange = async (e) => {
+  const files = [...e.target.files];
+  e.target.value = '';
+  if (!files.length || !job) return;
+  setSaveState('Subiendo fotos…', 'pending');
+  for (const f of files.slice(0, 12)) {
+    try { await uploadJobFile(await shrinkPhoto(f), inp.dataset.kind); } catch (err) { $('jErr').textContent = 'No se pudo subir una foto: ' + (err.message || err); }
+  }
+  setSaveState('Fotos guardadas ✓', 'ok');
+  loadJobPhotos();
+};
+$('jSignBtn').onclick = async () => {
+  if (!job) return;
+  let pad = null;
+  const r = await dialog(`<h3>Firma del cliente</h3>
+    <p class="muted" style="margin-top:0">Autoriza la reparación y deja el coche en depósito (resguardo, RD 1457/1986). Que firme con el dedo o el ratón.</p>
+    <canvas class="sign-pad" width="640" height="240"></canvas>
+    <div class="sign-tools"><a href="#" id="signClear">Borrar y volver a firmar</a><span class="err" id="signErr"></span></div>
+    <label>Nombre de quien firma</label><input name="name" maxlength="120" value="${esc(job.customer_name || '')}">`,
+  'Guardar firma', (fd) => fd, (form) => {
+    const c = form.querySelector('canvas');
+    const ctx = c.getContext('2d');
+    ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#14202B';
+    let drawing = false, empty = true;
+    const pos = (e) => { const b = c.getBoundingClientRect(); return [(e.clientX - b.left) * c.width / b.width, (e.clientY - b.top) * c.height / b.height]; };
+    c.onpointerdown = (e) => { drawing = true; empty = false; c.setPointerCapture(e.pointerId); ctx.beginPath(); ctx.moveTo(...pos(e)); };
+    c.onpointermove = (e) => { if (drawing) { ctx.lineTo(...pos(e)); ctx.stroke(); } };
+    c.onpointerup = c.onpointercancel = () => { drawing = false; };
+    form.querySelector('#signClear').onclick = (e) => { e.preventDefault(); ctx.clearRect(0, 0, c.width, c.height); empty = true; };
+    pad = { canvas: c, isEmpty: () => empty };
+    form.addEventListener('submit', (e) => { if (e.submitter?.value === 'ok' && empty) { e.preventDefault(); form.querySelector('#signErr').textContent = ' Falta la firma'; } });
+  });
+  if (!r || !pad || pad.isEmpty() || !job) return;
+  try {
+    const blob = await new Promise((ok) => pad.canvas.toBlob(ok, 'image/png'));
+    await uploadJobFile(blob, 'signature', 'png', 'image/png');
+    const patch = { intake_signed_at: new Date().toISOString(), intake_signed_name: (r.name || '').trim() || null };
+    await sb.from('jobs').update(patch).eq('id', job.id);
+    Object.assign(job, patch);
+    const i = jobs.findIndex((x) => x.id === job.id); if (i >= 0) Object.assign(jobs[i], patch);
+    loadJobPhotos();
+  } catch (e) { $('jErr').textContent = 'No se pudo guardar la firma: ' + (e.message || e); }
+};
 
 // ------------------------------------------------------------------ tarifas de proveedor
 // El distribuidor manda su tarifa cada pocas semanas (Excel, CSV, DBF…). Se
