@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pedir cita en el taller</title>
+<meta name="description" content="Pide cita en el taller en una hora libre. El taller te llamará para confirmarla.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#1D4B70">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="cita.css?v=20261013a">
+</head>
+<body class="cita">
+<main class="cita-wrap">
+  <header class="cita-head" id="head">
+    <div class="cita-logo" id="logo"></div>
+    <div><h1 id="wsName">Pedir cita</h1><p id="wsInfo" class="muted"></p></div>
+  </header>
+
+  <div id="loading" class="cita-card"><p class="muted">Cargando…</p></div>
+  <div id="closed" class="cita-card hidden"><h2>Cita online no disponible</h2><p class="muted">Este taller no tiene la cita online activada. Llámales por teléfono.</p></div>
+
+  <form id="form" class="hidden" novalidate>
+    <section class="cita-card">
+      <h2><span class="step">1</span> Qué necesitas</h2>
+      <div class="chips" id="services"></div>
+    </section>
+    <section class="cita-card">
+      <h2><span class="step">2</span> Elige día y hora</h2>
+      <div class="days" id="days"></div>
+      <div class="slots" id="slots"></div>
+      <p class="muted small" id="slotHint">Las horas en gris ya están cogidas.</p>
+    </section>
+    <section class="cita-card">
+      <h2><span class="step">3</span> Tus datos</h2>
+      <label>Nombre *</label><input name="name" required maxlength="120" autocomplete="name">
+      <label>Teléfono *</label><input name="phone" required type="tel" maxlength="30" autocomplete="tel" placeholder="Para confirmarte la cita">
+      <label>Matrícula</label><input name="plate" maxlength="12" placeholder="1234 ABC" autocapitalize="characters">
+      <label>¿Algo más que deba saber el taller?</label><textarea name="note" rows="3" maxlength="500" placeholder="Ruido al frenar, testigo encendido…"></textarea>
+      <label class="consent"><input type="checkbox" name="consent" required> Acepto que el taller reciba mis datos para gestionar la cita (<a href="../privacidad.html" target="_blank" rel="noopener">privacidad</a>).</label>
+      <p class="err" id="err"></p>
+      <button class="btn big" id="send">Pedir cita</button>
+      <p class="muted small">El taller te llamará o te escribirá para confirmarla.</p>
+    </section>
+  </form>
+
+  <div id="done" class="cita-card hidden">
+    <div class="ok-ic">✓</div>
+    <h2>¡Petición enviada!</h2>
+    <p id="doneText"></p>
+    <p class="muted">El taller te llamará o te escribirá para confirmarla.</p>
+    <div class="garaje-ad">
+      <b>¿Te ayudamos a no olvidar el mantenimiento?</b>
+      <p>Con <b>Garaje</b> sabes qué le toca a tu coche, cuándo pasa la ITV y guardas todo su historial. Gratis.</p>
+      <a class="btn" href="../" target="_blank" rel="noopener">Conocer Garaje</a>
+    </div>
+  </div>
+  <p class="powered">Cita online con <a href="../" target="_blank" rel="noopener">Garaje</a></p>
+</main>
+<script type="module" src="cita.js?v=20261013a"></script>
+</body>
+</html>

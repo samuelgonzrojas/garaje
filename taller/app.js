@@ -43,6 +43,9 @@ let channel = null;
 let tab = 'jobs';
 let invoicing = null;      // facturación activada (workshop_invoicing), solo dueño y encargado
 let invoices = [];         // facturas emitidas
+let payments = [];         // cobros de las facturas (invoice_payments)
+let wsCustomers = [];      // clientes propios del taller (workshop_customers)
+let wsVehicles = [];       // coches propios del taller, sin Garaje (workshop_vehicles)
 
 // ------------------------------------------------------------------ utilidades
 const fmtKm = (n) => n == null ? '—' : new Intl.NumberFormat('es-ES').format(n) + ' km';
@@ -75,6 +78,7 @@ const NAV_ICON = {
   team: '<path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>',
   more: '<path d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>',
   invoices: '<path d="M18 17H6v-2h12v2zm0-4H6v-2h12v2zm0-4H6V7h12v2zM3 22l1.5-1.5L6 22l1.5-1.5L9 22l1.5-1.5L12 22l1.5-1.5L15 22l1.5-1.5L18 22l1.5-1.5L21 22V2l-1.5 1.5L18 2l-1.5 1.5L15 2l-1.5 1.5L12 2l-1.5 1.5L9 2 7.5 3.5 6 2 4.5 3.5 3 2v20z"/>',
+  customers: '<path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>',
   logout: '<path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>',
 };
 const svgIcon = (k) => `<svg viewBox="0 0 24 24" aria-hidden="true">${NAV_ICON[k] || ''}</svg>`;
@@ -244,7 +248,7 @@ async function enter() {
     show('setup');
   } else {
     show('tabs');
-    if (workshop) await Promise.all([loadJobs(), loadLeads(), loadParts(), loadSuppliers(), loadTeam(), loadAppointments(), loadInvoices()]);
+    if (workshop) await Promise.all([loadJobs(), loadLeads(), loadParts(), loadSuppliers(), loadTeam(), loadAppointments(), loadInvoices(), loadCustomers()]);
     setTab(workshop ? tab : 'cars');
     openDeepLink();
   }
@@ -255,9 +259,10 @@ async function enter() {
 // #job=<id>, esa orden. Otros # (p. ej. los del inicio de sesión) no se tocan.
 function openDeepLink() {
   const h = location.hash.slice(1);
-  if (!workshop || !(h === 'leads' || h.startsWith('job='))) return;
+  if (!workshop || !(h === 'leads' || h === 'agenda' || h.startsWith('job='))) return;
   history.replaceState(null, '', location.pathname + location.search);
   if (h === 'leads') { if (isManager()) setTab('leads'); return; }
+  if (h === 'agenda') { setTab('agenda'); return; }
   const j = jobs.find((x) => x.id === h.slice(4));
   if (j) { setTab('jobs'); openJob(j); }
 }
@@ -271,6 +276,9 @@ function subscribe() {
     .on('postgres_changes', { event: '*', schema: 'public', table: 'leads' }, () => workshop && loadLeads())
     .on('postgres_changes', { event: '*', schema: 'public', table: 'workshop_appointments' }, () => workshop && loadAppointments())
     .on('postgres_changes', { event: '*', schema: 'public', table: 'workshop_invoices' }, () => invoicing && loadInvoices())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'invoice_payments' }, () => invoicing && loadInvoices())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'workshop_customers' }, () => workshop && loadCustomers())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'workshop_vehicles' }, () => workshop && loadCustomers())
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'job_messages' }, (p) => {
       if (job && p.new.job_id === job.id) loadMessages();
     })
@@ -310,9 +318,9 @@ async function loadWorkshop() {
   // Pestañas según el rol: el mecánico, órdenes, agenda y coches; el encargado,
   // todo menos los datos del taller; el dueño, todo.
   const allowed = !workshop ? ['cars', 'agenda']
-    : myRole === 'mechanic' ? ['jobs', 'agenda', 'cars']
-    : myRole === 'manager' ? ['jobs', 'leads', 'agenda', 'cars', 'parts', 'suppliers', 'team', ...(invoicing ? ['invoices'] : [])]
-    : ['jobs', 'leads', 'agenda', 'cars', 'parts', 'suppliers', 'team', 'settings', ...(invoicing ? ['invoices'] : [])];
+    : myRole === 'mechanic' ? ['jobs', 'agenda', 'cars', 'customers']
+    : myRole === 'manager' ? ['jobs', 'leads', 'agenda', 'cars', 'customers', 'parts', 'suppliers', 'team', ...(invoicing ? ['invoices'] : [])]
+    : ['jobs', 'leads', 'agenda', 'cars', 'customers', 'parts', 'suppliers', 'team', 'settings', ...(invoicing ? ['invoices'] : [])];
   for (const b of document.querySelectorAll('.tabs button[data-tab]')) b.classList.toggle('hidden', !allowed.includes(b.dataset.tab));
   if (!allowed.includes(tab)) tab = allowed[0];
   document.querySelector('.tabs .more-btn').classList.toggle('no-more', !workshop);
@@ -370,6 +378,34 @@ function shrinkLogo(file) {
   });
 }
 
+// --- cita online (supabase/031_online_booking.sql)
+const BOOKING_DEFAULT = ['Revisión y cambio de aceite', 'Pre-ITV', 'Frenos', 'Neumáticos', 'Diagnosis (testigo encendido)', 'Aire acondicionado', 'Otro'];
+const bookingUrl = () => (workshop ? new URL('cita.html?t=' + workshop.id, location.href.split('#')[0].replace(/\?.*$/, '')).href : '');
+function bookingBlock(d) {
+  const services = (d.booking_services?.length ? d.booking_services : BOOKING_DEFAULT).join('\n');
+  return `<h3 style="margin:22px 0 4px">Cita online</h3>
+    <p class="muted" style="font-size:13.5px;margin:0 0 6px">Un enlace para tu web, tu ficha de Google Maps o WhatsApp: cualquier cliente, aunque no use Garaje, te pide cita en una hora libre y la confirmas tú.</p>
+    <label class="chk"><input type="checkbox" name="booking_enabled" ${d.booking_enabled ? 'checked' : ''}> Dejar que los clientes me pidan cita por internet</label>
+    <label>Servicios que pueden pedir (uno por línea)</label><textarea name="booking_services" rows="5">${esc(services)}</textarea>
+    <div class="row2"><div><label>Horas para citas</label><input name="booking_hours" value="${esc(d.booking_hours || '09:00-13:30,15:30-19:00')}" placeholder="09:00-13:30,15:30-19:00"></div>
+      <div><label>&nbsp;</label><label class="chk"><input type="checkbox" name="booking_saturday" ${d.booking_saturday ? 'checked' : ''}> También sábados por la mañana</label></div></div>
+    ${d.id ? `<div class="booking-link"><input readonly value="${esc(bookingUrl())}" onclick="this.select()"><div><button type="button" class="btn ghost small" data-blink="copy">Copiar enlace</button> <a class="btn ghost small" href="${esc(bookingUrl())}" target="_blank" rel="noopener">Ver la página</a></div></div>` : ''}`;
+}
+async function shareBookingLink() {
+  if (!workshop?.booking_enabled) {
+    await notice(`<h3>Cita online</h3><p class="muted">${isOwner() ? 'Actívala en Mi taller → Cita online: eliges los servicios y las horas, y te da un enlace para tu web, Google Maps o WhatsApp.' : 'La activa el dueño del taller en Mi taller → Cita online.'}</p>`);
+    return;
+  }
+  const url = bookingUrl();
+  const msg = `Pide cita en ${workshop.name} aquí: ${url}`;
+  const c = await choose(`<h3>Tu enlace para pedir cita</h3><p class="muted">Ponlo en tu web, en tu ficha de Google Maps o mándalo por WhatsApp. Las peticiones te llegan a la Agenda para confirmarlas.</p>
+    <div class="booking-link"><input readonly value="${esc(url)}" onclick="this.select()"></div>`,
+    [['copy', 'Copiar enlace', 'btn small'], ['wa', 'Compartir por WhatsApp', 'btn ghost small'], ['open', 'Ver la página', 'btn ghost small']]);
+  if (c === 'copy') { try { await navigator.clipboard.writeText(url); } catch { /* sin permiso */ } }
+  if (c === 'wa') window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank', 'noopener');
+  if (c === 'open') window.open(url, '_blank', 'noopener');
+}
+
 function renderWsForm(formId, data, button) {
   const f = $(formId);
   const field = ([k, label, ph, req]) => `<div><label>${label}${req ? ' *' : ''}</label><input name="${k}" value="${esc(data[k] ?? '')}" placeholder="${esc(ph)}" ${req ? 'required' : ''} ${['labor_rate', 'vat', 'quote_validity_days'].includes(k) ? 'inputmode="decimal"' : ''}></div>`;
@@ -391,6 +427,7 @@ function renderWsForm(formId, data, button) {
     <div class="row2"><div><label>Margen de las piezas (%)</label><input name="parts_margin" inputmode="decimal" value="${esc(data.parts_margin ?? 35)}"><small class="muted">Para calcular el PVP al importar o con "Calcular PVP".</small></div>
       ${workshop ? `<div><label>Siguiente nº de orden</label><input name="next_job_no" inputmode="numeric" value="${esc(data.next_job_no ?? maxNo + 1)}"><small class="muted">Si vienes de otro programa, sigue su numeración.</small></div>` : ''}</div>
     </div><div>${listingBlock(data)}
+      ${bookingBlock(data)}
       <div class="app-preview"><small>Así te ven los conductores en la app</small><div class="ap-card" id="${formId}Preview"></div></div>
     </div></div>
     <div class="err" id="${formId}Err"></div>
@@ -418,6 +455,7 @@ function renderWsForm(formId, data, button) {
       <span class="ap-btn">Pedir presupuesto</span>
       ${fd.listed ? '' : '<p class="ap-off">Ahora no apareces en la app: marca "Aparecer en la app".</p>'}`;
   };
+  for (const b of f.querySelectorAll('[data-blink=copy]')) b.onclick = async () => { try { await navigator.clipboard.writeText(bookingUrl()); b.textContent = 'Copiado ✓'; } catch { /* sin permiso */ } };
   f.addEventListener('input', paintPreview);
   f.addEventListener('change', paintPreview);
   paintLogo(); paintPreview();
@@ -441,6 +479,12 @@ function renderWsForm(formId, data, button) {
     row.listed = !!fd.listed;
     for (const k of ['city', 'province', 'postal_code', 'description']) row[k] = (fd[k] ?? '').trim() || null;
     row.vehicle_types = ['car', 'moto'].filter((t) => fd['vt_' + t]);
+    // Cita online
+    row.booking_enabled = !!fd.booking_enabled;
+    row.booking_saturday = !!fd.booking_saturday;
+    row.booking_services = (fd.booking_services || '').split('\n').map((x) => x.trim()).filter(Boolean).slice(0, 20).map((x) => x.slice(0, 80));
+    row.booking_hours = (fd.booking_hours || '').replace(/\s/g, '') || '09:00-13:30,15:30-19:00';
+    if (!/^\d\d:\d\d-\d\d:\d\d(,\d\d:\d\d-\d\d:\d\d)*$/.test(row.booking_hours)) { $(formId + 'Err').textContent = 'Las horas de la cita online van así: 09:00-13:30,15:30-19:00'; return; }
     if (row.vehicle_types.length === 0) row.vehicle_types = ['car'];
     if (row.listed && !row.city) { $(formId + 'Err').textContent = 'Para aparecer en la app hace falta la ciudad.'; return; }
     if (!row.name) { $(formId + 'Err').textContent = 'Falta el nombre del taller.'; return; }
@@ -472,8 +516,8 @@ $('moreSheet').onclick = (e) => { if (e.target === $('moreSheet')) $('moreSheet'
 function setTab(t) {
   tab = t;
   for (const b of document.querySelectorAll('.tabs button[data-tab]')) b.classList.toggle('on', b.dataset.tab === t);
-  document.querySelector('.tabs .more-btn').classList.toggle('on', ['parts', 'suppliers', 'team', 'settings', 'invoices'].includes(t));
-  for (const id of ['tab-jobs', 'tab-leads', 'tab-agenda', 'tab-cars', 'tab-parts', 'tab-suppliers', 'tab-team', 'tab-settings', 'tab-invoices', 'job', 'vehicle']) show(id, false);
+  document.querySelector('.tabs .more-btn').classList.toggle('on', ['parts', 'suppliers', 'team', 'settings', 'invoices', 'customers'].includes(t));
+  for (const id of ['tab-jobs', 'tab-leads', 'tab-agenda', 'tab-cars', 'tab-customers', 'tab-parts', 'tab-suppliers', 'tab-team', 'tab-settings', 'tab-invoices', 'job', 'vehicle']) show(id, false);
   show('tab-' + t);
   if (t === 'jobs') renderBoard();
   if (t === 'leads') renderLeads();
@@ -484,6 +528,7 @@ function setTab(t) {
   if (t === 'settings') renderWsForm('settingsForm', workshop || {}, 'Guardar');
   if (t === 'team') renderTeam();
   if (t === 'invoices') renderInvoices();
+  if (t === 'customers') renderCustomers();
   job = null; current = null;
   window.scrollTo(0, 0);
 }
@@ -789,7 +834,7 @@ async function loadJobs() {
     }
   }
 }
-function vehicleOf(j) { return vehicles.find((v) => v.id === j.vehicle_id); }
+function vehicleOf(j) { return j.ws_vehicle_id ? wsVehicleRow(j.ws_vehicle_id) : vehicles.find((v) => v.id === j.vehicle_id); }
 /** Entrega prevista: "hoy", "atrasada" o la fecha. */
 function dueBadge(j) {
   if (!j.promised_at || ['delivered', 'cancelled'].includes(j.status)) return '';
@@ -937,21 +982,24 @@ function renderBoard() {
 }
 
 $('newJobBtn').onclick = async () => {
-  if (vehicles.length === 0) {
-    await dialog('<h3>Primero, un coche</h3><p class="muted">Para abrir una orden necesitas acceso al coche: el cliente abre Garaje → Mi coche → Compartir → Taller y te da un código. Escríbelo en la pestaña Coches.</p>', 'Ir a Coches', () => true) && setTab('cars');
-    return;
-  }
-  const opts = vehicles.map((v) => { const s = summary(v); const o = ownerOf(v.id); return `<option value="${v.id}">${esc(s.name)}${s.plate ? ' · ' + esc(s.plate) : ''}${o ? ' · ' + esc(o.display_name) : ''}</option>`; }).join('');
+  const garajeOpts = vehicles.map((v) => { const s = summary(v); const o = ownerOf(v.id); return `<option value="${v.id}">${esc(s.name)}${s.plate ? ' · ' + esc(s.plate) : ''}${o ? ' · ' + esc(o.display_name) : ''}</option>`; }).join('');
+  const wsOpts = wsVehicles.slice().sort((a, b) => normPlate(a.plate).localeCompare(normPlate(b.plate))).map((v) => { const s = summary(pseudoVehicle(v)); const c = customerOfVehicle(v); return `<option value="${wsKey(v.id)}">${esc(s.plate || 'Sin matrícula')} · ${esc(s.name)}${c ? ' · ' + esc(c.name) : ''}</option>`; }).join('');
+  const opts = `<option value="new">➕ Cliente y coche nuevos (sin Garaje)…</option>`
+    + (garajeOpts ? `<optgroup label="Con Garaje">${garajeOpts}</optgroup>` : '')
+    + (wsOpts ? `<optgroup label="Clientes del taller">${wsOpts}</optgroup>` : '');
   const r = await dialog(`<h3>Nueva orden de trabajo</h3>
     <label>Coche</label><select name="v">${opts}</select>
-    <p class="muted" style="font-size:13px;margin:4px 0 0">¿No está? Pide al cliente el código de taller y escríbelo en la pestaña Coches.</p>
+    <p class="muted" style="font-size:13px;margin:4px 0 0">Si el cliente usa Garaje, que te pase su código de taller (pestaña Coches). Si no, búscalo en tus clientes o créalo aquí.</p>
     <label>Lo que pide el cliente</label><textarea name="req" rows="2" placeholder="Cambio de aceite, ruido al frenar…"></textarea>
     <div class="row2"><div><label>Km al recibirlo</label><input name="km" inputmode="numeric" placeholder="Opcional"></div>
       <div><label>Entrega prevista</label><input name="promised" type="date" min="${today()}"></div></div>
     ${isManager() && team.filter((m) => m.joined).length > 1 ? `<label>Responsable</label><select name="who">${assigneeOptions(null)}</select>` : ''}`,
-    'Abrir orden', (fd) => fd);
+    'Abrir orden', (fd) => fd, (form) => { if (garajeOpts || wsOpts) form.v.selectedIndex = 1; });
   if (!r) return;
-  const row = vehicles.find((v) => v.id === r.v);
+  let row;
+  if (r.v === 'new') { const v = await quickCustomerCar(); if (!v) return; row = pseudoVehicle(v); }
+  else row = r.v.startsWith('ws:') ? wsVehicleRow(r.v.slice(3)) : vehicles.find((v) => v.id === r.v);
+  if (!row) return;
   const km = parseInt(String(r.km || '').replace(/\D/g, ''), 10);
   newJobFor(row, {
     customer_request: (r.req || '').trim() || null,
@@ -963,17 +1011,22 @@ $('newJobBtn').onclick = async () => {
 
 async function newJobFor(row, extra = {}) {
   const s = summary(row);
-  // Cliente: el propietario del coche (nombre y teléfono de su perfil).
-  let name = null, phone = null;
-  try {
-    const { data } = await sb.rpc('vehicle_people', { p_vehicle: row.id });
-    const owner = (data || []).find((p) => p.role === 'owner');
-    if (owner) { name = owner.display_name; phone = owner.phone; }
-  } catch { /* sin datos */ }
-  const base = {
-    workshop_id: workshop.id, vehicle_id: row.id, km: s.km, vat: workshop.vat,
-    customer_name: name, customer_phone: phone,
-  };
+  let base;
+  if (row.ws) {
+    // Coche del taller: el cliente es el de su ficha.
+    const c = customerOfVehicle(row.ws);
+    base = { workshop_id: workshop.id, ws_vehicle_id: row.ws.id, km: s.km, vat: workshop.vat,
+      customer_name: c?.name || null, customer_phone: c?.phone || null, customer_tax_id: c?.tax_id || null, customer_address: c?.address || null };
+  } else {
+    // Cliente: el propietario del coche (nombre y teléfono de su perfil).
+    let name = null, phone = null;
+    try {
+      const { data } = await sb.rpc('vehicle_people', { p_vehicle: row.id });
+      const owner = (data || []).find((p) => p.role === 'owner');
+      if (owner) { name = owner.display_name; phone = owner.phone; }
+    } catch { /* sin datos */ }
+    base = { workshop_id: workshop.id, vehicle_id: row.id, km: s.km, vat: workshop.vat, customer_name: name, customer_phone: phone };
+  }
   // Desde una solicitud: lo que pidió el cliente, su teléfono, la cita.
   for (const [k, v] of Object.entries(extra)) if (v != null && v !== '') base[k] = v;
   const { data, error } = await sb.from('jobs').insert(base).select('*').single();
@@ -1128,6 +1181,8 @@ async function loadAppointments() {
   const { data, error } = await sb.from('workshop_appointments').select('*').eq('workshop_id', workshop.id)
     .gte('starts_at', since.toISOString()).order('starts_at').limit(800);
   appointments = error ? [] : (data || []);
+  const asked = appointments.filter((a) => a.status === 'requested' && new Date(a.starts_at) > new Date()).length;
+  $('agendaBadge').textContent = asked; show('agendaBadge', asked > 0);
   if (tab === 'agenda') renderAgenda();
 }
 const hhmm = (d) => d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
@@ -1136,9 +1191,10 @@ const hhmm = (d) => d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-
 function agendaItems() {
   const items = [];
   for (const a of appointments) {
-    const v = a.vehicle_id ? vehicles.find((x) => x.id === a.vehicle_id) : null;
-    items.push({ kind: 'cita', at: new Date(a.starts_at), minutes: a.minutes, title: a.title,
-      sub: [v ? summary(v).name : '', a.customer_name, a.assigned_to ? '→ ' + nameOf(a.assigned_to) : ''].filter(Boolean).join(' · '), appt: a });
+    if (a.status === 'declined') continue;
+    const v = a.vehicle_id ? vehicles.find((x) => x.id === a.vehicle_id) : a.ws_vehicle_id ? wsVehicleRow(a.ws_vehicle_id) : null;
+    items.push({ kind: a.status === 'requested' ? 'pedida' : 'cita', at: new Date(a.starts_at), minutes: a.minutes, title: a.title,
+      sub: [v ? summary(v).name : a.plate || '', esc(a.customer_name || ''), a.assigned_to ? '→ ' + esc(nameOf(a.assigned_to)) : ''].filter(Boolean).join(' · '), appt: a });
   }
   for (const l of leads) {
     const j = l.job_id ? jobs.find((x) => x.id === l.job_id) : null;
@@ -1200,10 +1256,12 @@ function renderAgendaSummary(items, now) {
   const nEnt = todays.filter((it) => it.kind === 'entrega').length;
   const late = jobs.filter((j) => j.promised_at && j.promised_at < today() && !['ready', 'delivered', 'cancelled'].includes(j.status));
   const nextUp = items.filter((it) => (it.kind === 'cita' || it.kind === 'app') && it.at > now).sort((a, b) => a.at - b.at)[0];
-  $('agSummary').innerHTML = `<div class="ag-today"><small>Hoy</small><b>${nCitas ? `${nCitas} ${nCitas === 1 ? 'cita' : 'citas'}` : 'Sin citas'}${nEnt ? ` · ${nEnt} ${nEnt === 1 ? 'entrega' : 'entregas'}` : ''}</b>
+  const asked = appointments.filter((a) => a.status === 'requested' && new Date(a.starts_at) > now).sort((a, b) => a.starts_at.localeCompare(b.starts_at));
+  $('agSummary').innerHTML = `${asked.length ? `<div class="ag-asked"><small>Pedidas por internet, sin confirmar</small>${asked.map((a) => `<button class="late-chip asked" data-appt="${a.id}">${dayName(new Date(a.starts_at)).slice(0, 3)} ${new Date(a.starts_at).getDate()} · ${hhmm(new Date(a.starts_at))} · ${esc(a.title)} · ${esc(a.customer_name || '')}</button>`).join('')}</div>` : ''}<div class="ag-today"><small>Hoy</small><b>${nCitas ? `${nCitas} ${nCitas === 1 ? 'cita' : 'citas'}` : 'Sin citas'}${nEnt ? ` · ${nEnt} ${nEnt === 1 ? 'entrega' : 'entregas'}` : ''}</b>
       ${nextUp ? `<span>Siguiente: ${sameDay(nextUp.at, now) ? 'hoy' : dayName(nextUp.at).toLowerCase() + ' ' + nextUp.at.getDate()} a las ${hhmm(nextUp.at)} · ${esc(nextUp.title)}</span>` : ''}</div>
     ${late.length ? `<div class="ag-late"><small>Entregas atrasadas</small>${late.map((j) => { const v = vehicleOf(j); return `<button class="late-chip" data-job="${j.id}">OR ${j.number} · ${esc(v ? summary(v).name : 'Coche')} · ${fmtDate(j.promised_at).slice(0, 5)}</button>`; }).join('')}</div>` : ''}`;
   for (const b of $('agSummary').querySelectorAll('[data-job]')) b.onclick = () => openJob(jobs.find((j) => j.id === b.dataset.job));
+  for (const b of $('agSummary').querySelectorAll('[data-appt]')) b.onclick = () => { const it = items.find((x) => x.appt?.id === b.dataset.appt); if (it) openAgendaItem(it); };
 }
 
 /** Botón de un elemento de la agenda (cita, propuesta, entrega). */
@@ -1335,20 +1393,34 @@ async function openAgendaItem(it) {
   const phone = a?.customer_phone || l?.customer_phone || j?.customer_phone;
   const who = a?.customer_name || l?.customer_name || j?.customer_name || '';
   const endAt = new Date(it.at.getTime() + (it.minutes || 60) * 60000);
-  const label = { cita: 'Cita del taller', app: 'Cita desde la app', propuesta: 'Propuesta, sin aceptar', entrega: 'Entrega prevista' }[it.kind];
+  const label = { cita: 'Cita del taller', app: 'Cita desde la app', propuesta: 'Propuesta, sin aceptar', entrega: 'Entrega prevista', pedida: 'Pedida por internet · sin confirmar' }[it.kind];
   const buttons = [];
+  if (it.kind === 'pedida') buttons.push(['confirm', 'Confirmar', 'btn small'], ['decline', 'Rechazar', 'btn ghost small']);
   if (j) buttons.push(['job', 'Ver orden', 'btn small']);
-  if (a && !j && a.vehicle_id && vehicles.some((v) => v.id === a.vehicle_id)) buttons.push(['open', 'Abrir orden', 'btn small']);
+  if (a && !j && it.kind !== 'pedida' && ((a.vehicle_id && vehicles.some((v) => v.id === a.vehicle_id)) || (a.ws_vehicle_id && wsVehicleRow(a.ws_vehicle_id)))) buttons.push(['open', 'Abrir orden', 'btn small']);
   if (l && isManager()) buttons.push(['lead', 'Ver solicitud', j ? 'btn ghost small' : 'btn small']);
   if (!it.allDay) buttons.push(['ics', 'Añadir a mi calendario', 'btn ghost small']);
   if (a) buttons.push(['edit', 'Editar', 'btn ghost small'], ['del', 'Borrar', 'btn ghost small']);
   const choice = await choose(`<small class="ag-kind ${it.kind}">${label}</small><h3>${esc(it.title)}</h3>
     <p class="ag-when">${svgIcon('agenda')} ${it.allDay ? fmtDate(j.promised_at) : `${DAYS[(it.at.getDay() + 6) % 7]} ${it.at.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })}, ${hhmm(it.at)}–${hhmm(endAt)}`}</p>
     ${it.sub ? `<p class="muted">${it.sub}</p>` : ''}
+    ${a?.plate ? `<p class="muted">Matrícula: <b>${esc(a.plate)}</b></p>` : ''}
     ${a?.notes ? `<p class="lead-msg">${esc(a.notes)}</p>` : ''}
     ${phone ? `<div class="lead-who"><div><b>${esc(who || 'Cliente')}</b><small>${esc(fmtPhone(phone))}</small></div><div class="icons">${contactButtons(phone, null, `Hola${who ? ' ' + who : ''}, te escribo de ${workshop?.name || 'el taller'} por tu cita del ${it.at.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })}.`, who || 'el cliente')}</div></div>` : ''}`,
     buttons);
   if (choice === 'job') openJob(j);
+  if (choice === 'confirm' || choice === 'decline') {
+    const status = choice === 'confirm' ? 'confirmed' : 'declined';
+    const { error } = await sb.from('workshop_appointments').update({ status, updated_at: new Date().toISOString() }).eq('id', a.id);
+    if (error) { alert('No se pudo guardar: ' + error.message); return; }
+    await loadAppointments();
+    const when = `el ${it.at.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })} a las ${hhmm(it.at)}`;
+    const text = status === 'confirmed'
+      ? `Hola${who ? ' ' + who : ''}, te confirmamos la cita en ${workshop.name} ${when} (${a.title}). ¡Te esperamos!`
+      : `Hola${who ? ' ' + who : ''}, somos ${workshop.name}. Lo sentimos, ${when} no podemos atenderte. ¿Te viene bien otro día?`;
+    if (phone) await notice(`<h3>${status === 'confirmed' ? 'Cita confirmada' : 'Petición rechazada'}</h3><p class="muted">Avísale por WhatsApp o llámale:</p>
+      <div class="lead-who"><div><b>${esc(who || 'Cliente')}</b><small>${esc(fmtPhone(phone))}</small></div><div class="icons">${contactButtons(phone, null, text, who || 'el cliente')}</div></div>`);
+  }
   if (choice === 'lead') {
     setTab('leads');
     const card = document.querySelector(`.lead[data-id="${l.id}"]`);
@@ -1362,7 +1434,7 @@ async function openAgendaItem(it) {
     await loadAppointments();
   }
   if (choice === 'open') {
-    const row = vehicles.find((v) => v.id === a.vehicle_id);
+    const row = a.ws_vehicle_id ? wsVehicleRow(a.ws_vehicle_id) : vehicles.find((v) => v.id === a.vehicle_id);
     const created = await newJobFor(row, { customer_request: [a.title, a.notes].filter(Boolean).join('. '), customer_name: a.customer_name, customer_phone: a.customer_phone, assigned_to: a.assigned_to });
     if (created) { await sb.from('workshop_appointments').update({ job_id: created.id, updated_at: new Date().toISOString() }).eq('id', a.id); loadAppointments(); }
   }
@@ -1378,7 +1450,8 @@ async function editAppointment(a = {}) {
   })();
   const local = new Date(start.getTime() - start.getTimezoneOffset() * 60000).toISOString();
   const durs = [[15, '15 min'], [30, '30 min'], [45, '45 min'], [60, '1 hora'], [90, '1 h 30 min'], [120, '2 horas'], [180, '3 horas'], [240, '4 horas'], [480, 'Todo el día']];
-  const carOpts = '<option value="">Sin coche en Garaje</option>' + vehicles.map((v) => { const s = summary(v); const o = ownerOf(v.id); return `<option value="${v.id}" ${v.id === a.vehicle_id ? 'selected' : ''}>${esc(s.name)}${s.plate ? ' · ' + esc(s.plate) : ''}${o ? ' · ' + esc(o.display_name) : ''}</option>`; }).join('');
+  const carOpts = '<option value="">Sin coche</option>' + vehicles.map((v) => { const s = summary(v); const o = ownerOf(v.id); return `<option value="${v.id}" ${v.id === a.vehicle_id ? 'selected' : ''}>${esc(s.name)}${s.plate ? ' · ' + esc(s.plate) : ''}${o ? ' · ' + esc(o.display_name) : ''}</option>`; }).join('')
+    + (wsVehicles.length ? `<optgroup label="Clientes del taller">${wsVehicles.map((v) => { const s = summary(pseudoVehicle(v)); const c = customerOfVehicle(v); return `<option value="${wsKey(v.id)}" ${v.id === a.ws_vehicle_id ? 'selected' : ''}>${esc(s.plate || 'Sin matrícula')} · ${esc(s.name)}${c ? ' · ' + esc(c.name) : ''}</option>`; }).join('')}</optgroup>` : '');
   const r = await dialog(`<h3>${a.id ? 'Editar cita' : 'Nueva cita'}</h3>
     <label>Qué</label><input name="title" required maxlength="200" value="${esc(a.title || '')}" placeholder="Revisión, ITV, cambio de ruedas…">
     <div class="row3"><div><label>Día</label><input name="day" type="date" required value="${local.slice(0, 10)}"></div>
@@ -1392,6 +1465,12 @@ async function editAppointment(a = {}) {
     a.id ? 'Guardar' : 'Crear cita', (fd) => fd, (form) => {
       // Al elegir un coche, se rellenan el cliente y el teléfono de su dueño.
       form.vehicle.onchange = () => {
+        if (form.vehicle.value.startsWith('ws:')) {
+          const c = customerOfVehicle(wsVehicles.find((v) => wsKey(v.id) === form.vehicle.value));
+          if (c && !form.name.value) form.name.value = c.name;
+          if (c?.phone && !form.phone.value) form.phone.value = c.phone;
+          return;
+        }
         const o = ownerOf(form.vehicle.value);
         if (o && !form.name.value) form.name.value = o.display_name || '';
         if (o?.phone && !form.phone.value) form.phone.value = o.phone;
@@ -1402,7 +1481,7 @@ async function editAppointment(a = {}) {
   if (isNaN(startsAt)) { alert('Revisa el día y la hora.'); return; }
   const row = {
     workshop_id: workshop.id, title: r.title.trim(), starts_at: startsAt.toISOString(), minutes: parseInt(r.minutes, 10) || 60,
-    vehicle_id: r.vehicle || null, customer_name: (r.name || '').trim() || null, customer_phone: (r.phone || '').trim() || null,
+    vehicle_id: r.vehicle && !r.vehicle.startsWith('ws:') ? r.vehicle : null, ws_vehicle_id: r.vehicle?.startsWith('ws:') ? r.vehicle.slice(3) : null, customer_name: (r.name || '').trim() || null, customer_phone: (r.phone || '').trim() || null,
     assigned_to: r.who || a.assigned_to || null, notes: (r.notes || '').trim() || null, updated_at: new Date().toISOString(),
   };
   const q = a.id ? sb.from('workshop_appointments').update(row).eq('id', a.id) : sb.from('workshop_appointments').insert(row);
@@ -1412,6 +1491,7 @@ async function editAppointment(a = {}) {
   await loadAppointments();
 }
 $('newApptBtn').onclick = () => editAppointment({});
+$('bookingLinkBtn').onclick = () => shareBookingLink();
 
 /** Archivo .ics para añadir la cita al calendario del móvil o del ordenador. */
 function downloadIcs(it, endAt, who, phone) {
@@ -1567,8 +1647,10 @@ function renderJobHead() {
   a.innerHTML = '';
   const btn = (label, fn, cls = 'btn small') => { const b = document.createElement('button'); b.className = cls; b.textContent = label; b.onclick = fn; a.appendChild(b); };
   const st = job.status;
+  const noApp = !!job.ws_vehicle_id;   // cliente sin Garaje: el presupuesto se aprueba en persona o por teléfono
   if (['received', 'diagnosis', 'rejected'].includes(st)) {
-    if (isManager()) btn('Enviar presupuesto al cliente', sendQuote);
+    if (isManager() && !noApp) btn('Enviar presupuesto al cliente', sendQuote);
+    if (isManager() && noApp) btn('Aprobado por teléfono', () => setStatus('approved', { decision: 'approved', decided_at: new Date().toISOString(), decision_note: 'Aprobado por teléfono' }), 'btn ghost small');
     if (st === 'received') btn('En diagnóstico', () => setStatus('diagnosis'), 'btn ghost small');
     if (isManager()) btn('Aprobado en persona', () => setStatus('approved', { decision: 'approved', decided_at: new Date().toISOString(), decision_note: 'Aprobado en el taller' }), 'btn ghost small');
   }
@@ -1579,7 +1661,10 @@ function renderJobHead() {
   if (st === 'ready') btn('Entregar y pasar al historial', deliver);
   if (['ready', 'delivered'].includes(st) && isManager()) {
     const inv = invoicing ? invoiceOfJob(job.id) : null;
-    if (inv) btn(`Factura ${inv.full_number}`, () => printInvoice(inv), 'btn ghost small');
+    if (inv) {
+      btn(`Factura ${inv.full_number}`, () => printInvoice(inv), 'btn ghost small');
+      if (pendingOf(inv) > 0) btn(`Cobrar ${fmtEur(pendingOf(inv))}`, () => payInvoice(inv), 'btn small');
+    }
     else if (invoicing) btn('Emitir factura', issueInvoice, st === 'delivered' ? 'btn small' : 'btn ghost small');
     else btn(job.invoice_ref ? `Facturada · ${job.invoice_ref}` : 'Pasar a facturar', openInvoicing, st === 'delivered' && !job.invoice_ref ? 'btn small' : 'btn ghost small');
   }
@@ -1729,6 +1814,7 @@ $('jSave').onclick = () => saveJob();
 
 async function setStatus(status, extra = {}) {
   if (!(await saveJob({ status, ...extra }))) return;
+  if (job.ws_vehicle_id) return;   // sin Garaje no hay a quién avisar
   await postMessage(`Estado: ${STATUS[status]}.${status === 'ready' ? ' Ya puedes pasar a recogerlo.' : ''}`, true);
 }
 async function sendQuote() {
@@ -1757,11 +1843,19 @@ async function deliver() {
       }
       const lines = [...byItem.values()].map((g) => ({ catalogId: g.catalogId, cost: Math.round(g.cost * 100) / 100, note: `OR ${job.number}: ${g.notes.join('; ')}`.slice(0, 500) }));
       if (lines.length === 0) lines.push({ catalogId: null, cost: null, note: `OR ${job.number}` });
-      await writeHistory(job.vehicle_id, new Date().toISOString(), job.km, lines);
+      if (job.ws_vehicle_id) {
+        // Coche sin Garaje: al historial del taller.
+        const t = totals(job);
+        await sb.from('workshop_history').insert({ workshop_id: workshop.id, ws_vehicle_id: job.ws_vehicle_id, at: today(), km: job.km,
+          description: (job.lines || []).map((l) => l.description).filter(Boolean).join('; ').slice(0, 2000) || job.customer_request || `OR ${job.number}`,
+          amount: Math.round(t.total * 100) / 100, doc_ref: job.invoice_ref || `OR ${job.number}`, source: 'job', job_id: job.id });
+        const v = wsVehicles.find((x) => x.id === job.ws_vehicle_id);
+        if (v && job.km != null && (v.km == null || job.km > v.km)) await sb.from('workshop_vehicles').update({ km: job.km, km_at: today() }).eq('id', v.id);
+      } else await writeHistory(job.vehicle_id, new Date().toISOString(), job.km, lines);
       if (isManager()) await learnParts(eng);
     }
     await setStatus('delivered', { delivered_at: new Date().toISOString(), history_written: true });
-    await loadVehicles();
+    await (job?.ws_vehicle_id ? loadCustomers() : loadVehicles());
   } catch (e) {
     $('jErr').textContent = 'No se pudo pasar al historial: ' + (e.message || e);
   }
@@ -1790,6 +1884,15 @@ async function learnParts(engineId) {
 // --- mensajes
 async function loadMessages() {
   if (!job) return;
+  // Cliente sin Garaje: no hay app a la que escribir.
+  show('jMsgForm', !job.ws_vehicle_id);
+  if (job.ws_vehicle_id) {
+    const c = customerOfVehicle(wsVehicles.find((v) => v.id === job.ws_vehicle_id));
+    const phone = job.customer_phone || c?.phone;
+    $('jChat').innerHTML = `<p class="muted" style="font-size:14px">Este cliente no usa Garaje: llámale o escríbele por WhatsApp. Si se instala Garaje y te comparte el coche, verá aquí cada paso.</p>
+      ${phone ? `<div class="icons">${contactButtons(phone, c?.email, `Hola${job.customer_name ? ' ' + job.customer_name.split(' ')[0] : ''}, te escribo de ${workshop.name} por tu coche (OR ${job.number}).`, job.customer_name || 'el cliente')}</div>` : ''}`;
+    return;
+  }
   const { data } = await sb.from('job_messages').select('*').eq('job_id', job.id).order('created_at');
   messages = data || [];
   const box = $('jChat');
@@ -1986,11 +2089,49 @@ function verifactuLine(inv) {
 }
 const invoiceOfJob = (id) => invoices.find((i) => i.job_id === id && ['F1', 'F2'].includes(i.kind) && !invoices.some((r) => r.rectifies_id === i.id));
 
+// --- cobros (supabase/030_payments.sql)
+const PAY_METHOD = { cash: 'Efectivo', card: 'Tarjeta', bizum: 'Bizum', transfer: 'Transferencia', other: 'Otro' };
+const paidOf = (inv) => payments.filter((p) => p.invoice_id === inv.id).reduce((a, p) => a + num(p.amount), 0);
+/** Lo que falta por cobrar (las rectificadas y las rectificativas no cuentan). */
+function pendingOf(inv) {
+  if (!['F1', 'F2'].includes(inv.kind) || invoices.some((r) => r.rectifies_id === inv.id)) return 0;
+  return Math.max(0, Math.round((num(inv.total) - paidOf(inv)) * 100) / 100);
+}
+async function payInvoice(inv) {
+  const list = payments.filter((p) => p.invoice_id === inv.id);
+  const pend = pendingOf(inv);
+  const r = await dialog(`<h3>Cobro de la factura ${esc(inv.full_number)}</h3>
+    <p class="muted" style="margin-top:0">Total ${fmtEur(num(inv.total))}${list.length ? ` · cobrado ${fmtEur(paidOf(inv))}` : ''} · <b>${pend > 0 ? 'pendiente ' + fmtEur(pend) : 'cobrada entera'}</b></p>
+    ${list.length ? `<ul class="pay-list">${list.map((p) => `<li><span>${fmtDate(p.paid_at)} · ${PAY_METHOD[p.method] || p.method}${p.note ? ' · ' + esc(p.note) : ''}</span><b>${fmtEur(num(p.amount))}</b><a href="#" data-del="${p.id}" title="Quitar este cobro">×</a></li>`).join('')}</ul>` : ''}
+    ${pend > 0 ? `<div class="row2"><div><label>Importe</label><input name="amount" inputmode="decimal" value="${dec2(pend)}"></div>
+      <div><label>Fecha</label><input name="date" type="date" value="${today()}"></div></div>
+      <label>Forma de pago</label><div class="pay-methods">${Object.entries(PAY_METHOD).map(([k, t], i) => `<label class="chk"><input type="radio" name="method" value="${k}" ${i === 0 ? 'checked' : ''}> ${t}</label>`).join('')}</div>
+      <label>Nota (opcional)</label><input name="note" maxlength="300" placeholder="Nº de operación, quién pagó…">` : ''}`,
+  pend > 0 ? 'Apuntar cobro' : 'Vale', (fd) => fd, (form) => {
+    for (const a of form.querySelectorAll('[data-del]')) a.onclick = async (e) => {
+      e.preventDefault();
+      if (!window.confirm('¿Quitar este cobro? (por ejemplo, si lo apuntaste mal)')) return;
+      await sb.from('invoice_payments').delete().eq('id', a.dataset.del);
+      $('dlg').close();
+      await loadInvoices();
+      payInvoice(inv);
+    };
+  });
+  if (!r || pend <= 0) return;
+  const amount = money(r.amount);
+  if (!amount) { await notice('<h3>Falta el importe</h3>'); return; }
+  const { error } = await sb.from('invoice_payments').insert({ workshop_id: workshop.id, invoice_id: inv.id, amount, method: r.method || 'cash', paid_at: r.date || today(), note: (r.note || '').trim() || null });
+  if (error) { await notice(`<h3>No se pudo apuntar el cobro</h3><p>${esc(error.message)}</p>`); return; }
+  await loadInvoices();
+}
+
 async function loadInvoices() {
   if (!invoicing) { invoices = []; return; }
   const { data, error } = await sb.from('workshop_invoices').select('*').eq('workshop_id', workshop.id).order('issued_at', { ascending: false }).limit(2000);
   if (error) { console.warn(error); return; }
   invoices = data || [];
+  const { data: pays } = await sb.from('invoice_payments').select('*').eq('workshop_id', workshop.id).order('paid_at');
+  payments = pays || [];
   if (tab === 'invoices' && !job) renderInvoices();
   if (job) renderJobHead();
 }
@@ -2042,7 +2183,9 @@ async function issueInvoice() {
     $('jTaxId').value = j.customer_tax_id ?? ''; $('jAddress').value = j.customer_address ?? '';
     renderJobHead();
   }
-  if (await choose(`<h3>Factura ${esc(data.full_number)} emitida</h3><p class="muted">${fmtEur(num(data.total))} con IVA. La tienes en la pestaña Facturas.</p>${verifactuLine(data) ? `<p class="${data.status === 'error' ? 'err' : 'muted'}">${verifactuLine(data)}</p>` : ''}`, [['print', 'Imprimir o guardar en PDF', 'btn small']]) === 'print') printInvoice(data);
+  const after = await choose(`<h3>Factura ${esc(data.full_number)} emitida</h3><p class="muted">${fmtEur(num(data.total))} con IVA. La tienes en la pestaña Facturas.</p>${verifactuLine(data) ? `<p class="${data.status === 'error' ? 'err' : 'muted'}">${verifactuLine(data)}</p>` : ''}`, [['print', 'Imprimir o guardar en PDF', 'btn small'], ['pay', 'Cobrar ahora', 'btn ghost small']]);
+  if (after === 'print') printInvoice(data);
+  if (after === 'pay') payInvoice(data);
 }
 
 async function rectifyInvoice(inv) {
@@ -2097,12 +2240,15 @@ function renderInvoices() {
   ms.innerHTML = '<option value="">Todos los meses</option>' + months.map((m) => `<option value="${m}">${new Date(m + '-01T12:00').toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}</option>`).join('');
   ms.value = months.includes(keep) ? keep : (keep === '' ? '' : months[0] || '');
   const q = normTxt($('invSearch').value);
+  const pf = $('invPay').value;
   const list = invoices.filter((i) => (!ms.value || i.issued_at.startsWith(ms.value))
+    && (!pf || (pf === 'pending' ? pendingOf(i) > 0 : ['F1', 'F2'].includes(i.kind) && pendingOf(i) === 0))
     && (!q || [i.full_number, i.customer?.name, i.customer?.tax_id, i.customer?.vehicle].some((x) => normTxt(x).includes(q))));
+  const pendTotal = list.reduce((a, i) => a + pendingOf(i), 0);
   const sum = (k) => list.reduce((a, i) => a + num(i[k]), 0);
-  $('invTotals').innerHTML = `<div><b>${list.length}</b><span>${list.length === 1 ? 'factura' : 'facturas'}</span></div><div><b>${fmtEur(sum('base'))}</b><span>base imponible</span></div><div><b>${fmtEur(sum('vat'))}</b><span>IVA repercutido</span></div><div><b>${fmtEur(sum('total'))}</b><span>total facturado</span></div>`;
+  $('invTotals').innerHTML = `<div><b>${list.length}</b><span>${list.length === 1 ? 'factura' : 'facturas'}</span></div><div><b>${fmtEur(sum('total'))}</b><span>total facturado</span></div><div><b>${fmtEur(sum('vat'))}</b><span>IVA repercutido</span></div><div class="${pendTotal > 0 ? 'warn' : ''}"><b>${fmtEur(pendTotal)}</b><span>pendiente de cobro</span></div>`;
   if (!invoices.length) { box.innerHTML = emptyState('invoices', 'Aún no hay facturas', 'Se emiten desde una orden lista para recoger o entregada, con "Emitir factura".'); return; }
-  box.innerHTML = `<table class="inv-table"><thead><tr><th>Número</th><th>Fecha</th><th>Cliente</th><th class="num">Base</th><th class="num">IVA</th><th class="num">Total</th><th>Estado</th><th></th></tr></thead><tbody></tbody></table>`;
+  box.innerHTML = `<table class="inv-table"><thead><tr><th>Número</th><th>Fecha</th><th>Cliente</th><th class="num">Base</th><th class="num">IVA</th><th class="num">Total</th><th>Cobro</th><th>Estado</th><th></th></tr></thead><tbody></tbody></table>`;
   const tb = box.querySelector('tbody');
   for (const i of list) {
     const rect = invoices.find((r) => r.rectifies_id === i.id);
@@ -2112,10 +2258,12 @@ function renderInvoices() {
       <td data-label="Fecha">${fmtDate(i.issued_at)}</td>
       <td data-label="Cliente">${esc(i.customer?.name || '—')}${i.customer?.vehicle ? `<small>${esc(i.customer.vehicle)}</small>` : ''}</td>
       <td class="num" data-label="Base">${fmtEur(num(i.base))}</td><td class="num" data-label="IVA">${fmtEur(num(i.vat))}</td><td class="num" data-label="Total"><b>${fmtEur(num(i.total))}</b></td>
+      <td data-label="Cobro">${['F1', 'F2'].includes(i.kind) && !rect ? (pendingOf(i) > 0 ? `<a href="#" class="pay-link" data-pay>Pendiente ${fmtEur(pendingOf(i))}</a>` : `<a href="#" class="pay-ok" data-pay>Cobrada</a>`) : '<span class="muted">—</span>'}</td>
       <td data-label="Estado"><span class="inv-st ${cls}" ${i.error ? `title="${esc(i.error)}"` : ''}>${st}</span>${['pending', 'error'].includes(i.status) ? '<small><a href="#" data-retry>Reintentar</a></small>' : ''}</td>
       <td class="edit"><a href="#" data-print>Ver</a>${['F1', 'F2'].includes(i.kind) && !rect ? ' · <a href="#" data-rect>Rectificar</a>' : ''}</td>`;
     tr.querySelector('[data-print]').onclick = (e) => { e.preventDefault(); printInvoice(i); };
     tr.querySelector('[data-rect]')?.addEventListener('click', (e) => { e.preventDefault(); rectifyInvoice(i); });
+    tr.querySelector('[data-pay]')?.addEventListener('click', (e) => { e.preventDefault(); payInvoice(i); });
     tr.querySelector('[data-retry]')?.addEventListener('click', async (e) => {
       e.preventDefault(); e.target.textContent = 'Enviando…';
       const fresh = await sendVerifactu(i);
@@ -2123,9 +2271,10 @@ function renderInvoices() {
     });
     tb.appendChild(tr);
   }
-  if (!list.length) tb.innerHTML = '<tr><td colspan="8" class="muted">Ninguna con este filtro.</td></tr>';
+  if (!list.length) tb.innerHTML = '<tr><td colspan="9" class="muted">Ninguna con este filtro.</td></tr>';
 }
 $('invMonth').onchange = () => renderInvoices();
+$('invPay').onchange = () => renderInvoices();
 $('invSearch').oninput = () => renderInvoices();
 /** Libro de facturas emitidas, para el gestor. */
 $('invExport').onclick = () => {
@@ -2133,9 +2282,11 @@ $('invExport').onclick = () => {
   const list = invoices.filter((i) => !m || i.issued_at.startsWith(m)).slice().reverse();
   if (!list.length) return;
   downloadCsv(`facturas-${slug(workshop.name)}-${m || 'todas'}.csv`,
-    ['Fecha de expedición', 'Número', 'Tipo', 'Cliente', 'NIF/CIF', 'Dirección', 'Base imponible', 'Tipo de IVA %', 'Cuota de IVA', 'Total', 'Rectifica a', 'Motivo', 'Estado'],
+    ['Fecha de expedición', 'Número', 'Tipo', 'Cliente', 'NIF/CIF', 'Dirección', 'Base imponible', 'Tipo de IVA %', 'Cuota de IVA', 'Total', 'Cobrado', 'Pendiente', 'Forma de pago', 'Rectifica a', 'Motivo', 'Estado'],
     list.map((i) => [fmtDate(i.issued_at), i.full_number, INV_KIND[i.kind], i.customer?.name || '', i.customer?.tax_id || '', i.customer?.address || '',
-      num(i.base), num(i.vat_rate), num(i.vat), num(i.total), invoices.find((o) => o.id === i.rectifies_id)?.full_number || '', i.rectify_reason || '', INV_STATUS[i.status]?.[0] || i.status]));
+      num(i.base), num(i.vat_rate), num(i.vat), num(i.total), paidOf(i), pendingOf(i),
+      [...new Set(payments.filter((p) => p.invoice_id === i.id).map((p) => PAY_METHOD[p.method]))].join(', '),
+      invoices.find((o) => o.id === i.rectifies_id)?.full_number || '', i.rectify_reason || '', INV_STATUS[i.status]?.[0] || i.status]));
 };
 $('invSeriesBtn').onclick = async (e) => {
   e.preventDefault();
@@ -2517,6 +2668,375 @@ $('starterPartsBtn').onclick = addStarterParts;
 $('marginBtn').onclick = applyMargin;
 $('exportPartsBtn').onclick = exportParts;
 for (const b of document.querySelectorAll('#noParts [data-go]')) b.onclick = () => (b.dataset.go === 'import' ? importParts() : addStarterParts());
+
+// ------------------------------------------------------------------ clientes del taller
+// Clientes y coches propios del taller, también los que no usan Garaje
+// (supabase/032_workshop_customers.sql). Se traen del Excel del programa de
+// gestión anterior y se les abren órdenes como a cualquier coche.
+const wsKey = (id) => 'ws:' + id;
+const normPlate = (p) => String(p || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+const digitsOf = (p) => String(p || '').replace(/\D/g, '');
+/** Un coche del taller con la misma forma que un coche de Garaje (para summary, órdenes e impresos). */
+function pseudoVehicle(v) {
+  const prof = { make: v.make, model: v.model, year: v.year, plate: normPlate(v.plate), fuel: v.fuel, engine_id: v.engine_id, vin: v.vin, variant: v.version };
+  const name = ([v.make, v.model].filter(Boolean).join(' ') + (v.year ? ` (${v.year})` : '')).trim() || (v.plate ? 'Coche ' + v.plate : 'Coche');
+  return { id: wsKey(v.id), ws: v, name, data: { asset: { name, profile_json: JSON.stringify(prof) },
+    readings: v.km != null ? [{ id: 'km', value: v.km, at: v.km_at || v.updated_at }] : [], events: [], deleted: [] } };
+}
+function wsVehicleRow(id) { const v = wsVehicles.find((x) => x.id === id); return v ? pseudoVehicle(v) : null; }
+const customerOfVehicle = (v) => wsCustomers.find((c) => c.id === v?.customer_id) || null;
+
+async function loadCustomers() {
+  if (!workshop) return;
+  const page = async (table) => {
+    const all = [];
+    for (let from = 0; from < 50000; from += 1000) {
+      const { data, error } = await sb.from(table).select('*').eq('workshop_id', workshop.id).order('created_at').range(from, from + 999);
+      if (error || !data) break;
+      all.push(...data);
+      if (data.length < 1000) break;
+    }
+    return all;
+  };
+  [wsCustomers, wsVehicles] = await Promise.all([page('workshop_customers'), page('workshop_vehicles')]);
+  if (tab === 'customers') renderCustomers();
+}
+
+function renderCustomers() {
+  const q = normTxt($('custSearch').value), qd = digitsOf($('custSearch').value), qp = normPlate($('custSearch').value);
+  const carsOf = (c) => wsVehicles.filter((v) => v.customer_id === c.id);
+  const match = (c) => !q || normTxt(c.name).includes(q) || (qd.length >= 3 && digitsOf(c.phone).includes(qd)) || normTxt(c.tax_id).includes(q)
+    || carsOf(c).some((v) => (qp.length >= 3 && normPlate(v.plate).includes(qp)) || normTxt(`${v.make} ${v.model}`).includes(q));
+  const list = wsCustomers.filter(match).sort((a, b) => a.name.localeCompare(b.name, 'es'));
+  const orphans = wsVehicles.filter((v) => !v.customer_id && (!q || normPlate(v.plate).includes(qp) || normTxt(`${v.make} ${v.model}`).includes(q)));
+  $('custCount').textContent = wsCustomers.length || wsVehicles.length
+    ? `${wsCustomers.length} ${wsCustomers.length === 1 ? 'cliente' : 'clientes'} · ${wsVehicles.length} ${wsVehicles.length === 1 ? 'coche' : 'coches'}${q ? ` · ${list.length} con esta búsqueda` : ''}` : '';
+  const box = $('custList');
+  if (!wsCustomers.length && !wsVehicles.length) {
+    box.innerHTML = emptyState('customers', 'Aún no hay clientes', 'Tráelos de tu programa de gestión con "Importar de mi programa" (un Excel de clientes y coches, y otro con el historial), o crea uno con "+ Cliente".');
+    return;
+  }
+  box.innerHTML = '';
+  const carChip = (v) => `<button class="car-chip" data-car="${v.id}"><b>${esc(v.plate || '—')}</b> ${esc([v.make, v.model].filter(Boolean).join(' '))}</button>`;
+  for (const c of list.slice(0, 300)) {
+    const el = document.createElement('div');
+    el.className = 'card cust-card';
+    el.innerHTML = `<div class="cust-top"><div><b>${esc(c.name)}</b><small>${esc([c.phone ? fmtPhone(c.phone) : '', c.tax_id, c.email].filter(Boolean).join(' · '))}</small></div>
+        <div class="icons">${contactButtons(c.phone, c.email, `Hola ${c.name.split(' ')[0]}, te escribo de ${workshop.name}.`, c.name)}</div></div>
+      <div class="cust-cars">${carsOf(c).map(carChip).join('')}<button class="car-chip add" data-addcar>+ Coche</button></div>`;
+    el.querySelector('.cust-top > div').onclick = () => editCustomer(c);
+    for (const b of el.querySelectorAll('[data-car]')) b.onclick = () => openWsVehicle(wsVehicles.find((v) => v.id === b.dataset.car));
+    el.querySelector('[data-addcar]').onclick = () => editWsVehicle({ customer_id: c.id });
+    box.appendChild(el);
+  }
+  if (orphans.length) {
+    const el = document.createElement('div');
+    el.className = 'card cust-card';
+    el.innerHTML = `<div class="cust-top"><div><b>Coches sin cliente</b><small>Asígnales su dueño al abrirlos.</small></div></div><div class="cust-cars">${orphans.slice(0, 200).map(carChip).join('')}</div>`;
+    for (const b of el.querySelectorAll('[data-car]')) b.onclick = () => openWsVehicle(wsVehicles.find((v) => v.id === b.dataset.car));
+    box.appendChild(el);
+  }
+  if (list.length > 300) box.insertAdjacentHTML('beforeend', `<p class="muted">Y ${list.length - 300} más: busca por nombre, teléfono o matrícula.</p>`);
+}
+$('custSearch').addEventListener('input', () => renderCustomers());
+$('newCustomerBtn').onclick = () => editCustomer({});
+$('importCustomersBtn').onclick = () => importFromDms();
+
+async function editCustomer(c) {
+  const cars = wsVehicles.filter((v) => v.customer_id === c.id);
+  const r = await dialog(`<h3>${c.id ? esc(c.name) : 'Nuevo cliente'}</h3>
+    <label>Nombre o razón social *</label><input name="name" required maxlength="200" value="${esc(c.name || '')}">
+    <div class="row2"><div><label>Teléfono</label><input name="phone" type="tel" value="${esc(c.phone || '')}"></div><div><label>Correo</label><input name="email" type="email" value="${esc(c.email || '')}"></div></div>
+    <div class="row2"><div><label>NIF / DNI / CIF</label><input name="tax_id" maxlength="20" value="${esc(c.tax_id || '')}"></div><div><label>Dirección</label><input name="address" maxlength="300" value="${esc(c.address || '')}"></div></div>
+    <label>Notas</label><textarea name="notes" rows="2" maxlength="1000">${esc(c.notes || '')}</textarea>
+    ${c.id && cars.length ? `<p class="muted" style="margin:10px 0 0">Coches: ${cars.map((v) => esc(v.plate || v.model || 'coche')).join(', ')}</p>` : ''}
+    ${c.id ? '<p style="margin-top:14px"><a href="#" id="delCust" style="color:#E5484D">Borrar este cliente</a></p>' : ''}`,
+  'Guardar', (fd) => fd, (form) => {
+    const d = form.querySelector('#delCust');
+    if (d) d.onclick = async (e) => {
+      e.preventDefault();
+      if (!window.confirm(`¿Borrar a ${c.name}? Sus coches se quedan, sin dueño.`)) return;
+      $('dlg').close();
+      await sb.from('workshop_customers').delete().eq('id', c.id);
+      await loadCustomers();
+    };
+  });
+  if (!r) return null;
+  const row = { workshop_id: workshop.id, name: r.name.trim(), phone: r.phone.trim() || null, email: r.email.trim() || null,
+    tax_id: r.tax_id.trim().toUpperCase() || null, address: r.address.trim() || null, notes: r.notes.trim() || null, updated_at: new Date().toISOString() };
+  const { data, error } = c.id ? await sb.from('workshop_customers').update(row).eq('id', c.id).select('*').single()
+    : await sb.from('workshop_customers').insert(row).select('*').single();
+  if (error) { await notice(`<h3>No se pudo guardar</h3><p>${esc(error.message)}</p>`); return null; }
+  await loadCustomers();
+  return data;
+}
+
+const FUELS = [['', '—'], ['diesel', 'Diésel'], ['gasoline', 'Gasolina'], ['hybrid', 'Híbrido'], ['electric', 'Eléctrico'], ['lpg', 'GLP'], ['other', 'Otro']];
+async function editWsVehicle(v) {
+  const custOpts = '<option value="">Sin cliente</option>' + wsCustomers.slice().sort((a, b) => a.name.localeCompare(b.name, 'es'))
+    .map((c) => `<option value="${c.id}" ${c.id === v.customer_id ? 'selected' : ''}>${esc(c.name)}${c.phone ? ' · ' + esc(c.phone) : ''}</option>`).join('');
+  const r = await dialog(`<h3>${v.id ? 'Editar coche' : 'Nuevo coche'}</h3>
+    <div class="row2"><div><label>Matrícula</label><input name="plate" maxlength="12" value="${esc(v.plate || '')}" placeholder="1234 ABC" autocapitalize="characters"></div>
+      <div><label>Cliente</label><select name="customer">${custOpts}</select></div></div>
+    <div class="row3"><div><label>Marca</label><input name="make" list="brands" value="${esc(v.make || '')}"></div><div><label>Modelo</label><input name="model" value="${esc(v.model || '')}"></div><div><label>Año</label><input name="year" inputmode="numeric" value="${esc(v.year || '')}"></div></div>
+    <div class="row3"><div><label>Versión / motor</label><input name="version" value="${esc(v.version || '')}" placeholder="1.6 TDI 115 CV"></div>
+      <div><label>Combustible</label><select name="fuel">${FUELS.map(([k, t]) => `<option value="${k}" ${k === (v.fuel || '') ? 'selected' : ''}>${t}</option>`).join('')}</select></div>
+      <div><label>Km</label><input name="km" inputmode="numeric" value="${esc(v.km ?? '')}"></div></div>
+    <label>Bastidor (VIN)</label><input name="vin" maxlength="20" value="${esc(v.vin || '')}">
+    <label>Notas</label><textarea name="notes" rows="2" maxlength="1000">${esc(v.notes || '')}</textarea>`,
+  'Guardar', (fd) => fd);
+  if (!r) return null;
+  const km = parseInt(digitsOf(r.km), 10), year = parseInt(digitsOf(r.year), 10);
+  const row = { workshop_id: workshop.id, customer_id: r.customer || null, plate: normPlate(r.plate) || null, make: r.make.trim() || null, model: r.model.trim() || null,
+    version: r.version.trim() || null, year: year >= 1900 && year <= 2100 ? year : null, fuel: r.fuel || null, vin: r.vin.trim().toUpperCase() || null,
+    km: Number.isFinite(km) ? km : null, km_at: Number.isFinite(km) && km !== v.km ? today() : (v.km_at || null), notes: r.notes.trim() || null, updated_at: new Date().toISOString() };
+  const { data, error } = v.id ? await sb.from('workshop_vehicles').update(row).eq('id', v.id).select('*').single()
+    : await sb.from('workshop_vehicles').insert(row).select('*').single();
+  if (error) { await notice(`<h3>No se pudo guardar</h3><p>${esc(/workshop_vehicles_plate/.test(error.message) ? 'Ya tienes un coche con esa matrícula.' : error.message)}</p>`); return null; }
+  await loadCustomers();
+  return data;
+}
+
+async function openWsVehicle(v) {
+  if (!v) return;
+  const c = customerOfVehicle(v);
+  const { data: hist } = await sb.from('workshop_history').select('*').eq('ws_vehicle_id', v.id).order('at', { ascending: false }).limit(200);
+  const vjobs = jobs.filter((j) => j.ws_vehicle_id === v.id);
+  const open = vjobs.find((j) => !['delivered', 'cancelled'].includes(j.status));
+  const s = summary(pseudoVehicle(v));
+  const choice = await choose(`<h3>${esc(s.name)}</h3>
+    <p class="muted" style="margin-top:0"><span class="plate">${esc(s.plate || 'Sin matrícula')}</span> ${esc([v.version, v.vin ? 'VIN ' + v.vin : '', v.km != null ? fmtKm(v.km) : ''].filter(Boolean).join(' · '))}</p>
+    ${c ? `<div class="lead-who"><div><b>${esc(c.name)}</b><small>${esc([c.phone, c.tax_id].filter(Boolean).join(' · '))}</small></div><div class="icons">${contactButtons(c.phone, c.email, `Hola ${c.name.split(' ')[0]}, te escribo de ${workshop.name} por tu ${s.name}.`, c.name)}</div></div>` : '<p class="muted">Sin cliente asignado.</p>'}
+    ${v.notes ? `<p class="lead-msg">${esc(v.notes)}</p>` : ''}
+    <h4 style="margin:14px 0 6px">Historial</h4>
+    ${vjobs.length || (hist || []).length ? `<ul class="hist-list">${vjobs.map((j) => `<li><span>${fmtDate(j.delivered_at || j.created_at)} · <b>OR ${j.number}</b> · ${esc(STATUS[j.status])}</span><small>${esc(j.customer_request || '')}</small></li>`).join('')}
+      ${(hist || []).filter((h) => h.source !== 'job').map((h) => `<li><span>${fmtDate(h.at)}${h.km != null ? ' · ' + fmtKm(h.km) : ''}${h.doc_ref ? ' · ' + esc(h.doc_ref) : ''}${isManager() && h.amount != null ? ` · <b>${fmtEur(num(h.amount))}</b>` : ''}</span><small>${esc(h.description)}</small></li>`).join('')}</ul>`
+      : '<p class="muted">Sin trabajos todavía.</p>'}`,
+  [[open ? 'job' : 'new', open ? `Ver OR ${open.number}` : 'Abrir orden', 'btn small'], ['edit', 'Editar', 'btn ghost small'], ...(vjobs.length ? [] : [['del', 'Borrar', 'btn ghost small']])]);
+  if (choice === 'job') openJob(open);
+  if (choice === 'new') newJobFor(pseudoVehicle(v), { assigned_to: myRole === 'mechanic' ? session.user.id : null });
+  if (choice === 'edit') { const saved = await editWsVehicle(v); if (saved) openWsVehicle(saved); }
+  if (choice === 'del' && window.confirm('¿Borrar este coche y su historial importado?')) {
+    const { error } = await sb.from('workshop_vehicles').delete().eq('id', v.id);
+    if (error) await notice(`<h3>No se pudo borrar</h3><p>${esc(error.message)}</p>`);
+    await loadCustomers();
+  }
+}
+
+/** Cliente y coche nuevos de una vez (desde "Nueva orden"). */
+async function quickCustomerCar() {
+  const r = await dialog(`<h3>Cliente y coche nuevos</h3>
+    <p class="muted" style="margin-top:0">Para clientes que no usan Garaje. Quedan en la pestaña Clientes.</p>
+    <div class="row2"><div><label>Nombre *</label><input name="name" required maxlength="200"></div><div><label>Teléfono</label><input name="phone" type="tel"></div></div>
+    <div class="row3"><div><label>Matrícula *</label><input name="plate" required maxlength="12" placeholder="1234 ABC" autocapitalize="characters"></div><div><label>Marca</label><input name="make" list="brands"></div><div><label>Modelo</label><input name="model"></div></div>`,
+  'Crear', (fd) => fd);
+  if (!r || !r.name.trim() || !normPlate(r.plate)) return null;
+  const existing = wsVehicles.find((v) => normPlate(v.plate) === normPlate(r.plate));
+  if (existing) return existing;
+  const { data: c, error: e1 } = await sb.from('workshop_customers').insert({ workshop_id: workshop.id, name: r.name.trim(), phone: r.phone.trim() || null }).select('*').single();
+  if (e1) { await notice(`<h3>No se pudo crear</h3><p>${esc(e1.message)}</p>`); return null; }
+  const { data: v, error: e2 } = await sb.from('workshop_vehicles').insert({ workshop_id: workshop.id, customer_id: c.id, plate: normPlate(r.plate), make: r.make.trim() || null, model: r.model.trim() || null }).select('*').single();
+  if (e2) { await notice(`<h3>No se pudo crear el coche</h3><p>${esc(e2.message)}</p>`); return null; }
+  await loadCustomers();
+  return v;
+}
+
+// --- importar del programa de gestión anterior
+const CFIELDS = [['', 'No importar'], ['name', 'Nombre del cliente'], ['phone', 'Teléfono'], ['phone2', 'Otro teléfono / móvil'], ['email', 'Correo'], ['tax_id', 'NIF / CIF'],
+  ['address', 'Dirección'], ['city', 'Población'], ['postal', 'Código postal'], ['customer_ref', 'Código de cliente'], ['plate', 'Matrícula'], ['make', 'Marca'],
+  ['model', 'Modelo'], ['version', 'Versión / motor'], ['year', 'Año'], ['first_reg', 'Fecha de matriculación'], ['vin', 'Bastidor'], ['km', 'Kilómetros'], ['notes', 'Observaciones']];
+const HFIELDS = [['', 'No importar'], ['plate', 'Matrícula'], ['date', 'Fecha'], ['km', 'Kilómetros'], ['description', 'Trabajo / concepto'], ['amount', 'Importe'], ['doc_ref', 'Nº de factura u orden']];
+const CWORDS = {
+  name: /^(cliente|nombre|razon social|nombre cliente|nombre y apellidos|titular|propietario)$|nombre|razon/, phone: /^tel|telefono|phone/, phone2: /movil|celular|telefono ?2/, email: /mail|correo/,
+  tax_id: /nif|cif|dni|n\.?i\.?f/, address: /direccion|domicilio|calle/, city: /poblacion|localidad|ciudad|municipio/, postal: /postal|^c\.? ?p\.?$|^cp$/,
+  customer_ref: /cod.*cliente|n[ºo°]? ?cliente|^id cliente|^codigo$/, plate: /matricula|placa|^mat\.?$/, make: /marca/, model: /modelo/, version: /version|motor|motorizacion/,
+  year: /^ano$|^año$|ano fab|ejercicio/, first_reg: /matriculacion|f\.? ?matric|fecha matr/, vin: /bastidor|vin|chasis/, km: /^km|kilometr/, notes: /observ|notas|comentario/,
+};
+const HWORDS = { plate: /matricula|placa/, date: /fecha/, km: /^km|kilometr/, description: /concepto|descrip|trabajo|reparacion|detalle|operacion/, amount: /importe|total|precio|base/, doc_ref: /factura|n[ºo°]? ?(orden|doc)|^or$|documento|albaran/ };
+function guessMap(rows, fields, words) {
+  const first = rows[0] || [];
+  const ncol = Math.max(...rows.slice(0, 50).map((r) => r.length));
+  const map = new Array(ncol).fill('');
+  const isHeader = first.some((x) => typeof x === 'string' && Object.values(words).some((re) => re.test(normTxt(x))));
+  if (isHeader) first.forEach((h, i) => { const t = normTxt(h); for (const [k] of fields) if (k && !map.includes(k) && words[k]?.test(t)) { map[i] = k; break; } });
+  return { map, header: isHeader };
+}
+/** Fecha de Excel (número de serie), dd/mm/aaaa, dd-mm-aa o aaaa-mm-dd → aaaa-mm-dd. */
+function parseDay(v) {
+  if (v == null || v === '') return null;
+  if (typeof v === 'number' && v > 20000 && v < 80000) return new Date(Date.UTC(1899, 11, 30) + v * 86400000).toISOString().slice(0, 10);
+  const t = String(v).trim();
+  let m = t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (m) return `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}`;
+  m = t.match(/^(\d{1,2})[/.-](\d{1,2})[/.-](\d{2,4})/);
+  if (m) { const y = m[3].length === 2 ? (Number(m[3]) > 50 ? '19' : '20') + m[3] : m[3]; return `${y}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`; }
+  return null;
+}
+
+async function importFromDms() {
+  let kind = 'customers', rows = null, g = null;
+  const ok = await dialog(`<h3>Importar de mi programa</h3>
+    <p class="muted" style="margin-top:0">Saca de tu programa de gestión un Excel (o CSV) y súbelo aquí. Primero los clientes con sus coches; después, si quieres, el historial de trabajos.</p>
+    <div class="imp-kind">
+      <label class="chk"><input type="radio" name="kind" value="customers" checked><span><b>Clientes y coches</b><small>Una fila por coche (o por cliente): nombre, teléfono, NIF, matrícula, marca, modelo…</small></span></label>
+      <label class="chk"><input type="radio" name="kind" value="history"><span><b>Historial de trabajos</b><small>Una fila por trabajo o factura: matrícula, fecha, km, concepto e importe.</small></span></label>
+    </div>
+    <label class="imp-file"><input type="file" id="dmsFile" accept=".xlsx,.xls,.ods,.csv,.txt,.dbf"><span>Subir archivo<small>Excel, CSV o DBF</small></span></label>
+    <div id="dmsPreview"></div><div class="err" id="dmsErr"></div>`, 'Importar', () => true, (form) => {
+    const okBtn = form.querySelector('button[value=ok]');
+    okBtn.disabled = true;
+    const fields = () => (kind === 'customers' ? CFIELDS : HFIELDS);
+    const render = () => {
+      const box = form.querySelector('#dmsPreview');
+      if (!rows?.length) { box.innerHTML = ''; okBtn.disabled = true; return; }
+      const body = rows.slice(g.header ? 1 : 0);
+      const sel = (i) => `<select data-col="${i}">${fields().map(([v, t]) => `<option value="${v}" ${g.map[i] === v ? 'selected' : ''}>${t}</option>`).join('')}</select>`;
+      box.innerHTML = `<p class="imp-sum"><b>${body.length.toLocaleString('es-ES')}</b> filas. Revisa qué es cada columna:</p>
+        <div class="imp-table"><table><thead><tr>${g.map.map((_, i) => `<th>${sel(i)}${g.header ? `<small>${esc(rows[0][i] ?? '')}</small>` : ''}</th>`).join('')}</tr></thead>
+        <tbody>${body.slice(0, 5).map((r) => `<tr>${g.map.map((_, i) => `<td>${esc(r[i] ?? '')}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+        <label class="chk"><input type="checkbox" id="dmsHeader" ${g.header ? 'checked' : ''}> La primera fila son títulos</label>
+        ${kind === 'history' ? '<label class="chk"><input type="checkbox" id="dmsCreateCars" checked> Si una matrícula no está en Clientes, crear el coche</label>' : ''}`;
+      for (const s of box.querySelectorAll('select[data-col]')) s.onchange = () => { g.map[s.dataset.col] = s.value; validate(); };
+      box.querySelector('#dmsHeader').onchange = (e) => { g.header = e.target.checked; render(); };
+      validate();
+    };
+    const validate = () => {
+      const need = kind === 'customers' ? (g.map.includes('name') || g.map.includes('plate')) : (g.map.includes('plate') && g.map.includes('date') && g.map.includes('description'));
+      okBtn.disabled = !need;
+      form.querySelector('#dmsErr').textContent = need ? '' : kind === 'customers' ? 'Indica al menos la columna del nombre o la de la matrícula.' : 'Indica la matrícula, la fecha y el concepto.';
+    };
+    const guess = () => { if (rows) { g = guessMap(rows, fields(), kind === 'customers' ? CWORDS : HWORDS); render(); } };
+    for (const rd of form.querySelectorAll('input[name=kind]')) rd.onchange = () => { kind = rd.value; guess(); };
+    form.querySelector('#dmsFile').onchange = async (e) => {
+      const f = e.target.files[0]; if (!f) return;
+      form.querySelector('#dmsErr').textContent = 'Leyendo…';
+      try {
+        rows = /\.(csv|txt)$/i.test(f.name) ? parseDelimited(await readText(f)) : await parseSpreadsheet(f);
+        form.querySelector('#dmsErr').textContent = '';
+        form.querySelector('.imp-file span').firstChild.textContent = f.name;
+        guess();
+      } catch (ex) { form.querySelector('#dmsErr').textContent = ex.message || String(ex); }
+    };
+  });
+  if (!ok || !rows) return;
+  const createCars = $('dmsCreateCars')?.checked ?? true;
+  setTab('customers');
+  if (kind === 'customers') await importCustomerRows(rows, g); else await importHistoryRows(rows, g, createCars);
+}
+
+async function insertChunks(table, list, onProgress) {
+  const out = [];
+  for (let i = 0; i < list.length; i += 500) {
+    onProgress?.(i);
+    const { data, error } = await sb.from(table).insert(list.slice(i, i + 500)).select('*');
+    if (error) throw new Error(error.message);
+    out.push(...(data || []));
+  }
+  return out;
+}
+
+async function importCustomerRows(rows, g) {
+  const status = (t) => { $('custCount').textContent = t; };
+  const body = rows.slice(g.header ? 1 : 0);
+  const col = (f) => g.map.indexOf(f);
+  const get = (r, f) => { const i = col(f); return i >= 0 ? String(r[i] ?? '').trim() : ''; };
+  const keyOf = (x) => (x.tax_id ? 't:' + normPlate(x.tax_id) : x.phone && digitsOf(x.phone).length >= 9 ? 'p:' + digitsOf(x.phone).slice(-9) : x.name ? 'n:' + normTxt(x.name) : null);
+  const known = new Map();
+  for (const c of wsCustomers) for (const k of [c.tax_id && 't:' + normPlate(c.tax_id), c.phone && digitsOf(c.phone).length >= 9 && 'p:' + digitsOf(c.phone).slice(-9), 'n:' + normTxt(c.name)]) if (k) known.set(k, c.id);
+  const newCust = new Map(); const carRows = [];
+  for (const r of body) {
+    const name = get(r, 'name');
+    const phone = get(r, 'phone') || get(r, 'phone2');
+    const c = name ? { workshop_id: workshop.id, name: name.slice(0, 200), phone: phone || null, email: get(r, 'email') || null,
+      tax_id: get(r, 'tax_id').toUpperCase().slice(0, 20) || null, address: [get(r, 'address'), [get(r, 'postal'), get(r, 'city')].filter(Boolean).join(' ')].filter(Boolean).join(', ').slice(0, 300) || null,
+      external_ref: get(r, 'customer_ref').slice(0, 60) || null } : null;
+    if (c && get(r, 'phone2') && get(r, 'phone') && get(r, 'phone2') !== get(r, 'phone')) c.notes = 'Otro teléfono: ' + get(r, 'phone2');
+    const key = c ? keyOf(c) : null;
+    if (c && key && !known.has(key) && !newCust.has(key)) newCust.set(key, c);
+    const plate = normPlate(get(r, 'plate'));
+    if (plate) {
+      const yr = parseInt(get(r, 'year'), 10) || parseInt((parseDay(get(r, 'first_reg')) || '').slice(0, 4), 10);
+      const km = parseInt(digitsOf(get(r, 'km')), 10);
+      carRows.push({ key, plate, make: get(r, 'make') || null, model: get(r, 'model') || null, version: get(r, 'version') || null,
+        year: yr >= 1900 && yr <= 2100 ? yr : null, vin: get(r, 'vin').toUpperCase().slice(0, 20) || null, km: Number.isFinite(km) ? km : null, notes: get(r, 'notes').slice(0, 1000) || null });
+    }
+  }
+  try {
+    status(`Guardando ${newCust.size} clientes…`);
+    const created = await insertChunks('workshop_customers', [...newCust.values()], (i) => status(`Guardando clientes… ${i} de ${newCust.size}`));
+    for (const c of created) { const k = keyOf(c); if (k) known.set(k, c.id); }
+    const byPlate = new Map(wsVehicles.map((v) => [normPlate(v.plate), v]));
+    const seen = new Set(); const inserts = []; let updated = 0;
+    for (const x of carRows) {
+      if (seen.has(x.plate)) continue;
+      seen.add(x.plate);
+      const customer_id = x.key ? known.get(x.key) || null : null;
+      const ex = byPlate.get(x.plate);
+      if (ex) {
+        const patch = {};
+        for (const k of ['make', 'model', 'version', 'year', 'vin']) if (!ex[k] && x[k]) patch[k] = x[k];
+        if (!ex.customer_id && customer_id) patch.customer_id = customer_id;
+        if (x.km != null && (ex.km == null || x.km > ex.km)) { patch.km = x.km; patch.km_at = today(); }
+        if (Object.keys(patch).length) { await sb.from('workshop_vehicles').update(patch).eq('id', ex.id); updated++; }
+      } else inserts.push({ workshop_id: workshop.id, customer_id, plate: x.plate, make: x.make, model: x.model, version: x.version, year: x.year, vin: x.vin, km: x.km, km_at: x.km != null ? today() : null, notes: x.notes });
+    }
+    const cars = await insertChunks('workshop_vehicles', inserts, (i) => status(`Guardando coches… ${i} de ${inserts.length}`));
+    await loadCustomers();
+    await notice(`<h3>Importación terminada</h3><p><b>${created.length}</b> ${created.length === 1 ? 'cliente nuevo' : 'clientes nuevos'} y <b>${cars.length}</b> ${cars.length === 1 ? 'coche nuevo' : 'coches nuevos'}${updated ? ` (${updated} que ya tenías, completados)` : ''}.</p>
+      <p class="muted">Si tienes el historial de trabajos en otro Excel, impórtalo ahora con "Importar de mi programa" → Historial de trabajos.</p>`);
+  } catch (e) {
+    await loadCustomers();
+    await notice(`<h3>La importación se ha cortado</h3><p>${esc(e.message)}</p><p class="muted">Lo que ya se guardó no se duplica si vuelves a importar el mismo archivo.</p>`);
+  }
+}
+
+async function importHistoryRows(rows, g, createCars) {
+  const status = (t) => { $('custCount').textContent = t; };
+  const body = rows.slice(g.header ? 1 : 0);
+  const col = (f) => g.map.indexOf(f);
+  const get = (r, f) => { const i = col(f); return i >= 0 ? r[i] : ''; };
+  const byPlate = new Map(wsVehicles.map((v) => [normPlate(v.plate), v]));
+  // Coches que faltan.
+  const missing = [...new Set(body.map((r) => normPlate(get(r, 'plate'))).filter((p) => p && !byPlate.has(p)))];
+  try {
+    if (missing.length && createCars) {
+      const cars = await insertChunks('workshop_vehicles', missing.map((plate) => ({ workshop_id: workshop.id, plate })), (i) => status(`Creando coches… ${i} de ${missing.length}`));
+      for (const v of cars) byPlate.set(normPlate(v.plate), v);
+    }
+    // Lo que ya está (para no duplicar si se importa dos veces).
+    const have = new Set();
+    for (let from = 0; from < 200000; from += 1000) {
+      const { data } = await sb.from('workshop_history').select('ws_vehicle_id,at,description').eq('workshop_id', workshop.id).range(from, from + 999);
+      for (const h of data || []) have.add(`${h.ws_vehicle_id}|${h.at}|${normTxt(h.description)}`);
+      if (!data || data.length < 1000) break;
+    }
+    const list = []; let skipped = 0; const maxKm = new Map();
+    for (const r of body) {
+      const v = byPlate.get(normPlate(get(r, 'plate')));
+      const at = parseDay(get(r, 'date'));
+      const description = String(get(r, 'description') ?? '').trim().slice(0, 2000);
+      if (!v || !at || !description) { skipped++; continue; }
+      const key = `${v.id}|${at}|${normTxt(description)}`;
+      if (have.has(key)) continue;
+      have.add(key);
+      const km = parseInt(digitsOf(get(r, 'km')), 10);
+      list.push({ workshop_id: workshop.id, ws_vehicle_id: v.id, at, km: Number.isFinite(km) ? km : null, description, amount: money(get(r, 'amount')), doc_ref: String(get(r, 'doc_ref') ?? '').trim().slice(0, 60) || null, source: 'import' });
+      if (Number.isFinite(km) && km > (maxKm.get(v.id)?.km ?? -1)) maxKm.set(v.id, { km, at });
+    }
+    await insertChunks('workshop_history', list, (i) => status(`Guardando historial… ${i} de ${list.length}`));
+    // Kilómetros más recientes de cada coche.
+    for (const [id, x] of maxKm) {
+      const v = wsVehicles.find((y) => y.id === id) || [...byPlate.values()].find((y) => y.id === id);
+      if (v && (v.km == null || x.km > v.km)) await sb.from('workshop_vehicles').update({ km: x.km, km_at: x.at }).eq('id', id);
+    }
+    await loadCustomers();
+    await notice(`<h3>Historial importado</h3><p><b>${list.length.toLocaleString('es-ES')}</b> ${list.length === 1 ? 'trabajo guardado' : 'trabajos guardados'}${createCars && missing.length ? ` y <b>${missing.length}</b> ${missing.length === 1 ? 'coche nuevo' : 'coches nuevos'}` : ''}.${skipped ? ` Se han saltado ${skipped} filas sin matrícula conocida, fecha o concepto.` : ''}</p>
+      <p class="muted">Lo ves al abrir cada coche en Clientes.</p>`);
+  } catch (e) {
+    await loadCustomers();
+    await notice(`<h3>La importación se ha cortado</h3><p>${esc(e.message)}</p><p class="muted">Vuelve a subir el archivo: lo que ya se guardó no se duplica.</p>`);
+  }
+}
 
 // ------------------------------------------------------------------ tarifas de proveedor
 // El distribuidor manda su tarifa cada pocas semanas (Excel, CSV, DBF…). Se

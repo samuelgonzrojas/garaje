@@ -764,3 +764,49 @@ dialog#dlg{max-width:760px}
 .doc-test{border:2px solid #c23238;color:#c23238;font-weight:800;text-align:center;padding:6px;margin-bottom:10px;letter-spacing:.5px}
 .doc .vf{display:flex;align-items:center;gap:12px;margin-bottom:10px;font-size:12px}
 .doc .vf img{width:35mm;height:35mm}
+
+/* Cobros */
+.pay-list{list-style:none;margin:0 0 6px;padding:0;font-size:14px}
+.pay-list li{display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--line)}
+.pay-list li:first-child{border-top:0}
+.pay-list li span{flex:1}
+.pay-list li a{color:var(--muted);text-decoration:none;font-size:18px;padding:0 4px}
+.pay-methods{display:flex;flex-wrap:wrap;gap:4px 14px}
+.pay-methods label.chk{margin:4px 0}
+.pay-link{color:#9a6400;font-weight:700;white-space:nowrap}
+.pay-ok{color:#1a7f4b;font-weight:600}
+.t-sum .warn b{color:#9a6400}
+@media (prefers-color-scheme:dark){.pay-link,.t-sum .warn b{color:#F5B94F}.pay-ok{color:#5BD49A}}
+.head-btns{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+
+/* Cita online */
+.booking-link{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+.booking-link input{flex:1 1 240px;font-size:13px}
+.ag-asked{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:10px 12px;border-radius:14px;background:#F2A51622;margin-bottom:8px}
+.ag-asked small{width:100%;font-weight:700;color:#8a5a00}
+.late-chip.asked{border-color:#F2A51680}
+.appt.pedida{background:#F2A5161f;border:1px dashed #d99a1e;color:var(--ink)}
+.ag-kind.pedida{background:#F2A51629;color:#9a6400}
+@media (prefers-color-scheme:dark){.ag-asked small{color:#F5C46F}.ag-kind.pedida{color:#F5B94F}}
+
+/* Clientes */
+.cust-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+.cust-card{display:flex;flex-direction:column;gap:10px;margin:0}
+.cust-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.cust-top>div:first-child{cursor:pointer;min-width:0}
+.cust-top b{display:block;font-size:16px}
+.cust-top small{color:var(--muted);font-size:13px;word-break:break-word}
+.cust-cars{display:flex;flex-wrap:wrap;gap:6px}
+.car-chip{border:1px solid var(--line);background:var(--card-2);color:var(--ink);border-radius:999px;padding:5px 11px;font:inherit;font-size:13px;cursor:pointer}
+.car-chip b{font-variant-numeric:tabular-nums;letter-spacing:.3px}
+.car-chip.add{background:transparent;color:var(--brand-2);border-style:dashed}
+.hist-list{list-style:none;margin:0;padding:0;max-height:300px;overflow:auto;font-size:14px}
+.hist-list li{padding:7px 0;border-top:1px solid var(--line);display:flex;flex-direction:column}
+.hist-list li:first-child{border-top:0}
+.hist-list small{color:var(--muted)}
+.imp-kind{display:flex;flex-direction:column;gap:6px;margin:4px 0 10px}
+.imp-kind label.chk{align-items:flex-start;margin:0;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--card-2)}
+.imp-kind label.chk span{display:flex;flex-direction:column}
+.imp-kind label.chk small{font-weight:400;color:var(--muted);font-size:13px}
+/* Con todas las pestañas, en pantallas medianas se quitan los iconos para que quepan. */
+@media (min-width:721px) and (max-width:1180px){.tabs button[data-tab] .ni{display:none}}

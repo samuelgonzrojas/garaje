@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Garaje Taller">
 <link rel="stylesheet" href="../style.css">
-<link rel="stylesheet" href="taller.css?v=20261013d">
+<link rel="stylesheet" href="taller.css?v=20261013g">
 </head>
 <body>
 <div class="wrap panel">
@@ -29,8 +29,9 @@
 <nav id="tabs" class="tabs hidden no-print">
   <button data-tab="jobs" data-icon="jobs" class="on"><span>Órdenes</span></button>
   <button data-tab="leads" data-icon="leads"><span>Solicitudes</span><i class="nbadge hidden" id="leadsBadge"></i></button>
-  <button data-tab="agenda" data-icon="agenda"><span>Agenda</span></button>
+  <button data-tab="agenda" data-icon="agenda"><span>Agenda</span><i class="nbadge hidden" id="agendaBadge"></i></button>
   <button data-tab="cars" data-icon="cars"><span>Coches</span></button>
+  <button data-tab="customers" data-icon="customers" class="secondary"><span>Clientes</span></button>
   <button data-tab="invoices" data-icon="invoices" class="secondary hidden"><span>Facturas</span></button>
   <button data-tab="parts" data-icon="parts" class="secondary"><span>Piezas</span></button>
   <button data-tab="suppliers" data-icon="suppliers" class="secondary"><span>Proveedores</span></button>
@@ -109,7 +110,7 @@
 <section id="tab-agenda" class="tab hidden no-print">
   <div class="top page-head">
     <div><h2 style="margin:0">Agenda</h2><p class="sub" style="margin:2px 0 0">Tus citas, las que llegan desde la app y las entregas de las órdenes. Al cliente de la app le llega un recordatorio el día antes.</p></div>
-    <button class="btn" id="newApptBtn">+ Nueva cita</button>
+    <div class="head-btns"><button class="btn ghost" id="bookingLinkBtn">Enlace para pedir cita</button> <button class="btn" id="newApptBtn">+ Nueva cita</button></div>
   </div>
   <div class="ag-summary" id="agSummary"></div>
   <div class="ag-bar">
@@ -304,6 +305,17 @@
   <div class="empty hidden" id="noSuppliers" data-icon="suppliers"><b>Sin proveedores todavía</b><p>Añade los distribuidores a los que compras: luego los eliges en cada pieza y los llamas con un toque.</p></div>
 </section>
 
+<!-- CLIENTES -->
+<section id="tab-customers" class="tab hidden no-print">
+  <div class="top page-head">
+    <div><h2 style="margin:0">Clientes</h2><p class="sub" style="margin:2px 0 0">Tus clientes y sus coches, también los que no usan Garaje. Tráelos de tu programa de gestión y ábreles órdenes como a cualquiera.</p></div>
+    <div class="head-btns"><button class="btn ghost" id="importCustomersBtn">Importar de mi programa</button> <button class="btn" id="newCustomerBtn">+ Cliente</button></div>
+  </div>
+  <div class="board-tools"><input id="custSearch" type="search" placeholder="Buscar por nombre, teléfono, NIF o matrícula…" autocomplete="off"></div>
+  <p class="muted" id="custCount" style="font-size:14px"></p>
+  <div class="cust-list" id="custList"></div>
+</section>
+
 <!-- FACTURAS -->
 <section id="tab-invoices" class="tab hidden no-print">
   <div class="top page-head">
@@ -314,6 +326,7 @@
   <div class="board-tools">
     <input id="invSearch" type="search" placeholder="Buscar por número, cliente, NIF o matrícula…" autocomplete="off">
     <select id="invMonth"></select>
+    <select id="invPay"><option value="">Cobradas y pendientes</option><option value="pending">Pendientes de cobro</option><option value="paid">Cobradas</option></select>
   </div>
   <div class="t-sum inv-sum" id="invTotals"></div>
   <div class="card" id="invoicesBody"></div>
@@ -360,6 +373,6 @@
 </div>
 <datalist id="brands"></datalist>
 <datalist id="partNames"></datalist>
-<script type="module" src="app.js?v=20261013d"></script>
+<script type="module" src="app.js?v=20261013g"></script>
 </body>
 </html>
