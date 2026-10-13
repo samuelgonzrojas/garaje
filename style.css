@@ -33,6 +33,10 @@ header{display:flex;align-items:center;justify-content:space-between;gap:16px;pa
 nav{display:flex;flex-wrap:wrap;gap:4px 18px;justify-content:flex-end}
 nav a{text-decoration:none;color:var(--muted);font-size:15px;font-weight:600}
 nav a:hover{color:var(--ink)}
+/* Web pública: la cabecera se queda arriba al bajar o saltar a una sección.
+   El fondo se estira a todo el ancho aunque la cabecera esté dentro de .wrap. */
+header.site{position:sticky;top:0;z-index:50;padding:14px 0;background:var(--bg);box-shadow:0 0 0 100vmax var(--bg);clip-path:inset(0 -100vmax)}
+[id]{scroll-margin-top:84px}
 
 /* Botones */
 .btn{display:inline-flex;align-items:center;gap:8px;background:var(--brand);color:#fff;padding:13px 22px;border-radius:14px;text-decoration:none;font-weight:700;border:0;transition:transform .15s,box-shadow .15s}
@@ -204,6 +208,13 @@ footer a:hover{color:var(--ink)}
   .steps.three{grid-template-columns:1fr}
   header{flex-direction:column;align-items:flex-start;gap:8px}
   nav{justify-content:flex-start}
+  /* En el móvil, una sola fila: logo y menú que se desliza de lado. */
+  header.site{flex-direction:row;align-items:center;gap:14px;padding:10px 0}
+  header.site .logo{flex-shrink:0}
+  header.site nav{flex:1;min-width:0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-mask-image:linear-gradient(to right,#000 85%,transparent);mask-image:linear-gradient(to right,#000 85%,transparent)}
+  header.site nav::-webkit-scrollbar{display:none}
+  header.site nav a{white-space:nowrap}
+  [id]{scroll-margin-top:64px}
   .features{grid-template-columns:1fr}
   .band{padding:28px 22px}
   .section{padding:40px 0}
