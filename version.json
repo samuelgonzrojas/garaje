@@ -1,7 +1,7 @@
 {
-  "version": "1.0.39",
-  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.39/garaje-1.0.39-arm64.apk",
-  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.39/garaje-1.0.39.apk",
-  "notes": "Arreglos: el código que llega al correo para entrar se puede escribir aunque tenga 8 cifras, y los avisos y órdenes de tu taller se ven bien en la app.",
+  "version": "1.0.40",
+  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.40/garaje-1.0.40-arm64.apk",
+  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.40/garaje-1.0.40.apk",
+  "notes": "Garaje estrena web: garajeapp.es. Los enlaces para compartir un coche abren la app directamente con el código puesto.",
   "play_url": "https://play.google.com/apps/testing/com.samuel.mantenimiento"
 }
