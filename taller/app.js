@@ -41,6 +41,8 @@ let jobVehicle = null;     // coche de la orden abierta
 let messages = [];
 let channel = null;
 let tab = 'jobs';
+let invoicing = null;      // facturación activada (workshop_invoicing), solo dueño y encargado
+let invoices = [];         // facturas emitidas
 
 // ------------------------------------------------------------------ utilidades
 const fmtKm = (n) => n == null ? '—' : new Intl.NumberFormat('es-ES').format(n) + ' km';
@@ -72,6 +74,7 @@ const NAV_ICON = {
   settings: '<path d="M20 4H4v2h16V4zm1 10v-2l-1-5H4l-1 5v2h1v6h10v-6h4v6h2v-6h1zm-9 4H6v-4h6v4z"/>',
   team: '<path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>',
   more: '<path d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>',
+  invoices: '<path d="M18 17H6v-2h12v2zm0-4H6v-2h12v2zm0-4H6V7h12v2zM3 22l1.5-1.5L6 22l1.5-1.5L9 22l1.5-1.5L12 22l1.5-1.5L15 22l1.5-1.5L18 22l1.5-1.5L21 22V2l-1.5 1.5L18 2l-1.5 1.5L15 2l-1.5 1.5L12 2l-1.5 1.5L9 2 7.5 3.5 6 2 4.5 3.5 3 2v20z"/>',
   logout: '<path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>',
 };
 const svgIcon = (k) => `<svg viewBox="0 0 24 24" aria-hidden="true">${NAV_ICON[k] || ''}</svg>`;
@@ -240,7 +243,7 @@ async function enter() {
     show('setup');
   } else {
     show('tabs');
-    if (workshop) await Promise.all([loadJobs(), loadLeads(), loadParts(), loadSuppliers(), loadTeam(), loadAppointments()]);
+    if (workshop) await Promise.all([loadJobs(), loadLeads(), loadParts(), loadSuppliers(), loadTeam(), loadAppointments(), loadInvoices()]);
     setTab(workshop ? tab : 'cars');
     openDeepLink();
   }
@@ -266,6 +269,7 @@ function subscribe() {
     .on('postgres_changes', { event: '*', schema: 'public', table: 'jobs' }, () => workshop && loadJobs())
     .on('postgres_changes', { event: '*', schema: 'public', table: 'leads' }, () => workshop && loadLeads())
     .on('postgres_changes', { event: '*', schema: 'public', table: 'workshop_appointments' }, () => workshop && loadAppointments())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'workshop_invoices' }, () => invoicing && loadInvoices())
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'job_messages' }, (p) => {
       if (job && p.new.job_id === job.id) loadMessages();
     })
@@ -293,6 +297,11 @@ async function loadWorkshop() {
       if (ws && me) { workshop = ws; myRole = me.role; }
     }
   }
+  invoicing = null;
+  if (workshop && myRole !== 'mechanic') {
+    const { data: inv } = await sb.from('workshop_invoicing').select('*').eq('workshop_id', workshop.id).maybeSingle();
+    invoicing = inv || null;
+  }
   const name = workshop?.name || profile.display_name || '';
   $('who').textContent = name;
   $('avatar').innerHTML = workshop?.logo ? `<img src="${esc(workshop.logo)}" alt="">` : esc((name.trim()[0] || '?').toUpperCase());
@@ -301,8 +310,8 @@ async function loadWorkshop() {
   // todo menos los datos del taller; el dueño, todo.
   const allowed = !workshop ? ['cars', 'agenda']
     : myRole === 'mechanic' ? ['jobs', 'agenda', 'cars']
-    : myRole === 'manager' ? ['jobs', 'leads', 'agenda', 'cars', 'parts', 'suppliers', 'team']
-    : ['jobs', 'leads', 'agenda', 'cars', 'parts', 'suppliers', 'team', 'settings'];
+    : myRole === 'manager' ? ['jobs', 'leads', 'agenda', 'cars', 'parts', 'suppliers', 'team', ...(invoicing ? ['invoices'] : [])]
+    : ['jobs', 'leads', 'agenda', 'cars', 'parts', 'suppliers', 'team', 'settings', ...(invoicing ? ['invoices'] : [])];
   for (const b of document.querySelectorAll('.tabs button[data-tab]')) b.classList.toggle('hidden', !allowed.includes(b.dataset.tab));
   if (!allowed.includes(tab)) tab = allowed[0];
   document.querySelector('.tabs .more-btn').classList.toggle('no-more', !workshop);
@@ -462,8 +471,8 @@ $('moreSheet').onclick = (e) => { if (e.target === $('moreSheet')) $('moreSheet'
 function setTab(t) {
   tab = t;
   for (const b of document.querySelectorAll('.tabs button[data-tab]')) b.classList.toggle('on', b.dataset.tab === t);
-  document.querySelector('.tabs .more-btn').classList.toggle('on', ['parts', 'suppliers', 'team', 'settings'].includes(t));
-  for (const id of ['tab-jobs', 'tab-leads', 'tab-agenda', 'tab-cars', 'tab-parts', 'tab-suppliers', 'tab-team', 'tab-settings', 'job', 'vehicle']) show(id, false);
+  document.querySelector('.tabs .more-btn').classList.toggle('on', ['parts', 'suppliers', 'team', 'settings', 'invoices'].includes(t));
+  for (const id of ['tab-jobs', 'tab-leads', 'tab-agenda', 'tab-cars', 'tab-parts', 'tab-suppliers', 'tab-team', 'tab-settings', 'tab-invoices', 'job', 'vehicle']) show(id, false);
   show('tab-' + t);
   if (t === 'jobs') renderBoard();
   if (t === 'leads') renderLeads();
@@ -473,6 +482,7 @@ function setTab(t) {
   if (t === 'suppliers') renderSuppliers();
   if (t === 'settings') renderWsForm('settingsForm', workshop || {}, 'Guardar');
   if (t === 'team') renderTeam();
+  if (t === 'invoices') renderInvoices();
   job = null; current = null;
   window.scrollTo(0, 0);
 }
@@ -1566,7 +1576,12 @@ function renderJobHead() {
   if (st === 'in_progress') { btn('Listo para recoger', () => setStatus('ready')); btn('Esperando piezas', () => setStatus('waiting_parts'), 'btn ghost small'); }
   if (st === 'waiting_parts') { btn('Han llegado: seguir', () => setStatus('in_progress')); btn('Listo para recoger', () => setStatus('ready'), 'btn ghost small'); }
   if (st === 'ready') btn('Entregar y pasar al historial', deliver);
-  if (['ready', 'delivered'].includes(st) && isManager()) btn(job.invoice_ref ? `Facturada · ${job.invoice_ref}` : 'Pasar a facturar', openInvoicing, st === 'delivered' && !job.invoice_ref ? 'btn small' : 'btn ghost small');
+  if (['ready', 'delivered'].includes(st) && isManager()) {
+    const inv = invoicing ? invoiceOfJob(job.id) : null;
+    if (inv) btn(`Factura ${inv.full_number}`, () => printInvoice(inv), 'btn ghost small');
+    else if (invoicing) btn('Emitir factura', issueInvoice, st === 'delivered' ? 'btn small' : 'btn ghost small');
+    else btn(job.invoice_ref ? `Facturada · ${job.invoice_ref}` : 'Pasar a facturar', openInvoicing, st === 'delivered' && !job.invoice_ref ? 'btn small' : 'btn ghost small');
+  }
   if (!['delivered', 'cancelled'].includes(st) && isManager()) btn('Cancelar', async () => {
     if (await dialog('<h3>¿Cancelar esta orden?</h3><p class="muted">El cliente verá en su móvil que se ha cancelado. No se puede deshacer.</p>', 'Cancelar orden', () => true)) setStatus('cancelled');
   }, 'btn ghost small');
@@ -1944,13 +1959,172 @@ async function openInvoicing() {
   }
 }
 
+// ------------------------------------------------------------------ facturas
+// El panel emite la factura de la orden (supabase/028_invoices.sql): numeración
+// correlativa por serie, sin borrar ni modificar (se corrige con rectificativa).
+// El registro en Hacienda (Verifactu) lo hará el proveedor cuando esté
+// contratado; hasta entonces el taller está en modo 'test' y todo sale "de prueba".
+const INV_KIND = { F1: 'Factura', F2: 'Factura simplificada', R1: 'Factura rectificativa', R5: 'Factura rectificativa (simplificada)' };
+const INV_STATUS = { test: ['Prueba', 'test'], pending: ['Enviando a Hacienda', 'pending'], registered: ['Registrada', 'ok'], error: ['Error al registrar', 'bad'] };
+const invCode = (series, no) => series + String(no).padStart(4, '0');
+const testBanner = () => (invoicing?.mode === 'live' ? '' : '<p class="inv-test">Modo de prueba: las facturas salen marcadas <b>sin validez fiscal</b> hasta conectar el registro en Hacienda (Verifactu).</p>');
+const invoiceOfJob = (id) => invoices.find((i) => i.job_id === id && ['F1', 'F2'].includes(i.kind) && !invoices.some((r) => r.rectifies_id === i.id));
+
+async function loadInvoices() {
+  if (!invoicing) { invoices = []; return; }
+  const { data, error } = await sb.from('workshop_invoices').select('*').eq('workshop_id', workshop.id).order('issued_at', { ascending: false }).limit(2000);
+  if (error) { console.warn(error); return; }
+  invoices = data || [];
+  if (tab === 'invoices' && !job) renderInvoices();
+  if (job) renderJobHead();
+}
+
+async function issueInvoice() {
+  if (dirty && !isLocked()) await saveJob({}, { quiet: true });
+  const j = job;   // la orden abierta ahora (al volver del diálogo puede haber otra o ninguna)
+  const t = totals(j);
+  const s = jobVehicle ? summary(jobVehicle) : { name: '', plate: '' };
+  const canSimple = t.total <= 400;
+  const simpleDefault = canSimple && !j.customer_tax_id;
+  const r = await dialog(`<h3>Factura de la OR ${j.number}</h3>
+    ${testBanner()}
+    <div class="inv-kind">
+      <label class="chk"><input type="radio" name="kind" value="F1" ${simpleDefault ? '' : 'checked'}><span><b>Factura completa</b><small>Con los datos del cliente. La que necesita una empresa o un autónomo.</small></span></label>
+      <label class="chk${canSimple ? '' : ' off'}"><input type="radio" name="kind" value="F2" ${simpleDefault ? 'checked' : ''} ${canSimple ? '' : 'disabled'}><span><b>Factura simplificada</b><small>${canSimple ? 'El ticket de siempre: hasta 400 € con IVA y sin datos obligatorios del cliente.' : 'Solo hasta 400 € con IVA; esta pasa.'}</small></span></label>
+    </div>
+    <label>Nombre o razón social del cliente</label><input name="name" maxlength="200" value="${esc(j.customer_name || '')}">
+    <div class="row2"><div><label>NIF / CIF</label><input name="tax" maxlength="20" value="${esc(j.customer_tax_id || '')}" placeholder="Si es empresa o autónomo" autocomplete="off"></div>
+      <div><label>Dirección</label><input name="addr" maxlength="300" value="${esc(j.customer_address || '')}" placeholder="Si es empresa o autónomo" autocomplete="off"></div></div>
+    <div class="inv-totals"><span>Base ${fmtEur(t.base)}</span><span>IVA ${num(j.vat) ?? 21} % ${fmtEur(t.vat)}</span><b>Total ${fmtEur(t.total)}</b></div>
+    <p class="muted" style="font-size:13px;margin:6px 0 0">Se numera sola (<b id="invNext"></b>) con las líneas de la orden. Una factura no se borra ni se cambia: si te equivocas, se corrige con una rectificativa.</p>`,
+  'Emitir factura', (fd) => fd, (form) => {
+    const next = () => { form.querySelector('#invNext').textContent = form.kind.value === 'F2' ? invCode(invoicing.simple_series, invoicing.simple_next_no) : invCode(invoicing.series, invoicing.next_no); };
+    for (const rd of form.querySelectorAll('input[name=kind]')) rd.onchange = next;
+    next();
+  });
+  if (!r) return;
+  const customer = { name: (r.name || '').trim() || null, tax_id: (r.tax || '').trim().toUpperCase() || null, address: (r.addr || '').trim() || null,
+    vehicle: [s.name, s.plate].filter(Boolean).join(' · ') || null, km: j.km ?? null, job_number: j.number };
+  const { data, error } = await sb.rpc('issue_invoice', { p_job: j.id, p_simplified: r.kind === 'F2', p_customer: customer });
+  if (error) { await notice(`<h3>No se pudo emitir la factura</h3><p>${esc(error.message)}</p>`); return; }
+  invoices.unshift(data);
+  invoicing[r.kind === 'F2' ? 'simple_next_no' : 'next_no']++;
+  for (const x of new Set([j, jobs.find((y) => y.id === j.id)])) if (x) Object.assign(x, { invoice_ref: data.full_number, invoiced_at: data.issued_at, customer_tax_id: customer.tax_id ?? x.customer_tax_id, customer_address: customer.address ?? x.customer_address });
+  if (job?.id === j.id) {
+    Object.assign(job, { invoice_ref: data.full_number, invoiced_at: data.issued_at });
+    $('jTaxId').value = j.customer_tax_id ?? ''; $('jAddress').value = j.customer_address ?? '';
+    renderJobHead();
+  }
+  if (await choose(`<h3>Factura ${esc(data.full_number)} emitida</h3><p class="muted">${fmtEur(num(data.total))} con IVA. La tienes en la pestaña Facturas.</p>`, [['print', 'Imprimir o guardar en PDF', 'btn small']]) === 'print') printInvoice(data);
+}
+
+async function rectifyInvoice(inv) {
+  const r = await dialog(`<h3>Rectificar la factura ${esc(inv.full_number)}</h3>
+    ${testBanner()}
+    <p class="muted">Se emite una factura rectificativa (${esc(invCode(invoicing.rect_series, invoicing.rect_next_no))}) que la anula entera, en negativo. Después puedes volver a facturar la orden con los datos buenos.</p>
+    <label>Motivo</label>
+    <select name="why"><option>Error en los datos del cliente</option><option>Error en los importes o el IVA</option><option>Trabajo o pieza que no se hizo</option><option>Devolución o descuento posterior</option><option value="">Otro (escríbelo)</option></select>
+    <input name="other" maxlength="200" placeholder="Cuéntalo en una frase" style="margin-top:6px">`, 'Emitir rectificativa', (fd) => fd);
+  if (!r) return;
+  const reason = r.why || (r.other || '').trim();
+  const { data, error } = await sb.rpc('rectify_invoice', { p_invoice: inv.id, p_reason: reason });
+  if (error) { await notice(`<h3>No se pudo rectificar</h3><p>${esc(error.message)}</p>`); return; }
+  invoicing.rect_next_no++;
+  await Promise.all([loadInvoices(), loadJobs()]);
+  if (await choose(`<h3>Rectificativa ${esc(data.full_number)} emitida</h3><p class="muted">La factura ${esc(inv.full_number)} queda anulada. La orden vuelve a estar sin facturar.</p>`, [['print', 'Imprimir o guardar en PDF', 'btn small']]) === 'print') printInvoice(data);
+}
+
+function printInvoice(inv) {
+  const w = inv.issuer || {}, c = inv.customer || {};
+  const orig = inv.rectifies_id ? invoices.find((i) => i.id === inv.rectifies_id) : null;
+  const rows = (inv.lines || []).map((l) => `<tr><td>${l.kind === 'labor' ? 'Mano de obra' : 'Pieza'}</td><td>${esc(l.description)}${l.brand || l.reference ? `<br><small>${esc([l.brand, l.reference].filter(Boolean).join(' · '))}</small>` : ''}</td>
+    <td class="num">${String(l.qty).replace('.', ',')}</td><td class="num">${fmtEur(num(l.unit_price))}</td><td class="num">${num(l.discount) ? String(l.discount).replace('.', ',') + ' %' : ''}</td><td class="num">${fmtEur(num(l.amount))}</td></tr>`).join('');
+  const live = inv.status !== 'test';
+  $('print').innerHTML = `<div class="doc">
+    ${live && inv.qr ? `<div class="vf"><img src="${esc(inv.qr)}" alt="QR"><span>Factura verificable en la sede electrónica de la AEAT<br><b>VERI*FACTU</b></span></div>` : ''}
+    ${live ? '' : '<div class="doc-test">FACTURA DE PRUEBA · SIN VALIDEZ FISCAL</div>'}
+    <div class="head"><div>${workshop.logo ? `<img src="${esc(workshop.logo)}" alt="" class="doc-logo">` : ''}<h1>${esc(w.name || '')}</h1>${esc(w.legal_name || '')}<br>NIF ${esc(w.tax_id || '')}<br>${esc(w.address || '')}<br>${esc([w.phone, w.email].filter(Boolean).join(' · '))}${w.registry_no ? '<br>Nº registro industrial: ' + esc(w.registry_no) : ''}</div>
+      <div style="text-align:right"><h1>${INV_KIND[inv.kind]}</h1>Nº <b>${esc(inv.full_number)}</b><br>Fecha de expedición: ${fmtDate(inv.issued_at)}${c.job_number ? `<br>Orden de reparación nº ${esc(c.job_number)}` : ''}</div></div>
+    ${orig || inv.rectify_reason ? `<div class="box" style="margin-bottom:10px"><b>Rectifica</b>Factura ${esc(orig?.full_number || '')}${orig ? ' del ' + fmtDate(orig.issued_at) : ''}. Motivo: ${esc(inv.rectify_reason || '')}</div>` : ''}
+    <div class="boxes">
+      <div class="box"><b>Cliente</b>${esc(c.name || (inv.kind === 'F2' ? 'Cliente' : ''))}${c.tax_id ? '<br>NIF ' + esc(c.tax_id) : ''}${c.address ? '<br>' + esc(c.address) : ''}</div>
+      <div class="box"><b>Vehículo</b>${esc(c.vehicle || '')}${c.km != null ? '<br>Km: ' + fmtKm(c.km) : ''}</div>
+    </div>
+    <table><thead><tr><th>Tipo</th><th>Concepto</th><th class="num">Cant.</th><th class="num">Precio</th><th class="num">Dto.</th><th class="num">Importe</th></tr></thead><tbody>${rows}</tbody></table>
+    <div class="tot"><div><span>Base imponible</span><span>${fmtEur(num(inv.base))}</span></div><div><span>IVA ${String(num(inv.vat_rate)).replace('.', ',')} %</span><span>${fmtEur(num(inv.vat))}</span></div><div class="big"><span>Total</span><span>${fmtEur(num(inv.total))}</span></div></div>
+    <div class="legal">Las reparaciones tienen una garantía de 3 meses o 2.000 km, lo que antes ocurra (Real Decreto 1457/1986).${inv.kind === 'F2' ? ' Factura simplificada.' : ''}</div>
+  </div>`;
+  const old = document.title;
+  document.title = `${INV_KIND[inv.kind]} ${inv.full_number}`;
+  window.print();
+  document.title = old;
+}
+
+function renderInvoices() {
+  const box = $('invoicesBody');
+  $('invTestBanner').innerHTML = testBanner();
+  $('invSeries').textContent = invoicing ? `Series: ${invoicing.series} (completas) · ${invoicing.simple_series} (simplificadas) · ${invoicing.rect_series} (rectificativas)` : '';
+  const ms = $('invMonth'), keep = ms.value;
+  const months = [...new Set(invoices.map((i) => i.issued_at.slice(0, 7)))];
+  ms.innerHTML = '<option value="">Todos los meses</option>' + months.map((m) => `<option value="${m}">${new Date(m + '-01T12:00').toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}</option>`).join('');
+  ms.value = months.includes(keep) ? keep : (keep === '' ? '' : months[0] || '');
+  const q = normTxt($('invSearch').value);
+  const list = invoices.filter((i) => (!ms.value || i.issued_at.startsWith(ms.value))
+    && (!q || [i.full_number, i.customer?.name, i.customer?.tax_id, i.customer?.vehicle].some((x) => normTxt(x).includes(q))));
+  const sum = (k) => list.reduce((a, i) => a + num(i[k]), 0);
+  $('invTotals').innerHTML = `<div><b>${list.length}</b><span>${list.length === 1 ? 'factura' : 'facturas'}</span></div><div><b>${fmtEur(sum('base'))}</b><span>base imponible</span></div><div><b>${fmtEur(sum('vat'))}</b><span>IVA repercutido</span></div><div><b>${fmtEur(sum('total'))}</b><span>total facturado</span></div>`;
+  if (!invoices.length) { box.innerHTML = emptyState('invoices', 'Aún no hay facturas', 'Se emiten desde una orden lista para recoger o entregada, con "Emitir factura".'); return; }
+  box.innerHTML = `<table class="inv-table"><thead><tr><th>Número</th><th>Fecha</th><th>Cliente</th><th class="num">Base</th><th class="num">IVA</th><th class="num">Total</th><th>Estado</th><th></th></tr></thead><tbody></tbody></table>`;
+  const tb = box.querySelector('tbody');
+  for (const i of list) {
+    const rect = invoices.find((r) => r.rectifies_id === i.id);
+    const [st, cls] = INV_STATUS[i.status] || ['', ''];
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td><b>${esc(i.full_number)}</b><small>${INV_KIND[i.kind]}${rect ? ` · anulada por ${esc(rect.full_number)}` : ''}</small></td>
+      <td data-label="Fecha">${fmtDate(i.issued_at)}</td>
+      <td data-label="Cliente">${esc(i.customer?.name || '—')}${i.customer?.vehicle ? `<small>${esc(i.customer.vehicle)}</small>` : ''}</td>
+      <td class="num" data-label="Base">${fmtEur(num(i.base))}</td><td class="num" data-label="IVA">${fmtEur(num(i.vat))}</td><td class="num" data-label="Total"><b>${fmtEur(num(i.total))}</b></td>
+      <td data-label="Estado"><span class="inv-st ${cls}">${st}</span></td>
+      <td class="edit"><a href="#" data-print>Ver</a>${['F1', 'F2'].includes(i.kind) && !rect ? ' · <a href="#" data-rect>Rectificar</a>' : ''}</td>`;
+    tr.querySelector('[data-print]').onclick = (e) => { e.preventDefault(); printInvoice(i); };
+    tr.querySelector('[data-rect]')?.addEventListener('click', (e) => { e.preventDefault(); rectifyInvoice(i); });
+    tb.appendChild(tr);
+  }
+  if (!list.length) tb.innerHTML = '<tr><td colspan="8" class="muted">Ninguna con este filtro.</td></tr>';
+}
+$('invMonth').onchange = () => renderInvoices();
+$('invSearch').oninput = () => renderInvoices();
+/** Libro de facturas emitidas, para el gestor. */
+$('invExport').onclick = () => {
+  const m = $('invMonth').value;
+  const list = invoices.filter((i) => !m || i.issued_at.startsWith(m)).slice().reverse();
+  if (!list.length) return;
+  downloadCsv(`facturas-${slug(workshop.name)}-${m || 'todas'}.csv`,
+    ['Fecha de expedición', 'Número', 'Tipo', 'Cliente', 'NIF/CIF', 'Dirección', 'Base imponible', 'Tipo de IVA %', 'Cuota de IVA', 'Total', 'Rectifica a', 'Motivo', 'Estado'],
+    list.map((i) => [fmtDate(i.issued_at), i.full_number, INV_KIND[i.kind], i.customer?.name || '', i.customer?.tax_id || '', i.customer?.address || '',
+      num(i.base), num(i.vat_rate), num(i.vat), num(i.total), invoices.find((o) => o.id === i.rectifies_id)?.full_number || '', i.rectify_reason || '', INV_STATUS[i.status]?.[0] || i.status]));
+};
+$('invSeriesBtn').onclick = async (e) => {
+  e.preventDefault();
+  const r = await dialog(`<h3>Series de facturación</h3>
+    <p class="muted">El prefijo de cada tipo de factura. Si ya llevabas otra numeración, pon tu prefijo: sigue desde el último número que haya en Garaje con esa serie.</p>
+    <div class="row3"><div><label>Completas</label><input name="s" value="${esc(invoicing.series)}" maxlength="12"></div>
+      <div><label>Simplificadas</label><input name="t" value="${esc(invoicing.simple_series)}" maxlength="12"></div>
+      <div><label>Rectificativas</label><input name="r" value="${esc(invoicing.rect_series)}" maxlength="12"></div></div>`, 'Guardar', (fd) => fd);
+  if (!r) return;
+  const { error } = await sb.rpc('set_invoice_series', { p_workshop: workshop.id, p_series: r.s, p_simple: r.t, p_rect: r.r });
+  if (error) { await notice(`<h3>No se pudo guardar</h3><p>${esc(error.message)}</p>`); return; }
+  ({ data: invoicing } = await sb.from('workshop_invoicing').select('*').eq('workshop_id', workshop.id).maybeSingle());
+  renderInvoices();
+};
+
 // ------------------------------------------------------------------ piezas
 async function loadParts() {
   if (!isManager()) { parts = []; return; }
   // Por páginas: Supabase devuelve como mucho 1.000 filas por consulta y una
   // tarifa de proveedor puede tener miles de referencias.
   const all = [];
-  for (let from = 0; from < 20000; from += 1000) {
+  for (let from = 0; from < 100000; from += 1000) {
     const { data, error } = await sb.from('workshop_parts').select('*').eq('workshop_id', workshop.id)
       .order('uses', { ascending: false }).order('description').range(from, from + 999);
     if (error || !data) break;
@@ -1984,7 +2158,7 @@ function renderParts() {
     tr.innerHTML = `<td><b>${esc(p.description)}</b>${p.catalog_id ? `<small>${esc(itemName(p.catalog_id))}</small>` : ''}${(p.engine_ids || []).length ? `<small>Motores: ${esc(p.engine_ids.map((id) => engines[id]?.engine || id).join(', '))}</small>` : ''}</td>
       <td data-label="Marca"><span>${esc(p.brand || '')}${p.reference ? `<small><a href="${searchUrl(p.brand, p.reference)}" target="_blank" rel="noopener">${esc(p.reference)} ↗</a></small>` : ''}</span></td>
       <td data-label="Proveedor">${esc(sup?.name || '')}</td>
-      <td class="num" data-label="Coste"><input class="cell-in" data-k="cost" inputmode="decimal" value="${dec2(p.cost)}" placeholder="—" aria-label="Coste de ${esc(p.description)}"></td>
+      <td class="num" data-label="Coste"><input class="cell-in" data-k="cost" inputmode="decimal" value="${dec2(p.cost)}" placeholder="—" aria-label="Coste de ${esc(p.description)}">${p.list_price != null ? `<small class="marg" title="PVP de la tarifa del proveedor">Tarifa ${dec2(p.list_price)}</small>` : ''}</td>
       <td class="num" data-label="PVP"><input class="cell-in" data-k="price" inputmode="decimal" value="${dec2(p.price)}" placeholder="—" aria-label="PVP de ${esc(p.description)}">${marg != null ? `<small class="marg">${marg >= 0 ? '+' : ''}${marg} %</small>` : ''}</td>
       <td class="num" data-label="Usos">${p.uses}</td>
       <td class="edit"><a href="#" data-edit>Editar</a></td>`;
@@ -2133,7 +2307,7 @@ async function importParts() {
   const ok = await dialog(`<h3>Importar piezas</h3>
     <p class="muted">Desde el Excel de tu programa de gestión, la tarifa de tu proveedor o cualquier lista. Columnas útiles: descripción, marca, referencia, coste, PVP y proveedor (en cualquier orden).</p>
     <div class="imp-src">
-      <label class="imp-file"><input type="file" id="impFile" accept=".xlsx,.xls,.ods,.csv,.txt"><span>Subir archivo<small>Excel, CSV</small></span></label>
+      <label class="imp-file"><input type="file" id="impFile" accept=".xlsx,.xls,.ods,.csv,.txt,.dbf"><span>Subir archivo<small>Excel, CSV</small></span></label>
       <div class="imp-or">o</div>
       <textarea id="impPaste" rows="4" placeholder="Copia las celdas en Excel (incluida la fila de títulos si la tiene) y pégalas aquí"></textarea>
     </div>
@@ -2167,7 +2341,7 @@ async function importParts() {
       const f = e.target.files[0]; if (!f) return;
       form.querySelector('#impErr').textContent = 'Leyendo…';
       try {
-        load(/\.(csv|txt)$/i.test(f.name) ? parseDelimited(await f.text()) : await parseSpreadsheet(f));
+        load(/\.(csv|txt)$/i.test(f.name) ? parseDelimited(await readText(f)) : await parseSpreadsheet(f));
         form.querySelector('.imp-file span').firstChild.textContent = f.name;
       } catch (err) { form.querySelector('#impErr').textContent = err.message || String(err); }
     };
@@ -2311,6 +2485,198 @@ $('marginBtn').onclick = applyMargin;
 $('exportPartsBtn').onclick = exportParts;
 for (const b of document.querySelectorAll('#noParts [data-go]')) b.onclick = () => (b.dataset.go === 'import' ? importParts() : addStarterParts());
 
+// ------------------------------------------------------------------ tarifas de proveedor
+// El distribuidor manda su tarifa cada pocas semanas (Excel, CSV, DBF…). Se
+// importa desde su tarjeta: recuerda qué es cada columna, aplica el descuento
+// del taller y actualiza costes y precios de las piezas que ya tiene.
+const TFIELDS = [['', 'No importar'], ['reference', 'Referencia'], ['brand', 'Marca'], ['description', 'Descripción'],
+  ['list_price', 'PVP de tarifa'], ['discount', 'Descuento %'], ['cost', 'Tu precio neto']];
+const DISCOUNT_WORDS = /^dto|descuento|^desc\b|% ?dto/;
+const round2 = (n) => Math.round(n * 100) / 100;
+const daysAgo = (iso) => Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+
+/** Texto de un CSV/TXT: UTF-8 o, si no lo es, Windows-1252 (lo habitual en los programas de los distribuidores). */
+async function readText(file) {
+  const buf = await file.arrayBuffer();
+  try { return new TextDecoder('utf-8', { fatal: true }).decode(buf); } catch { return new TextDecoder('windows-1252').decode(buf); }
+}
+
+/** Qué es cada columna: lo de la última vez si los títulos coinciden; si no, se adivina. */
+function guessTariffColumns(rows, saved) {
+  const g = guessColumns(rows);
+  const titles = (rows[0] || []).map((h) => normTxt(h));
+  if (saved?.cols?.length && saved.header === g.header) {
+    if (g.header && saved.titles?.length) {
+      const byTitle = new Map(saved.titles.map((t, i) => [t, saved.cols[i]]));
+      const map = titles.map((t) => byTitle.get(t) ?? '');
+      if (map.some(Boolean)) return { map, header: true, remembered: true };
+    } else if (!g.header && saved.cols.length === g.map.length) return { map: [...saved.cols], header: false, remembered: true };
+  }
+  // En una tarifa, "PVP"/"precio" es el precio de tarifa y "neto"/"coste", el del taller.
+  const map = g.map.map((f) => (f === 'price' ? 'list_price' : f === 'supplier' ? '' : f));
+  if (g.header) titles.forEach((t, i) => { if (DISCOUNT_WORDS.test(t)) map[i] = 'discount'; });
+  return { map, header: g.header, remembered: false };
+}
+
+/** Lo que haría la tarifa: piezas que ya tienes (suben, bajan, iguales) y referencias nuevas. */
+function planTariff(s, rows, g, opt) {
+  const body = rows.slice(g.header ? 1 : 0);
+  const col = (f) => g.map.indexOf(f);
+  const get = (r, f) => (col(f) >= 0 ? r[col(f)] : '');
+  const byRef = new Map();
+  for (const p of parts) if (p.reference) {
+    const k = normRef(p.reference);
+    if (!byRef.has(k)) byRef.set(k, []);
+    byRef.get(k).push(p);
+  }
+  const plan = { rows: body.length, updates: [], inserts: [], up: 0, down: 0, same: 0, filled: 0, noRef: 0, noPrice: 0, changes: [] };
+  const seen = new Set();
+  const now = new Date().toISOString();
+  for (const r of body) {
+    const ref = String(get(r, 'reference') ?? '').trim();
+    if (!ref) { plan.noRef++; continue; }
+    const brand = String(get(r, 'brand') ?? '').trim() || opt.brand || null;
+    const key = normRef(ref) + '|' + normTxt(brand);
+    if (seen.has(key)) continue;   // repetida en el fichero
+    seen.add(key);
+    const list = money(get(r, 'list_price'));
+    const disc = col('discount') >= 0 ? money(get(r, 'discount')) : opt.discount;
+    let cost = money(get(r, 'cost'));
+    if (cost == null && list != null) cost = round2(list * (1 - (disc ?? 0) / 100));
+    if (cost == null) { plan.noPrice++; continue; }
+    const byMargin = round2(cost * (1 + opt.margin / 100));
+    const price = opt.pricing === 'list' ? (list ?? byMargin) : opt.pricing === 'margin' ? byMargin : null;   // null: no tocar
+    // Misma referencia; si las dos tienen marca, que coincida (el mismo código puede ser de otro fabricante).
+    const mine = (byRef.get(normRef(ref)) || []).filter((p) => !brand || !p.brand || normTxt(p.brand) === normTxt(brand));
+    if (mine.length) {
+      for (const p of mine) {
+        const before = p.cost;
+        const changed = before == null || Math.abs(cost - before) >= .005;
+        if (before == null) plan.filled++; else if (!changed) plan.same++; else if (cost > before) plan.up++; else plan.down++;
+        if (before != null && changed) plan.changes.push({ p, before, after: cost });
+        if (changed || p.supplier_id !== s.id || (list != null && p.list_price !== list) || (price != null && p.price !== price)) {
+          plan.updates.push({ id: p.id, cost, list_price: list, price, supplier_id: s.id, brand });
+        }
+      }
+    } else {
+      const description = (String(get(r, 'description') ?? '').trim() || ref).slice(0, 300);
+      plan.inserts.push({ workshop_id: workshop.id, description, brand, reference: ref, cost, list_price: list, price: price ?? byMargin,
+        supplier_id: s.id, catalog_id: guessCatalog(description), tariff_at: now });
+    }
+  }
+  plan.changes.sort((a, b) => Math.abs(b.after / b.before - 1) - Math.abs(a.after / a.before - 1));
+  return plan;
+}
+
+async function updateTariff(s) {
+  const saved = s.tariff_map || {};
+  let rows = null, g = null, plan = null;
+  const opt = { discount: s.tariff_discount ?? null, margin: saved.margin ?? workshop.parts_margin ?? 35, pricing: saved.pricing || 'list', brand: saved.brand || '', addNew: !!saved.addNew };
+  const ok = await dialog(`<h3>Tarifa de ${esc(s.name)}</h3>
+    <p class="muted">Sube el fichero que te manda (Excel, CSV o DBF). Se actualizan el coste y el precio de las piezas que ya tienes${s.tariff_updated_at ? '' : ', y la próxima vez recordará qué es cada columna'}.</p>
+    <label class="imp-file"><input type="file" id="tFile" accept=".xlsx,.xls,.ods,.csv,.txt,.dbf"><span>Subir la tarifa<small>Excel, CSV, TXT o DBF</small></span></label>
+    <div id="tPreview"></div>
+    <div class="err" id="tErr"></div>`, 'Actualizar', () => true, (form) => {
+    const okBtn = form.querySelector('button[value=ok]');
+    okBtn.disabled = true;
+    const summarize = () => {
+      const box = form.querySelector('#tSummary');
+      if (!box) return;
+      const hasRef = g.map.includes('reference'), hasPrice = g.map.includes('list_price') || g.map.includes('cost');
+      if (!hasRef || !hasPrice) {
+        box.innerHTML = `<p class="err">Indica qué columna es la referencia y cuál el precio (PVP de tarifa o tu precio neto).</p>`;
+        okBtn.disabled = true; return;
+      }
+      plan = planTariff(s, rows, g, opt);
+      const mineN = plan.up + plan.down + plan.same + plan.filled;
+      const n = (v) => v.toLocaleString('es-ES');
+      box.innerHTML = `<div class="t-sum">
+          <div><b>${n(mineN)}</b><span>de tus piezas están en la tarifa</span></div>
+          <div class="up"><b>${n(plan.up)}</b><span>suben</span></div>
+          <div class="down"><b>${n(plan.down)}</b><span>bajan</span></div>
+          <div><b>${n(plan.same + plan.filled)}</b><span>${plan.filled ? `iguales o sin coste antes` : 'iguales'}</span></div>
+        </div>
+        ${plan.changes.length ? `<ul class="t-changes">${plan.changes.slice(0, 6).map((c) => `<li><span>${esc(c.p.description)}${c.p.reference ? ` <small>${esc(c.p.reference)}</small>` : ''}</span><b class="${c.after > c.before ? 'up' : 'down'}">${fmtEur(c.before)} → ${fmtEur(c.after)}</b></li>`).join('')}</ul>` : ''}
+        <label class="chk"><input type="checkbox" id="tAddNew" ${opt.addNew ? 'checked' : ''}> Añadir también las <b>${n(plan.inserts.length)}</b> referencias de la tarifa que aún no tienes</label>
+        ${plan.noRef || plan.noPrice ? `<p class="muted" style="font-size:13px;margin:4px 0 0">Se ${plan.noRef + plan.noPrice === 1 ? 'salta' : 'saltan'} ${plan.noRef ? `${n(plan.noRef)} ${plan.noRef === 1 ? 'fila' : 'filas'} sin referencia` : ''}${plan.noRef && plan.noPrice ? ' y ' : ''}${plan.noPrice ? `${n(plan.noPrice)} sin precio` : ''}.</p>` : ''}`;
+      box.querySelector('#tAddNew').onchange = (e) => { opt.addNew = e.target.checked; };
+      okBtn.disabled = mineN === 0 && plan.inserts.length === 0;
+    };
+    const render = () => {
+      const box = form.querySelector('#tPreview');
+      if (!rows?.length) { box.innerHTML = ''; okBtn.disabled = true; return; }
+      const body = rows.slice(g.header ? 1 : 0);
+      const cols = g.map.length;
+      const sel = (i) => `<select data-col="${i}">${TFIELDS.map(([v, t]) => `<option value="${v}" ${g.map[i] === v ? 'selected' : ''}>${t}</option>`).join('')}</select>`;
+      box.innerHTML = `<p class="imp-sum"><b>${body.length.toLocaleString('es-ES')}</b> filas. ${g.remembered ? 'Columnas como la última vez; cámbialas si hace falta:' : 'Revisa qué es cada columna:'}</p>
+        <div class="imp-table"><table><thead><tr>${[...Array(cols).keys()].map((i) => `<th>${sel(i)}${g.header ? `<small>${esc(rows[0][i] ?? '')}</small>` : ''}</th>`).join('')}</tr></thead>
+        <tbody>${body.slice(0, 5).map((r) => `<tr>${[...Array(cols).keys()].map((i) => `<td>${esc(r[i] ?? '')}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+        <label class="chk"><input type="checkbox" id="tHeader" ${g.header ? 'checked' : ''}> La primera fila son títulos</label>
+        <div class="row2">
+          <div><label>Tu descuento sobre el PVP de tarifa (%)</label><input id="tDisc" inputmode="decimal" value="${opt.discount ?? ''}" placeholder="Ej.: 35"><small class="muted">Si el fichero no trae tu precio neto ni un descuento por línea.</small></div>
+          <div><label>Marca de todo el fichero</label><input id="tBrand" value="${esc(opt.brand)}" placeholder="Si no viene en una columna"></div>
+        </div>
+        <label>Tu precio de venta</label>
+        <div class="t-pricing">
+          <label class="chk"><input type="radio" name="tPricing" value="list" ${opt.pricing === 'list' ? 'checked' : ''}> El PVP de tarifa</label>
+          <label class="chk"><input type="radio" name="tPricing" value="margin" ${opt.pricing === 'margin' ? 'checked' : ''}> Tu coste + <input id="tMargin" inputmode="decimal" value="${opt.margin}" class="imp-margin"> %</label>
+          <label class="chk"><input type="radio" name="tPricing" value="keep" ${opt.pricing === 'keep' ? 'checked' : ''}> No cambiar mis precios de venta</label>
+        </div>
+        <div id="tSummary"></div>`;
+      for (const sl of box.querySelectorAll('select[data-col]')) sl.onchange = () => { g.map[sl.dataset.col] = sl.value; summarize(); };
+      box.querySelector('#tHeader').onchange = (e) => { g.header = e.target.checked; render(); };
+      box.querySelector('#tDisc').oninput = (e) => { opt.discount = money(e.target.value); summarize(); };
+      box.querySelector('#tBrand').oninput = (e) => { opt.brand = e.target.value.trim(); summarize(); };
+      box.querySelector('#tMargin').oninput = (e) => { opt.margin = money(e.target.value) ?? 0; summarize(); };
+      for (const rd of box.querySelectorAll('input[name=tPricing]')) rd.onchange = () => { opt.pricing = rd.value; summarize(); };
+      summarize();
+    };
+    form.querySelector('#tFile').onchange = async (e) => {
+      const f = e.target.files[0]; if (!f) return;
+      const err = form.querySelector('#tErr');
+      err.textContent = 'Leyendo…';
+      try {
+        rows = /\.(csv|txt)$/i.test(f.name) ? parseDelimited(await readText(f)) : await parseSpreadsheet(f);
+        if (rows.length && Math.max(...rows.slice(0, 20).map((r) => r.length)) < 2) throw new Error('Este fichero no tiene columnas separadas. Pídele al proveedor la tarifa en Excel o CSV.');
+        g = guessTariffColumns(rows, saved);
+        err.textContent = '';
+        form.querySelector('.imp-file span').firstChild.textContent = f.name;
+        render();
+      } catch (ex) { err.textContent = ex.message || String(ex); rows = null; render(); }
+    };
+  });
+  if (!ok || !plan) return;
+  await applyTariff(s, plan, opt, g, rows);
+}
+
+async function applyTariff(s, plan, opt, g, rows) {
+  const status = (t) => { $('partsCount').textContent = t; };
+  setTab('parts');
+  $('partSupplier').value = s.id;
+  let failed = 0, added = 0;
+  for (let i = 0; i < plan.updates.length; i += 500) {
+    status(`Actualizando precios… ${Math.min(i + 500, plan.updates.length).toLocaleString('es-ES')} de ${plan.updates.length.toLocaleString('es-ES')}`);
+    const { error } = await sb.rpc('update_parts_bulk', { p_rows: plan.updates.slice(i, i + 500) });
+    if (error) { failed += Math.min(500, plan.updates.length - i); console.warn(error); }
+  }
+  if (opt.addNew) {
+    for (let i = 0; i < plan.inserts.length; i += 500) {
+      status(`Añadiendo referencias… ${Math.min(i + 500, plan.inserts.length).toLocaleString('es-ES')} de ${plan.inserts.length.toLocaleString('es-ES')}`);
+      const { error } = await sb.from('workshop_parts').insert(plan.inserts.slice(i, i + 500));
+      if (error) { failed += Math.min(500, plan.inserts.length - i); console.warn(error); } else added += Math.min(500, plan.inserts.length - i);
+    }
+  }
+  await sb.from('workshop_suppliers').update({
+    tariff_map: { cols: g.map, header: g.header, titles: g.header ? rows[0].map((h) => normTxt(h)) : null, pricing: opt.pricing, margin: opt.margin, brand: opt.brand || null, addNew: opt.addNew },
+    tariff_discount: opt.discount, tariff_updated_at: new Date().toISOString(), tariff_rows: plan.rows,
+  }).eq('id', s.id);
+  await Promise.all([loadParts(), loadSuppliers()]);
+  await notice(`<h3>Tarifa de ${esc(s.name)} actualizada</h3>
+    <p>${plan.up ? `<b>${plan.up}</b> suben` : ''}${plan.up && plan.down ? ' · ' : ''}${plan.down ? `<b>${plan.down}</b> bajan` : ''}${plan.up || plan.down ? ' · ' : ''}<b>${plan.same + plan.filled}</b> sin cambios de coste${added ? ` · <b>${added.toLocaleString('es-ES')}</b> referencias nuevas` : ''}.</p>
+    <p class="muted">Los presupuestos que ya enviaste no cambian; las piezas que añadas desde ahora salen con el precio nuevo.</p>
+    ${failed ? `<p class="err">${failed} no se pudieron guardar. Vuelve a subir la tarifa.</p>` : ''}`);
+}
+
 // ------------------------------------------------------------------ proveedores
 async function loadSuppliers() {
   if (!isManager()) { suppliers = []; return; }
@@ -2318,6 +2684,12 @@ async function loadSuppliers() {
   suppliers = data || [];
   if (tab === 'suppliers') renderSuppliers();
   if (tab === 'jobs' && !job && workshop) renderOnboard();
+}
+/** Cuándo se actualizó su tarifa: en ámbar si hace más de 5 semanas. */
+function tariffLine(s) {
+  if (!s.tariff_updated_at) return '<p class="sup-tariff">Sin tarifa todavía. Súbela con "Actualizar tarifa" y los precios se ponen solos.</p>';
+  const d = daysAgo(s.tariff_updated_at);
+  return `<p class="sup-tariff${d > 35 ? ' old' : ''}">Tarifa ${d === 0 ? 'actualizada hoy' : d === 1 ? 'de ayer' : `de hace ${d} días`}${s.tariff_rows ? ` · ${s.tariff_rows.toLocaleString('es-ES')} referencias` : ''}${s.tariff_discount ? ` · tu descuento ${String(s.tariff_discount).replace('.', ',')} %` : ''}</p>`;
 }
 function renderSuppliers() {
   const g = $('suppliersGrid');
@@ -2332,10 +2704,13 @@ function renderSuppliers() {
       ${who ? `<p class="sup-who">${esc(who)}</p>` : ''}
       ${s.notes ? `<p class="sup-notes">${esc(s.notes)}</p>` : ''}
       <div class="supplier-actions"><div class="icons">${contactButtons(s.phone, s.email, '', s.name)}${s.web ? iconLink('web', /^https?:/.test(s.web) ? s.web : 'https://' + s.web, 'Web de ' + s.name, true) : ''}</div><a class="btn ghost small" href="#" data-edit>Editar</a></div>
+      ${tariffLine(s)}
       <div class="sup-foot"><button class="btn small" data-order ${s.phone || s.email ? '' : 'disabled title="Pon su teléfono o correo para pedirle por WhatsApp o correo"'}>Hacer pedido</button>
+        <button class="btn ghost small" data-tariff>Actualizar tarifa</button>
         <button class="btn ghost small" data-parts>${n === 1 ? 'Ver su pieza' : n ? `Ver sus ${n} piezas` : 'Sin piezas aún'}</button></div>`;
     el.querySelector('[data-edit]').onclick = (e) => { e.preventDefault(); editSupplier(s); };
     el.querySelector('[data-order]').onclick = () => orderFromSupplier(s);
+    el.querySelector('[data-tariff]').onclick = () => updateTariff(s);
     el.querySelector('[data-parts]').onclick = () => { $('partSupplier').value = s.id; setTab('parts'); };
     g.appendChild(el);
   }

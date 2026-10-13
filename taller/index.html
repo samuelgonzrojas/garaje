@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Garaje Taller">
 <link rel="stylesheet" href="../style.css">
-<link rel="stylesheet" href="taller.css?v=20261012c">
+<link rel="stylesheet" href="taller.css?v=20261013b">
 </head>
 <body>
 <div class="wrap panel">
@@ -31,6 +31,7 @@
   <button data-tab="leads" data-icon="leads"><span>Solicitudes</span><i class="nbadge hidden" id="leadsBadge"></i></button>
   <button data-tab="agenda" data-icon="agenda"><span>Agenda</span></button>
   <button data-tab="cars" data-icon="cars"><span>Coches</span></button>
+  <button data-tab="invoices" data-icon="invoices" class="secondary hidden"><span>Facturas</span></button>
   <button data-tab="parts" data-icon="parts" class="secondary"><span>Piezas</span></button>
   <button data-tab="suppliers" data-icon="suppliers" class="secondary"><span>Proveedores</span></button>
   <button data-tab="team" data-icon="team" class="secondary"><span>Equipo</span></button>
@@ -303,6 +304,22 @@
   <div class="empty hidden" id="noSuppliers" data-icon="suppliers"><b>Sin proveedores todavía</b><p>Añade los distribuidores a los que compras: luego los eliges en cada pieza y los llamas con un toque.</p></div>
 </section>
 
+<!-- FACTURAS -->
+<section id="tab-invoices" class="tab hidden no-print">
+  <div class="top page-head">
+    <div><h2 style="margin:0">Facturas</h2><p class="sub" style="margin:2px 0 0">Las que emites desde las órdenes, numeradas solas. No se borran: si una está mal, se rectifica.</p></div>
+    <button class="btn ghost" id="invExport">Descargar para el gestor (Excel)</button>
+  </div>
+  <div id="invTestBanner"></div>
+  <div class="board-tools">
+    <input id="invSearch" type="search" placeholder="Buscar por número, cliente, NIF o matrícula…" autocomplete="off">
+    <select id="invMonth"></select>
+  </div>
+  <div class="t-sum inv-sum" id="invTotals"></div>
+  <div class="card" id="invoicesBody"></div>
+  <p class="muted" style="font-size:13px"><span id="invSeries"></span> · <a href="#" id="invSeriesBtn">Cambiar</a></p>
+</section>
+
 <!-- EQUIPO -->
 <section id="tab-team" class="tab hidden no-print">
   <div class="top page-head">
@@ -343,6 +360,6 @@
 </div>
 <datalist id="brands"></datalist>
 <datalist id="partNames"></datalist>
-<script type="module" src="app.js?v=20261012c"></script>
+<script type="module" src="app.js?v=20261013b"></script>
 </body>
 </html>
