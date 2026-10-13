@@ -810,3 +810,6 @@ dialog#dlg{max-width:760px}
 .imp-kind label.chk small{font-weight:400;color:var(--muted);font-size:13px}
 /* Con todas las pestañas, en pantallas medianas se quitan los iconos para que quepan. */
 @media (min-width:721px) and (max-width:1180px){.tabs button[data-tab] .ni{display:none}}
+.terms-chk{align-items:flex-start;font-weight:400;font-size:14px;line-height:1.45;margin:14px 0 6px}
+.terms-chk input{margin-top:3px}
+.terms-chk a{color:var(--brand-2)}

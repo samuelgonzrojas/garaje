@@ -238,6 +238,22 @@ function leave() {
   if (channel) { sb.removeChannel(channel); channel = null; }
 }
 
+// Versión de las condiciones para talleres (condiciones.html §6). Si cambian, se
+// sube y el dueño las vuelve a aceptar al entrar.
+const TERMS_VERSION = '2026-10-13';
+async function askTerms() {
+  if (!workshop || !isOwner() || workshop.terms_version === TERMS_VERSION) return;
+  const ok = await dialog(`<h3>${workshop.terms_version ? 'Hemos actualizado las condiciones para talleres' : 'Condiciones para talleres'}</h3>
+    <p class="muted">Garaje guarda los datos de tus clientes (los que importas, las citas, las órdenes y las facturas) <b>por tu cuenta</b>: tú eres el responsable y Garaje tu encargado del tratamiento. Las condiciones explican cómo los protegemos y qué te corresponde a ti.</p>
+    <p><a href="../condiciones.html#talleres" target="_blank" rel="noopener">Leer las condiciones para talleres</a> · <a href="../privacidad.html#talleres" target="_blank" rel="noopener">Privacidad</a></p>
+    <label class="chk terms-chk"><input type="checkbox" name="terms" required> He leído y acepto las condiciones para talleres y la política de privacidad.</label>`,
+  'Aceptar', (fd) => !!fd.terms, (form) => { form.querySelector('button[value=cancel]').textContent = 'Ahora no'; });
+  if (!ok) return;
+  const patch = { terms_accepted_at: new Date().toISOString(), terms_version: TERMS_VERSION };
+  const { error } = await sb.from('workshops').update(patch).eq('id', workshop.id);
+  if (!error) Object.assign(workshop, patch);
+}
+
 async function enter() {
   hideAll(); show('nav');
   await ensureProfile();
@@ -253,6 +269,7 @@ async function enter() {
     openDeepLink();
   }
   subscribe();
+  askTerms();
 }
 
 // Desde la app Garaje (modo taller y avisos): #leads abre Solicitudes y
@@ -430,6 +447,7 @@ function renderWsForm(formId, data, button) {
       ${bookingBlock(data)}
       <div class="app-preview"><small>Así te ven los conductores en la app</small><div class="ap-card" id="${formId}Preview"></div></div>
     </div></div>
+    ${workshop ? '' : `<label class="chk terms-chk"><input type="checkbox" name="terms" required> He leído y acepto las <a href="../condiciones.html#talleres" target="_blank" rel="noopener">condiciones para talleres</a> (Garaje trata los datos de mis clientes por mi cuenta, como encargado del tratamiento) y la <a href="../privacidad.html#talleres" target="_blank" rel="noopener">política de privacidad</a>.</label>`}
     <div class="err" id="${formId}Err"></div>
     <button class="btn">${button}</button>`;
   // Logo
@@ -488,6 +506,11 @@ function renderWsForm(formId, data, button) {
     if (row.vehicle_types.length === 0) row.vehicle_types = ['car'];
     if (row.listed && !row.city) { $(formId + 'Err').textContent = 'Para aparecer en la app hace falta la ciudad.'; return; }
     if (!row.name) { $(formId + 'Err').textContent = 'Falta el nombre del taller.'; return; }
+    if (!workshop) {
+      if (!fd.terms) { $(formId + 'Err').textContent = 'Para crear el taller tienes que aceptar las condiciones para talleres.'; return; }
+      row.terms_accepted_at = new Date().toISOString();
+      row.terms_version = TERMS_VERSION;
+    }
     const q = workshop ? sb.from('workshops').update(row).eq('id', workshop.id) : sb.from('workshops').insert(row);
     const { error } = await q;
     if (error) { $(formId + 'Err').textContent = 'No se pudo guardar: ' + error.message; return; }
