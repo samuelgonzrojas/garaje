@@ -1967,7 +1967,22 @@ async function openInvoicing() {
 const INV_KIND = { F1: 'Factura', F2: 'Factura simplificada', R1: 'Factura rectificativa', R5: 'Factura rectificativa (simplificada)' };
 const INV_STATUS = { test: ['Prueba', 'test'], pending: ['Enviando a Hacienda', 'pending'], registered: ['Registrada', 'ok'], error: ['Error al registrar', 'bad'] };
 const invCode = (series, no) => series + String(no).padStart(4, '0');
-const testBanner = () => (invoicing?.mode === 'live' ? '' : '<p class="inv-test">Modo de prueba: las facturas salen marcadas <b>sin validez fiscal</b> hasta conectar el registro en Hacienda (Verifactu).</p>');
+const testBanner = () => (invoicing?.mode === 'live' ? ''
+  : invoicing?.mode === 'sandbox' ? '<p class="inv-test">Conectado al <b>entorno de pruebas de Verifactu</b>: las facturas se registran en pruebas, con su QR, pero <b>sin validez fiscal</b>.</p>'
+  : '<p class="inv-test">Modo de prueba: las facturas salen marcadas <b>sin validez fiscal</b> hasta conectar el registro en Hacienda (Verifactu).</p>');
+/** Registra la factura en Hacienda (función verifactu → B2Brouter) y la devuelve actualizada. */
+async function sendVerifactu(inv) {
+  try { await sb.functions.invoke('verifactu', { body: { invoice_id: inv.id } }); } catch (e) { console.warn(e); }
+  await loadInvoices();
+  return invoices.find((i) => i.id === inv.id) || inv;
+}
+/** Lo que pasó con el registro, en una frase. */
+function verifactuLine(inv) {
+  if (inv.status === 'registered') return `Registrada en Hacienda${inv.live ? '' : ' (entorno de pruebas)'}.`;
+  if (inv.status === 'error') return `No se pudo registrar en Hacienda: ${esc(inv.error || 'error desconocido')}. Reinténtalo desde Facturas.`;
+  if (inv.status === 'pending') return 'Enviada a Hacienda; aún no ha contestado. Mira su estado en Facturas.';
+  return '';
+}
 const invoiceOfJob = (id) => invoices.find((i) => i.job_id === id && ['F1', 'F2'].includes(i.kind) && !invoices.some((r) => r.rectifies_id === i.id));
 
 async function loadInvoices() {
@@ -1993,7 +2008,7 @@ async function issueInvoice() {
       <label class="chk${canSimple ? '' : ' off'}"><input type="radio" name="kind" value="F2" ${simpleDefault ? 'checked' : ''} ${canSimple ? '' : 'disabled'}><span><b>Factura simplificada</b><small>${canSimple ? 'El ticket de siempre: hasta 400 € con IVA y sin datos obligatorios del cliente.' : 'Solo hasta 400 € con IVA; esta pasa.'}</small></span></label>
     </div>
     <label>Nombre o razón social del cliente</label><input name="name" maxlength="200" value="${esc(j.customer_name || '')}">
-    <div class="row2"><div><label>NIF / CIF</label><input name="tax" maxlength="20" value="${esc(j.customer_tax_id || '')}" placeholder="Si es empresa o autónomo" autocomplete="off"></div>
+    <div class="row2"><div><label>NIF / DNI / CIF</label><input name="tax" maxlength="20" value="${esc(j.customer_tax_id || '')}" placeholder="Si es empresa o autónomo" autocomplete="off"></div>
       <div><label>Dirección</label><input name="addr" maxlength="300" value="${esc(j.customer_address || '')}" placeholder="Si es empresa o autónomo" autocomplete="off"></div></div>
     <div class="inv-totals"><span>Base ${fmtEur(t.base)}</span><span>IVA ${num(j.vat) ?? 21} % ${fmtEur(t.vat)}</span><b>Total ${fmtEur(t.total)}</b></div>
     <p class="muted" style="font-size:13px;margin:6px 0 0">Se numera sola (<b id="invNext"></b>) con las líneas de la orden. Una factura no se borra ni se cambia: si te equivocas, se corrige con una rectificativa.</p>`,
@@ -2001,12 +2016,23 @@ async function issueInvoice() {
     const next = () => { form.querySelector('#invNext').textContent = form.kind.value === 'F2' ? invCode(invoicing.simple_series, invoicing.simple_next_no) : invCode(invoicing.series, invoicing.next_no); };
     for (const rd of form.querySelectorAll('input[name=kind]')) rd.onchange = next;
     next();
+    // Con Verifactu, la factura completa necesita el NIF o DNI del cliente.
+    form.addEventListener('submit', (e) => {
+      if (e.submitter?.value !== 'ok' || invoicing.mode === 'test' || form.kind.value !== 'F1' || form.tax.value.trim()) return;
+      e.preventDefault();
+      form.tax.focus();
+      form.tax.setCustomValidity('La factura completa necesita el NIF, DNI o CIF del cliente. Si no lo tiene, haz una simplificada (hasta 400 €).');
+      form.tax.reportValidity();
+      form.tax.oninput = () => form.tax.setCustomValidity('');
+    });
   });
   if (!r) return;
   const customer = { name: (r.name || '').trim() || null, tax_id: (r.tax || '').trim().toUpperCase() || null, address: (r.addr || '').trim() || null,
     vehicle: [s.name, s.plate].filter(Boolean).join(' · ') || null, km: j.km ?? null, job_number: j.number };
-  const { data, error } = await sb.rpc('issue_invoice', { p_job: j.id, p_simplified: r.kind === 'F2', p_customer: customer });
+  const { data: issued, error } = await sb.rpc('issue_invoice', { p_job: j.id, p_simplified: r.kind === 'F2', p_customer: customer });
   if (error) { await notice(`<h3>No se pudo emitir la factura</h3><p>${esc(error.message)}</p>`); return; }
+  let data = issued;
+  if (data.status === 'pending') { setSaveState('Registrando en Hacienda…', 'pending'); data = await sendVerifactu(data); setSaveState(''); }
   invoices.unshift(data);
   invoicing[r.kind === 'F2' ? 'simple_next_no' : 'next_no']++;
   for (const x of new Set([j, jobs.find((y) => y.id === j.id)])) if (x) Object.assign(x, { invoice_ref: data.full_number, invoiced_at: data.issued_at, customer_tax_id: customer.tax_id ?? x.customer_tax_id, customer_address: customer.address ?? x.customer_address });
@@ -2015,7 +2041,7 @@ async function issueInvoice() {
     $('jTaxId').value = j.customer_tax_id ?? ''; $('jAddress').value = j.customer_address ?? '';
     renderJobHead();
   }
-  if (await choose(`<h3>Factura ${esc(data.full_number)} emitida</h3><p class="muted">${fmtEur(num(data.total))} con IVA. La tienes en la pestaña Facturas.</p>`, [['print', 'Imprimir o guardar en PDF', 'btn small']]) === 'print') printInvoice(data);
+  if (await choose(`<h3>Factura ${esc(data.full_number)} emitida</h3><p class="muted">${fmtEur(num(data.total))} con IVA. La tienes en la pestaña Facturas.</p>${verifactuLine(data) ? `<p class="${data.status === 'error' ? 'err' : 'muted'}">${verifactuLine(data)}</p>` : ''}`, [['print', 'Imprimir o guardar en PDF', 'btn small']]) === 'print') printInvoice(data);
 }
 
 async function rectifyInvoice(inv) {
@@ -2027,11 +2053,12 @@ async function rectifyInvoice(inv) {
     <input name="other" maxlength="200" placeholder="Cuéntalo en una frase" style="margin-top:6px">`, 'Emitir rectificativa', (fd) => fd);
   if (!r) return;
   const reason = r.why || (r.other || '').trim();
-  const { data, error } = await sb.rpc('rectify_invoice', { p_invoice: inv.id, p_reason: reason });
+  const { data: issued, error } = await sb.rpc('rectify_invoice', { p_invoice: inv.id, p_reason: reason });
   if (error) { await notice(`<h3>No se pudo rectificar</h3><p>${esc(error.message)}</p>`); return; }
   invoicing.rect_next_no++;
+  const data = issued.status === 'pending' ? await sendVerifactu(issued) : issued;
   await Promise.all([loadInvoices(), loadJobs()]);
-  if (await choose(`<h3>Rectificativa ${esc(data.full_number)} emitida</h3><p class="muted">La factura ${esc(inv.full_number)} queda anulada. La orden vuelve a estar sin facturar.</p>`, [['print', 'Imprimir o guardar en PDF', 'btn small']]) === 'print') printInvoice(data);
+  if (await choose(`<h3>Rectificativa ${esc(data.full_number)} emitida</h3><p class="muted">La factura ${esc(inv.full_number)} queda anulada. La orden vuelve a estar sin facturar.</p>${verifactuLine(data) ? `<p class="${data.status === 'error' ? 'err' : 'muted'}">${verifactuLine(data)}</p>` : ''}`, [['print', 'Imprimir o guardar en PDF', 'btn small']]) === 'print') printInvoice(data);
 }
 
 function printInvoice(inv) {
@@ -2039,10 +2066,10 @@ function printInvoice(inv) {
   const orig = inv.rectifies_id ? invoices.find((i) => i.id === inv.rectifies_id) : null;
   const rows = (inv.lines || []).map((l) => `<tr><td>${l.kind === 'labor' ? 'Mano de obra' : 'Pieza'}</td><td>${esc(l.description)}${l.brand || l.reference ? `<br><small>${esc([l.brand, l.reference].filter(Boolean).join(' · '))}</small>` : ''}</td>
     <td class="num">${String(l.qty).replace('.', ',')}</td><td class="num">${fmtEur(num(l.unit_price))}</td><td class="num">${num(l.discount) ? String(l.discount).replace('.', ',') + ' %' : ''}</td><td class="num">${fmtEur(num(l.amount))}</td></tr>`).join('');
-  const live = inv.status !== 'test';
+  // El QR de Verifactu va arriba, antes del resto (Orden HAC/1177/2024).
   $('print').innerHTML = `<div class="doc">
-    ${live && inv.qr ? `<div class="vf"><img src="${esc(inv.qr)}" alt="QR"><span>Factura verificable en la sede electrónica de la AEAT<br><b>VERI*FACTU</b></span></div>` : ''}
-    ${live ? '' : '<div class="doc-test">FACTURA DE PRUEBA · SIN VALIDEZ FISCAL</div>'}
+    ${inv.qr ? `<div class="vf"><img src="${esc(inv.qr)}" alt="QR"><span>Factura verificable en la sede electrónica de la AEAT<br><b>VERI*FACTU</b></span></div>` : ''}
+    ${inv.live ? '' : `<div class="doc-test">FACTURA DE PRUEBA${inv.qr ? ' (entorno de pruebas de Verifactu)' : ''} · SIN VALIDEZ FISCAL</div>`}
     <div class="head"><div>${workshop.logo ? `<img src="${esc(workshop.logo)}" alt="" class="doc-logo">` : ''}<h1>${esc(w.name || '')}</h1>${esc(w.legal_name || '')}<br>NIF ${esc(w.tax_id || '')}<br>${esc(w.address || '')}<br>${esc([w.phone, w.email].filter(Boolean).join(' · '))}${w.registry_no ? '<br>Nº registro industrial: ' + esc(w.registry_no) : ''}</div>
       <div style="text-align:right"><h1>${INV_KIND[inv.kind]}</h1>Nº <b>${esc(inv.full_number)}</b><br>Fecha de expedición: ${fmtDate(inv.issued_at)}${c.job_number ? `<br>Orden de reparación nº ${esc(c.job_number)}` : ''}</div></div>
     ${orig || inv.rectify_reason ? `<div class="box" style="margin-bottom:10px"><b>Rectifica</b>Factura ${esc(orig?.full_number || '')}${orig ? ' del ' + fmtDate(orig.issued_at) : ''}. Motivo: ${esc(inv.rectify_reason || '')}</div>` : ''}
@@ -2084,10 +2111,15 @@ function renderInvoices() {
       <td data-label="Fecha">${fmtDate(i.issued_at)}</td>
       <td data-label="Cliente">${esc(i.customer?.name || '—')}${i.customer?.vehicle ? `<small>${esc(i.customer.vehicle)}</small>` : ''}</td>
       <td class="num" data-label="Base">${fmtEur(num(i.base))}</td><td class="num" data-label="IVA">${fmtEur(num(i.vat))}</td><td class="num" data-label="Total"><b>${fmtEur(num(i.total))}</b></td>
-      <td data-label="Estado"><span class="inv-st ${cls}">${st}</span></td>
+      <td data-label="Estado"><span class="inv-st ${cls}" ${i.error ? `title="${esc(i.error)}"` : ''}>${st}</span>${['pending', 'error'].includes(i.status) ? '<small><a href="#" data-retry>Reintentar</a></small>' : ''}</td>
       <td class="edit"><a href="#" data-print>Ver</a>${['F1', 'F2'].includes(i.kind) && !rect ? ' · <a href="#" data-rect>Rectificar</a>' : ''}</td>`;
     tr.querySelector('[data-print]').onclick = (e) => { e.preventDefault(); printInvoice(i); };
     tr.querySelector('[data-rect]')?.addEventListener('click', (e) => { e.preventDefault(); rectifyInvoice(i); });
+    tr.querySelector('[data-retry]')?.addEventListener('click', async (e) => {
+      e.preventDefault(); e.target.textContent = 'Enviando…';
+      const fresh = await sendVerifactu(i);
+      if (fresh.status === 'error') await notice(`<h3>${esc(fresh.full_number)}: no se pudo registrar</h3><p>${esc(fresh.error || '')}</p>`);
+    });
     tb.appendChild(tr);
   }
   if (!list.length) tb.innerHTML = '<tr><td colspan="8" class="muted">Ninguna con este filtro.</td></tr>';
