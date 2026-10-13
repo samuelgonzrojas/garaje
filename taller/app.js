@@ -3750,7 +3750,7 @@ $('inviteBtn').onclick = async () => {
   const r = await dialog(`<h3>Invitar al equipo</h3>
     <label>Su correo (el de Google o el que use para entrar)</label><input name="email" type="email" required placeholder="nombre@ejemplo.com">
     <label>Rol</label><select name="role">${roleOpts}</select>
-    <p class="muted" style="font-size:13px">Cuando entre en este panel con ese correo (garajeapp.es/taller), pasará a ser del equipo. Mándale el enlace por WhatsApp.</p>`,
+    <p class="muted" style="font-size:13px">Cuando entre en este panel con ese correo (${esc(PANEL_URL.replace(/^https?:\/\//, ''))}), pasará a ser del equipo. Mándale el enlace por WhatsApp.</p>`,
     'Invitar', (fd) => fd);
   if (!r) return;
   const { error } = await sb.rpc('invite_member', { w: workshop.id, p_email: r.email, p_role: r.role });
@@ -3759,9 +3759,11 @@ $('inviteBtn').onclick = async () => {
   const joined = team.some((m) => m.email === r.email.trim().toLowerCase() && m.joined);
   shareInvite(r.email.trim().toLowerCase(), r.role, joined);
 };
+/** Dirección de este panel (vale para github.io y para garajeapp.es). */
+const PANEL_URL = location.origin + location.pathname.replace(/index\.html$/, '');
 /** Mensaje para avisar a la persona invitada (WhatsApp, correo o copiar). */
 async function shareInvite(email, role, joined = false) {
-  const url = 'https://garajeapp.es/taller/';
+  const url = PANEL_URL;
   const text = `Hola, te he dado acceso al panel de ${workshop.name} en Garaje como ${ROLE_NAME[role].toLowerCase()}. Entra en ${url} con tu correo ${email} (con Google o con el código que te llega) y verás las órdenes y los coches del taller. En el móvil puedes añadirlo a la pantalla de inicio.`;
   const choice = await choose(`<h3>${joined ? 'Ya está en el equipo' : 'Invitación lista'}</h3>
     <p class="muted">${joined ? 'Ya tenía cuenta en Garaje, así que entra directamente.' : 'Entrará en cuanto abra el panel con ese correo.'} Mándale el enlace:</p>
