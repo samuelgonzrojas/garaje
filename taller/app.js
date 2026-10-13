@@ -205,7 +205,8 @@ $('again').onclick = (e) => { e.preventDefault(); show('stepCode', false); show(
 $('verify').onclick = async () => {
   const email = $('sentTo').textContent;
   const token = $('code').value.replace(/\D/g, '');
-  if (token.length !== 6) { $('loginErr').textContent = 'El código tiene 6 cifras.'; return; }
+  // Supabase manda 6 u 8 cifras según su ajuste (Auth → Email OTP length).
+  if (token.length < 6 || token.length > 10) { $('loginErr').textContent = 'Escribe el código entero que te ha llegado al correo.'; return; }
   $('verify').disabled = true;
   const { error } = await sb.auth.verifyOtp({ email, token, type: 'email' });
   $('verify').disabled = false;

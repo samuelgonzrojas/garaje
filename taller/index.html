@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Garaje Taller">
 <link rel="stylesheet" href="../style.css">
-<link rel="stylesheet" href="taller.css?v=20261013c">
+<link rel="stylesheet" href="taller.css?v=20261013d">
 </head>
 <body>
 <div class="wrap panel">
@@ -51,12 +51,12 @@
       <div class="or"><span>o con tu correo</span></div>
       <label for="email">Tu correo</label>
       <input id="email" type="email" autocomplete="email" placeholder="taller@ejemplo.com">
-      <p class="hint">Te enviamos un código de 6 cifras. Usa el mismo correo con el que entras en la app, si la tienes.</p>
+      <p class="hint">Te enviamos un código por correo. Usa el mismo correo con el que entras en la app, si la tienes.</p>
       <button class="btn outline-white" id="sendCode">Enviarme el código</button>
     </div>
     <div id="stepCode" class="hidden">
       <label for="code">Código que te ha llegado a <span id="sentTo"></span></label>
-      <input id="code" class="code" inputmode="numeric" maxlength="6" placeholder="······">
+      <input id="code" class="code" inputmode="numeric" maxlength="10" autocomplete="one-time-code" placeholder="········">
       <div style="margin-top:12px"><button class="btn" id="verify">Entrar</button> <a href="#" id="again" class="muted" style="margin-left:10px;font-size:14px">Cambiar de correo</a></div>
     </div>
     <div class="err" id="loginErr"></div>
@@ -360,6 +360,6 @@
 </div>
 <datalist id="brands"></datalist>
 <datalist id="partNames"></datalist>
-<script type="module" src="app.js?v=20261013c"></script>
+<script type="module" src="app.js?v=20261013d"></script>
 </body>
 </html>
