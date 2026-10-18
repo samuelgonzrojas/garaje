@@ -1096,6 +1096,10 @@
      "months": 24
     }
    },
+   "not_fitted": [
+    "gearbox_oil_manual",
+    "aux_belt"
+   ],
    "watch_hints": {
     "battery": "Dos baterías: la de 12 V (suele durar 5-7 años y deja el coche sin arrancar) y la híbrida, que se revisa con diagnosis en cada visita al taller.",
     "brake_pads": "Frenos regenerativos: las pastillas duran muchísimo, pero los discos se oxidan por poco uso; frenar fuerte de vez en cuando limpia la superficie.",
@@ -4581,6 +4585,9 @@
      "months": 60
     }
    },
+   "not_fitted": [
+    "gearbox_oil_manual"
+   ],
    "watch_hints": {
     "battery": "Batería de 12 V de litio integrada: botón de reinicio en el salpicadero si se descarga; la híbrida se revisa por diagnosis.",
     "brake_pads": "Frenos regenerativos: discos oxidados por poco uso; frenar fuerte de vez en cuando."
@@ -7338,6 +7345,9 @@
      "months": 24
     }
    },
+   "not_fitted": [
+    "gearbox_oil_manual"
+   ],
    "watch_hints": {
     "battery": "Dos baterías: la de 12 V (los propietarios hablan de unos 5 años de vida; si muere, no abren ni las puertas) y la de tracción, que Renault dice que no necesita mantenimiento.",
     "timing_chain": "H4M: cadena pensada para toda la vida, pero con conducción dura puede estirarse hacia los 150.000 km; no lleva taqués hidráulicos y los ruidos suelen ser holgura de válvulas.",
@@ -7388,6 +7398,9 @@
      "months": 24
     }
    },
+   "not_fitted": [
+    "gearbox_oil_manual"
+   ],
    "watch_hints": {
     "fluids": "Comprobar el nivel de aceite cada mes: hay una campaña por consumo de aceite (tubo de reaspiración de vapores) y el aviso «nivel de aceite a ajustar» es frecuente.",
     "battery": "La de 12 V puede descargarse con el coche parado; la batería de tracción se revisa por diagnosis."
@@ -7440,6 +7453,10 @@
      "months": 24
     }
    },
+   "not_fitted": [
+    "gearbox_oil_manual",
+    "aux_belt"
+   ],
    "watch_hints": {
     "timing_chain": "Cadena en el 1.5 y el 2.0. No llevan taqués hidráulicos: si hay tic-tac de válvulas, revisar holguras (en el 1.5 se citan unos 50.000 km).",
     "battery": "Dos baterías: la de 12 V y la híbrida de litio (1,5-2 kWh), que se revisa por diagnosis en el taller.",
@@ -7489,6 +7506,9 @@
      "months": 24
     }
    },
+   "not_fitted": [
+    "gearbox_oil_manual"
+   ],
    "watch_hints": {
     "battery": "La 12 V es AGM; la batería de alto voltaje del PHEV ha tenido campañas: si el coche avisa de no cargar, al concesionario.",
     "brake_pads": "Frenada regenerativa: discos que se oxidan por poco uso; frenar fuerte de vez en cuando."
@@ -7551,6 +7571,9 @@
      "months": 24
     }
    },
+   "not_fitted": [
+    "gearbox_oil_manual"
+   ],
    "watch_hints": {
     "fluids": "Motor nuevo y con poco recorrido: comprobar el nivel de aceite cada mes; aún no se sabe si ha superado el consumo de aceite de la PureTech de correa.",
     "battery": "Además de la de 12 V lleva una batería de litio de 48 V bajo el asiento delantero izquierdo."
@@ -7615,6 +7638,10 @@
      "months": 24
     }
    },
+   "not_fitted": [
+    "gearbox_oil_manual",
+    "aux_belt"
+   ],
    "watch_hints": {
     "battery": "La 12 V es de litio-ferrofosfato (LFP) y se «duerme» tras mucho tiempo parado: se despierta pulsando el microinterruptor de la maneta delantera izquierda. Después, dejar el coche encendido más de 15 minutos.",
     "exercise_car": "BYD recomienda cargar y descargar la batería de alto voltaje por completo al menos cada 6 meses para que se calibre, y que al menos un 10 % del tiempo se circule en modo híbrido (HEV) para que el motor térmico también funcione."
