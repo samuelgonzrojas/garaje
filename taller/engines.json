@@ -411,11 +411,11 @@
     "Bomba de agua con fugas."
    ],
    "specs": {
-    "oil": "5W-30 VW 504.00/507.00 (o 502.00)",
+    "oil": "5W-30 VW 504.00 (o 5W-40 VW 502.00 en intervalo fijo)",
     "oil_l": "3,6-3,8 l con filtro",
     "coolant": "G12++ / G13",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
-    "plugs": "NGK PZFR6R / ZKR7AI-8 según motor, cada 60.000 km",
+    "plugs": "VW indica 60.000 km; con años, mejor cada 45.000 km",
     "timing": "Cadena: vigilar el tensor (ruido en frío)"
    },
    "typical_l100": 6.6
@@ -474,7 +474,7 @@
    },
    "watch_hints": {},
    "known_issues": [
-    "Correa de distribución: el fabricante la da por 'de por vida' o 240.000 km; conviene revisarla a los 120.000 y cambiarla a 150.000 o 8 años.",
+    "Correa de distribución: el fabricante no fija cambio; conviene revisarla a los 120.000 km y cambiarla a 150.000 km o 8 años.",
     "1.5 TSI 2017-2019: tirones en frío (actualización de software).",
     "Carbonilla en válvulas de admisión (inyección directa) con uso urbano."
    ],
@@ -484,7 +484,7 @@
     "coolant": "G13",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Cada 60.000 km",
-    "timing": "Correa dentada: VW no fija cambio; 120.000 km o 8 años recomendado"
+    "timing": "Correa dentada: VW no fija cambio (solo revisión); revisarla a 120.000 km y cambiarla a 150.000 km u 8 años"
    },
    "typical_l100": 6.2
   },
@@ -623,8 +623,8 @@
     "Turbo por falta de lubricación (cribas de aceite obstruidas): el fallo más caro y más frecuente.",
     "FAP: aditivo agotado o filtro saturado en uso urbano.",
     "EGR y bomba de vacío.",
-    "Junta de culata y fugas por el intercambiador (1.6 HDi 110 CV 2004-2010).",
-    "Correa de distribución: el fabricante dice 240.000 km/10 años; conservador 120.000 km/6 años."
+    "Arandelas de los inyectores que pierden compresión: carbonilla negra alrededor de los inyectores y olor a gasóleo quemado.",
+    "Correa de distribución: el fabricante da entre 180.000 y 240.000 km/10 años según el año; conservador 120.000 km/6 años."
    ],
    "specs": {
     "oil": "5W-30 PSA B71 2290 (Total Quartz Ineo ECS) — nunca otro grado con FAP",
@@ -852,6 +852,7 @@
    },
    "known_issues": [
     "Inyectores (sobre todo Delphi en 2005-2012).",
+    "Cojinetes de biela (gripaje) si se alargan los cambios de aceite o se usa un aceite no homologado.",
     "Turbo por lubricación deficiente.",
     "Volante bimasa y embrague.",
     "EGR y caudalímetro.",
@@ -862,7 +863,7 @@
     "oil_l": "4,4-4,5 l con filtro",
     "coolant": "Glaceol RX Type D (amarillo), al 50 %",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
-    "timing": "Correa con bomba de agua y correa de accesorios; 120.000 km / 5 años (60.000 en los primeros K9K)"
+    "timing": "Correa con bomba de agua y correa de accesorios; 120.000 km / 5 años"
    },
    "typical_l100": 4.9
   },
@@ -1111,7 +1112,7 @@
     "oil_l": "1.8: 4,2 l con filtro · 1.5: 3,7 l · 2.0 M20A: 4,5 l",
     "coolant": "Toyota Super Long Life (rosa); el inversor lleva su propio circuito",
     "brake_fluid": "DOT 3 / DOT 4 (sistema electrohidráulico: purga con útil)",
-    "plugs": "Iridio, cada 120.000 km",
+    "plugs": "Iridio; Toyota indica 120.000 km, mejor cada 90.000",
     "battery": "12 V AGM pequeña (auxiliar); la de tracción no se mantiene",
     "timing": "Cadena"
    },
@@ -1280,7 +1281,7 @@
    },
    "known_issues": [
     "Cadena de distribución estirada por aceite viejo o nivel bajo.",
-    "EGR y colector de admisión (swirl flaps) con carbonilla.",
+    "EGR y colector de admisión con carbonilla.",
     "Turbo en las versiones de 90-95 CV.",
     "Bomba de aceite y presión baja (testigo) en unidades con muchos km."
    ],
@@ -1340,7 +1341,7 @@
     "oil_l": "5,4 l con filtro",
     "coolant": "Opel / GM dexcool (naranja)",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
-    "timing": "Correa con bomba de agua; 150.000 km / 10 años"
+    "timing": "Correa con bomba de agua; el fabricante dice 150.000 km / 10 años, conservador 90.000 km / 6 años"
    },
    "typical_l100": 5.4
   },
@@ -2340,7 +2341,7 @@
     "Turbo por lubricación (muy frecuente).",
     "Volante bimasa.",
     "Inyectores y caudalímetro.",
-    "Culatas con poros en los primeros 1.9 dCi 120.",
+    "Cojinetes de biela (gripaje) con aceite viejo o nivel bajo.",
     "Correa de distribución: no apurar."
    ],
    "specs": {
@@ -3126,7 +3127,7 @@
    "known_issues": [
     "Correa de distribución: cambiar con bomba de agua y rodillos.",
     "Bobinas de encendido y bujías.",
-    "Consumo de aceite en el 1.6 16v CWVA (2014-2016, campaña de segmentos).",
+    "Consumo de aceite en algunos 1.6 16v CWVA (2014-2016) por los segmentos.",
     "Motor sencillo y barato: la mejor noticia posible."
    ],
    "specs": {
