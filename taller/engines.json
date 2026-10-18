@@ -6599,7 +6599,8 @@
     "navara d40",
     "pathfinder r51",
     "np300 pick up",
-    "2.5 dci"
+    "2.5 dci",
+    "cabstar"
    ],
    "years": [
     2005,
@@ -6638,6 +6639,7 @@
     "fluids": "Pick-up y todoterreno 4x4: cambia el aceite de la transferencia y de los diferenciales. Si el trasero es autoblocante (LSD), cada 20.000 km."
    },
    "known_issues": [
+    "Cadena de la bomba de inyección (de una fila): se estira pronto, desde unos 70.000 km. Síntoma: el motor se cala a los pocos segundos de arrancar en frío.",
     "Inyectores a partir de unos 150.000 km.",
     "EGR con hollín: tirones y pérdida de fuerza si no se limpia.",
     "Holgura de válvulas sin taqués hidráulicos: hay que revisarla y ajustarla si el motor hace ruido de taqués.",
@@ -6648,7 +6650,7 @@
     "oil_l": "6,9 l con filtro (Navara D40 y Pathfinder R51)",
     "coolant": "Nissan Long Life Coolant (azul)",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
-    "timing": "Cadena doble, sin cambio programado",
+    "timing": "Cadena doble a los árboles y cadena simple a la bomba de inyección (esta se gasta antes); sin cambio programado",
     "gearbox": "Manual: Nissan MTF 75W-85 GL-4. Automática 5 vel.: Nissan Matic S/J ATF",
     "diff": "Transferencia Navara D40: Nissan ATF Matic D, 2,0 l. Diferencial delantero: 80W-90 GL-5 (0,85 l). Trasero: 80W-90 GL-5 LSD si es autoblocante (cada 20.000 km)",
     "fap": "Solo versiones Euro 5 (190 CV, desde 2010)",
@@ -6695,8 +6697,8 @@
      "months": 24
     },
     "timing_belt": {
-     "km": 150000,
-     "months": 96
+     "km": 100000,
+     "months": 72
     },
     "brake_fluid": {
      "months": 24
@@ -6708,6 +6710,7 @@
    },
    "known_issues": [
     "Bomba de alta presión e inyectores Delphi: averías por gasóleo contaminado o filtro sin cambiar.",
+    "Focus 1.8 TDCi fabricados entre 05/2001 y 04/2002: desgaste de la bomba de alta presión que llena de limaduras los inyectores.",
     "Inyectores que empiezan a fugar hacia los 100.000 km; si se ignora, riesgo de pistón quemado.",
     "Dámper de la polea del cigüeñal: arranque difícil o ruido de soplido cuando falla.",
     "Sensor de posición del árbol de levas y pérdida de la codificación de inyectores."
@@ -6715,9 +6718,9 @@
    "specs": {
     "oil": "5W-30 Ford WSS-M2C913-C (ACEA A5/B5)",
     "oil_l": "5,6 l con filtro (aprox.)",
-    "coolant": "Ford Super Plus naranja (WSS-M97B44-D)",
+    "coolant": "Ford WSS-M97B44-D (Motorcraft SuperPlus)",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
-    "timing": "Correa al árbol de levas, movida desde el piñón de la bomba; la bomba va por cadena doble desde el cigüeñal (correa bañada en aceite desde 2007). Ford: 160.000-200.000 km / 10 años según versión",
+    "timing": "Correa al árbol de levas, movida desde el piñón de la bomba; la bomba va por cadena doble desde el cigüeñal (correa bañada en aceite desde 2007). Ford: hasta 160.000 km / 8-10 años según versión; mejor 100.000 km / 6 años, junto con la correa o cadena de la bomba",
     "gearbox": "Manual: aceite Ford 75W-90 (WSD-M2C200) según caja",
     "notes": "Ford da 20.000 km o 12 meses de aceite y 60.000 km de filtro de gasoil; con un sistema Delphi tan delicado conviene acortar ambos."
    },
@@ -7035,7 +7038,7 @@
    ],
    "years": [
     1998,
-    2007
+    2011
    ],
    "fuel": "diesel",
    "label": "PSA 1.9 D atmosférico (motor DW8, 1998-2007)",
@@ -7096,10 +7099,12 @@
     "x290",
     "daily",
     "autocaravana",
-    "camper"
+    "camper",
+    "ducato 244",
+    "jtd"
    ],
    "years": [
-    2006,
+    2002,
     2022
    ],
    "fuel": "diesel",
@@ -7226,6 +7231,75 @@
     "notes": "No confundir con el 2.2 HDi DW12 (de correa) del Boxer/Jumper 2002-2006, ni con el 2.2 BlueHDi DW12 de 2019 en adelante, ni con el 2.0 BlueHDi DW10 del Boxer/Jumper 2014-2019. Desde 2016 el Transit pasa al 2.0 EcoBlue."
    },
    "typical_l100": 8.5
+  },
+  {
+   "id": "vag_19tdi_ve_alh",
+   "make": [
+    "Seat",
+    "Volkswagen",
+    "VW",
+    "Audi",
+    "Skoda"
+   ],
+   "models": [
+    "golf",
+    "golf iv",
+    "bora",
+    "leon",
+    "león",
+    "toledo",
+    "ibiza",
+    "cordoba",
+    "córdoba",
+    "octavia",
+    "polo",
+    "a3"
+   ],
+   "years": [
+    1996,
+    2006
+   ],
+   "fuel": "diesel",
+   "label": "Grupo VW 1.9 TDI con bomba rotativa y 1.9 SDI (ALH, AGR, AHF, ASV, 1996-2006)",
+   "engine": "1.9 TDI 90 CV (AHU, AGR, ALH) y 110 CV (AHF, ASV) con bomba rotativa; 1.9 SDI atmosférico 64/68 CV (ASY, AQM, AGP)",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "timing_belt": {
+     "km": 90000,
+     "months": 60
+    },
+    "fuel_filter": {
+     "km": 30000,
+     "months": 24
+    },
+    "aux_belt": {
+     "km": 60000,
+     "months": 60
+    }
+   },
+   "watch_hints": {
+    "turbo_egr": "TDI 110 CV: caudalímetro y turbo dan guerra (sobre todo antes de 2002); tirones o pérdida de fuerza suelen venir de ahí. El SDI no lleva turbo.",
+    "fluids": "Olor a gasóleo o manchas sobre la bomba inyectora: suelen ser sus juntas (tapa superior y regulador de caudal). Mejor arreglarlo pronto."
+   },
+   "known_issues": [
+    "Caudalímetro (sobre todo 110 CV anteriores a 2002): tirones y pérdida de potencia.",
+    "Turbo en las versiones de 110 CV.",
+    "Fugas de gasóleo por las juntas de la bomba inyectora rotativa.",
+    "Carbonilla en la EGR y el colector de admisión con mucho uso urbano.",
+    "Correa de distribución: las primeras ALH tenían intervalos cortos hasta que VW mejoró correa y rodillos; cambiar siempre el kit completo con bomba de agua."
+   ],
+   "specs": {
+    "oil": "Aceite diésel VW 505.00 (5W-40 o 10W-40); un 505.01 también vale",
+    "oil_l": "4,5 l con filtro (aprox.)",
+    "coolant": "G12 / G12+ (VW TL 774 D/F, rosa), al 50 %",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Kit de distribución con bomba de agua, tensor y rodillos; no apurar el intervalo aunque el kit sea de los actualizados"
+   },
+   "typical_l100": 5.5
   }
  ],
  "specs_note": "Especificaciones orientativas recopiladas de manuales y talleres: comprueba siempre el libro de tu vehículo antes de comprar.",
