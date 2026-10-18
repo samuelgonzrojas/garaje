@@ -6310,6 +6310,922 @@
     "notes": "Refrigeración por aire: cambios de aceite cortos (5.000 km / 6 meses)"
    },
    "typical_l100": 3.0
+  },
+  {
+   "id": "renault_10_sce_tce_h4d",
+   "make": [
+    "Renault",
+    "Dacia",
+    "Nissan",
+    "Smart"
+   ],
+   "models": [
+    "clio",
+    "clio v",
+    "clio 5",
+    "captur",
+    "captur ii",
+    "twingo",
+    "twingo iii",
+    "sandero",
+    "sandero ii",
+    "sandero iii",
+    "stepway",
+    "sandero stepway",
+    "logan",
+    "logan mcv",
+    "jogger",
+    "duster",
+    "micra",
+    "k14",
+    "fortwo",
+    "forfour"
+   ],
+   "years": [
+    2014,
+    2026
+   ],
+   "fuel": "gasoline",
+   "label": "Renault / Dacia 1.0 SCe y 1.0 TCe 3 cilindros (motores B4D / H4D, 2014-hoy)",
+   "engine": "1.0 SCe 65/67/70/73/75 CV · 1.0 TCe 90/100/110 CV (incl. ECO-G GLP)",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "spark_plugs": {
+     "km": 60000,
+     "months": 48
+    }
+   },
+   "watch_hints": {
+    "timing_chain": "TCe (H4D turbo): cadena y variador de admisión pueden sonar a partir de 100.000-150.000 km; escuchar en frío."
+   },
+   "known_issues": [
+    "Sin taqués hidráulicos: revisar holgura de válvulas (~60.000 km en TCe, ~100.000 km en SCe).",
+    "SCe atmosférico: posible consumo de aceite a partir de 100.000 km (aros).",
+    "TCe: fugas por la junta de tapa de balancines en los primeros años.",
+    "ECO-G (GLP): bujías e inyectores de gas se gastan antes; revisar el sistema de GLP en cada servicio.",
+    "Vigilar refrigeración (motor de aluminio; sobre todo Twingo, motor trasero)."
+   ],
+   "specs": {
+    "oil": "5W-30 RN17 (SCe 2016-2020: RN0700)",
+    "oil_l": "SCe: 3,0 l con filtro · TCe: 3,3-4,2 l (fuentes discrepan; rellenar por varilla)",
+    "coolant": "Glaceol RX Type D",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Cada 60.000 km / 4 años (Renault); en ECO-G con mucho GLP, adelantar",
+    "timing": "Cadena (sin cambio programado)",
+    "notes": "Renault indica aceite cada 30.000 km / 1-2 años; mejor cada 15.000 km / 1 año. SCe 65/75 (Clio V, Sandero III, Twingo desde 2019) = código B4D; TCe 90/100 = H4D 450-480; Twingo III SCe 70 (2014-2019) = H4D atmosférico."
+   },
+   "typical_l100": 6.0
+  },
+  {
+   "id": "renault_14_16_8v_k7j_k7m",
+   "make": [
+    "Renault",
+    "Dacia"
+   ],
+   "models": [
+    "clio",
+    "clio ii",
+    "clio 2",
+    "clio symbol",
+    "thalia",
+    "symbol",
+    "kangoo",
+    "megane",
+    "mégane",
+    "scenic",
+    "scénic",
+    "logan",
+    "logan mcv",
+    "sandero",
+    "sandero stepway",
+    "stepway",
+    "dokker",
+    "lodgy"
+   ],
+   "years": [
+    1995,
+    2016
+   ],
+   "fuel": "gasoline",
+   "label": "Renault / Dacia 1.4 y 1.6 8v MPI (motores K7J / K7M, 1995-2016)",
+   "engine": "1.4 8v 75 CV · 1.6 8v 85/90 CV",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "timing_belt": {
+     "km": 60000,
+     "months": 48
+    },
+    "spark_plugs": {
+     "km": 30000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Correa de distribución con bomba de agua y rodillo tensor: si rompe, dobla válvulas.",
+    "Bobinas de encendido que se agrietan (anteriores a 2012): tirones con humedad.",
+    "Ralentí inestable: motor paso a paso / mariposa sucios, inyectores o tomas de aire.",
+    "Fugas de aceite (retén del cigüeñal, tapa de balancines) y de refrigerante (caja del termostato).",
+    "Sin taqués hidráulicos: ajustar holgura de válvulas si hace ruido.",
+    "Sensor de cigüeñal poco duradero."
+   ],
+   "specs": {
+    "oil": "5W-40 / 10W-40 RN0700 (ACEA A3/B4)",
+    "oil_l": "3,3 l con filtro (Clio II 1.4: 3,1 l)",
+    "coolant": "Glaceol RX Type D",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Cada 30.000 km (valor prudente)",
+    "timing": "Correa con bomba de agua y tensor; 60.000 km / 4 años (prudente)",
+    "notes": "Dacia/Renault indican aceite cada 15.000-20.000 km / 1 año. En España el Duster 1.6 era 16v (K4M), no este motor."
+   },
+   "typical_l100": 7.8
+  },
+  {
+   "id": "renault_12_16v_d4f",
+   "make": [
+    "Renault",
+    "Dacia"
+   ],
+   "models": [
+    "clio",
+    "clio ii",
+    "clio iii",
+    "clio iv",
+    "clio 2",
+    "clio 3",
+    "clio 4",
+    "twingo",
+    "twingo ii",
+    "kangoo",
+    "modus",
+    "grand modus",
+    "thalia",
+    "symbol",
+    "sandero",
+    "sandero stepway",
+    "logan",
+    "logan mcv",
+    "wind"
+   ],
+   "years": [
+    1999,
+    2018
+   ],
+   "fuel": "gasoline",
+   "label": "Renault / Dacia 1.2 16v (motor D4F, incl. 1.2 TCe 100 D4Ft, 1999-2018)",
+   "engine": "1.2 16v 60/65/75/79 CV · 1.2 TCe 100 CV",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "timing_belt": {
+     "km": 90000,
+     "months": 60
+    },
+    "spark_plugs": {
+     "km": 60000,
+     "months": 48
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Correa de distribución: si rompe, dobla válvulas; puede fallar antes de lo previsto.",
+    "Bobina de encendido con cables integrados (cara en el TCe).",
+    "Sin taqués hidráulicos: válvulas desajustadas hacen ruido (en el TCe hay que quitar el colector).",
+    "Fugas de aceite y fallos de sensores/electrónica.",
+    "Bomba de gasolina sensible a combustible de mala calidad."
+   ],
+   "specs": {
+    "oil": "5W-40 / 5W-30 RN0700 (TCe 100: RN0710)",
+    "oil_l": "4,0 l con filtro",
+    "coolant": "Glaceol RX Type D",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Cada 60.000 km / 4 años (versión GLP: 30.000 km)",
+    "timing": "Correa; 90.000 km / 5 años (prudente; Renault: 120.000 km / 5-6 años, Clio IV 150.000 km / 6 años)",
+    "notes": "Renault indica aceite cada 20.000-30.000 km; mejor cada 15.000 km / 1 año."
+   },
+   "typical_l100": 6.5
+  },
+  {
+   "id": "mitsubishi_32_did_4m41",
+   "make": "Mitsubishi",
+   "models": [
+    "montero",
+    "pajero",
+    "shogun",
+    "montero iii",
+    "montero iv",
+    "pajero iii",
+    "pajero iv",
+    "montero 3.2",
+    "did",
+    "di-d"
+   ],
+   "years": [
+    2000,
+    2021
+   ],
+   "fuel": "diesel",
+   "label": "Mitsubishi Montero 3.2 DI-D (motor 4M41, 2000-2021)",
+   "engine": "3.2 DI-D 160-170 CV (Montero III y primeros IV), 200/190 CV (Montero IV desde 2009-2010)",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 10000,
+     "months": 12
+    },
+    "fuel_filter": {
+     "km": 30000,
+     "months": 24
+    },
+    "coolant": {
+     "km": 120000,
+     "months": 60
+    },
+    "diff_oil": {
+     "km": 40000
+    },
+    "brake_fluid": {
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "timing_chain": "Distribución por engranajes más cadena a los árboles de levas: no tiene cambio programado, pero a partir de 200.000 km la cadena puede estirarse y la guía superior desgastarse. Un cascabeleo nuevo en frío es motivo de revisión.",
+    "injectors": "Common rail de alta presión: humo negro, tirones o pérdida de fuerza bajo carga apuntan a inyectores. Las reprogramaciones baratas aceleran su desgaste.",
+    "turbo_egr": "Limpiar la EGR y revisar la tensión de la correa del alternador cada 50.000 km aprox.",
+    "fluids": "Es un 4x4 con reductora: cambia también el aceite de la transferencia y de los dos diferenciales. Si aparece aceite en el depósito del refrigerante, revisar el enfriador de aceite."
+   },
+   "known_issues": [
+    "Polea del cigüeñal (dámper) con goma que se despega, incluso con pocos kilómetros: vibración o ruido en la parte delantera del motor.",
+    "Estiramiento de la cadena y desgaste de la guía superior a partir de 200-250.000 km.",
+    "Inyectores y sistema common rail a alto kilometraje: humo negro y pérdida de potencia.",
+    "EGR y admisión con carbonilla; limpieza periódica.",
+    "Enfriador de aceite que fuga al circuito de refrigeración (casos documentados en Montero III)."
+   ],
+   "specs": {
+    "oil": "5W-30 sintético. Montero III: ACEA B3/B4. Montero IV: ACEA C2/C3 (obligatorio si lleva FAP)",
+    "oil_l": "9,3 l con filtro (9,8 l en seco con el enfriador)",
+    "coolant": "Mitsubishi Super Long Life Coolant (o equivalente sin silicatos)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Engranajes (bomba de alta y ejes de equilibrado) + cadena a los árboles de levas; sin cambio programado",
+    "gearbox": "Manual: Mitsubishi MTF 75W-85 GL-4. Automática: ATF SP-III (Montero III) / ATF-PA (Montero IV)",
+    "diff": "Transferencia: MTF 75W-85 GL-4, 2,5-2,8 l. Diferenciales: 80W GL-5 (delantero 1,2 l, trasero 1,6 l). Mitsubishi: 80.000 km en uso normal, 40.000 km en uso severo",
+    "fap": "Los Montero IV Euro 5 (200/190 CV) llevan FAP: aceite C3 y algún trayecto largo de vez en cuando",
+    "notes": "Mitsubishi pide el filtro de aceite cada 10.000 km o 12 meses en este motor; en uso severo (polvo, remolque, campo) acortar más."
+   },
+   "typical_l100": 10.5
+  },
+  {
+   "id": "nissan_25_dci_yd25",
+   "make": "Nissan",
+   "models": [
+    "navara",
+    "pathfinder",
+    "np300",
+    "pick up",
+    "pick-up",
+    "d40",
+    "r51",
+    "d22",
+    "navara d40",
+    "pathfinder r51",
+    "np300 pick up",
+    "2.5 dci"
+   ],
+   "years": [
+    2005,
+    2015
+   ],
+   "fuel": "diesel",
+   "label": "Nissan 2.5 dCi (motor YD25DDTi: Navara D40, Pathfinder R51, NP300 Pick-Up, 2005-2015)",
+   "engine": "2.5 dCi 133 CV (NP300 Pick-Up), 144/171-174 CV (2005-2010), 190 CV (desde 2010)",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 10000,
+     "months": 12
+    },
+    "fuel_filter": {
+     "km": 30000,
+     "months": 24
+    },
+    "coolant": {
+     "km": 60000,
+     "months": 48
+    },
+    "diff_oil": {
+     "km": 30000,
+     "months": 24
+    },
+    "brake_fluid": {
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "timing_chain": "Distribución por cadena doble. No tiene cambio programado, pero un ruido metálico o cascabeleo al arrancar en frío hay que revisarlo cuanto antes.",
+    "injectors": "Los inyectores Denso suelen durar unos 150.000 km; arranque difícil, humo o ralentí irregular son la señal.",
+    "turbo_egr": "La EGR se ensucia rápido con hollín: conviene limpiarla de forma periódica.",
+    "dpf": "Las versiones de 190 CV (Euro 5, desde 2010) llevan FAP: aceite ACEA C4 y algún trayecto largo para que regenere.",
+    "fluids": "Pick-up y todoterreno 4x4: cambia el aceite de la transferencia y de los diferenciales. Si el trasero es autoblocante (LSD), cada 20.000 km."
+   },
+   "known_issues": [
+    "Inyectores a partir de unos 150.000 km.",
+    "EGR con hollín: tirones y pérdida de fuerza si no se limpia.",
+    "Holgura de válvulas sin taqués hidráulicos: hay que revisarla y ajustarla si el motor hace ruido de taqués.",
+    "Chasis del pick-up: revisar óxido y fisuras, sobre todo si se ha usado con carga pesada o remolque."
+   ],
+   "specs": {
+    "oil": "5W-30 ACEA B4 (sin FAP) / Nissan 5W-30 DPF ACEA C4 (con FAP, 190 CV)",
+    "oil_l": "6,9 l con filtro (Navara D40 y Pathfinder R51)",
+    "coolant": "Nissan Long Life Coolant (azul)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Cadena doble, sin cambio programado",
+    "gearbox": "Manual: Nissan MTF 75W-85 GL-4. Automática 5 vel.: Nissan Matic S/J ATF",
+    "diff": "Transferencia Navara D40: Nissan ATF Matic D, 2,0 l. Diferencial delantero: 80W-90 GL-5 (0,85 l). Trasero: 80W-90 GL-5 LSD si es autoblocante (cada 20.000 km)",
+    "fap": "Solo versiones Euro 5 (190 CV, desde 2010)",
+    "notes": "Nissan da 15.000 km en uso normal y 7.500 km en uso severo; en un pick-up de trabajo o con remolque, mejor 10.000 km. El NP300 Pick-Up (base D22) lleva otra cantidad de aceite: comprobar en el manual."
+   },
+   "typical_l100": 10.0
+  },
+  {
+   "id": "ford_18_tdci",
+   "make": "Ford",
+   "models": [
+    "focus",
+    "focus i",
+    "focus ii",
+    "focus 2",
+    "c-max",
+    "c max",
+    "focus c-max",
+    "mondeo",
+    "mondeo iv",
+    "galaxy",
+    "s-max",
+    "smax",
+    "transit connect",
+    "tourneo connect",
+    "connect",
+    "1.8 tdci"
+   ],
+   "years": [
+    2001,
+    2013
+   ],
+   "fuel": "diesel",
+   "label": "Ford 1.8 TDCi (motor Lynx/Duratorq 1.8, 2001-2013)",
+   "engine": "1.8 TDCi 75-125 CV (Focus I/II 100/115, C-Max 115, Mondeo IV y Galaxy/S-Max 100/125, Connect 75/90/110)",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "fuel_filter": {
+     "km": 40000,
+     "months": 24
+    },
+    "timing_belt": {
+     "km": 150000,
+     "months": 96
+    },
+    "brake_fluid": {
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "injectors": "Sistema common rail Delphi muy sensible al gasóleo de mala calidad o con agua: reposta en estaciones fiables y cambia el filtro de gasoil a tiempo. Un inyector que gotea puede dañar un pistón.",
+    "fluids": "Si se repara la bomba de alta por contaminación, suele haber que cambiar también inyectores y limpiar el depósito: es caro."
+   },
+   "known_issues": [
+    "Bomba de alta presión e inyectores Delphi: averías por gasóleo contaminado o filtro sin cambiar.",
+    "Inyectores que empiezan a fugar hacia los 100.000 km; si se ignora, riesgo de pistón quemado.",
+    "Dámper de la polea del cigüeñal: arranque difícil o ruido de soplido cuando falla.",
+    "Sensor de posición del árbol de levas y pérdida de la codificación de inyectores."
+   ],
+   "specs": {
+    "oil": "5W-30 Ford WSS-M2C913-C (ACEA A5/B5)",
+    "oil_l": "5,6 l con filtro (aprox.)",
+    "coolant": "Ford Super Plus naranja (WSS-M97B44-D)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Correa al árbol de levas, movida desde el piñón de la bomba; la bomba va por cadena doble desde el cigüeñal (correa bañada en aceite desde 2007). Ford: 160.000-200.000 km / 10 años según versión",
+    "gearbox": "Manual: aceite Ford 75W-90 (WSD-M2C200) según caja",
+    "notes": "Ford da 20.000 km o 12 meses de aceite y 60.000 km de filtro de gasoil; con un sistema Delphi tan delicado conviene acortar ambos."
+   },
+   "typical_l100": 6.3
+  },
+  {
+   "id": "fca_firefly_10_13",
+   "make": [
+    "Jeep",
+    "Fiat"
+   ],
+   "models": [
+    "renegade",
+    "compass",
+    "500x",
+    "500 x",
+    "tipo"
+   ],
+   "years": [
+    2018,
+    2026
+   ],
+   "fuel": "gasoline",
+   "label": "FCA FireFly 1.0 T3 / 1.3 T4 turbo (2018-2026)",
+   "engine": "1.0 T3 100/120 CV · 1.3 T4 150/180 CV (GSE MultiAir III)",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "spark_plugs": {
+     "km": 60000,
+     "months": 48
+    },
+    "brake_fluid": {
+     "months": 24
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Fuga de aceite por la tapa del bloque lado volante (Renegade/Compass 2020-2023): boletín FCA 09-021-24, se cambia la tapa.",
+    "El cambio de aceite lo marca el indicador de degradación del cuadro: nunca más de 1 año.",
+    "Bujías solo las específicas (NGK ILKFR7A8): el manual avisa de daños graves con otras.",
+    "El 1.3 PHEV 4xe y el 1.5 e-Hybrid tienen plan propio: no usar esta ficha."
+   ],
+   "specs": {
+    "oil": "0W-30 ACEA C2 / API SN, norma FCA 9.55535-GS1 (Selenia Digitek P.E.) · Fiat alarga el cambio según indicador (máx. 1 año)",
+    "oil_l": "3,3 l con filtro (1.0 T3) · 4,7 l con filtro (1.3 T4)",
+    "coolant": "Paraflu UP al 50 % (6,9 l 1.0 · 8,3 l 1.3)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "NGK ILKFR7A8 (cada 60.000 km)",
+    "timing": "Cadena",
+    "notes": "Renegade/Compass 4xe (1.3 PHEV 190/240 CV) comparten bloque pero no esta ficha."
+   },
+   "typical_l100": 7.0
+  },
+  {
+   "id": "fca_firefly_10_hybrid",
+   "make": [
+    "Fiat",
+    "Lancia"
+   ],
+   "models": [
+    "panda",
+    "pandina",
+    "panda hybrid",
+    "500",
+    "500 hybrid",
+    "ypsilon",
+    "ypsilon hybrid"
+   ],
+   "years": [
+    2020,
+    2026
+   ],
+   "fuel": "gasoline",
+   "label": "Fiat/Lancia 1.0 FireFly Hybrid 70 CV (2020-2026)",
+   "engine": "1.0 FireFly Hybrid 70 CV, tres cilindros, BSG 12 V",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "spark_plugs": {
+     "km": 15000,
+     "months": 12
+    },
+    "air_filter": {
+     "km": 30000,
+     "months": 24
+    },
+    "brake_fluid": {
+     "months": 24
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Bujías cada 15.000 km: mucho antes que otros motores, no te las saltes.",
+    "Correa del motor-generador (BSG): sustituir a los 240.000 km; con caminos de polvo revisar el tensor a los 120.000 km.",
+    "Si se enciende el testigo de avería del sistema híbrido o de la batería, al taller Fiat."
+   ],
+   "specs": {
+    "oil": "0W-20 (Selenia ECO2)",
+    "oil_l": "2,5 l con filtro (2,2 l sin filtro)",
+    "coolant": "Paraflu UP al 50 % (4,4 l)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Específicas del motor FireFly (cada 15.000 km)",
+    "timing": "Cadena",
+    "notes": "Uso por ciudad con menos de 10.000 km/año: cambiar aceite y filtro cada año."
+   },
+   "typical_l100": 5.4
+  },
+  {
+   "id": "honda_esp_300_350",
+   "make": "Honda",
+   "models": [
+    "sh300",
+    "sh 300",
+    "sh300i",
+    "sh 300i",
+    "sh350",
+    "sh 350",
+    "sh350i",
+    "sh 350i",
+    "forza 300",
+    "forza300",
+    "nss300",
+    "forza 350",
+    "forza350",
+    "nss350",
+    "adv350",
+    "adv 350"
+   ],
+   "years": [
+    2007,
+    2030
+   ],
+   "fuel": "gasoline",
+   "label": "Honda 300/350 (SH300i/SH350i, Forza 300/350, ADV350)",
+   "engine": "Monocilíndrico 279 cc (SH300i/Forza 300) / 330 cc eSP+ (SH350i/Forza 350/ADV350), CVT",
+   "timing": "chain",
+   "intervals": {
+    "moto_oil": {
+     "km": 12000,
+     "months": 12
+    },
+    "moto_spark_plugs": {
+     "km": 12000
+    },
+    "valve_clearance": {
+     "km": 24000
+    },
+    "moto_air_filter": {
+     "km": 24000
+    },
+    "cvt_belt": {
+     "km": 24000
+    },
+    "moto_coolant": {
+     "months": 36
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Correa del variador: revisar a los 12.000 km y cambiar a los 24.000 km.",
+    "Filtro de la caja del variador y respiradero del cárter: limpiar cada 12.000 km (más a menudo con lluvia o polvo).",
+    "Aceite de la transmisión final: cambio cada 2 años, se olvida a menudo.",
+    "Filtro de aceite solo cada 24.000 km (el aceite, cada 12.000 km o cada año)."
+   ],
+   "specs": {
+    "oil": "10W-30 JASO MB (API SG o superior) · transmisión final 0,17-0,30 l (cambio cada 2 años)",
+    "oil_l": "1,5 l con filtro (350) · 1,4 l con filtro (300)",
+    "coolant": "Pro Honda HP Coolant (premezclado) · 1,0-1,3 l",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "NGK LMAR8L-9 (350) · NGK LMAR8A-9 (300)",
+    "drive": "Correa del variador cada 24.000 km (revisión a los 12.000)",
+    "tyres": "110/70-16 · 130/70 R16 (SH) · 120/70-15 · 140/70-14 (Forza 300/350)",
+    "battery": "YTZ12S (SH350i) · YTZ10S (Forza 350)"
+   },
+   "typical_l100": 3.3
+  },
+  {
+   "id": "benelli_500_twin",
+   "make": "Benelli",
+   "models": [
+    "trk 502",
+    "trk502",
+    "trk 502x",
+    "trk502x",
+    "trk 502 x",
+    "leoncino",
+    "leoncino 500",
+    "leoncino trail",
+    "502c",
+    "502 c"
+   ],
+   "years": [
+    2017,
+    2030
+   ],
+   "fuel": "gasoline",
+   "label": "Benelli 500 bicilíndrico (TRK 502/502X, Leoncino 500, 502C)",
+   "engine": "Bicilíndrico paralelo 500 cc, 8 válvulas, 48 CV",
+   "timing": "chain",
+   "intervals": {
+    "moto_oil": {
+     "km": 6000,
+     "months": 12
+    },
+    "moto_spark_plugs": {
+     "km": 6000
+    },
+    "moto_air_filter": {
+     "km": 6000
+    },
+    "valve_clearance": {
+     "km": 24000
+    },
+    "moto_coolant": {
+     "months": 24
+    },
+    "chain_kit": {
+     "km": 25000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Bomba de gasolina en las primeras unidades.",
+    "Paradas repentinas del motor: cable de bobina, batería débil o interruptor del caballete lateral.",
+    "Fugas de refrigerante por la bomba de agua.",
+    "Colectores de escape que se oxidan y se rompen.",
+    "Vibraciones que aflojan tornillería (carenados, caballete central): revisar apriete.",
+    "Llamadas a revisión: amortiguador trasero (TRK 2018-2020) y bomba de freno delantera. Consulta con el bastidor."
+   ],
+   "specs": {
+    "oil": "10W-50 API SJ / JASO MA2 (Petronas, de primer llenado)",
+    "oil_l": "3,0 l con filtro (2,9 l sin filtro)",
+    "coolant": "Etilenglicol para motores de aluminio · 2,4 l + 0,3 l vaso",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "NGK CR8E (separación 0,7-0,8 mm)",
+    "drive": "Cadena: limpiar y engrasar cada 500-1.000 km; holgura 28-35 mm",
+    "tyres": "120/70 ZR17 · 160/60 ZR17 (TRK 502/Leoncino) · 110/80 R19 · 150/70 R17 (TRK 502X)",
+    "battery": "YTX9-BS (12 V 8 Ah)",
+    "notes": "Primera revisión a los 1.000 km; después cada 6.000 km (7.000, 13.000, 19.000...). Tubos de gasolina: cambiar cada 3 años."
+   },
+   "typical_l100": 4.6
+  },
+  {
+   "id": "mg_15_vti_tech_15s4c",
+   "make": "MG",
+   "models": [
+    "zs",
+    "mg zs",
+    "zs11",
+    "mg3",
+    "mg 3",
+    "zs vti-tech",
+    "vti-tech"
+   ],
+   "years": [
+    2017,
+    2024
+   ],
+   "fuel": "gasoline",
+   "label": "MG 1.5 VTi-tech atmosférico (motor 15S4C / 15S4U, 2017-2024)",
+   "engine": "1.5 16v VTi-tech 106 CV (sin turbo)",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "spark_plugs": {
+     "km": 60000,
+     "months": 48
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Motor atmosférico sencillo con cadena de distribución; no hay fallos crónicos bien documentados.",
+    "El manual pide revisar el nivel de aceite cada semana y no usar aditivos."
+   ],
+   "specs": {
+    "oil": "5W-30 ACEA A5/B5 o 0W-20 ACEA C5 (MG anuncia revisión cada 24.000 km / 1 año)",
+    "oil_l": "4,1 l con filtro",
+    "coolant": "Anticongelante OAT (glicol), 5,4 l",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Cambio cada 60.000 km / 4 años (valor prudente, no confirmado en el plan MG)",
+    "timing": "Cadena",
+    "gearbox": "Manual 5 velocidades, aceite MTF94, 1,8 l",
+    "notes": "En el ZS gasolina vendido en Europa, el 1.5 solo iba con cambio manual. El automático era el 1.0 T-GDI (ATF AW-1, 6,2 l). El ZS Hybrid+ de 2024 lleva otro motor."
+   },
+   "typical_l100": 7.0
+  },
+  {
+   "id": "psa_19d_dw8",
+   "make": [
+    "Peugeot",
+    "Citroën",
+    "Citroen"
+   ],
+   "models": [
+    "partner",
+    "berlingo",
+    "206",
+    "306",
+    "xsara",
+    "expert",
+    "jumpy",
+    "c15",
+    "partner combispace",
+    "berlingo multispace"
+   ],
+   "years": [
+    1998,
+    2007
+   ],
+   "fuel": "diesel",
+   "label": "PSA 1.9 D atmosférico (motor DW8, 1998-2007)",
+   "engine": "1.9 D 68-71 CV (DW8 WJZ, DW8B WJY) · C15 1.9 D 60 CV (WJX)",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 10000,
+     "months": 12
+    },
+    "timing_belt": {
+     "km": 100000,
+     "months": 60
+    },
+    "fuel_filter": {
+     "km": 30000,
+     "months": 24
+    },
+    "air_filter": {
+     "km": 40000,
+     "months": 48
+    },
+    "brake_fluid": {
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "injectors": "Si cuesta arrancar en frío: mirar primero bujías y relé de precalentamiento; si no, entra aire por el portafiltro o la bomba de cebado y el circuito se desceba.",
+    "fluids": "Mirar si hay fugas de gasoil en la bomba de inyección y purgar el agua del filtro de gasoil en cada revisión."
+   },
+   "known_issues": [
+    "Arranca mal en frío: bujías o relé de precalentamiento, o entra aire por el portafiltro y el gasoil se desceba.",
+    "Fugas en la bomba de inyección mecánica. Tras desmontarla, si queda mal calada da ruido, tirones y demasiado avance.",
+    "Junta de culata en motores muy gastados o que se han calentado: vigilar el nivel de refrigerante y el humo blanco.",
+    "Correa de distribución: PSA da 120.000 km/10 años. Por la edad de estos coches, cámbiala por tiempo (cada 5 años) con rodillos y bomba de agua.",
+    "Motor sencillo y duradero: con mantenimiento básico muchos pasan de 300.000 km."
+   ],
+   "specs": {
+    "oil": "10W-40 o 5W-40 para diésel (ACEA B3 o superior). PSA daba 15.000 km/2 años; mejor cada 10.000 km/1 año",
+    "oil_l": "≈4,5-4,8 l con filtro (cambia según carrocería; ajustar con la varilla)",
+    "coolant": "Anticongelante original PSA o uno equivalente; no mezclar tipos",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Correa con rodillo tensor. PSA: 120.000 km/10 años. Mejor cambiarla a la vez que la bomba de agua",
+    "notes": "Diésel de inyección indirecta sin turbo ni common rail, evolución del XUD9. No lleva FAP. Dejó de fabricarse al llegar la Euro 4."
+   },
+   "typical_l100": 6.0
+  },
+  {
+   "id": "fiat_iveco_23_multijet",
+   "make": [
+    "Fiat",
+    "Iveco"
+   ],
+   "models": [
+    "ducato",
+    "ducato maxi",
+    "x250",
+    "x290",
+    "daily",
+    "autocaravana",
+    "camper"
+   ],
+   "years": [
+    2006,
+    2022
+   ],
+   "fuel": "diesel",
+   "label": "Fiat / Iveco 2.3 Multijet (motor F1A, Ducato 2006-2022)",
+   "engine": "2.3 Multijet 110/120/130/140/150/160/180 CV, 150 Ecojet, 180 Multijet Power (F1AE / F1AGL)",
+   "timing": "belt",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "timing_belt": {
+     "km": 120000,
+     "months": 60
+    },
+    "fuel_filter": {
+     "km": 30000,
+     "months": 24
+    },
+    "air_filter": {
+     "km": 40000,
+     "months": 24
+    },
+    "aux_belt": {
+     "km": 120000,
+     "months": 60
+    },
+    "brake_fluid": {
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "turbo_egr": "Euro 6 de 2016-2019 sin AdBlue (130 CV, doble EGR): la EGR de baja presión y su enfriador se tapan (P0401, P0236/P0238, modo avería). Revisar también el sensor MAP y la electroválvula del turbo, y tener el software actualizado.",
+    "dpf": "Euro 5/6 con DPF: con trayectos cortos o mucho ralentí no regenera. Desde 2016 hay versiones con AdBlue y desde 2019 lo lleva toda la gama.",
+    "injectors": "Inyectores Bosch: con mucha carbonilla se quedan agarrotados en la culata; mantenerlos limpios y no forzar al desmontarlos."
+   },
+   "known_issues": [
+    "EGR con carbonilla (en Euro 6 de 2016-2019, la de baja presión): tirones, ralentí irregular, P0401 y modo avería.",
+    "DPF y regeneraciones: el software de los primeros Euro 6 daba problemas (DPF agrietados, enfriador EGR tapado). Pedir actualización en el taller oficial.",
+    "Entra agua por el desagüe bajo el parabrisas: moja inyectores, cableado y centralita. Mantener limpios los desagües.",
+    "Sensor de cigüeñal: el motor se corta en caliente y no arranca hasta que se enfría (P0335).",
+    "Correa de distribución: Fiat da 180.000-192.000 km y 5 años, o 4 años si el uso es exigente. En autocaravana manda la edad: cada 4-5 años aunque tenga pocos km."
+   ],
+   "specs": {
+    "oil": "Euro 4 (2006-2011): 5W-40 Selenia WR, Fiat 9.55535-N2 (ACEA B4) · Euro 5 (2011-2014/16): 5W-30 Selenia WR Pure Energy, 9.55535-S1 (ACEA C2) · Euro 6 (2014/16-2022): 0W-30 Selenia WR Forward, 9.55535-DS1 (ACEA C2). Fiat: según el indicador, hasta 45.000-48.000 km o 24 meses (12 meses si es sobre todo ciudad)",
+    "oil_l": "6,5 l con filtro (Euro 4) · 5,9 l (Euro 5) · 6,3 l (Euro 6)",
+    "coolant": "Paraflu UP al 50% con agua (9,6 l; 11 l en el manual de 2007)",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Correa. Fiat: máx. 180.000 km (Euro 4) o 192.000 km (Euro 5/6), y siempre a los 5 años, o 4 si hay frío, ciudad o mucho ralentí. Cambiar también tensor, bomba de agua y correa auxiliar (Fiat: 135.000-144.000 km)",
+    "adblue": "Euro 6 con SCR (130 AdBlue y 150 Ecojet desde 2016; toda la gama Euro 6d desde 2019): depósito de 15-19 l",
+    "fap": "DPF sin aditivo (Euro 5/6)",
+    "gearbox": "Manual de 6 vel.: 2,9 l Tutela Transmission Geartech (caja MLGU de 5 vel.: 2,7 l)",
+    "notes": "FPT F1A de 2.287 cc, también en el Iveco Daily (que tiene su propio plan de mantenimiento). Peugeot Boxer y Citroën Jumper NO lo llevan. Hacia 2021-2022 el Ducato pasa al 2.2 Multijet 3. Consumo: furgoneta vacía ≈8 l/100 km; autocaravana 10-12 l/100 km."
+   },
+   "typical_l100": 10.0
+  },
+  {
+   "id": "psa_ford_22_hdi_puma",
+   "make": [
+    "Ford",
+    "Peugeot",
+    "Citroën",
+    "Citroen",
+    "Land Rover"
+   ],
+   "models": [
+    "transit",
+    "transit custom",
+    "tourneo",
+    "tourneo custom",
+    "boxer",
+    "jumper",
+    "relay",
+    "defender"
+   ],
+   "years": [
+    2006,
+    2016
+   ],
+   "fuel": "diesel",
+   "label": "Ford / PSA 2.2 TDCi / 2.2 HDi «Puma» (Duratorq, 2006-2016)",
+   "engine": "2.2 TDCi 85-155 CV (Transit, Transit Custom) · 2.2 HDi 100/110/120/130/150 CV (Boxer/Jumper) · Defender 2.2",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "fuel_filter": {
+     "km": 40000,
+     "months": 24
+    },
+    "air_filter": {
+     "km": 40000,
+     "months": 24
+    },
+    "aux_belt": {
+     "km": 120000
+    },
+    "brake_fluid": {
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "timing_chain": "Cadena sin cambio programado, pero si suena al arrancar en frío hay que revisar el tensor y las guías. Para cuidarla: el aceite correcto y sin alargar los cambios.",
+    "dpf": "Versiones Euro 5 (2011-2016) con FAP y algunas Euro 4: con trayectos cortos se satura.",
+    "clutch": "Al cambiar el embrague, cambiar también el bombín concéntrico y revisar si la caja pierde aceite sobre el disco."
+   },
+   "known_issues": [
+    "Polea libre del alternador y correa auxiliar: ruidos y vibraciones. Revisarlas en cada servicio.",
+    "EGR con carbonilla: tirones, ralentí irregular y arranques difíciles.",
+    "Sensor de cigüeñal: el motor se corta en caliente y no arranca hasta que se enfría.",
+    "FAP en las versiones Euro 5 si se usa sobre todo en ciudad.",
+    "Inyectores y bomba de alta presión: no aguantan gasoil sucio o con agua. Cambiar el filtro de gasoil a su tiempo.",
+    "Cadena de distribución: dura mucho, pero un ruido en frío avisa de que el tensor o las guías están gastados."
+   ],
+   "specs": {
+    "oil": "Ducato 2.2 100 (manual Fiat 2007): 5W-40 Selenia WR, Fiat 9.55535-N2 (ACEA B4) · Transit: 5W-30 Ford WSS-M2C913-C/-D (sin verificar en el manual; confirmar) · Ford da 25.000 km/12 meses y PSA/Fiat 40.000-48.000 km/24 meses; mejor 15.000 km/1 año",
+    "oil_l": "6,4 l con filtro (Ducato 2.2 100: 6,38 l) · Transit ≈6,2 l",
+    "coolant": "Ducato: Paraflu UP al 50% · Ford/PSA: el refrigerante original de la marca, sin mezclar",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "timing": "Cadena (con otra cadena aparte para la bomba de aceite); sin cambio programado",
+    "fap": "FAP en Euro 5 (2011-2016) y opcional en Euro 4",
+    "notes": "No confundir con el 2.2 HDi DW12 (de correa) del Boxer/Jumper 2002-2006, ni con el 2.2 BlueHDi DW12 de 2019 en adelante, ni con el 2.0 BlueHDi DW10 del Boxer/Jumper 2014-2019. Desde 2016 el Transit pasa al 2.0 EcoBlue."
+   },
+   "typical_l100": 8.5
   }
  ],
  "specs_note": "Especificaciones orientativas recopiladas de manuales y talleres: comprueba siempre el libro de tu vehículo antes de comprar.",
