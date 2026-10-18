@@ -7300,6 +7300,341 @@
     "timing": "Kit de distribución con bomba de agua, tensor y rodillos; no apurar el intervalo aunque el kit sea de los actualizados"
    },
    "typical_l100": 5.5
+  },
+  {
+   "id": "renault_16_etech_hybrid",
+   "make": [
+    "Renault",
+    "Dacia"
+   ],
+   "models": [
+    "clio",
+    "clio e-tech",
+    "captur",
+    "captur e-tech",
+    "arkana",
+    "megane",
+    "mégane",
+    "symbioz",
+    "jogger",
+    "jogger hybrid",
+    "duster",
+    "duster hybrid"
+   ],
+   "years": [
+    2020,
+    2026
+   ],
+   "fuel": "gasoline",
+   "label": "Renault / Dacia 1.6 E-Tech híbrido y enchufable (motor H4M, 2020 en adelante)",
+   "engine": "1.6 E-Tech full hybrid 140/145 CV y plug-in 160 CV: H4M atmosférico + 2 motores eléctricos, caja multimodo sin embrague",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "brake_fluid": {
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "battery": "Dos baterías: la de 12 V (los propietarios hablan de unos 5 años de vida; si muere, no abren ni las puertas) y la de tracción, que Renault dice que no necesita mantenimiento.",
+    "timing_chain": "H4M: cadena pensada para toda la vida, pero con conducción dura puede estirarse hacia los 150.000 km; no lleva taqués hidráulicos y los ruidos suelen ser holgura de válvulas.",
+    "brake_pads": "Frenada regenerativa: las pastillas duran mucho, pero los discos se oxidan por poco uso; frenar fuerte de vez en cuando."
+   },
+   "known_issues": [
+    "Caja multimodo E-Tech: es la avería más citada por los propietarios (ruidos, tirones, cambio de caja en los peores casos).",
+    "Campaña de mayo de 2024: junta tórica del eje primario del motor eléctrico que deja pasar aceite al estátor (aviso de sobrecalentamiento E-Tech o pérdida de tracción). Afecta a 1.6 de 140/145 CV y enchufables de 160 CV fabricados de 2020 a enero de 2024.",
+    "Campaña de septiembre de 2023 (aviso «Panne électrique danger»): reprogramación en unos 154.000 coches fabricados de abril de 2020 a abril de 2023.",
+    "Batería de 12 V que se descarga con el coche aparcado."
+   ],
+   "specs": {
+    "oil": "Ficha de mantenimiento Renault: 5W-30 RN17 o 0W-20 RN17 FE (Renault prevé revisión cada 30.000 km o 1 año; aquí, cada 15.000 km)",
+    "oil_l": "Unos 4,5 l",
+    "coolant": "Refrigerante Renault indicado en el libro; la revisión E-Tech incluye el circuito de refrigeración del sistema híbrido",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Usar solo el tipo indicado en la etiqueta del vano motor; intervalo oficial no confirmado",
+    "battery": "12 V auxiliar más batería de tracción de litio (1,2 kWh en el full hybrid). Garantía de la batería de tracción: 8 años o 160.000 km",
+    "timing": "Cadena",
+    "gearbox": "Caja multimodo E-Tech (4 marchas del motor térmico + 2 del eléctrico), sin embrague",
+    "notes": "Ojo: desde 2025 el Captur, el Clio VI y otros llevan el nuevo 1.8 E-Tech de 160 CV, que es otro motor (0W-16 norma AN 2022, unos 3,5 l)."
+   },
+   "typical_l100": 5.0
+  },
+  {
+   "id": "renault_12_etech_austral",
+   "make": "Renault",
+   "models": [
+    "austral",
+    "austral e-tech",
+    "espace",
+    "rafale"
+   ],
+   "years": [
+    2022,
+    2026
+   ],
+   "fuel": "gasoline",
+   "label": "Renault 1.2 E-Tech híbrido 200 (Austral, Espace, Rafale; 2022 en adelante)",
+   "engine": "1.2 turbo tres cilindros (HR12, ciclo Miller) de 130 CV + motores eléctricos, 200 CV en total; caja multimodo",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "brake_fluid": {
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "fluids": "Comprobar el nivel de aceite cada mes: hay una campaña por consumo de aceite (tubo de reaspiración de vapores) y el aviso «nivel de aceite a ajustar» es frecuente.",
+    "battery": "La de 12 V puede descargarse con el coche parado; la batería de tracción se revisa por diagnosis."
+   },
+   "known_issues": [
+    "Campaña de revisión: tubo de reaspiración de vapores de aceite defectuoso en Austral híbridos fabricados de junio de 2022 a diciembre de 2024; provoca consumo de aceite y el aviso de nivel.",
+    "Avisos de inyección, sobre todo en frío: la queja más repetida entre propietarios.",
+    "Fallos del sistema híbrido y de la centralita: subidas de vueltas bruscas, pérdidas de potencia, frenada regenerativa irregular.",
+    "Motor menos fiable que el 1.6 E-Tech según las estadísticas de propietarios; la caja ya está más pulida."
+   ],
+   "specs": {
+    "oil": "0W-20 Renault RN17 FE (compruébalo en el libro). Los propietarios citan cambio cada 30.000 km o 2 años en el libro; aquí, cada 15.000 km o 1 año",
+    "oil_l": "No confirmado: consultar el libro de mantenimiento",
+    "coolant": "Refrigerante Renault indicado en el libro",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Usar solo el tipo indicado por Renault; intervalo oficial no confirmado",
+    "battery": "12 V auxiliar más batería de tracción de litio de 2 kWh",
+    "timing": "Cadena",
+    "gearbox": "Caja multimodo E-Tech, la misma familia que en el 1.6",
+    "notes": "Es un motor distinto del 1.6 E-Tech (tres cilindros turbo), con otro aceite y otros fallos; por eso va aparte."
+   },
+   "typical_l100": 5.8
+  },
+  {
+   "id": "honda_ehev_15_20",
+   "make": "Honda",
+   "models": [
+    "jazz",
+    "jazz crosstar",
+    "crosstar",
+    "hr-v",
+    "zr-v",
+    "civic",
+    "cr-v"
+   ],
+   "years": [
+    2019,
+    2026
+   ],
+   "fuel": "gasoline",
+   "label": "Honda e:HEV / i-MMD 1.5 y 2.0 híbrido (Jazz, HR-V, ZR-V, Civic, CR-V)",
+   "engine": "1.5 i-VTEC (LEB) o 2.0 Atkinson (LFA/LFB) + 2 motores eléctricos; sin caja de cambios, embrague directo a velocidad de crucero",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "brake_fluid": {
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "timing_chain": "Cadena en el 1.5 y el 2.0. No llevan taqués hidráulicos: si hay tic-tac de válvulas, revisar holguras (en el 1.5 se citan unos 50.000 km).",
+    "battery": "Dos baterías: la de 12 V y la híbrida de litio (1,5-2 kWh), que se revisa por diagnosis en el taller.",
+    "brake_pads": "Frenada regenerativa: discos que se oxidan por poco uso; frenar fuerte de vez en cuando."
+   },
+   "known_issues": [
+    "Pocos fallos documentados: Honda usa motores atmosféricos sencillos con cadena.",
+    "2.0: la gasolina de mala calidad daña sondas lambda y catalizador; evitar sobrecalentamientos.",
+    "CR-V híbrido 2020-2022: llamada a revisión en EE. UU. por riesgo de incendio; comprobar campañas con el bastidor."
+   ],
+   "specs": {
+    "oil": "0W-20 original Honda (Honda usa el indicador de mantenimiento del cuadro; aquí, cada 15.000 km o 1 año)",
+    "oil_l": "2.0 CR-V: 4,1 l con filtro (4,8 l en seco) · 1.5 Jazz/HR-V: unos 3,6 l (el kit oficial trae 4 l)",
+    "coolant": "Refrigerante Honda indicado en el libro",
+    "brake_fluid": "DOT 3 o DOT 4 según el libro (cambio cada 2 años)",
+    "plugs": "Iridio; intervalo oficial no confirmado (seguir el indicador de mantenimiento)",
+    "battery": "12 V auxiliar más batería híbrida de litio. Garantía Honda España de componentes híbridos: 5 años, ampliable a 8 años o 160.000 km si se revisa en la red oficial",
+    "timing": "Cadena",
+    "gearbox": "Sin caja de cambios convencional (e-CVT); embrague multidisco para la conexión directa a 80-120 km/h"
+   },
+   "typical_l100": 5.5
+  },
+  {
+   "id": "ford_25_fhev_phev",
+   "make": "Ford",
+   "models": [
+    "kuga",
+    "kuga hybrid",
+    "kuga phev",
+    "s-max",
+    "galaxy"
+   ],
+   "years": [
+    2019,
+    2026
+   ],
+   "fuel": "gasoline",
+   "label": "Ford 2.5 Duratec híbrido FHEV 190 CV y enchufable PHEV 225 CV (Kuga, S-Max, Galaxy)",
+   "engine": "2.5 Duratec ciclo Atkinson, inyección indirecta, + motor eléctrico refrigerado por líquido; transmisión power-split de variación continua",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "brake_fluid": {
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "battery": "La 12 V es AGM; la batería de alto voltaje del PHEV ha tenido campañas: si el coche avisa de no cargar, al concesionario.",
+    "brake_pads": "Frenada regenerativa: discos que se oxidan por poco uso; frenar fuerte de vez en cuando."
+   },
+   "known_issues": [
+    "Kuga PHEV 2019-2020: celdas de la batería con impurezas que se sobrecalentaban; Ford sustituyó la batería completa en unos 33.000 coches.",
+    "Nueva campaña 24S79 (Kuga PHEV de agosto de 2019 a noviembre de 2023): posible defecto en celdas de alto voltaje; como medida provisional, no cargar y usar el modo EV Auto.",
+    "Fallos de la persiana activa de la calandra que encienden el testigo de motor.",
+    "Fallos eléctricos menores: multimedia, llave sin contacto, testigos."
+   ],
+   "specs": {
+    "oil": "0W-20 Ford WSS-M2C962-A1",
+    "oil_l": "Unos 4,7 l con filtro",
+    "coolant": "Refrigerante Ford indicado en el libro; el motor eléctrico también va refrigerado por líquido",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Intervalo oficial no confirmado: consultar el libro",
+    "battery": "12 V AGM. Tracción: litio 1,1 kWh en el FHEV y 14,4 kWh en el PHEV",
+    "timing": "Cadena en baño de aceite con tensor dinámico",
+    "gearbox": "Power-split automática de variación continua (sin marchas)"
+   },
+   "typical_l100": 6.0
+  },
+  {
+   "id": "stellantis_12_hybrid_48v",
+   "make": [
+    "Peugeot",
+    "Citroën",
+    "Citroen",
+    "Opel",
+    "Fiat"
+   ],
+   "models": [
+    "208",
+    "2008",
+    "308",
+    "408",
+    "3008",
+    "5008",
+    "c4",
+    "c4 x",
+    "c5 aircross",
+    "corsa",
+    "frontera",
+    "600"
+   ],
+   "years": [
+    2023,
+    2026
+   ],
+   "fuel": "gasoline",
+   "label": "Peugeot / Citroën / Opel / Fiat 1.2 Hybrid 100/136/145 48 V (cadena, 2023 en adelante)",
+   "engine": "Nuevo 1.2 PureTech turbo de tres cilindros con cadena, turbo de geometría variable y ciclo Miller; híbrido de 48 V con caja e-DCS6",
+   "timing": "chain",
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "brake_fluid": {
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "fluids": "Motor nuevo y con poco recorrido: comprobar el nivel de aceite cada mes; aún no se sabe si ha superado el consumo de aceite de la PureTech de correa.",
+    "battery": "Además de la de 12 V lleva una batería de litio de 48 V bajo el asiento delantero izquierdo."
+   },
+   "known_issues": [
+    "Es otro motor que la 1.2 PureTech de correa en baño de aceite (2014-2023): lleva cadena y un 40 % de piezas nuevas.",
+    "Campaña desde agosto de 2024: actualización del software de la caja e-DCS6 en los 1.2 Hybrid 100 y 136 (208, 2008, 308, 408, 3008, 5008).",
+    "Fiabilidad a largo plazo aún desconocida: poco recorrido."
+   ],
+   "specs": {
+    "oil": "Aceite homologado Stellantis indicado en el libro de este motor (grado y norma no confirmados aquí); no dar por buena la 0W-30 B71 2312 de la PureTech de correa sin mirarlo",
+    "oil_l": "No confirmado: consultar el libro de mantenimiento",
+    "coolant": "Refrigerante indicado en el libro",
+    "brake_fluid": "DOT 4 (cambio cada 2 años)",
+    "plugs": "Intervalo oficial no confirmado: consultar el libro",
+    "battery": "12 V más batería de litio de 48 V: 0,9 kWh brutos (0,43 kWh útiles)",
+    "timing": "Cadena",
+    "gearbox": "e-DCS6: doble embrague de 6 marchas con el motor eléctrico (21 kW), el inversor y la centralita integrados"
+   },
+   "typical_l100": 5.5
+  },
+  {
+   "id": "byd_15_dmi",
+   "make": "BYD",
+   "models": [
+    "seal u",
+    "seal u dm-i",
+    "atto 2",
+    "atto 2 dm-i",
+    "seal 6",
+    "seal 6 dm-i"
+   ],
+   "years": [
+    2024,
+    2026
+   ],
+   "fuel": "gasoline",
+   "label": "BYD 1.5 DM-i híbrido enchufable (Seal U, Atto 2, Seal 6; 2024 en adelante)",
+   "engine": "1.5 atmosférico ciclo Atkinson (BYD472QA, 98 CV) o 1.5 turbo (BYD476ZQC, 4WD) + transmisión eléctrica EHS",
+   "timing": null,
+   "intervals": {
+    "oil": {
+     "km": 15000,
+     "months": 12
+    },
+    "spark_plugs": {
+     "km": 45000
+    },
+    "air_filter": {
+     "km": 15000,
+     "months": 12
+    },
+    "coolant": {
+     "km": 90000,
+     "months": 72
+    },
+    "gearbox_oil_auto": {
+     "km": 60000,
+     "months": 48
+    },
+    "brake_fluid": {
+     "months": 24
+    }
+   },
+   "watch_hints": {
+    "battery": "La 12 V es de litio-ferrofosfato (LFP) y se «duerme» tras mucho tiempo parado: se despierta pulsando el microinterruptor de la maneta delantera izquierda. Después, dejar el coche encendido más de 15 minutos.",
+    "exercise_car": "BYD recomienda cargar y descargar la batería de alto voltaje por completo al menos cada 6 meses para que se calibre, y que al menos un 10 % del tiempo se circule en modo híbrido (HEV) para que el motor térmico también funcione."
+   },
+   "known_issues": [
+    "Modelo reciente en Europa: aún no hay fallos crónicos bien documentados.",
+    "El aceite de la transmisión EHS y su filtro se cambian cada 4 años o 60.000 km: es fácil que un taller sin experiencia en BYD se lo salte."
+   ],
+   "specs": {
+    "oil": "0W-20 ACEA C5 o superior (plan BYD: cada 12 meses o 15.000 km)",
+    "oil_l": "1.5 atmosférico (2WD): 3,3 l con filtro · 1.5 turbo (4WD): 3,9 l con filtro",
+    "coolant": "Orgánico de larga duración, dos circuitos (4,7 l y 7,5 l): motor térmico y motor eléctrico; cambio cada 6 años o 90.000 km",
+    "brake_fluid": "SINOPEC HZY6, 970 ml; cambio cada 2 años o 30.000 km",
+    "plugs": "Cambio cada 45.000 km (plan BYD)",
+    "battery": "12 V de litio-ferrofosfato (LFP). Batería de tracción Blade LFP: garantía de 8 años o 250.000 km con al menos un 70 % de capacidad",
+    "timing": "No confirmado en el manual: preguntar al taller",
+    "gearbox": "Transmisión EHS: aceite EHSF-2LV (3,0 l en 2WD, 3,7 l en 4WD) y filtro cada 4 años o 60.000 km",
+    "notes": "Datos del manual oficial del Seal U DM-i; Atto 2 y Seal 6 DM-i usan la misma familia 1.5, pero confirma las cantidades en su manual."
+   },
+   "typical_l100": 6.0
   }
  ],
  "specs_note": "Especificaciones orientativas recopiladas de manuales y talleres: comprueba siempre el libro de tu vehículo antes de comprar.",
