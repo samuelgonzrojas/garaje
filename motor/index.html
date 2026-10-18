@@ -82,7 +82,7 @@
   function km(n){return n.toLocaleString('es-ES')+' km';}
   function months(n){return n%12===0?(n===12?'1 año':(n/12)+' años'):n+' meses';}
   function when(j){if(j.wear)return 'Según desgaste';var p=[];if(j.km)p.push(km(j.km));if(j.months)p.push(months(j.months));return p.length?'Cada '+p.join(' o '):'Sin cambio programado: se vigila';}
-  function price(j){return j.price?'<span class="pr">Precio orientativo en taller: '+j.price[0]+'–'+j.price[1]+' €</span>':'';}
+  function price(j){return j.price?'<span class="pr">Precio orientativo en taller: '+j.price[0]+'–'+j.price[1]+' €'+(j.price_note?' ('+j.price_note+')':'')+'</span>':'';}
   function shop(j,e){
     var what=j.id==='oil'||j.id==='moto_oil'?(e.oil||'aceite')+' '+e.name.split(' (')[0]:j.name+' '+e.name.split(' (')[0].split(':')[0];
     return '<a class="shop" rel="nofollow noopener" target="_blank" href="https://www.amazon.es/s?k='+encodeURIComponent(what)+'">Buscar recambio</a>';

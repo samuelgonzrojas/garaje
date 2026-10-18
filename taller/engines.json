@@ -1044,7 +1044,7 @@
     "oil_l": "3,9-4,1 l con filtro",
     "coolant": "Glaceol RX Type D",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
-    "timing": "Correa con bomba de agua; 120.000 km / 6 años"
+    "timing": "Cadena: sin cambio programado; vigilar ruidos en frío"
    },
    "typical_l100": 6.0
   },
@@ -3560,7 +3560,7 @@
     "coolant": "Glaceol RX Type D",
     "brake_fluid": "DOT 4 (cambio cada 2 años)",
     "plugs": "Cada 60.000 km",
-    "timing": "Correa con bomba de agua; 120.000 km / 6 años"
+    "timing": "Correa con bomba de agua: 90.000 km / 5 años (conservador; el fabricante da más)"
    },
    "typical_l100": 7.6
   },
