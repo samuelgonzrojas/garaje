@@ -1,7 +1,7 @@
 {
-  "version": "1.0.41",
-  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.41/garaje-1.0.41-arm64.apk",
-  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.0.41/garaje-1.0.41.apk",
-  "notes": "Más motores reconocidos, ahora también híbridos de Renault, Honda, Ford, Peugeot/Citroën/Opel y BYD. En los híbridos que no la llevan, el plan ya no pide correa de accesorios ni aceite de caja manual.",
+  "version": "1.1.0",
+  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.1.0/garaje-1.1.0-arm64.apk",
+  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.1.0/garaje-1.1.0.apk",
+  "notes": "Garaje ya está en Google Play para todo el mundo. Gracias a quienes la habéis probado estas semanas. Tu coche o tu moto con su plan de mantenimiento según el motor, avisos de la ITV, los kilómetros con una foto, gasolineras con el precio de hoy, y presupuesto y cita con talleres de tu zona. Gratis y sin anuncios.",
   "play_url": "https://play.google.com/apps/testing/com.samuel.mantenimiento"
 }
