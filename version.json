@@ -3,5 +3,5 @@
   "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.1.0/garaje-1.1.0-arm64.apk",
   "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.1.0/garaje-1.1.0.apk",
   "notes": "Garaje ya está en Google Play para todo el mundo. Gracias a quienes la habéis probado estas semanas. Tu coche o tu moto con su plan de mantenimiento según el motor, avisos de la ITV, los kilómetros con una foto, gasolineras con el precio de hoy, y presupuesto y cita con talleres de tu zona. Gratis y sin anuncios.",
-  "play_url": "https://play.google.com/apps/testing/com.samuel.mantenimiento"
+  "play_url": "https://play.google.com/store/apps/details?id=com.samuel.mantenimiento"
 }
