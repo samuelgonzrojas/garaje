@@ -1,7 +1,7 @@
 {
-  "version": "1.1.0",
-  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.1.0/garaje-1.1.0-arm64.apk",
-  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.1.0/garaje-1.1.0.apk",
-  "notes": "Garaje ya está en Google Play para todo el mundo. Gracias a quienes la habéis probado estas semanas. Tu coche o tu moto con su plan de mantenimiento según el motor, avisos de la ITV, los kilómetros con una foto, gasolineras con el precio de hoy, y presupuesto y cita con talleres de tu zona. Gratis y sin anuncios.",
+  "version": "1.1.1",
+  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.1.1/garaje-1.1.1-arm64.apk",
+  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.1.1/garaje-1.1.1.apk",
+  "notes": "Arreglos: el tour de bienvenida ya no se cierra en móviles de pantalla pequeña, y cancelar el acceso con Google o quedarse sin red al activar los avisos ya no cuentan como fallo.",
   "play_url": "https://play.google.com/store/apps/details?id=com.samuel.mantenimiento"
 }
