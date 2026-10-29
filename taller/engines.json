@@ -7662,6 +7662,1117 @@
     "notes": "Datos del manual oficial del Seal U DM-i; Atto 2 y Seal 6 DM-i usan la misma familia 1.5, pero confirma las cantidades en su manual."
    },
    "typical_l100": 6.0
+  },
+  {
+   "id": "tesla_model_3_y",
+   "make": [
+    "Tesla"
+   ],
+   "models": [
+    "model 3",
+    "model y",
+    "model 3 highland",
+    "model y juniper",
+    "tesla model 3",
+    "tesla model y"
+   ],
+   "years": [
+    2019,
+    2026
+   ],
+   "fuel": "electric",
+   "label": "Tesla Model 3 y Model Y",
+   "engine": "Eléctrico · Propia de Tesla",
+   "timing": null,
+   "intervals": {
+    "cabin_filter": {
+     "months": 24
+    },
+    "brake_fluid": {
+     "months": 48,
+     "note": "Tesla pide comprobarlo cada 4 años y cambiarlo si hace falta; antes si se frena mucho (remolque, puertos de montaña)."
+    },
+    "ac_service": {
+     "months": 72,
+     "note": "Cambio de la bolsa desecante del aire acondicionado, en coches fabricados antes de 2021 aproximadamente."
+    },
+    "wipers": {
+     "months": 12
+    },
+    "tyre_rotation": {
+     "km": 10000
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "En la ITV alemana (informe TÜV) Model 3 y Model Y tienen tasas de defectos altas en coches de 2-3 años, sobre todo por discos y pinzas de freno oxidados (se usan poco gracias a la frenada regenerativa)",
+    "Desgaste prematuro en la suspensión delantera (brazos superiores y rótulas) señalado por el TÜV",
+    "Tesla no fija revisiones periódicas y el TÜV relaciona parte de los defectos con esa falta de mantenimiento programado"
+   ],
+   "specs": {
+    "brake_fluid": "Tesla pide comprobar el estado del líquido de frenos cada 4 años y cambiarlo si hace falta (antes si se frena mucho: remolque, puertos de montaña, conducción deportiva)",
+    "heat_pump": "De serie en Model Y y en Model 3 desde 2021; el Model 3 Standard Range Plus de 2019-2020 no la lleva"
+   },
+   "platform": "Propia de Tesla",
+   "battery": "Model 3: 49 kWh netos (Standard Range Plus 2019-2020), 57 kWh (RWD LFP 2022-2024), 60 kWh (RWD 2025+), 75-79 kWh (Long Range / Premium / Performance). Model Y: 57-60 kWh (RWD), 72-79 kWh (Long Range / Premium / Performance)",
+   "range_wltp": "Model 3: 409 km (SR+ 2019), 534 km (RWD 2025), hasta 691-750 km (Premium Long Range RWD 2025). Model Y: 430-455 km (RWD 57 kWh), 533-542 km (Long Range AWD 2022-2025)",
+   "charge_ac": "11 kW",
+   "charge_dc": "170 kW (SR+ y Model Y RWD 57 kWh), 175 kW (Model 3 RWD 2025), 250 kW (Long Range / Performance)",
+   "warranty_battery": "8 años / 160.000 km (tracción trasera) o 8 años / 192.000 km (Long Range y Performance), con al menos un 70 % de capacidad",
+   "typical_kwh100": 15.5,
+   "buy_tips": [
+    "Comprueba el estado de salud de la batería (SoH) y desde qué fecha cuenta la garantía (8 años / 160.000 o 192.000 km según versión)",
+    "Revisa discos y pinzas de freno: el óxido es el defecto de ITV más típico. Tesla recomienda limpiar y engrasar las pinzas cada año (o cada 20.000 km) si se circula por carreteras con sal",
+    "Escucha ruidos en la suspensión delantera al pasar baches (brazos superiores y rótulas)",
+    "En el menú Controles > Servicio > Mantenimiento de la pantalla se ve el estado de los elementos de mantenimiento",
+    "Los Model 3 anteriores a 2021 no tienen bomba de calor: gastan más en invierno",
+    "En coches fabricados antes de 2021 aprox., Tesla indica cambiar la bolsa desecante del aire acondicionado cada 6 años"
+   ],
+   "service": "Tesla no fija revisiones periódicas: recomienda hacer los trabajos de la tabla cuando toquen.",
+   "not_fitted": [
+    "ev_service"
+   ]
+  },
+  {
+   "id": "mg4_mse",
+   "make": [
+    "MG"
+   ],
+   "models": [
+    "mg4",
+    "mg 4",
+    "mg4 electric",
+    "mg4 xpower",
+    "mg4 standard",
+    "mg4 comfort",
+    "mg4 luxury"
+   ],
+   "years": [
+    2022,
+    2026
+   ],
+   "fuel": "electric",
+   "label": "MG4 Electric",
+   "engine": "Eléctrico · MSP (Modular Scalable Platform) de SAIC",
+   "timing": null,
+   "intervals": {
+    "cabin_filter": {
+     "months": 24
+    },
+    "brake_fluid": {
+     "months": 24
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Descarga de la batería de 12 V con el coche parado: no abre ni arranca. Se atribuye a la batería original y a un software que no la recarga bien desde la batería de tracción; se corrige con actualización en el concesionario y, si hace falta, batería nueva",
+    "Falsas alertas del asistente de carril (MG Pilot) en carreteras estrechas o con mal pintado; MG publicó una actualización a finales de 2024",
+    "Deformación de la protección inferior del motor trasero en algunas unidades de 2023 y principios de 2024"
+   ],
+   "specs": {
+    "battery_12v": "Batería auxiliar de 12 V de plomo (los propietarios citan su sustitución por una AGM en garantía cuando falla)",
+    "heat_pump": "No en la versión de 51 kWh; en la de 64 kWh depende del país y acabado"
+   },
+   "platform": "MSP (Modular Scalable Platform) de SAIC",
+   "battery": "51 kWh nominales / 50,8 kWh netos (LFP) y 64 kWh nominales / 61,7 kWh netos (NMC); versiones posteriores con otras capacidades",
+   "range_wltp": "350-353 km (51 kWh), 435-450 km (64 kWh)",
+   "charge_ac": "6,6 kW (11 kW opcional en algunos países con la batería de 64 kWh)",
+   "charge_dc": "87 kW (51 kWh), 142 kW (64 kWh)",
+   "warranty_battery": "7 años / 150.000 km",
+   "typical_kwh100": 17.0,
+   "buy_tips": [
+    "Pregunta si se cambió la batería de 12 V y si el software está actualizado",
+    "Distingue la versión de 51 kWh (LFP, 87 kW de carga rápida, sin bomba de calor) de la de 64 kWh (142 kW)",
+    "Pide un informe de estado de salud de la batería (SoH) y el historial de servicio: MG guarda los registros de forma centralizada y no hay libro físico",
+    "Comprueba que la garantía de batería de 7 años / 150.000 km sigue vigente"
+   ]
+  },
+  {
+   "id": "vag_meb",
+   "make": [
+    "Volkswagen",
+    "Cupra",
+    "Skoda",
+    "Audi"
+   ],
+   "models": [
+    "id.3",
+    "id3",
+    "id.4",
+    "id4",
+    "id.5",
+    "id5",
+    "born",
+    "cupra born",
+    "enyaq",
+    "enyaq coupe",
+    "q4 e-tron",
+    "q4 etron",
+    "q4 sportback e-tron",
+    "elroq",
+    "id.7",
+    "id7",
+    "id. buzz",
+    "id buzz",
+    "tavascan",
+    "q4",
+    "id.3 neo"
+   ],
+   "years": [
+    2020,
+    2026
+   ],
+   "fuel": "electric",
+   "label": "VW ID.3 / ID.4 / ID.5 / ID.7, Cupra Born y Tavascan, Skoda Enyaq y Elroq, Audi Q4 e-tron (MEB)",
+   "engine": "Eléctrico · MEB (Grupo Volkswagen)",
+   "timing": null,
+   "intervals": {
+    "cabin_filter": {
+     "months": 24
+    },
+    "brake_fluid": {
+     "months": 24
+    },
+    "ev_service": {
+     "months": 24
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Primeros ID.3 (2020-2021): descarga de la batería de 12 V tras pocos días parado por módulos que no entran en reposo; el coche puede quedar inerte",
+    "Campañas de software (ID.Software 2.4 y 3.0) que incluían una batería de 12 V nueva, en taller oficial",
+    "Campaña en Europa para unos 10.000 ID.3 e ID.4 fabricados en 2020 por posibles módulos de batería de alta tensión defectuosos",
+    "Bloqueos o reinicios de la pantalla central reportados por usuarios"
+   ],
+   "specs": {
+    "brake_fluid": "VW 501 14",
+    "battery_12v": "Batería de 12 V convencional; en los primeros ID.3/ID.4 se sustituyó en campaña de servicio",
+    "heat_pump": "Opcional (no de serie)"
+   },
+   "platform": "MEB (Grupo Volkswagen)",
+   "battery": "Netos: 45 y 58 kWh (ID.3 Pure / Pro), 77 kWh (Pro S, ID.4 Pro 2024-2025), 79 kWh (ID.3 2026)",
+   "range_wltp": "ID.4 Pro 77 kWh (2024-2025): 517-574 km; ID.3 79 kWh (2026): 606-630 km. Las versiones de batería pequeña, bastante menos",
+   "charge_ac": "11 kW",
+   "charge_dc": "175 kW (ID.4 Pro 2024-2025), 183 kW (ID.3 79 kWh 2026); las versiones anteriores y las de batería pequeña cargan menos",
+   "warranty_battery": "8 años / 160.000 km, con al menos un 70 % de capacidad",
+   "typical_kwh100": 17.0,
+   "buy_tips": [
+    "Comprueba con el bastidor (VIN) en un concesionario oficial qué campañas y actualizaciones de software están hechas",
+    "Prueba que el coche arranca y responde tras uno o dos días parado y mide la tensión de la batería de 12 V",
+    "Revisa si lleva bomba de calor (opcional): cambia mucho el consumo en invierno",
+    "La inspección oficial es cada 2 años sin límite de km (según indicador de servicio): pide el historial",
+    "Pide un informe de estado de salud de la batería (SoH); garantía 8 años / 160.000 km con 70 %"
+   ],
+   "service": "Inspección oficial cada 2 años, sin límite de kilómetros (lo marca el indicador de servicio).",
+   "slug": "vw-id-3-id-4-id-5-cupra-born-skoda-enyaq-y-audi-q4-e-tron-meb"
+  },
+  {
+   "id": "hyundai_kia_egmp",
+   "make": [
+    "Hyundai",
+    "Kia"
+   ],
+   "models": [
+    "ioniq 5",
+    "ioniq5",
+    "ioniq 6",
+    "ioniq6",
+    "ev6",
+    "ev9",
+    "ioniq 5 n",
+    "ev6 gt"
+   ],
+   "years": [
+    2021,
+    2026
+   ],
+   "fuel": "electric",
+   "label": "Hyundai Ioniq 5 / Ioniq 6 y Kia EV6 / EV9 (E-GMP)",
+   "engine": "Eléctrico · E-GMP (800 V)",
+   "timing": null,
+   "intervals": {
+    "cabin_filter": {
+     "km": 30000,
+     "months": 24
+    },
+    "brake_fluid": {
+     "months": 24
+    },
+    "coolant": {
+     "km": 200000,
+     "months": 120,
+     "note": "Primer cambio. Después, cada 40.000 km o 2 años."
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Fallo de la ICCU (unidad integrada de carga): deja de cargar la batería de 12 V y puede provocar pérdida de potencia; campaña mundial en 2024 con actualización de software y cambio de la unidad si está dañada",
+    "Algunos coches ya reparados han tenido que volver al taller por la misma campaña"
+   ],
+   "specs": {
+    "coolant": "Refrigerante del sistema de alta tensión: primer cambio a los 200.000 km o 10 años y después cada 40.000 km o 24 meses",
+    "reducer_oil": "Aceite de reductora: solo inspección periódica en uso normal; cambio antes en uso severo (montaña, remolque, polvo)",
+    "heat_pump": "Sí; de serie u opcional según país y acabado (opcional en el Ioniq 5 2022-2024)"
+   },
+   "platform": "E-GMP (800 V)",
+   "battery": "Ioniq 5: 58 kWh (versión Standard, nominal), 74 kWh netos (77,4 kWh nominal, 2022-2024), 80 kWh netos (84 kWh nominal, 2024+). Kia EV6: 80 kWh netos (84 kWh nominal, 2024+). EV9 con batería mayor (aprox. 99,8 kWh nominal)",
+   "range_wltp": "Ioniq 5 77,4 kWh RWD: 476-507 km; Ioniq 5 84 kWh RWD: 515-570 km; EV6 Long Range AWD 2024+: 521-546 km",
+   "charge_ac": "11 kW",
+   "charge_dc": "233-263 kW de pico (800 V)",
+   "warranty_battery": "Hyundai: 8 años / 160.000 km. Kia: 7 años / 150.000 km",
+   "typical_kwh100": 18.5,
+   "buy_tips": [
+    "Comprueba con el VIN que la campaña de la ICCU está hecha (Ioniq 5, Ioniq 6, EV6, GV60)",
+    "Pide un informe de estado de salud de la batería (SoH) y prueba la carga rápida y la carga en casa (AC)",
+    "Revisa si lleva bomba de calor: en algunos mercados y años era opcional",
+    "Kia tiene 7 años / 150.000 km de garantía de batería y Hyundai 8 años / 160.000 km: calcula cuánta queda"
+   ]
+  },
+  {
+   "id": "hyundai_kia_64kwh",
+   "make": [
+    "Hyundai",
+    "Kia"
+   ],
+   "models": [
+    "kona electric",
+    "kona ev",
+    "kona eléctrico",
+    "kona electrico",
+    "e-niro",
+    "eniro",
+    "niro ev",
+    "niro eléctrico",
+    "niro electrico",
+    "kona",
+    "niro",
+    "soul",
+    "e-soul"
+   ],
+   "years": [
+    2018,
+    2026
+   ],
+   "fuel": "electric",
+   "label": "Hyundai Kona Electric y Kia e-Niro / Niro EV",
+   "engine": "Eléctrico",
+   "timing": null,
+   "intervals": {
+    "cabin_filter": {
+     "km": 30000,
+     "months": 24
+    },
+    "coolant": {
+     "km": 200000,
+     "months": 120,
+     "note": "Primer cambio. Después, cada 2 años."
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Kona Electric fabricado entre el 31/01/2018 y el 20/03/2020: llamada a revisión por riesgo de incendio de la batería de alta tensión (celdas LG); la solución final fue cambiar la batería"
+   ],
+   "specs": {
+    "coolant": "Refrigerante de baja conductividad específico para eléctricos; en el Kona, primer cambio a los 120 meses (unos 200.000 km) y luego cada 24 meses",
+    "heat_pump": "Kona: de serie según país. e-Niro: opcional"
+   },
+   "battery": "Kona Electric: 64 kWh netos (67,5 kWh nominal). e-Niro (2019-2022): 64 kWh netos. Niro EV (2022-2025): 64,8 kWh netos. Kona de 2.ª generación (2023 en adelante): 48,6 o 65,4 kWh",
+   "range_wltp": "Kona Electric 64 kWh (2021-2023): 449-484 km; e-Niro 64 kWh: 455 km; Niro EV (2022-2025): 460 km",
+   "charge_ac": "Kona: 11 kW. e-Niro: 7,2 kW (11 kW opcional). Niro EV 2022+: 11 kW",
+   "charge_dc": "77 kW (Kona y e-Niro), 94 kW (Niro EV 2022+)",
+   "warranty_battery": "Hyundai Kona: 8 años / 160.000 km. Kia e-Niro / Niro EV: 7 años / 150.000 km",
+   "typical_kwh100": 17.0,
+   "buy_tips": [
+    "En un Kona Electric pregunta si se le cambió la batería en la campaña y comprueba con el VIN que no tiene campañas pendientes",
+    "Pide un informe de estado de salud de la batería (SoH)",
+    "La carga rápida es modesta (77 kW): en viajes largos tarda más que coches más modernos",
+    "En el e-Niro comprueba si lleva cargador de 11 kW y bomba de calor (ambos opcionales)"
+   ],
+   "slug": "hyundai-kona-electric-2018-2023-y-kia-e-niro-niro-ev-64-kwh"
+  },
+  {
+   "id": "renault_megane_scenic_etech",
+   "make": [
+    "Renault"
+   ],
+   "models": [
+    "megane e-tech",
+    "mégane e-tech",
+    "megane electric",
+    "megane eléctrico",
+    "scenic e-tech",
+    "scénic e-tech",
+    "scenic electric",
+    "megane e-tech electric",
+    "scenic",
+    "scénic",
+    "megane"
+   ],
+   "years": [
+    2022,
+    2026
+   ],
+   "fuel": "electric",
+   "label": "Renault Mégane E-Tech Electric y Scénic E-Tech",
+   "engine": "Eléctrico · CMF-EV (AmpR Medium)",
+   "timing": null,
+   "intervals": {
+    "ev_service": {
+     "km": 40000,
+     "months": 24
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Fallos de software reportados por usuarios: avisos falsos, estimación de autonomía imprecisa y fallos del climatizador; algunas actualizaciones remotas fallan al instalarse"
+   ],
+   "specs": {
+    "coolant": "Dos circuitos (motor y batería de tracción) con refrigerante homologado por Renault; el periodo de cambio está en el documento de mantenimiento",
+    "heat_pump": "Mégane: sí, de serie según país. Scénic 89 kWh: de serie"
+   },
+   "platform": "CMF-EV (AmpR Medium)",
+   "battery": "Mégane: 60 kWh netos (65 kWh nominal, EV60) y versión de 40 kWh. Scénic: 87-89 kWh netos (versión grande) y unos 60 kWh",
+   "range_wltp": "Mégane EV60 220 CV: 429-450 km. Scénic 89 kWh (2026): 621-632 km",
+   "charge_ac": "Mégane EV60: 22 kW. Scénic: 11 kW de serie, 22 kW opcional",
+   "charge_dc": "130 kW (Mégane EV60), 150 kW (Scénic)",
+   "warranty_battery": "8 años / 160.000 km; Renault sustituye la batería si el SoH baja del 70 %",
+   "typical_kwh100": 16.5,
+   "buy_tips": [
+    "Renault indica revisión de los eléctricos cada 2 años o 40.000 km: pide el historial",
+    "Pide el certificado de estado de salud de la batería (SoH); la garantía de 8 años / 160.000 km cubre la sustitución si baja del 70 %",
+    "Comprueba que el software multimedia está actualizado y prueba climatizador y planificador de rutas",
+    "Prueba carga AC y carga rápida"
+   ],
+   "service": "Renault indica revisión de sus eléctricos cada 2 años o 40.000 km."
+  },
+  {
+   "id": "renault_zoe",
+   "make": [
+    "Renault"
+   ],
+   "models": [
+    "zoe",
+    "zoé",
+    "renault zoe",
+    "zoe e-tech",
+    "zoe ze50",
+    "zoe ze40",
+    "zoe r110",
+    "zoe r135"
+   ],
+   "years": [
+    2013,
+    2024
+   ],
+   "fuel": "electric",
+   "label": "Renault Zoe",
+   "engine": "Eléctrico",
+   "timing": null,
+   "intervals": {
+    "ev_service": {
+     "km": 40000,
+     "months": 24
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Muchos Zoe se vendieron con la batería en alquiler (cuota mensual ligada al contrato y a los km)",
+    "Fallos intermitentes de carga reportados por usuarios (no arranca o se corta) y corrosión en los pines del conector"
+   ],
+   "specs": {
+    "heat_pump": "Sí en el ZE50"
+   },
+   "battery": "ZE50 (2019-2024): 52 kWh netos. Versiones anteriores de 22 y 41 kWh",
+   "range_wltp": "ZE50 R110: 344-395 km",
+   "charge_ac": "22 kW",
+   "charge_dc": "46 kW (CCS, opcional en algunos países; solo ZE50)",
+   "warranty_battery": "8 años / 160.000 km (Zoe E-Tech); Renault sustituye la batería si el SoH baja del 70 %",
+   "typical_kwh100": 16.5,
+   "buy_tips": [
+    "Confirma si la batería es en propiedad o de alquiler; si es de alquiler pide el contrato, la cuota y los km permitidos (se puede comprar la batería, precio según concesionario)",
+    "Comprueba si lleva toma de carga rápida CCS (opcional en el ZE50; las versiones antiguas no la tienen)",
+    "Pide el estado de salud de la batería (SoH) con diagnóstico oficial o independiente",
+    "Prueba la carga en AC y revisa el estado del conector",
+    "Renault indica revisión de los eléctricos cada 2 años o 40.000 km"
+   ],
+   "service": "Renault indica revisión de sus eléctricos cada 2 años o 40.000 km."
+  },
+  {
+   "id": "stellantis_ecmp",
+   "make": [
+    "Peugeot",
+    "Opel",
+    "Citroën",
+    "DS",
+    "Jeep",
+    "Fiat",
+    "Alfa Romeo",
+    "Lancia"
+   ],
+   "models": [
+    "e-208",
+    "e208",
+    "e-2008",
+    "e2008",
+    "corsa-e",
+    "corsa e",
+    "corsa electric",
+    "corsa eléctrico",
+    "mokka-e",
+    "ë-c4",
+    "e-c4",
+    "c4 eléctrico",
+    "ds3 e-tense",
+    "ds 3 e-tense",
+    "ds3 crossback e-tense",
+    "208",
+    "2008",
+    "corsa",
+    "mokka",
+    "c4",
+    "ds 3",
+    "avenger",
+    "600",
+    "600e",
+    "junior",
+    "ypsilon"
+   ],
+   "years": [
+    2019,
+    2026
+   ],
+   "fuel": "electric",
+   "label": "Peugeot e-208 / e-2008, Opel Corsa / Mokka, Citroën ë-C4, DS 3, Jeep Avenger, Fiat 600e, Alfa Romeo Junior y Lancia Ypsilon (e-CMP)",
+   "engine": "Eléctrico · e-CMP (Stellantis)",
+   "timing": null,
+   "intervals": {},
+   "watch_hints": {},
+   "known_issues": [
+    "Cargador de a bordo (OBC) que falla y deja de cargar en corriente alterna, sobre todo el trifásico de 11 kW; afecta a e-208, Corsa-e y otros Stellantis",
+    "Llamada a revisión de e-208 / e-2008 fabricados entre el 15/01/2020 y el 20/06/2020 por posible cortocircuito en la batería bajo el capó (riesgo de incendio)",
+    "Campaña de 2023 por la calibración del software de la batería de tracción (lecturas erróneas que pueden parar el motor); se arregla con actualización en taller"
+   ],
+   "specs": {
+    "heat_pump": "Sí en muchas versiones; de serie u opcional según país y acabado"
+   },
+   "platform": "e-CMP (Stellantis)",
+   "battery": "50 kWh nominales / 46,3 kWh netos (2019-2023 y e-208 50 kWh posterior); 54 kWh nominales / 50,8 kWh netos (2023+)",
+   "range_wltp": "e-208 50 kWh: 334-340 km (2020-2021), 350-362 km (2023+); e-2008 54 kWh: 397-406 km",
+   "charge_ac": "7,4 kW de serie; 11 kW opcional (de serie en algunos países)",
+   "charge_dc": "100 kW aprox. (101 kW e-208 50 kWh; 107 kW e-2008 54 kWh)",
+   "warranty_battery": "8 años / 160.000 km, con un 70 % de capacidad",
+   "typical_kwh100": 16.5,
+   "buy_tips": [
+    "Prueba la carga en un punto de corriente alterna (AC) además de la carga rápida: es la avería típica del cargador de a bordo",
+    "Comprueba con el VIN que las campañas de batería y software están hechas",
+    "Distingue la batería de 50 kWh (46,3 kWh útiles) de la de 54 kWh (50,8 kWh útiles, más autonomía)",
+    "Pide el certificado de capacidad de batería (SoH); la garantía es de 8 años / 160.000 km"
+   ],
+   "slug": "peugeot-e-208-e-2008-opel-corsa-electric-citroen-e-c4-y-ds3-e-tense-e-cmp"
+  },
+  {
+   "id": "dacia_spring",
+   "make": [
+    "Dacia"
+   ],
+   "models": [
+    "spring",
+    "dacia spring",
+    "spring electric 45",
+    "spring electric 65",
+    "spring electric 70",
+    "spring extreme"
+   ],
+   "years": [
+    2021,
+    2026
+   ],
+   "fuel": "electric",
+   "label": "Dacia Spring",
+   "engine": "Eléctrico · CMF-A de Renault-Dacia",
+   "timing": null,
+   "intervals": {},
+   "watch_hints": {},
+   "known_issues": [
+    "Llamada a revisión de unos 1.730 Spring fabricados entre julio y octubre de 2022 por un fallo de software en la unidad de carga que puede impedir que el coche arranque"
+   ],
+   "specs": {
+    "heat_pump": "No"
+   },
+   "platform": "CMF-A de Renault-Dacia",
+   "battery": "25 kWh netos (26,8 kWh nominal, NMC) hasta 2025; 24 kWh netos (24,3 kWh nominal, LFP) desde finales de 2025",
+   "range_wltp": "225-230 km (26,8 kWh); 221-226 km (Spring Electric 70 LFP)",
+   "charge_ac": "6,6 kW",
+   "charge_dc": "30-34 kW (26,8 kWh, opcional según versión); 40 kW (Spring 2025+ LFP)",
+   "warranty_battery": "8 años / 120.000 km",
+   "typical_kwh100": 15.0,
+   "buy_tips": [
+    "Comprueba si lleva toma de carga rápida CCS: en muchas unidades era opcional",
+    "Pide el estado de salud de la batería (SoH) y comprueba la garantía de 8 años / 120.000 km",
+    "Comprueba con el VIN que la campaña del cargador de 2022 está hecha",
+    "Es un coche pensado para ciudad: autonomía real de unos 135-190 km según temperatura"
+   ]
+  },
+  {
+   "id": "byd_e_platform",
+   "make": [
+    "BYD"
+   ],
+   "models": [
+    "atto 3",
+    "atto3",
+    "dolphin",
+    "seal",
+    "byd atto 3",
+    "byd dolphin",
+    "byd seal",
+    "atto 2",
+    "atto2",
+    "dolphin surf",
+    "sealion 7",
+    "seal u"
+   ],
+   "years": [
+    2022,
+    2026
+   ],
+   "fuel": "electric",
+   "label": "BYD Dolphin, Dolphin Surf, Atto 2, Atto 3, Seal y Sealion 7 (e-Platform 3.0)",
+   "engine": "Eléctrico · e-Platform 3.0 con batería Blade LFP",
+   "timing": null,
+   "intervals": {
+    "cabin_filter": {
+     "km": 20000,
+     "months": 12
+    },
+    "brake_fluid": {
+     "months": 24
+    },
+    "coolant": {
+     "km": 80000,
+     "months": 48
+    },
+    "reducer_oil": {
+     "km": 40000,
+     "months": 24
+    },
+    "tyre_rotation": {
+     "km": 10000
+    },
+    "ev_service": {
+     "km": 20000,
+     "months": 12
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [],
+   "specs": {
+    "coolant": "Anticongelante del motor eléctrico: cambio cada 4 años / 80.000 km (plan de servicio BYD para Atto 3 y Dolphin)",
+    "reducer_oil": "Aceite de la transmisión NT30: cambio cada 2 años / 40.000 km (plan BYD Atto 3 / Dolphin)",
+    "brake_fluid": "Cambio cada 2 años / 40.000 km",
+    "heat_pump": "De serie"
+   },
+   "platform": "e-Platform 3.0 con batería Blade LFP",
+   "battery": "Atto 3: 60,5 kWh. Dolphin: 60,5 kWh (62 kWh nominal) y versión pequeña de 44,9 kWh. Seal: 82,5 kWh (y versión de unos 61 kWh). Todas LFP (Blade)",
+   "range_wltp": "Atto 3: 420 km. Dolphin 60 kWh: 427 km. Seal 82,5 kWh AWD: 520 km",
+   "charge_ac": "11 kW",
+   "charge_dc": "89 kW (Atto 3 2023-2024), 110 kW (Dolphin 60 kWh), 150 kW (Seal)",
+   "warranty_battery": "8 años / 250.000 km",
+   "typical_kwh100": 18.0,
+   "buy_tips": [
+    "Batería LFP: pide el estado de salud (SoH); la garantía de 8 años / 250.000 km es de las más largas",
+    "BYD indica revisión cada 12 meses o 20.000 km con cambio del filtro HEPA de carbón activo en cada una: pide el historial",
+    "El Atto 3 de 2023-2024 carga a solo 89 kW en carga rápida"
+   ],
+   "service": "BYD indica revisión cada 12 meses o 20.000 km (plan del Atto 3 y el Dolphin).",
+   "slug": "byd-atto-3-dolphin-y-seal-e-platform-3-0"
+  },
+  {
+   "id": "fiat_500e",
+   "make": [
+    "Fiat",
+    "Abarth"
+   ],
+   "models": [
+    "500e",
+    "500 e",
+    "500 eléctrico",
+    "500 electrico",
+    "nuevo 500",
+    "500 la prima",
+    "500e cabrio",
+    "500e 3+1",
+    "abarth 500e",
+    "500"
+   ],
+   "years": [
+    2020,
+    2026
+   ],
+   "fuel": "electric",
+   "label": "Fiat 500e eléctrico (desde 2020)",
+   "engine": "Eléctrico · Propia del nuevo 500 eléctrico",
+   "timing": null,
+   "intervals": {
+    "cabin_filter": {
+     "km": 30000,
+     "months": 24
+    },
+    "brake_fluid": {
+     "months": 24
+    },
+    "ev_service": {
+     "km": 15000,
+     "months": 12
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [],
+   "specs": {
+    "coolant": "Mezcla al 50 % de agua desmineralizada y PARAFLU UP (orgánico, CUNA NC 956-16 / ASTM D3306); 6,5 litros",
+    "reducer_oil": "PETRONAS IONA INTEGRA PLUS FCA, SAE 75W-70 API GL-4; 0,67 litros (módulo EDM)",
+    "brake_fluid": "DOT 4 (TUTELA TOP EVO, ISO 4925 clase 6); 0,8 kg",
+    "tyres": "185/65 R15, 195/55 R16, 205/45 R17"
+   },
+   "platform": "Propia del nuevo 500 eléctrico",
+   "battery": "42 kWh nominales / 37,3 kWh netos; versión urbana de 24 kWh",
+   "range_wltp": "315-333 km (42 kWh)",
+   "charge_ac": "11 kW",
+   "charge_dc": "85 kW (42 kWh)",
+   "warranty_battery": "8 años / 160.000 km",
+   "typical_kwh100": 16.0,
+   "buy_tips": [
+    "Revisión cada año o 15.000 km; filtro de habitáculo y líquido de frenos cada 2 años (cada año en zonas con mucho polvo)",
+    "Comprueba con el VIN que las campañas están hechas",
+    "Distingue la batería de 42 kWh (unos 320 km WLTP) de la de 24 kWh, mucho más corta",
+    "Pide el estado de salud de la batería (SoH); garantía 8 años / 160.000 km"
+   ],
+   "service": "Fiat indica revisión cada año o 15.000 km."
+  },
+  {
+   "id": "renault_ampr_small",
+   "make": [
+    "Renault",
+    "Nissan",
+    "Alpine"
+   ],
+   "models": [
+    "5 e-tech",
+    "r5",
+    "renault 5",
+    "4 e-tech",
+    "r4",
+    "renault 4",
+    "twingo",
+    "twingo e-tech",
+    "micra",
+    "micra ev",
+    "a290"
+   ],
+   "years": [
+    2024,
+    2026
+   ],
+   "fuel": "electric",
+   "label": "Renault 5, Renault 4 y Twingo E-Tech, Nissan Micra y Alpine A290 (AmpR Small)",
+   "engine": "Eléctrico · AmpR Small (Ampere, Renault)",
+   "timing": null,
+   "intervals": {
+    "ev_service": {
+     "km": 40000,
+     "months": 24
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Llamada a revisión en 2025 de unos 15.700 Renault 5 fabricados entre septiembre y diciembre de 2024 (unos 500 en España): la centralita del inversor podía dejar el coche sin arrancar con el aviso de fallo del motor eléctrico. Se arregla reprogramándola en el taller oficial",
+    "Llamada a revisión de Renault 5 y Renault 4 fabricados entre diciembre de 2025 y enero de 2026 por una celda de batería defectuosa (riesgo de cortocircuito interno y sobrecalentamiento)"
+   ],
+   "specs": {
+    "heat_pump": "De serie en las versiones altas del Renault 5 y 4; según acabado en el resto"
+   },
+   "platform": "AmpR Small (Ampere, Renault)",
+   "battery": "Renault 5 / 4, Micra y A290: 40 o 52 kWh (NMC). Twingo E-Tech (2026): 27,5 kWh útiles, LFP",
+   "range_wltp": "Renault 5 52 kWh: hasta unos 410 km; 40 kWh: unos 300 km. Twingo: 263 km",
+   "charge_ac": "11 kW",
+   "charge_dc": "80 kW (40 kWh), 100 kW (52 kWh); Twingo: 50 kW con el pack de carga rápida opcional",
+   "warranty_battery": "8 años / 160.000 km",
+   "typical_kwh100": 15.5,
+   "buy_tips": [
+    "Comprueba con el bastidor en un Renault oficial que están hechas las dos campañas (inversor y celdas de batería)",
+    "Mira qué batería lleva (40 o 52 kWh): cambia la autonomía y la carga rápida",
+    "En el Twingo, mira si lleva el pack de carga rápida: sin él no admite cargadores de corriente continua"
+   ],
+   "service": "Renault indica revisión de sus eléctricos cada 2 años o 40.000 km."
+  },
+  {
+   "id": "stellantis_smart_car",
+   "make": [
+    "Citroën",
+    "Opel",
+    "Fiat"
+   ],
+   "models": [
+    "c3",
+    "ë-c3",
+    "e-c3",
+    "c3 aircross",
+    "ë-c3 aircross",
+    "frontera",
+    "frontera electric",
+    "grande panda"
+   ],
+   "years": [
+    2024,
+    2026
+   ],
+   "fuel": "electric",
+   "label": "Citroën ë-C3 y ë-C3 Aircross, Opel Frontera Electric y Fiat Grande Panda (Smart Car)",
+   "engine": "Eléctrico · Smart Car (Stellantis)",
+   "timing": null,
+   "intervals": {},
+   "watch_hints": {},
+   "known_issues": [],
+   "specs": {},
+   "platform": "Smart Car (Stellantis)",
+   "battery": "44 kWh útiles, LFP. El ë-C3 tiene también una versión de batería pequeña, de unos 200 km",
+   "range_wltp": "Unos 300-320 km con la batería de 44 kWh",
+   "charge_ac": "7,4 kW (11 kW opcional)",
+   "charge_dc": "100 kW",
+   "warranty_battery": "8 años / 160.000 km",
+   "typical_kwh100": 16.5,
+   "buy_tips": [
+    "Mira si lleva el cargador de 11 kW (opcional): con el de 7,4 kW tarda bastante más en casa"
+   ]
+  },
+  {
+   "id": "volvo_ex30",
+   "make": [
+    "Volvo"
+   ],
+   "models": [
+    "ex30",
+    "ex30 cross country"
+   ],
+   "years": [
+    2023,
+    2026
+   ],
+   "fuel": "electric",
+   "label": "Volvo EX30",
+   "engine": "Eléctrico · SEA (Geely)",
+   "timing": null,
+   "intervals": {
+    "ev_service": {
+     "km": 30000,
+     "months": 24,
+     "note": "Volvo publica cada 20.000 millas (32.000 km) o 2 años."
+    },
+    "cabin_filter": {
+     "km": 30000,
+     "months": 24,
+     "note": "Volvo lo cambia en cada revisión."
+    },
+    "reducer_oil": {
+     "km": 64000,
+     "note": "Volvo cambia el aceite de los ejes eléctricos una vez, a las 40.000 millas (unos 64.000 km)."
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Llamada a revisión en 2026 de EX30 Single Motor Extended Range de 2024-2025 por un posible defecto en las celdas de la batería (riesgo de sobrecalentamiento): Volvo cambia módulos de batería y, hasta la reparación, pide no cargar por encima del 70 %",
+    "Llamada a revisión en 2024 de todos los EX30 fabricados hasta entonces por un fallo de software del cuadro; se arregló por actualización remota"
+   ],
+   "specs": {
+    "reducer_oil": "Aceite del eje eléctrico (delantero y trasero si es Twin Motor): un cambio a los 64.000 km, según Volvo",
+    "brake_fluid": "Volvo comprueba la humedad del líquido en cada revisión"
+   },
+   "platform": "SEA (Geely)",
+   "battery": "49 kWh LFP (Single Motor) o 64 kWh útiles NMC (Extended Range y Twin Motor)",
+   "range_wltp": "Unos 340 km (49 kWh) y hasta unos 475 km (64 kWh)",
+   "charge_ac": "11 kW",
+   "charge_dc": "134 kW (49 kWh), 153 kW (64 kWh)",
+   "warranty_battery": "8 años / 160.000 km",
+   "typical_kwh100": 17.0,
+   "buy_tips": [
+    "Comprueba con el bastidor en un Volvo oficial que está hecha la campaña de la batería si es un Extended Range",
+    "Mira qué batería lleva: la de 49 kWh (LFP) y la de 64 kWh cambian mucho la autonomía"
+   ],
+   "service": "Volvo indica revisión cada 2 años (en EE. UU., cada 20.000 millas o 2 años)."
+  },
+  {
+   "id": "toyota_etnga",
+   "make": [
+    "Toyota",
+    "Subaru"
+   ],
+   "models": [
+    "bz4x",
+    "bz4x touring",
+    "c-hr+",
+    "c-hr plus",
+    "c-hr",
+    "solterra"
+   ],
+   "years": [
+    2022,
+    2026
+   ],
+   "fuel": "electric",
+   "label": "Toyota bZ4X y C-HR+, Subaru Solterra (e-TNGA)",
+   "engine": "Eléctrico · e-TNGA (Toyota)",
+   "timing": null,
+   "intervals": {
+    "ev_service": {
+     "km": 15000,
+     "months": 12
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [
+    "Llamada a revisión en 2022 de los primeros bZ4X y Solterra (unos 2.700, la mayoría en Europa): los tornillos de los cubos de rueda podían aflojarse"
+   ],
+   "specs": {
+    "heat_pump": "De serie"
+   },
+   "platform": "e-TNGA (Toyota)",
+   "battery": "bZ4X y Solterra 2022-2025: 71,4 kWh. C-HR+: 77 kWh (en algunos mercados, 57,7 kWh). bZ4X 2026: 57,7 o 74,7 kWh",
+   "range_wltp": "C-HR+ 77 kWh: hasta unos 600 km (tracción delantera) y 475 km (total). bZ4X 2022-2025: 450-515 km",
+   "charge_ac": "11 kW (6,6 kW en los primeros bZ4X; 22 kW opcional en el C-HR+)",
+   "charge_dc": "150 kW",
+   "warranty_battery": "8 años / 160.000 km; con el programa Battery Care (revisión anual de la batería en el oficial) llega a 10 años / 1.000.000 km",
+   "typical_kwh100": 17.0,
+   "buy_tips": [
+    "Pide el historial de la revisión anual de la batería: sin ella se pierde la garantía ampliada de Battery Care",
+    "En un bZ4X de 2022, comprueba con el bastidor que está hecha la campaña de los tornillos de rueda"
+   ],
+   "service": "Toyota hace la revisión cada 12 meses o 15.000 km, con revisión del estado de la batería."
+  },
+  {
+   "id": "leapmotor",
+   "make": [
+    "Leapmotor"
+   ],
+   "models": [
+    "t03",
+    "c10",
+    "b10",
+    "b05",
+    "b03x",
+    "b03"
+   ],
+   "years": [
+    2023,
+    2026
+   ],
+   "fuel": "electric",
+   "label": "Leapmotor T03, B03X, B05, B10 y C10",
+   "engine": "Eléctrico · LEAP 3.5 (B03X, B05, B10, C10); el T03 es un urbano aparte",
+   "timing": null,
+   "intervals": {
+    "ev_service": {
+     "km": 20000,
+     "months": 12
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [],
+   "specs": {
+    "heat_pump": "De serie en B10 y C10"
+   },
+   "platform": "LEAP 3.5 (B03X, B05, B10, C10); el T03 es un urbano aparte",
+   "battery": "Todas LFP. T03: 37,3 kWh. B03X: 39,8 o 53 kWh. B05: 56,2 o 67,1 kWh. B10: 56,2 o 67,1 kWh. C10: 69,9 kWh",
+   "range_wltp": "T03: 265 km. B03X: hasta 382 km. B05: 401-482 km. B10: hasta unos 430 km. C10: 420 km",
+   "charge_ac": "6,6 kW (T03), 11 kW (resto)",
+   "charge_dc": "48 kW (T03), 133 kW (B03X), 150-174 kW (B05, B10, C10)",
+   "warranty_battery": "8 años / 160.000 km",
+   "typical_kwh100": 16.5,
+   "buy_tips": [
+    "Se venden y se reparan en la red de Stellantis: pide el historial de revisiones con sello"
+   ],
+   "service": "Leapmotor indica revisión cada 12 meses o 20.000 km."
+  },
+  {
+   "id": "kia_ev2_ev3_ev4",
+   "make": [
+    "Kia"
+   ],
+   "models": [
+    "ev2",
+    "ev3",
+    "ev4",
+    "ev5"
+   ],
+   "years": [
+    2024,
+    2026
+   ],
+   "fuel": "electric",
+   "label": "Kia EV2, EV3 y EV4",
+   "engine": "Eléctrico · E-GMP de 400 V (EV3, EV4)",
+   "timing": null,
+   "intervals": {},
+   "watch_hints": {},
+   "known_issues": [
+    "EV3 de las primeras series (matriculados de finales de 2024 a principios de 2025): fallos del ICCU, el módulo que carga la batería de 12 V. El coche se queda sin batería de 12 V e inmovilizado, a menudo mientras carga. Kia España habló de unos 40 casos en más de 2.000 coches"
+   ],
+   "specs": {},
+   "platform": "E-GMP de 400 V (EV3, EV4)",
+   "battery": "EV3 y EV4: 58,3 o 81,4 kWh. EV2: 42,2 kWh (LFP) o 61 kWh",
+   "range_wltp": "EV3: 436-605 km. EV2: 317 km (42,2 kWh) y unos 450 km (61 kWh)",
+   "charge_ac": "11 kW",
+   "charge_dc": "EV3 y EV4: unos 100 kW (58,3 kWh) y 128 kW (81,4 kWh). EV2: unos 115 kW",
+   "warranty_battery": "Kia: 7 años / 150.000 km",
+   "typical_kwh100": 16.0,
+   "buy_tips": [
+    "En un EV3 de 2024-2025, pregunta en un Kia oficial si le han cambiado o actualizado el ICCU"
+   ]
+  },
+  {
+   "id": "geely_gea",
+   "make": [
+    "Geely"
+   ],
+   "models": [
+    "e2",
+    "ex2",
+    "e5",
+    "ex5"
+   ],
+   "years": [
+    2025,
+    2026
+   ],
+   "fuel": "electric",
+   "label": "Geely E2 y E5 (EX2 y EX5)",
+   "engine": "Eléctrico · GEA (Geely)",
+   "timing": null,
+   "intervals": {},
+   "watch_hints": {},
+   "known_issues": [],
+   "specs": {},
+   "platform": "GEA (Geely)",
+   "battery": "E2: 35,4 o 47,1 kWh. E5: 60,2 kWh. LFP (Short Blade)",
+   "range_wltp": "E2: 252 km (35,4 kWh) y 345 km (47,1 kWh). E5: unos 410-430 km",
+   "warranty_battery": "8 años / 200.000 km (Geely Care+, con el mantenimiento en la red oficial)",
+   "typical_kwh100": 15.5,
+   "buy_tips": [
+    "La garantía de 8 años depende de hacer el mantenimiento en la red oficial: pide el historial"
+   ]
+  },
+  {
+   "id": "xpeng",
+   "make": [
+    "XPeng"
+   ],
+   "models": [
+    "g6",
+    "g9",
+    "p7",
+    "p7+",
+    "x9"
+   ],
+   "years": [
+    2023,
+    2026
+   ],
+   "fuel": "electric",
+   "label": "XPeng G6, G9, P7 y X9",
+   "engine": "Eléctrico · SEPA 2.0 (XPeng), 800 V",
+   "timing": null,
+   "intervals": {
+    "ev_service": {
+     "km": 20000,
+     "months": 12,
+     "note": "XPeng recomienda revisión cada año o 12.500 millas (unos 20.000 km)."
+    }
+   },
+   "watch_hints": {},
+   "known_issues": [],
+   "specs": {
+    "heat_pump": "De serie"
+   },
+   "platform": "SEPA 2.0 (XPeng), 800 V",
+   "battery": "G6: 66 kWh (LFP) u 87,5 kWh (NMC). G9: 78,2 o 98 kWh",
+   "charge_ac": "11 kW",
+   "charge_dc": "G6: 215-280 kW. G9: hasta 300 kW",
+   "warranty_battery": "8 años / 160.000 km",
+   "typical_kwh100": 18.5,
+   "buy_tips": [
+    "Comprueba que las actualizaciones de software están al día: muchas funciones dependen de ellas"
+   ],
+   "service": "XPeng recomienda revisión cada año o unos 20.000 km."
+  },
+  {
+   "id": "changan_deepal",
+   "make": [
+    "Deepal",
+    "Changan"
+   ],
+   "models": [
+    "s05",
+    "s07",
+    "deepal s05",
+    "deepal s07"
+   ],
+   "years": [
+    2025,
+    2026
+   ],
+   "fuel": "electric",
+   "label": "Deepal S05 y S07 (Changan)",
+   "engine": "Eléctrico · EPA (Changan)",
+   "timing": null,
+   "intervals": {},
+   "watch_hints": {},
+   "known_issues": [],
+   "specs": {},
+   "platform": "EPA (Changan)",
+   "battery": "S05: 68,8 kWh LFP (CATL). S07: 79,97 kWh LFP",
+   "range_wltp": "S05: hasta 485 km (tracción trasera). S07: unos 475 km",
+   "warranty_battery": "8 años / 200.000 km",
+   "typical_kwh100": 17.5,
+   "buy_tips": [
+    "Marca recién llegada a España (2026): pregunta dónde está el taller oficial más cercano antes de comprar"
+   ]
+  },
+  {
+   "id": "chery_omoda_jaecoo_ev",
+   "make": [
+    "Omoda",
+    "Jaecoo"
+   ],
+   "models": [
+    "5 ev",
+    "e5",
+    "omoda 5",
+    "omoda e5",
+    "jaecoo 5",
+    "j5",
+    "5"
+   ],
+   "years": [
+    2024,
+    2026
+   ],
+   "fuel": "electric",
+   "label": "Omoda 5 EV (E5) y Jaecoo 5 EV (Chery)",
+   "engine": "Eléctrico · Chery",
+   "timing": null,
+   "intervals": {},
+   "watch_hints": {},
+   "known_issues": [],
+   "specs": {},
+   "platform": "Chery",
+   "battery": "Omoda 5 EV: 61 kWh. Jaecoo 5 EV: 61 kWh LFP (CATL)",
+   "range_wltp": "Omoda 5 EV: unos 430 km. Jaecoo 5 EV: unos 400 km",
+   "charge_ac": "11 kW",
+   "charge_dc": "Omoda 5 EV: 80 kW. Jaecoo 5 EV: 130 kW en España",
+   "warranty_battery": "8 años / 160.000 km",
+   "typical_kwh100": 17.0,
+   "buy_tips": [
+    "Pregunta la potencia de carga rápida de esa unidad: no todas las versiones cargan igual de rápido"
+   ]
   }
  ],
  "specs_note": "Especificaciones orientativas recopiladas de manuales y talleres: comprueba siempre el libro de tu vehículo antes de comprar.",

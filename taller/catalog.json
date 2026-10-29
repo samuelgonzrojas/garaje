@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "description": "Catálogo base de mantenimiento: turismos y furgonetas de combustión (clase car) y motos/ciclomotores (clase moto). Intervalos conservadores. Cuando hay km y meses vence lo primero que llegue.",
+  "description": "Catálogo base de mantenimiento: turismos y furgonetas de combustión y eléctricos (clase car) y motos/ciclomotores (clase moto). Intervalos conservadores. Cuando hay km y meses vence lo primero que llegue.",
   "rules": {
     "min_interval_km": 7500,
     "round_km": 500,
@@ -26,6 +26,10 @@
       "applies_to": {
         "vehicle_class": [
           "car"
+        ],
+        "fuel": [
+          "diesel",
+          "gasoline"
         ]
       },
       "ask_on_onboarding": true,
@@ -40,6 +44,10 @@
       "applies_to": {
         "vehicle_class": [
           "car"
+        ],
+        "fuel": [
+          "diesel",
+          "gasoline"
         ]
       },
       "ask_on_onboarding": true,
@@ -113,6 +121,10 @@
         ],
         "vehicle_class": [
           "car"
+        ],
+        "fuel": [
+          "diesel",
+          "gasoline"
         ]
       },
       "ask_on_onboarding": true,
@@ -127,6 +139,10 @@
       "applies_to": {
         "vehicle_class": [
           "car"
+        ],
+        "fuel": [
+          "diesel",
+          "gasoline"
         ]
       },
       "ask_on_onboarding": true,
@@ -144,6 +160,10 @@
         ],
         "vehicle_class": [
           "car"
+        ],
+        "fuel": [
+          "diesel",
+          "gasoline"
         ]
       },
       "ask_on_onboarding": true,
@@ -161,6 +181,10 @@
         ],
         "vehicle_class": [
           "car"
+        ],
+        "fuel": [
+          "diesel",
+          "gasoline"
         ]
       },
       "ask_on_onboarding": true,
@@ -179,6 +203,10 @@
         ],
         "vehicle_class": [
           "car"
+        ],
+        "fuel": [
+          "diesel",
+          "gasoline"
         ]
       },
       "ask_on_onboarding": true,
@@ -243,6 +271,40 @@
       "ask_on_onboarding": false,
       "description": "Alarga la vida del juego. No aplica si llevas medidas distintas delante y detrás.",
       "category": "ruedas"
+    },
+    {
+      "id": "ev_service",
+      "name": "Revisión del fabricante",
+      "interval_km": 20000,
+      "interval_months": 12,
+      "applies_to": {
+        "vehicle_class": [
+          "car"
+        ],
+        "fuel": [
+          "electric"
+        ]
+      },
+      "ask_on_onboarding": true,
+      "description": "La revisión del libro de mantenimiento de tu eléctrico. Hacerla a tiempo, en el oficial o en un taller que siga el plan del fabricante, es lo que mantiene la garantía de la batería.",
+      "category": "general"
+    },
+    {
+      "id": "reducer_oil",
+      "name": "Aceite de la reductora",
+      "interval_km": 100000,
+      "interval_months": null,
+      "applies_to": {
+        "vehicle_class": [
+          "car"
+        ],
+        "fuel": [
+          "electric"
+        ]
+      },
+      "ask_on_onboarding": false,
+      "description": "La reductora hace de caja de cambios. Muchos fabricantes no le ponen cambio; si tu libro no dice nada, que la revisen a los 100.000 km.",
+      "category": "transmision"
     },
     {
       "id": "moto_oil",
@@ -425,6 +487,10 @@
       "applies_to": {
         "vehicle_class": [
           "car"
+        ],
+        "fuel": [
+          "diesel",
+          "gasoline"
         ]
       },
       "included_by_default": true,
@@ -491,6 +557,10 @@
         ],
         "vehicle_class": [
           "car"
+        ],
+        "fuel": [
+          "diesel",
+          "gasoline"
         ]
       },
       "included_by_default": true,
@@ -568,6 +638,10 @@
       "applies_to": {
         "transmission": [
           "manual"
+        ],
+        "fuel": [
+          "diesel",
+          "gasoline"
         ]
       },
       "included_by_default": true,
@@ -612,12 +686,73 @@
       "applies_to": {
         "vehicle_class": [
           "car"
+        ],
+        "fuel": [
+          "diesel",
+          "gasoline"
         ]
       },
       "included_by_default": true,
       "life_hint": "Con el motor frío y en llano.",
       "symptoms": "Nivel bajo repetido = fuga o consumo; mancha en el suelo.",
       "category": "motor"
+    },
+    {
+      "id": "ev_fluids",
+      "name": "Niveles (refrigerante, frenos, limpiaparabrisas)",
+      "check_every_km": null,
+      "check_every_months": 1,
+      "check_on": [],
+      "applies_to": {
+        "vehicle_class": [
+          "car"
+        ],
+        "fuel": [
+          "electric"
+        ]
+      },
+      "included_by_default": true,
+      "life_hint": "En llano y con el coche parado un rato. El refrigerante también enfría la batería.",
+      "symptoms": "Nivel bajo repetido = fuga; mancha en el suelo.",
+      "category": "general"
+    },
+    {
+      "id": "ev_battery",
+      "name": "Batería de tracción (estado de salud)",
+      "check_every_km": null,
+      "check_every_months": 12,
+      "check_on": [],
+      "applies_to": {
+        "vehicle_class": [
+          "car"
+        ],
+        "fuel": [
+          "electric"
+        ]
+      },
+      "included_by_default": true,
+      "life_hint": "Lo habitual es una garantía de 8 años o 160.000 km con al menos el 70 % de capacidad. Pide el informe de estado (SoH) en cada revisión y guárdalo.",
+      "symptoms": "La autonomía cae de golpe, la carga rápida va más lenta o salen avisos de batería.",
+      "category": "electrico"
+    },
+    {
+      "id": "ev_brakes",
+      "name": "Frenos (pastillas, discos y óxido)",
+      "check_every_km": 20000,
+      "check_every_months": 12,
+      "check_on": [],
+      "applies_to": {
+        "vehicle_class": [
+          "car"
+        ],
+        "fuel": [
+          "electric"
+        ]
+      },
+      "included_by_default": true,
+      "life_hint": "Las pastillas duran mucho porque frena el motor, pero los discos y las pinzas se oxidan si apenas se usan: es el fallo de ITV más típico de los eléctricos. Frena fuerte de vez en cuando.",
+      "symptoms": "Ruido o vibración al frenar, discos con óxido o surcos.",
+      "category": "frenos"
     },
     {
       "id": "injectors",
@@ -803,6 +938,10 @@
       "applies_to": {
         "vehicle_class": [
           "car"
+        ],
+        "fuel": [
+          "diesel",
+          "gasoline"
         ]
       }
     },
@@ -1050,7 +1189,13 @@
     {
       "id": "exhaust",
       "name": "Escape",
-      "itv_note": "Marcado CE/E y nivel de ruido dentro del límite de ficha. Sin DPF eliminado: defecto grave."
+      "itv_note": "Marcado CE/E y nivel de ruido dentro del límite de ficha. Sin DPF eliminado: defecto grave.",
+      "applies_to": {
+        "fuel": [
+          "diesel",
+          "gasoline"
+        ]
+      }
     },
     {
       "id": "lights",

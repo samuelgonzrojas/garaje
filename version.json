@@ -1,7 +1,7 @@
 {
-  "version": "1.1.1",
-  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.1.1/garaje-1.1.1-arm64.apk",
-  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.1.1/garaje-1.1.1.apk",
-  "notes": "Arreglos: el tour de bienvenida ya no se cierra en móviles de pantalla pequeña, y cancelar el acceso con Google o quedarse sin red al activar los avisos ya no cuentan como fallo.",
+  "version": "1.2.0",
+  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.2.0/garaje-1.2.0-arm64.apk",
+  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.2.0/garaje-1.2.0.apk",
+  "notes": "Coches eléctricos: ya puedes dar de alta tu eléctrico con su propio plan (revisión del fabricante, frenos, batería y neumáticos), con más de 20 familias como Tesla, Renault 5, BYD, Kia EV3, MG4, Volvo EX30 o Leapmotor. En un eléctrico ya no salen el repostaje ni las gasolineras.",
   "play_url": "https://play.google.com/store/apps/details?id=com.samuel.mantenimiento"
 }
