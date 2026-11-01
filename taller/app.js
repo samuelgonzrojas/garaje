@@ -4,7 +4,7 @@
 // (unión por id de eventos y lecturas); las órdenes, piezas, proveedores y
 // mensajes van en sus propias tablas.
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-import { BRANDS, CAR_MAKES, searchUrl } from './brands.js?v=20261101f';
+import { BRANDS, CAR_MAKES, searchUrl } from './brands.js?v=20261101g';
 
 const SUPABASE_URL = 'https://pzgqgligxmwnwvozfwcl.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_zPxM3Ul4VYkudB1D_lhUZw_lUy6K52g';
@@ -2132,7 +2132,6 @@ function collectJob() {
     assigned_to: $('jAssigned').value || null,
     lines: (job.lines || []).filter((l) => (l.description || '').trim() || num(l.unit_price)).map((l) => ({
       ...l, qty: num(l.qty) ?? 1, unit_price: num(l.unit_price), discount: num(l.discount),
-      supplier: suppliers.find((s) => s.id === l.supplier_id)?.name || l.supplier || null,
     })),
   };
 }
@@ -2586,6 +2585,8 @@ async function exchangeInvoice(inv) {
   if (next === 'print') printInvoice(data);
 }
 
+/** Nota y forma de pago que el taller pone en sus facturas, tal como estaban al emitirla. */
+const invoiceExtras = (w) => (w.note || w.payment ? `<div class="doc-extras">${w.note ? `<p>${esc(w.note)}</p>` : ''}${w.payment ? `<p>Forma de pago: ${esc(w.payment)}</p>` : ''}</div>` : '');
 /** La factura simplificada, como un ticket de 80 mm y casi sin datos del cliente. */
 function ticketHtml(inv) {
   const w = inv.issuer || {}, c = inv.customer || {};
@@ -2600,6 +2601,7 @@ function ticketHtml(inv) {
     <div class="t-row"><span>Base imponible</span><span>${fmtEur(num(inv.base))}</span></div>
     <div class="t-row"><span>IVA ${String(num(inv.vat_rate)).replace('.', ',')} %</span><span>${fmtEur(num(inv.vat))}</span></div>
     <div class="t-row t-total"><span>TOTAL</span><span>${fmtEur(num(inv.total))}</span></div>
+    ${invoiceExtras(w)}
     <div class="t-seal">${sealImages()}Firma y sello del taller</div>
     <div class="legal">${WARRANTY}</div>
   </div>`;
@@ -2627,7 +2629,8 @@ function invoiceDoc(inv) {
     </div>
     <table><thead><tr><th>Tipo</th><th>Concepto</th><th class="num">Cant.</th><th class="num">Precio</th><th class="num">Dto.</th><th class="num">Importe</th></tr></thead><tbody>${rows}</tbody></table>
     <div class="tot"><div><span>Base imponible</span><span>${fmtEur(num(inv.base))}</span></div><div><span>IVA ${String(num(inv.vat_rate)).replace('.', ',')} %</span><span>${fmtEur(num(inv.vat))}</span></div><div class="big"><span>Total</span><span>${fmtEur(num(inv.total))}</span></div></div>
-    <div class="legal">${WARRANTY}</div>
+    ${invoiceExtras(w)}
+    <div class="legal">${WARRANTY}${w.privacy ? `<p>${esc(w.privacy)}</p>` : ''}</div>
     <div class="sign"><div>${sealImages()}Firma y sello del taller</div><div></div></div>
   </div>`;
 }
@@ -2878,12 +2881,23 @@ $('invExport').onclick = async () => {
 };
 $('invSeriesBtn').onclick = async (e) => {
   e.preventDefault();
-  const r = await dialog(`<h3>Series de facturación</h3>
-    <p class="muted">Las completas y las simplificadas van en la misma serie. Si ya llevabas otra numeración, pon tu prefijo: sigue desde el último número que haya en Garaje con esa serie.</p>
-    <div class="row2"><div><label>Facturas</label><input name="s" value="${esc(invoicing.series)}" maxlength="12"></div>
-      <div><label>Rectificativas</label><input name="r" value="${esc(invoicing.rect_series)}" maxlength="12"></div></div>`, 'Guardar', (fd) => fd);
+  const w = workshop;
+  const example = `Los datos personales que nos ha facilitado serán tratados por ${w.legal_name || w.name}${w.tax_id ? `, con NIF ${w.tax_id}` : ''}${w.address ? ` y domicilio en ${w.address}` : ''}, para prestarle el servicio y facturarlo, y para cumplir las obligaciones contables y fiscales. Se conservarán mientras dure la relación comercial y los años que exija la ley, y no se cederán a terceros salvo obligación legal. Puede ejercer sus derechos de acceso, rectificación, supresión y demás dirigiéndose por escrito a esa dirección, y reclamar ante la Agencia Española de Protección de Datos (aepd.es).`;
+  const r = await dialog(`<h3>Datos de la factura</h3>
+    <div class="row3"><div><label>Serie de facturas</label><input name="s" required value="${esc(invoicing.series)}" maxlength="12"></div>
+      <div><label>Siguiente número</label><input name="next" inputmode="numeric" value="${esc(invoicing.next_no)}"></div>
+      <div><label>Serie rectificativas</label><input name="r" required value="${esc(invoicing.rect_series)}" maxlength="12"></div></div>
+    <p class="muted" style="font-size:13px;margin:4px 0 0">Completas y simplificadas van en la misma serie. Si vienes de otro programa, pon el número siguiente al último que hiciste.</p>
+    <label>Forma de pago</label><input name="pay" maxlength="300" value="${esc(invoicing.payment_text || '')}" placeholder="Transferencia a tu IBAN, efectivo, tarjeta…">
+    <label>Nota final</label><input name="note" maxlength="300" value="${esc(invoicing.invoice_note || '')}" placeholder="Gracias por su confianza.">
+    <label>Protección de datos</label><textarea name="priv" rows="5" maxlength="2000" placeholder="La cláusula que quieres que salga en tus facturas completas.">${esc(invoicing.privacy_text || '')}</textarea>
+    <p style="margin:4px 0 0"><a href="#" id="privExample">Poner un texto de ejemplo</a> <span class="muted" style="font-size:13px">Revísalo: la responsabilidad de lo que diga es del taller.</span></p>
+    <p class="muted" style="font-size:13px">Se copian en cada factura al emitirla: las ya emitidas no cambian.</p>`, 'Guardar', (fd) => fd, (form) => {
+    form.querySelector('#privExample').onclick = (ev) => { ev.preventDefault(); form.priv.value = example; };
+  });
   if (!r) return;
-  const { error } = await sb.rpc('set_invoice_series', { p_workshop: workshop.id, p_series: r.s, p_simple: r.s, p_rect: r.r });
+  const next = (r.next || '').trim() ? parseInt(digitsOf(r.next), 10) : null;
+  const { error } = await sb.rpc('set_invoice_settings', { p_workshop: workshop.id, p_series: r.s, p_rect: r.r, p_next: next, p_payment: r.pay, p_note: r.note, p_privacy: r.priv });
   if (error) { await notice(`<h3>No se pudo guardar</h3><p>${esc(error.message)}</p>`); return; }
   ({ data: invoicing } = await sb.from('workshop_invoicing').select('*').eq('workshop_id', workshop.id).maybeSingle());
   renderInvoices();

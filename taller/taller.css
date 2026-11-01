@@ -947,3 +947,9 @@ td .stock-low{display:block;margin:0}
 .line-cost-in.saved{outline:2px solid #1B7F4B}
 .line-cost-in.bad{outline:2px solid #E5484D}
 .line-marg{white-space:nowrap;color:var(--muted);font-size:12.5px}
+
+/* Nota, forma de pago y cláusula de la factura */
+.doc-extras{margin-top:12px;font-size:12px}
+.doc-extras p{margin:2px 0;color:#000}
+.doc .legal p{margin:6px 0 0;color:#333;font-size:inherit;line-height:inherit;max-width:none}
+.ticket .doc-extras{font-size:11px;margin-top:8px}
