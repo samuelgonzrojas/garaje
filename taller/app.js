@@ -4,7 +4,7 @@
 // (unión por id de eventos y lecturas); las órdenes, piezas, proveedores y
 // mensajes van en sus propias tablas.
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-import { BRANDS, CAR_MAKES, searchUrl } from './brands.js?v=20261101e';
+import { BRANDS, CAR_MAKES, searchUrl } from './brands.js?v=20261101f';
 
 const SUPABASE_URL = 'https://pzgqgligxmwnwvozfwcl.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_zPxM3Ul4VYkudB1D_lhUZw_lUy6K52g';
@@ -45,6 +45,8 @@ let invoicing = null;      // facturación activada (workshop_invoicing), solo d
 let invoices = [];         // facturas emitidas
 let payments = [];         // cobros de las facturas (invoice_payments)
 let works = [];            // trabajos del taller, con su número (workshop_works)
+let lineCosts = {};        // coste y proveedor de las líneas de la orden abierta (job_line_costs)
+let jobCostItems = null;   // lo que costaban sus piezas al entregarla (job_costs)
 let seals = null;          // firma y sello del taller (workshop_seals)
 let vehicleBack = 'cars';  // a qué pestaña vuelve la ficha del coche
 let wsCustomers = [];      // clientes propios del taller (workshop_customers)
@@ -1703,8 +1705,10 @@ function openJob(j) {
   $('jErr').textContent = ''; setSaveState('');
   renderPhoneIcons();
   renderJobHead();
+  lineCosts = {}; jobCostItems = null;
   renderLines();
   renderRecs();
+  loadLineCosts(job.id);
   loadMessages();
   jobPhotos = []; renderIntakeMedia(); loadJobPhotos();
   window.scrollTo(0, 0);
@@ -1766,7 +1770,7 @@ function renderProgress() {
   $('jAlert').className = 'job-alert' + (alert ? '' : ' hidden') + (late || st === 'rejected' ? ' warn' : '');
   // Solo lectura cuando ya está entregada o cancelada.
   const locked = isLocked();
-  for (const el of document.querySelectorAll('#job input:not(#jMsg), #job select, #job textarea')) el.disabled = locked || (el.id === 'jAssigned' && !isManager());
+  for (const el of document.querySelectorAll('#job input:not(#jMsg):not(.line-cost), #job select:not(.line-cost), #job textarea')) el.disabled = locked || (el.id === 'jAssigned' && !isManager());
   for (const id of ['addLabor', 'addPart', 'jSave']) show(id, !locked);
   show('orderPartsBtn', !locked && isManager() && toolOn('parts'));
 }
@@ -1834,6 +1838,9 @@ function renderLines() {
     const row = document.createElement('div');
     row.className = 'qline ' + l.kind;
     const part = l.kind === 'part';
+    const key = part && isManager() ? lineKey(l, i) : null;
+    const saved = key ? lineCosts[key] : null;
+    const libCost = part && isManager() ? partOfLine(l)?.cost : null;
     row.innerHTML = `<div class="r1">
         <select data-k="kind" title="Tipo"><option value="labor" ${!part ? 'selected' : ''}>Mano de obra</option><option value="part" ${part ? 'selected' : ''}>Pieza</option></select>
         <input data-k="description" value="${esc(l.description)}" placeholder="${part ? 'Filtro de aceite' : 'Cambio de aceite y filtro'}" title="Descripción">
@@ -1846,7 +1853,9 @@ function renderLines() {
       <div class="r2">
         ${part ? `<input data-k="brand" value="${esc(l.brand)}" list="brands" placeholder="Marca">
         <input data-k="reference" value="${esc(l.reference)}" placeholder="Referencia">
-        ${isManager() ? `<select data-k="supplier_id">${supOpts(l.supplier_id)}</select>` : ''}` : ''}
+        ${isManager() ? `<select class="line-cost" data-costsup title="De qué proveedor viene">${supOpts(saved?.supplier_id || l.supplier_id)}</select>
+        <input class="line-cost line-cost-in" data-cost inputmode="decimal" autocomplete="off" value="${esc(dec2(saved?.unit_cost))}" placeholder="${libCost != null ? 'Coste ' + esc(dec2(libCost)) : 'Coste/u sin IVA'}" title="Lo que te cuesta cada unidad, sin IVA. Puedes sumar albaranes: 44,54+30,86. Solo lo ve el taller.">
+        <small class="marg line-marg" data-marg></small>` : ''}` : ''}
         ${part && l.reference ? `<a class="search" href="${searchUrl(l.brand, l.reference)}" target="_blank" rel="noopener">Buscar ${esc(l.reference)} ↗</a>` : ''}
         ${isManager() && !isLocked() && !(part ? l.part_id : l.work_id) ? `<button type="button" class="link-btn" data-savelib ${(l.description || '').trim() ? '' : 'hidden'}>Guardar en mis ${part ? 'piezas' : 'trabajos'}</button>` : ''}
       </div>`;
@@ -1859,12 +1868,76 @@ function renderLines() {
     }
     if (!isLocked()) attachPicker(row.querySelector('[data-k=description]'), (text) => lineResults(l, text), false);
     const saveLib = row.querySelector('[data-savelib]');
-    if (saveLib) saveLib.onclick = () => saveLineToList(l);
+    if (saveLib) saveLib.onclick = () => saveLineToList(l, key);
+    if (isLocked()) for (const inp of row.querySelectorAll('[data-k]')) inp.disabled = true;
+    const costIn = row.querySelector('[data-cost]'), costSup = row.querySelector('[data-costsup]'), marg = row.querySelector('[data-marg]');
+    if (costIn) {
+      const paintMarg = () => {
+        const unit = num(lineCosts[key]?.unit_cost ?? libCost);
+        marg.textContent = unit == null ? '' : `Deja ${fmtEur(lineTotal(l) - unit * (num(l.qty) ?? 1))}`;
+      };
+      paintMarg();
+      for (const inp of row.querySelectorAll('[data-k=qty],[data-k=unit_price],[data-k=discount]')) inp.addEventListener('input', paintMarg);
+      costIn.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); costIn.blur(); } });
+      costIn.addEventListener('change', async () => {
+        const v = sumCost(costIn.value);
+        if (v === undefined) { costIn.classList.add('bad'); return; }
+        costIn.classList.remove('bad');
+        costIn.value = dec2(v);
+        if (await saveLineCost(l, key, { unit_cost: v })) { costIn.classList.add('saved'); setTimeout(() => costIn.classList.remove('saved'), 900); paintMarg(); renderTotals(); } else costIn.classList.add('bad');
+      });
+      costSup.addEventListener('change', async () => {
+        if (!isLocked()) { l.supplier_id = costSup.value; markDirty(); }
+        await saveLineCost(l, key, { supplier_id: costSup.value || null });
+      });
+    }
     row.querySelector('.x').onclick = () => { job.lines.splice(i, 1); markDirty(); renderLines(); };
     if (isLocked()) row.querySelector('.x').remove();
     box.appendChild(row);
   });
   renderTotals();
+}
+/** Clave de la línea para su coste: la orden entregada ya no cambia, y le vale su posición. */
+function lineKey(l, i) {
+  if (!l.line_id && !isLocked()) l.line_id = newId();
+  return l.line_id || 'i' + i;
+}
+/** «44,54+30,86-15» → 60,40. Vacío = null; si no se entiende, undefined. */
+function sumCost(text) {
+  const t = String(text ?? '').replace(/\s/g, '');
+  if (!t) return null;
+  const parts = t.match(/[+-]?[^+-]+/g);
+  if (!parts || parts.join('') !== t) return undefined;
+  let total = 0;
+  for (const p of parts) {
+    if (!/^[+-]?\d[\d.,]*$/.test(p)) return undefined;
+    const n = money(p.replace(/^[+-]/, ''));
+    if (n == null) return undefined;
+    total += p[0] === '-' ? -n : n;
+  }
+  return Math.round(total * 100) / 100;
+}
+/** Coste y proveedor de la orden abierta. Van aparte porque el cliente lee las líneas de la orden. */
+async function loadLineCosts(jobId) {
+  if (!isManager()) return;
+  const [{ data: rows }, { data: snap }] = await Promise.all([
+    sb.from('job_line_costs').select('*').eq('job_id', jobId),
+    sb.from('job_costs').select('items').eq('job_id', jobId).maybeSingle(),
+  ]);
+  if (job?.id !== jobId) return;
+  lineCosts = Object.fromEntries((rows || []).map((r) => [r.line_id, r]));
+  jobCostItems = snap?.items || null;
+  // Sin repintar si se está escribiendo en una línea, para no perder el cursor.
+  if (!$('jLines').contains(document.activeElement)) renderLines(); else renderTotals();
+}
+async function saveLineCost(l, key, patch) {
+  const cur = lineCosts[key];
+  const row = { job_id: job.id, line_id: key, workshop_id: workshop.id, unit_cost: cur?.unit_cost ?? null, supplier_id: cur?.supplier_id ?? (l.supplier_id || null), ...patch, updated_at: new Date().toISOString() };
+  lineCosts[key] = row;   // ya, para que lo vea quien repinta la línea sin esperar a la red
+  const { error } = await sb.from('job_line_costs').upsert(row, { onConflict: 'job_id,line_id' });
+  if (error) { lineCosts[key] = cur; setSaveState('No se pudo guardar el coste', 'err'); console.warn(error); return false; }
+  if (!isLocked()) markDirty();
+  return true;
 }
 function afterLineEdit(rerender, l, key) {
   markDirty();
@@ -1878,7 +1951,7 @@ function renderTotals() {
     <span>IVA ${num(job.vat) ?? 21} %</span><span>${fmtEur(t.vat)}</span>
     <span><b>Total</b></span><span><b>${fmtEur(t.total)}</b></span>`;
   if (isManager() && (job.lines || []).length) {
-    const m = jobMargin(job);
+    const m = jobMargin(job, jobCostItems, lineCosts);
     $('jTotals').insertAdjacentHTML('beforeend', `<span class="muted">Coste de piezas${m.missing ? ` (${m.missing} sin coste)` : ''}</span><span class="muted">${fmtEur(m.cost)}</span>
       <span class="muted">Beneficio sin IVA</span><span class="muted">${fmtEur(m.profit)}</span>`);
   }
@@ -1911,7 +1984,12 @@ function quickResults(text) {
 /** Lo que se puede elegir en una línea: trabajos en la mano de obra, piezas en las piezas. */
 function lineResults(l, text) {
   const q = normTxt(text);
-  const fill = (values) => { for (const k of ['work_id', 'part_id']) delete l[k]; Object.assign(l, values); markDirty(); renderLines(); };
+  const fill = (values) => {
+    // Otra pieza, otro coste: lo apuntado en la línea era de la anterior.
+    if (lineCosts[l.line_id]) saveLineCost(l, l.line_id, { unit_cost: null, supplier_id: null });
+    for (const k of ['work_id', 'part_id']) delete l[k];
+    Object.assign(l, values); markDirty(); renderLines();
+  };
   return l.kind === 'part' ? matchParts(q, q ? 12 : 200).map((p) => partItem(p, () => fill(partToLine(p))))
     : [...matchWorks(q, q ? 12 : 200).map((w) => workItem(w, () => { fill(workToLine(w)); useWork(w); })), ...(q ? [] : noWorksItem())];
 }
@@ -1989,9 +2067,9 @@ attachPicker($('quickAdd'), quickResults, true);
 window.addEventListener('scroll', () => { if (picker.input) placePicker(); }, { passive: true });
 window.addEventListener('resize', () => { if (picker.input) placePicker(); });
 /** Guarda una línea escrita a mano en la lista de trabajos o de piezas. */
-async function saveLineToList(l) {
+async function saveLineToList(l, key) {
   if (l.kind === 'part') {
-    const p = await editPart({ description: (l.description || '').trim(), brand: l.brand, reference: l.reference, supplier_id: l.supplier_id, catalog_id: l.catalog_id, price: num(l.unit_price) });
+    const p = await editPart({ description: (l.description || '').trim(), brand: l.brand, reference: l.reference, supplier_id: lineCosts[key]?.supplier_id || l.supplier_id, catalog_id: l.catalog_id, price: num(l.unit_price), cost: lineCosts[key]?.unit_cost });
     if (p) { l.part_id = p.id; markDirty(); renderLines(); }
   } else {
     const w = await editWork({ name: (l.description || '').trim(), hours: num(l.qty), catalog_id: l.catalog_id });
@@ -2139,7 +2217,7 @@ async function learnParts(engineId) {
     const engineIds = existing ? [...new Set([...(existing.engine_ids || []), ...(engineId ? [engineId] : [])])] : (engineId ? [engineId] : []);
     const row = {
       workshop_id: workshop.id, description: existing?.description || l.description.trim(), brand: l.brand || null, reference: l.reference || null,
-      catalog_id: l.catalog_id || null, supplier_id: l.supplier_id || null, price: num(l.unit_price), engine_ids: engineIds,
+      catalog_id: l.catalog_id || null, supplier_id: lineCosts[l.line_id]?.supplier_id || l.supplier_id || null, price: num(l.unit_price), cost: existing?.cost ?? lineCosts[l.line_id]?.unit_cost ?? null, engine_ids: engineIds,
       uses: (existing?.uses || 0) + 1, last_used_at: new Date().toISOString(),
     };
     if (existing) await sb.from('workshop_parts').update(row).eq('id', existing.id);
@@ -3007,43 +3085,57 @@ function partOfLine(l) {
     || (l.reference ? parts.find((p) => normRef(p.reference) === normRef(l.reference) && normTxt(p.brand) === normTxt(l.brand)) : null)
     || (l.description ? (() => { const m = parts.filter((p) => normTxt(p.description) === normTxt(l.description)); return m.length === 1 ? m[0] : null; })() : null);
 }
-function jobMargin(j, items) {
+function jobMargin(j, items, costs) {
   const r = { labor: 0, sale: 0, cost: 0, missing: 0, suppliers: new Map() };
   let n = 0;
-  for (const l of j.lines || []) {
-    if (l.kind !== 'part') { r.labor += lineTotal(l); continue; }
-    const it = items?.[n++], p = partOfLine(l);
-    const unit = num(it?.unit_cost ?? p?.cost);
+  (j.lines || []).forEach((l, i) => {
+    if (l.kind !== 'part') { r.labor += lineTotal(l); return; }
+    const it = items?.[n++], p = partOfLine(l), own = costs?.[l.line_id || 'i' + i];
+    // Lo apuntado en la línea manda; si no, lo que costaba al entregarla; si no, el coste actual.
+    const unit = num(own?.unit_cost ?? it?.unit_cost ?? p?.cost);
     const sale = lineTotal(l), cost = unit == null ? null : unit * (num(l.qty) ?? 1);
     r.sale += sale;
     if (cost == null) r.missing++; else r.cost += cost;
-    const sup = it?.supplier_id || l.supplier_id || p?.supplier_id || '';
+    const sup = own?.supplier_id || l.supplier_id || it?.supplier_id || p?.supplier_id || '';
     const g = r.suppliers.get(sup) || { sale: 0, cost: 0 };
     g.sale += sale; g.cost += cost ?? 0;
     r.suppliers.set(sup, g);
-  }
+  });
   r.profit = r.labor + r.sale - r.cost;
   return r;
 }
+/** Todas las filas de una consulta: Supabase devuelve como mucho 1.000 de cada vez. */
+async function fetchAll(query) {
+  const all = [];
+  for (let from = 0; from < 100000; from += 1000) {
+    const { data, error } = await query().range(from, from + 999);
+    if (error || !data) { if (error) console.warn(error); break; }
+    all.push(...data);
+    if (data.length < 1000) break;
+  }
+  return all;
+}
 async function renderProfit() {
-  const [{ data: list }, { data: costs }] = await Promise.all([
-    sb.from('jobs').select('*').eq('workshop_id', workshop.id).eq('status', 'delivered').order('delivered_at', { ascending: false }).limit(3000),
-    sb.from('job_costs').select('job_id,items').eq('workshop_id', workshop.id).limit(3000),
+  const [done, costs, own] = await Promise.all([
+    fetchAll(() => sb.from('jobs').select('*').eq('workshop_id', workshop.id).eq('status', 'delivered').order('delivered_at', { ascending: false })),
+    fetchAll(() => sb.from('job_costs').select('job_id,items').eq('workshop_id', workshop.id).order('job_id')),
+    fetchAll(() => sb.from('job_line_costs').select('job_id,line_id,unit_cost,supplier_id').eq('workshop_id', workshop.id).order('job_id').order('line_id')),
   ]);
-  const itemsOf = Object.fromEntries((costs || []).map((c) => [c.job_id, c.items]));
-  const done = list || [];
+  const itemsOf = Object.fromEntries(costs.map((c) => [c.job_id, c.items]));
+  const ownOf = {};
+  for (const c of own) (ownOf[c.job_id] ||= {})[c.line_id] = c;
   const ms = $('profitMonth'), keep = ms.value;
   const months = [...new Set(done.map((j) => (j.delivered_at || '').slice(0, 7)).filter(Boolean))];
   ms.innerHTML = '<option value="">Desde el principio</option>' + months.map((m) => `<option value="${m}">${monthLabel(m)}</option>`).join('');
   ms.value = months.includes(keep) ? keep : '';
-  const rows = done.filter((j) => !ms.value || (j.delivered_at || '').startsWith(ms.value)).map((j) => ({ j, m: jobMargin(j, itemsOf[j.id]) }));
+  const rows = done.filter((j) => !ms.value || (j.delivered_at || '').startsWith(ms.value)).map((j) => ({ j, m: jobMargin(j, itemsOf[j.id], ownOf[j.id]) }));
   const t = rows.reduce((a, { m }) => { a.labor += m.labor; a.sale += m.sale; a.cost += m.cost; a.missing += m.missing; for (const [k, g] of m.suppliers) { const x = a.sup.get(k) || { sale: 0, cost: 0 }; x.sale += g.sale; x.cost += g.cost; a.sup.set(k, x); } return a; }, { labor: 0, sale: 0, cost: 0, missing: 0, sup: new Map() });
   const sales = t.labor + t.sale, profit = sales - t.cost;
   const pct = (p, v) => (v > 0 ? Math.round(p / v * 100) + ' %' : '');
   const stockValue = parts.reduce((a, p) => a + (p.stock != null && p.cost != null && num(p.stock) > 0 ? num(p.stock) * num(p.cost) : 0), 0);
   $('profitCards').innerHTML = `<div><b>${fmtEur(sales)}</b><span>ventas sin IVA</span></div><div><b>${fmtEur(t.labor)}</b><span>mano de obra</span></div><div><b>${fmtEur(t.sale)}</b><span>piezas vendidas</span></div>
     <div><b>${fmtEur(t.cost)}</b><span>coste de las piezas</span></div><div class="good"><b>${fmtEur(profit)}</b><span>beneficio · ${pct(profit, sales) || '—'}</span></div><div><b>${fmtEur(stockValue)}</b><span>en el almacén, a coste</span></div>`;
-  $('profitWarn').textContent = t.missing ? `${t.missing} ${t.missing === 1 ? 'pieza vendida no tiene' : 'piezas vendidas no tienen'} coste: el beneficio real será menor. Ponles el coste en Piezas.` : '';
+  $('profitWarn').textContent = t.missing ? `${t.missing} ${t.missing === 1 ? 'pieza vendida no tiene' : 'piezas vendidas no tienen'} coste: el beneficio real será menor. Pónselo abriendo la orden, abajo.` : '';
   show('noProfit', !rows.length);
   show('profitBody', rows.length > 0);
   $('profitSup').innerHTML = [...t.sup.entries()].sort((a, b) => b[1].sale - a[1].sale).map(([k, g]) => `<tr><td><b>${esc(suppliers.find((s) => s.id === k)?.name || 'Sin proveedor')}</b></td><td class="num" data-label="Venta">${fmtEur(g.sale)}</td><td class="num" data-label="Coste">${fmtEur(g.cost)}</td><td class="num" data-label="Beneficio"><b>${fmtEur(g.sale - g.cost)}</b> <small class="marg">${pct(g.sale - g.cost, g.sale)}</small></td></tr>`).join('') || '<tr><td colspan="4" class="muted">No se han vendido piezas en este periodo.</td></tr>';

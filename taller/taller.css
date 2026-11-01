@@ -941,3 +941,9 @@ td .stock-low{display:block;margin:0}
 .user-menu a:hover,.user-menu button:hover,.user-menu button.on{background:var(--card-2)}
 .user-menu svg{width:19px;height:19px;fill:var(--muted);flex:none}
 #userMenuTabs{border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:6px}
+
+/* Coste de cada línea */
+.qline .r2 .line-cost-in{flex:0 1 130px}
+.line-cost-in.saved{outline:2px solid #1B7F4B}
+.line-cost-in.bad{outline:2px solid #E5484D}
+.line-marg{white-space:nowrap;color:var(--muted);font-size:12.5px}
