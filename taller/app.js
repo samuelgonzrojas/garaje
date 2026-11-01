@@ -4,7 +4,7 @@
 // (unión por id de eventos y lecturas); las órdenes, piezas, proveedores y
 // mensajes van en sus propias tablas.
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-import { BRANDS, searchUrl } from './brands.js';
+import { BRANDS, CAR_MAKES, searchUrl } from './brands.js?v=20261101b';
 
 const SUPABASE_URL = 'https://pzgqgligxmwnwvozfwcl.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_zPxM3Ul4VYkudB1D_lhUZw_lUy6K52g';
@@ -44,6 +44,9 @@ let tab = 'jobs';
 let invoicing = null;      // facturación activada (workshop_invoicing), solo dueño y encargado
 let invoices = [];         // facturas emitidas
 let payments = [];         // cobros de las facturas (invoice_payments)
+let works = [];            // trabajos del taller, con su número (workshop_works)
+let seals = null;          // firma y sello del taller (workshop_seals)
+let vehicleBack = 'cars';  // a qué pestaña vuelve la ficha del coche
 let wsCustomers = [];      // clientes propios del taller (workshop_customers)
 let wsVehicles = [];       // coches propios del taller, sin Garaje (workshop_vehicles)
 
@@ -79,6 +82,8 @@ const NAV_ICON = {
   more: '<path d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>',
   invoices: '<path d="M18 17H6v-2h12v2zm0-4H6v-2h12v2zm0-4H6V7h12v2zM3 22l1.5-1.5L6 22l1.5-1.5L9 22l1.5-1.5L12 22l1.5-1.5L15 22l1.5-1.5L18 22l1.5-1.5L21 22V2l-1.5 1.5L18 2l-1.5 1.5L15 2l-1.5 1.5L12 2l-1.5 1.5L9 2 7.5 3.5 6 2 4.5 3.5 3 2v20z"/>',
   customers: '<path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>',
+  works: '<path d="M2 17h2v.5H3v1h1v.5H2v1h3v-4H2v1zm1-9h1V4H2v1h1v3zm-1 3h1.8L2 13.1v.9h3v-1H3.2L5 10.9V10H2v1zm5-6v2h14V5H7zm0 14h14v-2H7v2zm0-6h14v-2H7v2z"/>',
+  profit: '<path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>',
   logout: '<path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>',
 };
 const svgIcon = (k) => `<svg viewBox="0 0 24 24" aria-hidden="true">${NAV_ICON[k] || ''}</svg>`;
@@ -190,6 +195,7 @@ async function loadStatic() {
     for (const f of e.engines || []) engines[f.id] = f;
   } catch (e) { console.warn('motores', e); }
   $('brands').innerHTML = BRANDS.map((b) => `<option value="${esc(b)}">`).join('');
+  $('carMakes').innerHTML = CAR_MAKES.map((b) => `<option value="${esc(b)}">`).join('');
 }
 
 // ------------------------------------------------------------------ acceso
@@ -264,7 +270,7 @@ async function enter() {
     show('setup');
   } else {
     show('tabs');
-    if (workshop) await Promise.all([loadJobs(), loadLeads(), loadParts(), loadSuppliers(), loadTeam(), loadAppointments(), loadInvoices(), loadCustomers()]);
+    if (workshop) await Promise.all([loadJobs(), loadLeads(), loadParts(), loadWorks(), loadSuppliers(), loadTeam(), loadAppointments(), loadInvoices(), loadCustomers()]);
     setTab(workshop ? tab : 'cars');
     openDeepLink();
   }
@@ -337,14 +343,16 @@ async function loadWorkshop() {
   // todo menos los datos del taller; el dueño, todo.
   const allowed = !workshop ? ['cars', 'agenda']
     : myRole === 'mechanic' ? ['jobs', 'agenda', 'cars', 'customers']
-    : myRole === 'manager' ? ['jobs', 'leads', 'agenda', 'cars', 'customers', 'parts', 'suppliers', 'team', ...(invoicing ? ['invoices'] : [])]
-    : ['jobs', 'leads', 'agenda', 'cars', 'customers', 'parts', 'suppliers', 'team', 'settings', ...(invoicing ? ['invoices'] : [])];
-  const off = [...(toolOn('parts') ? [] : ['parts', 'suppliers']), ...(toolOn('team') ? [] : ['team'])];
+    : myRole === 'manager' ? ['jobs', 'leads', 'agenda', 'cars', 'customers', 'works', 'parts', 'suppliers', 'profit', 'team', ...(invoicing ? ['invoices'] : [])]
+    : ['jobs', 'leads', 'agenda', 'cars', 'customers', 'works', 'parts', 'suppliers', 'profit', 'team', 'settings', ...(invoicing ? ['invoices'] : [])];
+  const off = [...(toolOn('parts') ? [] : ['parts', 'suppliers', 'profit']), ...(toolOn('team') ? [] : ['team'])];
   for (let i = allowed.length - 1; i >= 0; i--) if (off.includes(allowed[i])) allowed.splice(i, 1);
   for (const b of document.querySelectorAll('.tabs button[data-tab]')) b.classList.toggle('hidden', !allowed.includes(b.dataset.tab));
   if (!allowed.includes(tab)) tab = allowed[0];
   document.querySelector('.tabs .more-btn').classList.toggle('no-more', !workshop);
   show('vJobActions', !!workshop);
+  seals = null;
+  if (workshop) { const { data: sl } = await sb.from('workshop_seals').select('*').eq('workshop_id', workshop.id).maybeSingle(); seals = sl || null; }
 }
 
 const WS_FIELDS = [
@@ -380,11 +388,11 @@ function listingBlock(d) {
 }
 
 /** Logo: se reduce en el navegador a ≤ 256 px y se guarda como data URL. */
-function shrinkLogo(file) {
+function shrinkLogo(file, max = 256) {
   return new Promise((ok, ko) => {
     const img = new Image();
     img.onload = () => {
-      const k = Math.min(1, 256 / Math.max(img.width, img.height));
+      const k = Math.min(1, max / Math.max(img.width, img.height));
       const c = document.createElement('canvas');
       c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
       c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
@@ -441,8 +449,12 @@ function renderWsForm(formId, data, button) {
     <div class="logo-row"><div class="logo-prev" id="${formId}LogoPrev"></div>
       <div><label class="btn ghost small logo-btn">Subir logotipo<input type="file" accept="image/*" id="${formId}LogoFile" hidden></label>
         <a href="#" class="muted logo-del" id="${formId}LogoDel">Quitar</a>
-        <p class="muted" style="font-size:12.5px;margin:4px 0 0">Sale en los presupuestos y órdenes que imprimes.</p></div>
+        <p class="muted" style="font-size:12.5px;margin:4px 0 0">Sale en los presupuestos, órdenes y facturas que imprimes.</p></div>
       <input type="hidden" name="logo" value="${esc(data.logo || '')}"></div>
+    ${workshop ? `<div class="seal-row">${[['signature', 'Firma'], ['stamp', 'Sello']].map(([k, t]) => `<div class="seal-box"><div class="seal-prev" id="${formId}Seal_${k}"></div>
+        <label class="btn ghost small logo-btn">${t}<input type="file" accept="image/*" data-seal="${k}" hidden></label> <a href="#" class="muted" data-sealdel="${k}">Quitar</a>
+        <input type="hidden" name="seal_${k}" value="${esc(seals?.[k] || '')}"></div>`).join('')}</div>
+      <p class="muted" style="font-size:12.5px;margin:4px 0 0">La factura tiene que ir firmada y sellada (Real Decreto 1457/1986, art. 15). Sube una foto sobre fondo blanco y salen solos al imprimir.</p>` : ''}
     ${field(WS_FIELDS[0])}
     <div class="row2">${field(WS_FIELDS[1])}${field(WS_FIELDS[2])}</div>
     ${field(WS_FIELDS[3])}${field(WS_FIELDS[4])}
@@ -465,6 +477,21 @@ function renderWsForm(formId, data, button) {
     ${workshop ? '' : `<label class="chk terms-chk"><input type="checkbox" name="terms" required> He leído y acepto las <a href="../condiciones.html#talleres" target="_blank" rel="noopener">condiciones para talleres</a> (Garaje trata los datos de mis clientes por mi cuenta, como encargado del tratamiento) y la <a href="../privacidad.html#talleres" target="_blank" rel="noopener">política de privacidad</a>.</label>`}
     <div class="err" id="${formId}Err"></div>
     <button class="btn">${button}</button>`;
+  // Firma y sello
+  const paintSeal = (k) => {
+    const v = f.querySelector(`input[name=seal_${k}]`).value;
+    $(`${formId}Seal_${k}`).innerHTML = v ? `<img src="${esc(v)}" alt="">` : '';
+    f.querySelector(`[data-sealdel=${k}]`).classList.toggle('hidden', !v);
+  };
+  for (const inp of f.querySelectorAll('[data-seal]')) {
+    const k = inp.dataset.seal;
+    inp.onchange = async (e) => {
+      const file = e.target.files[0]; if (!file) return;
+      try { f.querySelector(`input[name=seal_${k}]`).value = await shrinkLogo(file, 480); paintSeal(k); } catch (err) { $(formId + 'Err').textContent = err.message; }
+    };
+    f.querySelector(`[data-sealdel=${k}]`).onclick = (e) => { e.preventDefault(); f.querySelector(`input[name=seal_${k}]`).value = ''; paintSeal(k); };
+    paintSeal(k);
+  }
   // Logo
   const logoIn = f.querySelector('input[name=logo]');
   const paintLogo = () => {
@@ -494,6 +521,7 @@ function renderWsForm(formId, data, button) {
   paintLogo(); paintPreview();
   f.onsubmit = async (e) => {
     e.preventDefault();
+    $(formId + 'Err').textContent = '';
     const fd = Object.fromEntries(new FormData(f).entries());
     const row = { owner_id: workshop?.owner_id || session.user.id, updated_at: new Date().toISOString() };
     for (const [k] of WS_FIELDS) {
@@ -531,6 +559,10 @@ function renderWsForm(formId, data, button) {
     const q = workshop ? sb.from('workshops').update(row).eq('id', workshop.id) : sb.from('workshops').insert(row);
     const { error } = await q;
     if (error) { $(formId + 'Err').textContent = 'No se pudo guardar: ' + error.message; return; }
+    if (workshop && ((fd.seal_signature || '') !== (seals?.signature || '') || (fd.seal_stamp || '') !== (seals?.stamp || ''))) {
+      const { error: e2 } = await sb.from('workshop_seals').upsert({ workshop_id: workshop.id, signature: fd.seal_signature || null, stamp: fd.seal_stamp || null, updated_at: row.updated_at });
+      if (e2) { $(formId + 'Err').textContent = 'No se pudieron guardar la firma y el sello: ' + e2.message; return; }
+    }
     // Perfil: marca de taller; el nombre y el teléfono, solo si aún no tenía (no se pisa el nombre personal).
     await sb.from('profiles').upsert({ user_id: session.user.id, display_name: profile.display_name || row.name, is_workshop: true, phone: profile.phone || row.phone, updated_at: row.updated_at });
     const first = !workshop;
@@ -556,14 +588,16 @@ $('moreSheet').onclick = (e) => { if (e.target === $('moreSheet')) $('moreSheet'
 function setTab(t) {
   tab = t;
   for (const b of document.querySelectorAll('.tabs button[data-tab]')) b.classList.toggle('on', b.dataset.tab === t);
-  document.querySelector('.tabs .more-btn').classList.toggle('on', ['parts', 'suppliers', 'team', 'settings', 'invoices', 'customers'].includes(t));
-  for (const id of ['tab-jobs', 'tab-leads', 'tab-agenda', 'tab-cars', 'tab-customers', 'tab-parts', 'tab-suppliers', 'tab-team', 'tab-settings', 'tab-invoices', 'job', 'vehicle']) show(id, false);
+  document.querySelector('.tabs .more-btn').classList.toggle('on', ['works', 'parts', 'suppliers', 'profit', 'team', 'settings', 'invoices', 'customers'].includes(t));
+  for (const id of ['tab-jobs', 'tab-leads', 'tab-agenda', 'tab-cars', 'tab-customers', 'tab-works', 'tab-parts', 'tab-suppliers', 'tab-profit', 'tab-team', 'tab-settings', 'tab-invoices', 'job', 'vehicle']) show(id, false);
   show('tab-' + t);
   if (t === 'jobs') renderBoard();
   if (t === 'leads') renderLeads();
   if (t === 'agenda') renderAgenda();
   if (t === 'cars') renderGrid();
+  if (t === 'works') renderWorks();
   if (t === 'parts') renderParts();
+  if (t === 'profit') renderProfit();
   if (t === 'suppliers') renderSuppliers();
   if (t === 'settings') renderWsForm('settingsForm', workshop || {}, 'Guardar');
   if (t === 'team') renderTeam();
@@ -592,13 +626,22 @@ async function loadVehicles() {
     const { data: st } = await sb.from('vehicle_status').select('*').in('vehicle_id', vehicles.map((v) => v.id));
     vstatus = Object.fromEntries((st || []).map((x) => [x.vehicle_id, x]));
   }
+  // Con taller, los coches compartidos están en Clientes; Coches queda para los suyos.
+  if (workshop) {
+    $('tabs').querySelector('[data-tab=cars]').classList.toggle('hidden', !ownCars().length);
+    if (tab === 'cars' && !ownCars().length && !current) setTab('customers');
+  }
   if (tab === 'cars' && !current) renderGrid();
+  if (tab === 'customers' && !current && !job) renderCustomers();
   if (current) {
     const fresh = vehicles.find((v) => v.id === current.id);
     if (fresh) { current = fresh; renderVehicle(); }
   }
   if (job) jobVehicle = vehicles.find((v) => v.id === job.vehicle_id) || jobVehicle;
 }
+/** Coche de un cliente: lo compartió con el taller (y no es del taller ni de su familia). */
+const isClientCar = (row) => !!workshop && (!roles[row.id] || roles[row.id] === 'workshop');
+const ownCars = () => vehicles.filter((v) => !isClientCar(v));
 /** ITV: "Caducada", "en N días" (si quedan menos de 45) o nada. */
 function itvBadge(iso) {
   if (!iso) return '';
@@ -612,10 +655,12 @@ const attentionOf = (id) => (vstatus[id]?.items || []).filter((i) => i.level ===
 function renderGrid() {
   const g = $('grid');
   g.innerHTML = '';
-  show('empty', vehicles.length === 0);
+  show('empty', ownCars().length === 0);
+  show('joinForm', !workshop);
+  $('carsSub').textContent = workshop ? 'Tus coches y los de tu familia. Los de tus clientes están en la pestaña Clientes.' : 'Los que te han dado acceso desde la app (Mi coche → Compartir → Taller), con su dueño y su teléfono.';
   const q = $('carSearch').value.trim().toLowerCase();
   const openOf = (id) => jobs.find((j) => j.vehicle_id === id && !['delivered', 'cancelled'].includes(j.status));
-  const list = vehicles.filter((row) => {
+  const list = ownCars().filter((row) => {
     if (!q) return true;
     const s = summary(row); const o = ownerOf(row.id);
     return [s.name, s.plate, (s.plate || '').replace(/\s/g, ''), o?.display_name, o?.phone].some((x) => (x || '').toLowerCase().includes(q));
@@ -644,24 +689,27 @@ function renderGrid() {
 }
 $('carSearch').addEventListener('input', () => renderGrid());
 
-$('joinForm').onsubmit = async (e) => {
+async function joinByCode(e, inputId, errId) {
   e.preventDefault();
   // Vale el código o el enlace que manda la app (…?c=ABC123).
-  const raw = $('joinCode').value.trim();
+  const raw = $(inputId).value.trim();
   const code = ((raw.match(/[?&]c=([A-Za-z0-9]{6})/) || [])[1] || raw).toUpperCase().replace(/[^A-Z0-9]/g, '');
-  if (code.length !== 6) { $('listErr').textContent = 'El código tiene 6 letras o números. También puedes pegar el enlace que te ha mandado el cliente.'; return; }
-  $('listErr').textContent = '';
+  if (code.length !== 6) { $(errId).textContent = 'El código tiene 6 letras o números. También puedes pegar el enlace que te ha mandado el cliente.'; return; }
+  $(errId).textContent = '';
   const { error } = await sb.rpc('accept_invite', { p_code: code });
-  if (error) { $('listErr').textContent = error.message; return; }
-  $('joinCode').value = '';
+  if (error) { $(errId).textContent = error.message; return; }
+  $(inputId).value = '';
   await loadVehicles();
-  renderGrid();
+  if (tab === 'cars') renderGrid(); else renderCustomers();
   checkGarajeLinks();
-};
+}
+$('joinForm').onsubmit = (e) => joinByCode(e, 'joinCode', 'listErr');
+$('custJoinForm').onsubmit = (e) => joinByCode(e, 'custJoinCode', 'custErr');
 
 function openVehicle(row) {
   current = row;
-  show('tab-cars', false); show('vehicle');
+  vehicleBack = isClientCar(row) ? 'customers' : 'cars';
+  show('tab-cars', false); show('tab-customers', false); show('vehicle');
   $('fDate').value = today();
   $('fKm').value = summary(row).km ?? '';
   $('lines').innerHTML = '';
@@ -670,7 +718,7 @@ function openVehicle(row) {
   renderVehicle();
   window.scrollTo(0, 0);
 }
-$('back').onclick = (e) => { e.preventDefault(); current = null; setTab('cars'); };
+$('back').onclick = (e) => { e.preventDefault(); current = null; setTab(vehicleBack); };
 $('vNewJob').onclick = () => newJobFor(current);
 
 function renderVehicle() {
@@ -763,7 +811,7 @@ $('vLeave').onclick = async (e) => {
   if (error) { alert('No se pudo: ' + error.message); return; }
   current = null;
   await loadVehicles();
-  setTab('cars');
+  setTab(vehicleBack);
 };
 
 /** Dueño y familiares del coche con sus datos de contacto. */
@@ -1030,7 +1078,7 @@ $('newJobBtn').onclick = async () => {
     + (wsOpts ? `<optgroup label="Clientes del taller">${wsOpts}</optgroup>` : '');
   const r = await dialog(`<h3>Nueva orden de trabajo</h3>
     <label>Coche</label><select name="v">${opts}</select>
-    <p class="muted" style="font-size:13px;margin:4px 0 0">Si el cliente usa Garaje, que te pase su código de taller (pestaña Coches). Si no, búscalo en tus clientes o créalo aquí.</p>
+    <p class="muted" style="font-size:13px;margin:4px 0 0">Si el cliente usa Garaje, que te pase su código de taller (pestaña Clientes). Si no, búscalo en tus clientes o créalo aquí.</p>
     <label>Lo que pide el cliente</label><textarea name="req" rows="2" placeholder="Cambio de aceite, ruido al frenar…"></textarea>
     <div class="row2"><div><label>Km al recibirlo</label><input name="km" inputmode="numeric" placeholder="Opcional"></div>
       <div><label>Entrega prevista</label><input name="promised" type="date" min="${today()}"></div></div>
@@ -1120,8 +1168,8 @@ function leadCard(l, compact = false) {
   const past = l.appointment_at && new Date(l.appointment_at) < new Date() && ['quoted', 'accepted'].includes(l.status);
   const who = l.customer_name || 'Cliente de Garaje';
   const wa = `Hola ${who}, te escribo de ${workshop?.name || 'el taller'} por tu solicitud de presupuesto${v.name ? ' para el ' + v.name : ''}.`;
-  const answer = l.quote_amount != null ? `<div class="lead-box answer"><small>Tu respuesta</small>
-      <div><b class="amount">${fmtEur(num(l.quote_amount))}</b>${l.appointment_at ? `<span class="when">${svgIcon('agenda')} ${fmtTime(l.appointment_at)}</span>` : ''}</div>
+  const answer = l.quote_amount != null || l.quote_text || l.appointment_at ? `<div class="lead-box answer"><small>Tu respuesta</small>
+      <div>${l.quote_amount != null ? `<b class="amount">${fmtEur(baseOfLead(l))}</b> <small>sin IVA · ${fmtEur(num(l.quote_amount))} con IVA</small>` : ''}${l.appointment_at ? `<span class="when">${svgIcon('agenda')} ${fmtTime(l.appointment_at)}</span>` : ''}</div>
       ${l.quote_text && !compact ? `<p>${esc(l.quote_text)}</p>` : ''}</div>` : '';
   el.innerHTML = `<div class="top">${photoImg(v.photo, 64)}<div class="lead-head"><b>${esc(v.name || 'Vehículo')}</b> <span class="plate">${esc(v.plate || '')}</span> <span class="status ${l.status}">${LEAD_STATUS[l.status] || l.status}</span>
       <small>${meta}</small></div>
@@ -1133,7 +1181,7 @@ function leadCard(l, compact = false) {
     <div class="lead-who"><div><b>${esc(who)}</b>${l.customer_phone ? `<small>${esc(fmtPhone(l.customer_phone))}</small>` : '<small>Sin teléfono: responde desde aquí y le llega al móvil.</small>'}</div>
       ${l.customer_phone ? `<div class="icons">${contactButtons(l.customer_phone, null, wa, who)}</div>` : ''}</div>
     ${l.status === 'reschedule' ? `<div class="lead-box warn"><b>Pide otra hora${l.client_preferred_at ? ': propone ' + fmtTime(l.client_preferred_at) : ''}</b>${l.decision_note ? `<p>“${esc(l.decision_note)}”</p>` : ''}</div>` : ''}
-    ${l.status === 'accepted' ? `<div class="lead-box ok"><b>Ha aceptado tu presupuesto${l.quote_amount != null ? ' de ' + fmtEur(num(l.quote_amount)) : ''}${l.appointment_at ? ' · cita ' + fmtTime(l.appointment_at) : ''}</b><p>Abre la orden para recibir el vehículo: el cliente verá el estado en su móvil.</p></div>` : ''}
+    ${l.status === 'accepted' ? `<div class="lead-box ok"><b>Ha aceptado tu presupuesto${l.quote_amount != null ? ' de ' + fmtEur(num(l.quote_amount)) + ' con IVA' : ''}${l.appointment_at ? ' · cita ' + fmtTime(l.appointment_at) : ''}</b><p>Abre la orden para recibir el vehículo: el cliente verá el estado en su móvil.</p></div>` : ''}
     ${l.status === 'declined' ? `<div class="lead-box"><b>Ha rechazado el presupuesto</b>${l.decision_note ? `<p>“${esc(l.decision_note)}”</p>` : ''}</div>` : ''}
     ${l.status === 'accepted' ? '' : answer}
     ${past ? `<p class="lead-past">La cita que propusiste ya ha pasado. ${l.status === 'quoted' ? 'Cambia la respuesta con una fecha nueva.' : 'Llama al cliente para quedar otro día.'}</p>` : ''}`}`;
@@ -1171,6 +1219,8 @@ function renderLeads() {
   $('leadsDoneCount').textContent = closed.length ? `(${closed.length})` : '';
 }
 
+const withVat = (base) => Math.round(base * (1 + (num(workshop?.vat) ?? 21) / 100) * 100) / 100;
+const baseOfLead = (l) => Math.round(num(l.quote_amount) / (1 + (num(workshop?.vat) ?? 21) / 100) * 100) / 100;
 async function respondLead(l) {
   const def = l.status === 'reschedule' && l.client_preferred_at ? new Date(l.client_preferred_at) : l.appointment_at ? new Date(l.appointment_at) : null;
   const toLocal = (d) => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
@@ -1181,14 +1231,21 @@ async function respondLead(l) {
       ${l.message ? `<p class="lead-msg">${esc(l.message)}</p>` : ''}
       ${l.preferred ? `<p class="lead-pref">${svgIcon('agenda')} Le viene bien: <b>${esc(l.preferred)}</b></p>` : ''}
       ${l.status === 'reschedule' && l.client_preferred_at ? `<p class="lead-pref">${svgIcon('agenda')} Propone: <b>${fmtTime(l.client_preferred_at)}</b></p>` : ''}</div>
-    <label>Precio orientativo, IVA incluido</label><div class="euro"><input name="amount" inputmode="decimal" value="${l.quote_amount ?? ''}" placeholder="0" required><span>€</span></div>
+    <label>Precio orientativo sin IVA (opcional)</label><div class="euro"><input name="amount" inputmode="decimal" value="${l.quote_amount != null ? dec2(baseOfLead(l)) : ''}" placeholder="Sin precio de momento"><span>€</span></div>
+    <small class="muted" id="leadVatHint"></small>
     <label>Qué incluye y comentarios</label><textarea name="text" rows="3" placeholder="Mano de obra y piezas incluidas. Te confirmamos el precio final al ver el vehículo.">${esc(l.quote_text ?? '')}</textarea>
-    <label>${l.status === 'reschedule' ? 'Cita nueva (ya está puesta la hora que propone; cámbiala si no te cuadra)' : 'Propón una cita'}</label><input type="datetime-local" name="when" value="${local}" min="${toLocal(new Date())}">
+    <label>${l.status === 'reschedule' ? 'Cita nueva (ya está puesta la hora que propone; cámbiala si no te cuadra)' : 'Propón una cita (opcional)'}</label><input type="datetime-local" name="when" value="${local}" min="${toLocal(new Date())}">
     <p class="muted" style="font-size:13px">Le llega al móvil al momento y puede aceptarlo con un toque. Al aceptar tendrás acceso a su vehículo para abrir la orden.</p>`,
-    'Enviar respuesta', (fd) => fd);
+    'Enviar respuesta', (fd) => fd, (form) => {
+      // En la app el cliente ve siempre el precio final: se guarda con IVA.
+      const hint = () => { const a = num(form.amount.value); form.querySelector('#leadVatHint').textContent = a > 0 ? `En la app el cliente lo verá como ${fmtEur(withVat(a))}, IVA incluido.` : ''; };
+      form.amount.addEventListener('input', hint); hint();
+    });
   if (!r) return;
-  const amount = num(r.amount);
-  if (amount == null || amount <= 0) { alert('Pon un precio orientativo.'); return respondLead(l); }
+  const entered = (r.amount || '').trim() ? num(r.amount) : null;
+  if ((r.amount || '').trim() && (entered == null || entered <= 0)) { alert('El precio no es válido. Déjalo vacío si aún no quieres dar uno.'); return respondLead(l); }
+  if (entered == null && !(r.text || '').trim() && !r.when) { alert('Escribe al menos un comentario, un precio o una cita para responderle.'); return respondLead(l); }
+  const amount = entered == null ? null : withVat(entered);
   if (r.when && new Date(r.when) < new Date()) { alert('Esa hora ya ha pasado. Elige una cita futura.'); return respondLead(l); }
   const { error } = await sb.rpc('quote_lead', { p_lead: l.id, p_amount: amount, p_text: (r.text || '').trim() || null, p_appointment: r.when ? new Date(r.when).toISOString() : null });
   if (error) { alert('No se pudo responder: ' + error.message); return; }
@@ -1198,7 +1255,7 @@ async function respondLead(l) {
 async function convertLead(l) {
   let row = vehicles.find((v) => v.id === l.vehicle_id);
   if (!row) { await loadVehicles(); row = vehicles.find((v) => v.id === l.vehicle_id); }
-  if (!row) { alert('Todavía no tienes acceso a este vehículo: el cliente tiene que aceptar desde la app (o darte el código de taller en la pestaña Coches).'); return; }
+  if (!row) { alert('Todavía no tienes acceso a este vehículo: el cliente tiene que aceptar desde la app (o darte el código de taller en la pestaña Clientes).'); return; }
   const request = [(l.items || []).map((i) => i.name).join(', '), l.message].filter(Boolean).join('. ');
   const created = await newJobFor(row, {
     customer_request: request || null, lead_id: l.id,
@@ -1586,7 +1643,7 @@ function openJob(j) {
   job = structuredClone(j);
   jobVehicle = vehicleOf(j);
   dirty = false;
-  for (const id of ['tab-jobs', 'tab-cars', 'vehicle']) show(id, false);
+  for (const id of ['tab-jobs', 'tab-leads', 'tab-agenda', 'tab-cars', 'tab-customers', 'tab-profit', 'tab-invoices', 'vehicle']) show(id, false);
   show('job');
   $('jKm').value = job.km ?? '';
   $('jFuel').value = job.fuel_level ?? '';
@@ -1727,8 +1784,8 @@ function renderLines() {
   const box = $('jLines');
   box.innerHTML = (job.lines || []).length
     ? '<div class="qhead"><span>Tipo</span><span>Descripción</span><span>Cant. / horas</span><span>€/u sin IVA</span><span>Dto %</span><span>Total</span><span></span></div>'
-    : '<p class="muted">Añade mano de obra y piezas. Las piezas de tu biblioteca se autocompletan al escribir.</p>';
-  const prof = jobVehicle ? profileOf(jobVehicle) : {};
+    : '<p class="muted">Escribe arriba el número de un trabajo, su nombre o una pieza y pulsa Intro.</p>';
+  show('quickAddWrap', !isLocked());
   const supOpts = (sel) => `<option value="">Proveedor</option>` + suppliers.map((s) => `<option value="${s.id}" ${s.id === sel ? 'selected' : ''}>${esc(s.name)}</option>`).join('');
   (job.lines || []).forEach((l, i) => {
     const row = document.createElement('div');
@@ -1736,7 +1793,7 @@ function renderLines() {
     const part = l.kind === 'part';
     row.innerHTML = `<div class="r1">
         <select data-k="kind" title="Tipo"><option value="labor" ${!part ? 'selected' : ''}>Mano de obra</option><option value="part" ${part ? 'selected' : ''}>Pieza</option></select>
-        <input data-k="description" value="${esc(l.description)}" placeholder="${part ? 'Filtro de aceite' : 'Cambio de aceite y filtro'}" ${part ? 'list="partNames"' : ''} title="Descripción">
+        <input data-k="description" value="${esc(l.description)}" placeholder="${part ? 'Filtro de aceite' : 'Cambio de aceite y filtro'}" title="Descripción">
         <input data-k="qty" value="${esc(l.qty)}" inputmode="decimal" title="${part ? 'Cantidad' : 'Horas'}" placeholder="${part ? 'Cant.' : 'Horas'}">
         <input data-k="unit_price" value="${esc(l.unit_price)}" inputmode="decimal" placeholder="€/u" title="Precio unitario sin IVA">
         <input data-k="discount" value="${esc(l.discount ?? '')}" inputmode="decimal" placeholder="Dto %" title="Descuento %">
@@ -1744,31 +1801,31 @@ function renderLines() {
         <button class="x" title="Quitar">×</button>
       </div>
       <div class="r2">
-        <select data-k="catalog_id" title="Trabajo del plan de mantenimiento (para el historial)"><option value="">Trabajo del plan…</option>${itemOptions(prof, l.catalog_id)}</select>
         ${part ? `<input data-k="brand" value="${esc(l.brand)}" list="brands" placeholder="Marca">
         <input data-k="reference" value="${esc(l.reference)}" placeholder="Referencia">
         ${isManager() ? `<select data-k="supplier_id">${supOpts(l.supplier_id)}</select>` : ''}` : ''}
         ${part && l.reference ? `<a class="search" href="${searchUrl(l.brand, l.reference)}" target="_blank" rel="noopener">Buscar ${esc(l.reference)} ↗</a>` : ''}
+        ${isManager() && !isLocked() && !(part ? l.part_id : l.work_id) ? `<button type="button" class="link-btn" data-savelib ${(l.description || '').trim() ? '' : 'hidden'}>Guardar en mis ${part ? 'piezas' : 'trabajos'}</button>` : ''}
       </div>`;
     for (const inp of row.querySelectorAll('[data-k]')) {
       inp.addEventListener('change', () => { l[inp.dataset.k] = inp.value; afterLineEdit(inp.dataset.k === 'kind' || inp.dataset.k === 'reference', l, inp.dataset.k); });
-      inp.addEventListener('input', () => { l[inp.dataset.k] = inp.value; markDirty(); row.querySelector('.tot').textContent = fmtEur(lineTotal(l)); renderTotals(); });
+      inp.addEventListener('input', () => {
+        l[inp.dataset.k] = inp.value; markDirty(); row.querySelector('.tot').textContent = fmtEur(lineTotal(l)); renderTotals();
+        if (inp.dataset.k === 'description') { const b = row.querySelector('[data-savelib]'); if (b) b.hidden = !inp.value.trim(); }
+      });
     }
+    const saveLib = row.querySelector('[data-savelib]');
+    if (saveLib) saveLib.onclick = () => saveLineToList(l);
     row.querySelector('.x').onclick = () => { job.lines.splice(i, 1); markDirty(); renderLines(); };
     if (isLocked()) row.querySelector('.x').remove();
     box.appendChild(row);
   });
-  // Autocompletar descripciones con la biblioteca de piezas.
-  $('partNames').innerHTML = parts.map((p) => `<option value="${esc(p.description)}">${esc([p.brand, p.reference].filter(Boolean).join(' '))}</option>`).join('');
   renderTotals();
 }
 function afterLineEdit(rerender, l, key) {
   markDirty();
-  // Al elegir una descripción de la biblioteca, se rellenan marca, ref. y precio.
-  if (key === 'description' && l.kind === 'part') {
-    const p = parts.find((x) => x.description === l.description);
-    if (p) { Object.assign(l, partToLine(p)); rerender = true; }
-  }
+  // Para el historial del cliente: de qué trabajo del plan se trata.
+  if (key === 'description' && !l.catalog_id) l.catalog_id = guessCatalog(l.description) || '';
   if (rerender) renderLines(); else renderTotals();
 }
 function renderTotals() {
@@ -1776,9 +1833,72 @@ function renderTotals() {
   $('jTotals').innerHTML = `<span>Base imponible</span><span>${fmtEur(t.base)}</span>
     <span>IVA ${num(job.vat) ?? 21} %</span><span>${fmtEur(t.vat)}</span>
     <span><b>Total</b></span><span><b>${fmtEur(t.total)}</b></span>`;
+  if (isManager() && (job.lines || []).length) {
+    const m = jobMargin(job);
+    $('jTotals').insertAdjacentHTML('beforeend', `<span class="muted">Coste de piezas${m.missing ? ` (${m.missing} sin coste)` : ''}</span><span class="muted">${fmtEur(m.cost)}</span>
+      <span class="muted">Beneficio sin IVA</span><span class="muted">${fmtEur(m.profit)}</span>`);
+  }
 }
 const partToLine = (p) => ({ kind: 'part', description: p.description, catalog_id: p.catalog_id || '', brand: p.brand || '', reference: p.reference || '', supplier_id: p.supplier_id || '', qty: 1, unit_price: p.price ?? '', discount: '', part_id: p.id });
 function addJobLine(l) { job.lines ||= []; job.lines.push(l); markDirty(); renderLines(); }
+const workToLine = (w) => ({ kind: 'labor', description: w.name, catalog_id: w.catalog_id || guessCatalog(w.name) || '', work_id: w.id, discount: '',
+  ...(w.price != null ? { qty: 1, unit_price: num(w.price) } : { qty: num(w.hours) ?? 1, unit_price: workshop.labor_rate }) });
+// Entrada rápida: número de trabajo, nombre o pieza, con Intro o eligiendo de la lista.
+function quickResults(text) {
+  const q = normTxt(text);
+  if (!q) return [];
+  const isNo = /^\d+$/.test(q);
+  const ws = works.filter((w) => (isNo ? String(w.code).startsWith(q) : normTxt(w.name).includes(q)))
+    .sort((a, b) => (String(b.code) === q) - (String(a.code) === q) || b.uses - a.uses || a.code - b.code).slice(0, 8)
+    .map((w) => ({ html: `<b class="q-no">${w.code}</b>${esc(w.name)}<small>${[w.price != null ? fmtEur(num(w.price)) : null, w.hours != null ? String(num(w.hours)).replace('.', ',') + ' h' : null].filter(Boolean).join(' · ')}</small>`, run: () => { addJobLine(workToLine(w)); sb.from('workshop_works').update({ uses: w.uses + 1 }).eq('id', w.id).then(() => { w.uses++; }); } }));
+  const ps = parts.filter((p) => [p.description, p.brand, p.reference, normRef(p.reference)].some((x) => normTxt(x).includes(q))).slice(0, 8)
+    .map((p) => ({ html: `<i class="q-part">Pieza</i>${esc(p.description)}<small>${esc([p.brand, p.reference, p.price != null ? fmtEur(num(p.price)) : null, p.stock != null ? `quedan ${String(num(p.stock)).replace('.', ',')}` : null].filter(Boolean).join(' · '))}</small>`, run: () => addJobLine(partToLine(p)) }));
+  const out = [...ws, ...ps];
+  if (isManager() && !isNo) {
+    out.push({ html: `<i class="q-new">Nuevo</i>Guardar «${esc(text.trim())}» como trabajo`, run: async () => { const w = await editWork({ name: text.trim() }); if (w) addJobLine(workToLine(w)); } });
+    out.push({ html: `<i class="q-new">Nueva</i>Guardar «${esc(text.trim())}» como pieza`, run: async () => { const p = await editPart({ description: text.trim() }); if (p) addJobLine(partToLine(p)); } });
+  }
+  return out;
+}
+let quickItems = [], quickActive = 0;
+function paintQuick() {
+  const box = $('quickList');
+  quickItems = quickResults($('quickAdd').value);
+  quickActive = Math.min(quickActive, Math.max(0, quickItems.length - 1));
+  show('quickList', quickItems.length > 0 || !!$('quickAdd').value.trim());
+  box.innerHTML = quickItems.length ? '' : '<p class="muted">Ningún trabajo con ese número.</p>';
+  quickItems.forEach((it, i) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'q-item' + (i === quickActive ? ' on' : ''); b.innerHTML = it.html;
+    b.onmousedown = (e) => e.preventDefault();
+    b.onclick = () => pickQuick(i);
+    box.appendChild(b);
+  });
+}
+function pickQuick(i) {
+  const it = quickItems[i];
+  if (!it) return;
+  $('quickAdd').value = ''; quickActive = 0; show('quickList', false);
+  it.run();
+  $('quickAdd').focus();
+}
+$('quickAdd').addEventListener('input', () => { quickActive = 0; paintQuick(); });
+$('quickAdd').addEventListener('blur', () => show('quickList', false));
+$('quickAdd').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') { e.preventDefault(); pickQuick(quickActive); }
+  else if (e.key === 'Escape') { $('quickAdd').value = ''; show('quickList', false); }
+  else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); if (quickItems.length) { quickActive = (quickActive + (e.key === 'ArrowDown' ? 1 : quickItems.length - 1)) % quickItems.length; paintQuick(); } }
+});
+/** Guarda una línea escrita a mano en la lista de trabajos o de piezas. */
+async function saveLineToList(l) {
+  if (l.kind === 'part') {
+    const p = await editPart({ description: (l.description || '').trim(), brand: l.brand, reference: l.reference, supplier_id: l.supplier_id, catalog_id: l.catalog_id, price: num(l.unit_price) });
+    if (p) { l.part_id = p.id; markDirty(); renderLines(); }
+  } else {
+    const w = await editWork({ name: (l.description || '').trim(), hours: num(l.qty), catalog_id: l.catalog_id });
+    if (w) { l.work_id = w.id; markDirty(); renderLines(); }
+  }
+}
 $('addLabor').onclick = () => addJobLine({ kind: 'labor', description: '', catalog_id: '', qty: 1, unit_price: workshop.labor_rate, discount: '' });
 $('addPart').onclick = () => addJobLine({ kind: 'part', description: '', catalog_id: '', brand: '', reference: '', supplier_id: '', qty: 1, unit_price: '', discount: '' });
 
@@ -1896,6 +2016,9 @@ async function deliver() {
         if (v && job.km != null && (v.km == null || job.km > v.km)) await sb.from('workshop_vehicles').update({ km: job.km, km_at: today() }).eq('id', v.id);
       } else await writeHistory(job.vehicle_id, new Date().toISOString(), job.km, lines);
       if (isManager()) await learnParts(eng);
+      // Coste de lo montado ese día y salida del inventario.
+      const { error: costErr } = await sb.rpc('close_job_costs', { p_job: job.id });
+      if (costErr) console.warn(costErr);
     }
     await setStatus('delivered', { delivered_at: new Date().toISOString(), history_written: true });
     await (job?.ws_vehicle_id ? loadCustomers() : loadVehicles());
@@ -1964,6 +2087,8 @@ $('jMsgForm').onsubmit = async (e) => {
 // --- documentos
 $('printQuote').onclick = () => printDoc('quote');
 $('printOrder').onclick = () => printDoc('order');
+/** Firma y sello del taller para los documentos que se imprimen. */
+const sealImages = () => (seals?.signature || seals?.stamp ? `<span class="doc-seals">${seals.signature ? `<img src="${esc(seals.signature)}" alt="">` : ''}${seals.stamp ? `<img src="${esc(seals.stamp)}" alt="">` : ''}</span>` : '');
 async function printDoc(kind) {
   if (dirty) await saveJob();
   const s = jobVehicle ? summary(jobVehicle) : { name: '', plate: '', prof: {} };
@@ -1976,18 +2101,19 @@ async function printDoc(kind) {
     <div class="head"><div>${w.logo ? `<img src="${esc(w.logo)}" alt="" class="doc-logo">` : ''}<h1>${esc(w.name)}</h1>${w.legal_name ? esc(w.legal_name) + '<br>' : ''}${w.tax_id ? 'NIF ' + esc(w.tax_id) + '<br>' : ''}${esc(w.address || '')}<br>${esc([w.phone, w.email].filter(Boolean).join(' · '))}${w.registry_no ? '<br>Nº registro industrial: ' + esc(w.registry_no) : ''}${w.hours ? '<br>Horario: ' + esc(w.hours) : ''}</div>
       <div style="text-align:right"><h1>${title}</h1>Nº ${job.number}<br>Fecha: ${fmtDate(new Date().toISOString())}${kind === 'quote' ? `<br>Válido ${w.quote_validity_days} días hábiles` : ''}${job.promised_at ? '<br>Entrega prevista: ' + fmtDate(job.promised_at) : ''}</div></div>
     <div class="boxes">
-      <div class="box"><b>Cliente</b>${esc(job.customer_name || '')}<br>${esc(job.customer_phone || '')}</div>
+      <div class="box"><b>Cliente</b>${esc(job.customer_name || '')}<br>${esc(job.customer_phone || '')}${job.customer_address ? '<br>' + esc(job.customer_address) : ''}</div>
       <div class="box"><b>Vehículo</b>${esc(s.name)}<br>Matrícula: ${esc(s.plate)}${s.prof?.vin ? '<br>Bastidor: ' + esc(s.prof.vin) : ''}<br>Km: ${fmtKm(job.km)}${job.fuel_level ? ' · Combustible: ' + esc(job.fuel_level) : ''}</div>
     </div>
     ${job.customer_request ? `<div class="box" style="margin-bottom:10px"><b>Trabajos solicitados</b>${esc(job.customer_request)}</div>` : ''}
     ${kind === 'order' && job.intake_notes ? `<div class="box" style="margin-bottom:10px"><b>Estado del vehículo a la recepción</b>${esc(job.intake_notes)}</div>` : ''}
     ${kind === 'order' && jobPhotos.some((p) => p.kind !== 'signature' && p.url) ? `<div class="doc-photos">${jobPhotos.filter((p) => p.kind !== 'signature' && p.url).slice(0, 6).map((p) => `<figure><img src="${esc(p.url)}" alt=""><figcaption>${PHOTO_KIND[p.kind]}</figcaption></figure>`).join('')}</div>` : ''}
     ${rows ? `<table><thead><tr><th>Tipo</th><th>Concepto</th><th class="num">Cant.</th><th class="num">Precio</th><th class="num">Dto.</th><th class="num">Importe</th></tr></thead><tbody>${rows}</tbody></table>
-    <div class="tot"><div><span>Base imponible</span><span>${fmtEur(t.base)}</span></div><div><span>IVA ${num(job.vat)} %</span><span>${fmtEur(t.vat)}</span></div><div class="big"><span>Total</span><span>${fmtEur(t.total)}</span></div></div>` : ''}
+    ${kind === 'quote' ? `<div class="tot"><div class="big"><span>Total sin IVA</span><span>${fmtEur(t.base)}</span></div><div class="tot-note">IVA no incluido: el ${num(job.vat)} % se añade en la factura.</div></div>`
+      : `<div class="tot"><div><span>Base imponible</span><span>${fmtEur(t.base)}</span></div><div><span>IVA ${num(job.vat)} %</span><span>${fmtEur(t.vat)}</span></div><div class="big"><span>Total</span><span>${fmtEur(t.total)}</span></div></div>`}` : ''}
     <div class="legal">${kind === 'quote'
       ? 'Presupuesto conforme al Real Decreto 1457/1986. El usuario puede aceptarlo firmando este documento o desde la app Garaje. Las piezas sustituidas se entregarán al cliente si así lo solicita. Este presupuesto no es una factura.'
       : 'El usuario autoriza la reparación descrita y deposita el vehículo en el taller. Este documento sirve como resguardo de depósito (Real Decreto 1457/1986): preséntelo para retirar el vehículo. No es una factura.'}</div>
-    <div class="sign"><div>Firma del taller</div><div>${(() => { const sig = kind === 'order' ? jobPhotos.filter((p) => p.kind === 'signature' && p.url).pop() : null;
+    <div class="sign"><div>${sealImages()}Firma y sello del taller</div><div>${(() => { const sig = kind === 'order' ? jobPhotos.filter((p) => p.kind === 'signature' && p.url).pop() : null;
       return sig ? `<img class="doc-sig" src="${esc(sig.url)}" alt="">Firmado por ${esc(job.intake_signed_name || 'el cliente')}${job.intake_signed_at ? ' · ' + fmtDate(job.intake_signed_at) : ''}` : 'Conforme, firma del cliente'; })()}</div></div>
   </div>`;
   // Que las fotos y la firma estén cargadas antes de imprimir.
@@ -2115,7 +2241,7 @@ async function openInvoicing() {
 // correlativa por serie, sin borrar ni modificar (se corrige con rectificativa).
 // El registro en Hacienda (Verifactu) lo hará el proveedor cuando esté
 // contratado; hasta entonces el taller está en modo 'test' y todo sale "de prueba".
-const INV_KIND = { F1: 'Factura', F2: 'Factura simplificada', R1: 'Factura rectificativa', R5: 'Factura rectificativa (simplificada)' };
+const INV_KIND = { F1: 'Factura', F2: 'Factura simplificada', F3: 'Factura (sustituye a simplificada)', R1: 'Factura rectificativa', R5: 'Factura rectificativa (simplificada)' };
 const INV_STATUS = { test: ['Prueba', 'test'], pending: ['Enviando a Hacienda', 'pending'], registered: ['Registrada', 'ok'], error: ['Error al registrar', 'bad'] };
 const invCode = (series, no) => series + String(no).padStart(4, '0');
 const testBanner = () => (invoicing?.mode === 'live' ? ''
@@ -2134,14 +2260,15 @@ function verifactuLine(inv) {
   if (inv.status === 'pending') return 'Enviada a Hacienda; aún no ha contestado. Mira su estado en Facturas.';
   return '';
 }
-const invoiceOfJob = (id) => invoices.find((i) => i.job_id === id && ['F1', 'F2'].includes(i.kind) && !invoices.some((r) => r.rectifies_id === i.id));
+const replacedBy = (inv) => invoices.find((r) => r.replaces_id === inv.id);
+const invoiceOfJob = (id) => invoices.find((i) => i.job_id === id && ['F1', 'F2', 'F3'].includes(i.kind) && !invoices.some((r) => r.rectifies_id === i.id) && !replacedBy(i));
 
 // --- cobros (supabase/030_payments.sql)
 const PAY_METHOD = { cash: 'Efectivo', card: 'Tarjeta', bizum: 'Bizum', transfer: 'Transferencia', other: 'Otro' };
 const paidOf = (inv) => payments.filter((p) => p.invoice_id === inv.id).reduce((a, p) => a + num(p.amount), 0);
-/** Lo que falta por cobrar (las rectificadas y las rectificativas no cuentan). */
+/** Lo que falta por cobrar (las rectificadas, las rectificativas y las sustituidas no cuentan). */
 function pendingOf(inv) {
-  if (!['F1', 'F2'].includes(inv.kind) || invoices.some((r) => r.rectifies_id === inv.id)) return 0;
+  if (!['F1', 'F2', 'F3'].includes(inv.kind) || invoices.some((r) => r.rectifies_id === inv.id) || replacedBy(inv)) return 0;
   return Math.max(0, Math.round((num(inv.total) - paidOf(inv)) * 100) / 100);
 }
 async function payInvoice(inv) {
@@ -2194,15 +2321,18 @@ async function issueInvoice() {
     ${testBanner()}
     <div class="inv-kind">
       <label class="chk"><input type="radio" name="kind" value="F1" ${simpleDefault ? '' : 'checked'}><span><b>Factura completa</b><small>Con los datos del cliente. La que necesita una empresa o un autónomo.</small></span></label>
-      <label class="chk${canSimple ? '' : ' off'}"><input type="radio" name="kind" value="F2" ${simpleDefault ? 'checked' : ''} ${canSimple ? '' : 'disabled'}><span><b>Factura simplificada</b><small>${canSimple ? 'El ticket de siempre: hasta 400 € con IVA y sin datos obligatorios del cliente.' : 'Solo hasta 400 € con IVA; esta pasa.'}</small></span></label>
+      <label class="chk${canSimple ? '' : ' off'}"><input type="radio" name="kind" value="F2" ${simpleDefault ? 'checked' : ''} ${canSimple ? '' : 'disabled'}><span><b>Factura simplificada</b><small>${canSimple ? 'Un ticket: hasta 400 € con IVA y sin datos del cliente.' : 'Solo hasta 400 € con IVA; esta pasa.'}</small></span></label>
     </div>
-    <label>Nombre o razón social del cliente</label><input name="name" maxlength="200" value="${esc(j.customer_name || '')}">
+    <div id="invCustomer"><label>Nombre o razón social del cliente</label><input name="name" maxlength="200" value="${esc(j.customer_name || '')}">
     <div class="row2"><div><label>NIF / DNI / CIF</label><input name="tax" maxlength="20" value="${esc(j.customer_tax_id || '')}" placeholder="Si es empresa o autónomo" autocomplete="off"></div>
-      <div><label>Dirección</label><input name="addr" maxlength="300" value="${esc(j.customer_address || '')}" placeholder="Si es empresa o autónomo" autocomplete="off"></div></div>
+      <div><label>Dirección</label><input name="addr" maxlength="300" value="${esc(j.customer_address || '')}" placeholder="Si es empresa o autónomo" autocomplete="off"></div></div></div>
     <div class="inv-totals"><span>Base ${fmtEur(t.base)}</span><span>IVA ${num(j.vat) ?? 21} % ${fmtEur(t.vat)}</span><b>Total ${fmtEur(t.total)}</b></div>
     <p class="muted" style="font-size:13px;margin:6px 0 0">Se numera sola (<b id="invNext"></b>) con las líneas de la orden. Una factura no se borra ni se cambia: si te equivocas, se corrige con una rectificativa.</p>`,
   'Emitir factura', (fd) => fd, (form) => {
-    const next = () => { form.querySelector('#invNext').textContent = form.kind.value === 'F2' ? invCode(invoicing.simple_series, invoicing.simple_next_no) : invCode(invoicing.series, invoicing.next_no); };
+    const next = () => {
+      form.querySelector('#invNext').textContent = invCode(invoicing.series, invoicing.next_no);
+      form.querySelector('#invCustomer').classList.toggle('hidden', form.kind.value === 'F2');
+    };
     for (const rd of form.querySelectorAll('input[name=kind]')) rd.onchange = next;
     next();
     // Con Verifactu, la factura completa necesita el NIF o DNI del cliente.
@@ -2216,14 +2346,16 @@ async function issueInvoice() {
     });
   });
   if (!r) return;
-  const customer = { name: (r.name || '').trim() || null, tax_id: (r.tax || '').trim().toUpperCase() || null, address: (r.addr || '').trim() || null,
+  // El ticket no lleva datos fiscales del cliente; el nombre queda solo para buscarlo aquí.
+  const simple = r.kind === 'F2';
+  const customer = { name: (r.name || '').trim() || null, tax_id: simple ? null : (r.tax || '').trim().toUpperCase() || null, address: simple ? null : (r.addr || '').trim() || null,
     vehicle: [s.name, s.plate].filter(Boolean).join(' · ') || null, km: j.km ?? null, job_number: j.number };
   const { data: issued, error } = await sb.rpc('issue_invoice', { p_job: j.id, p_simplified: r.kind === 'F2', p_customer: customer });
   if (error) { await notice(`<h3>No se pudo emitir la factura</h3><p>${esc(error.message)}</p>`); return; }
   let data = issued;
   if (data.status === 'pending') { setSaveState('Registrando en Hacienda…', 'pending'); data = await sendVerifactu(data); setSaveState(''); }
   invoices.unshift(data);
-  invoicing[r.kind === 'F2' ? 'simple_next_no' : 'next_no']++;
+  invoicing.next_no++;
   for (const x of new Set([j, jobs.find((y) => y.id === j.id)])) if (x) Object.assign(x, { invoice_ref: data.full_number, invoiced_at: data.issued_at, customer_tax_id: customer.tax_id ?? x.customer_tax_id, customer_address: customer.address ?? x.customer_address });
   if (job?.id === j.id) {
     Object.assign(job, { invoice_ref: data.full_number, invoiced_at: data.issued_at });
@@ -2252,36 +2384,84 @@ async function rectifyInvoice(inv) {
   if (await choose(`<h3>Rectificativa ${esc(data.full_number)} emitida</h3><p class="muted">La factura ${esc(inv.full_number)} queda anulada. La orden vuelve a estar sin facturar.</p>${verifactuLine(data) ? `<p class="${data.status === 'error' ? 'err' : 'muted'}">${verifactuLine(data)}</p>` : ''}`, [['print', 'Imprimir o guardar en PDF', 'btn small']]) === 'print') printInvoice(data);
 }
 
-function printInvoice(inv) {
+/** Garantía del art. 16 del Real Decreto 1457/1986, también la de vehículos industriales. */
+const WARRANTY = 'Las reparaciones están garantizadas 3 meses o 2.000 km y, en vehículos industriales, 15 días o 2.000 km, lo que antes ocurra, salvo que las piezas tengan una garantía mayor (art. 16 del Real Decreto 1457/1986).';
+/** Pasa una simplificada a factura completa: una nueva que la sustituye (F3). */
+async function exchangeInvoice(inv) {
+  const c = inv.customer || {};
+  const j = jobs.find((x) => x.id === inv.job_id);
+  const r = await dialog(`<h3>Pasar ${esc(inv.full_number)} a factura completa</h3>
+    ${testBanner()}
+    <p class="muted">Se emite una factura nueva (${esc(invCode(invoicing.series, invoicing.next_no))}) con los datos del cliente y los mismos importes, que indica que sustituye a esta. La simplificada se conserva y sus cobros pasan a la nueva.</p>
+    <label>Nombre o razón social *</label><input name="name" required maxlength="200" value="${esc(c.name || '')}">
+    <div class="row2"><div><label>NIF / DNI / CIF *</label><input name="tax" required maxlength="20" value="${esc(j?.customer_tax_id || '')}" autocomplete="off"></div>
+      <div><label>Dirección</label><input name="addr" maxlength="300" value="${esc(j?.customer_address || '')}" autocomplete="off"></div></div>`, 'Emitir factura completa', (fd) => fd);
+  if (!r) return;
+  const { data, error } = await sb.rpc('exchange_invoice', { p_invoice: inv.id, p_customer: { name: r.name.trim(), tax_id: r.tax.trim().toUpperCase(), address: (r.addr || '').trim() || null } });
+  if (error) { await notice(`<h3>No se pudo hacer</h3><p>${esc(error.message)}</p>`); return; }
+  invoicing.next_no++;
+  await Promise.all([loadInvoices(), loadJobs()]);
+  if (await choose(`<h3>Factura ${esc(data.full_number)} emitida</h3><p class="muted">Sustituye a la simplificada ${esc(inv.full_number)}.</p>`, [['print', 'Imprimir o guardar en PDF', 'btn small']]) === 'print') printInvoice(data);
+}
+
+/** La factura simplificada, como un ticket de 80 mm y casi sin datos del cliente. */
+function ticketHtml(inv) {
   const w = inv.issuer || {}, c = inv.customer || {};
+  const plate = (c.vehicle || '').split(' · ').pop();
+  return `<div class="doc ticket">
+    ${inv.qr ? `<div class="vf"><img src="${esc(inv.qr)}" alt="QR"><span>Factura verificable en la sede electrónica de la AEAT<br><b>VERI*FACTU</b></span></div>` : ''}
+    ${inv.live ? '' : `<div class="doc-test">DE PRUEBA · SIN VALIDEZ FISCAL</div>`}
+    <div class="t-head">${workshop.logo ? `<img src="${esc(workshop.logo)}" alt="" class="doc-logo">` : ''}<b>${esc(w.name || '')}</b>${w.legal_name && w.legal_name !== w.name ? `<br>${esc(w.legal_name)}` : ''}<br>NIF ${esc(w.tax_id || '')}<br>${esc(w.address || '')}${w.phone ? '<br>' + esc(w.phone) : ''}</div>
+    <div class="t-row t-top"><b>Factura simplificada</b><b>${esc(inv.full_number)}</b></div>
+    <div class="t-row"><span>${fmtDate(inv.issued_at)}</span><span>${esc(plate)}</span></div>
+    <div class="t-lines">${(inv.lines || []).map((l) => `<div class="t-line"><div>${esc(l.description)}</div><div class="t-row"><span>${String(l.qty).replace('.', ',')} × ${fmtEur(num(l.unit_price))}${num(l.discount) ? ` −${String(l.discount).replace('.', ',')} %` : ''}</span><span>${fmtEur(num(l.amount))}</span></div></div>`).join('')}</div>
+    <div class="t-row"><span>Base imponible</span><span>${fmtEur(num(inv.base))}</span></div>
+    <div class="t-row"><span>IVA ${String(num(inv.vat_rate)).replace('.', ',')} %</span><span>${fmtEur(num(inv.vat))}</span></div>
+    <div class="t-row t-total"><span>TOTAL</span><span>${fmtEur(num(inv.total))}</span></div>
+    <div class="t-seal">${sealImages()}Firma y sello del taller</div>
+    <div class="legal">${WARRANTY}</div>
+  </div>`;
+}
+
+async function printInvoice(inv) {
+  const w = inv.issuer || {}, c = inv.customer || {};
+  const ticket = inv.kind === 'F2';
   const orig = inv.rectifies_id ? invoices.find((i) => i.id === inv.rectifies_id) : null;
+  const replaced = inv.replaces_id ? invoices.find((i) => i.id === inv.replaces_id) : null;
   const rows = (inv.lines || []).map((l) => `<tr><td>${l.kind === 'labor' ? 'Mano de obra' : 'Pieza'}</td><td>${esc(l.description)}${l.brand || l.reference ? `<br><small>${esc([l.brand, l.reference].filter(Boolean).join(' · '))}</small>` : ''}</td>
     <td class="num">${String(l.qty).replace('.', ',')}</td><td class="num">${fmtEur(num(l.unit_price))}</td><td class="num">${num(l.discount) ? String(l.discount).replace('.', ',') + ' %' : ''}</td><td class="num">${fmtEur(num(l.amount))}</td></tr>`).join('');
   // El QR de Verifactu va arriba, antes del resto (Orden HAC/1177/2024).
-  $('print').innerHTML = `<div class="doc">
+  $('print').innerHTML = ticket ? ticketHtml(inv) : `<div class="doc">
     ${inv.qr ? `<div class="vf"><img src="${esc(inv.qr)}" alt="QR"><span>Factura verificable en la sede electrónica de la AEAT<br><b>VERI*FACTU</b></span></div>` : ''}
     ${inv.live ? '' : `<div class="doc-test">FACTURA DE PRUEBA${inv.qr ? ' (entorno de pruebas de Verifactu)' : ''} · SIN VALIDEZ FISCAL</div>`}
     <div class="head"><div>${workshop.logo ? `<img src="${esc(workshop.logo)}" alt="" class="doc-logo">` : ''}<h1>${esc(w.name || '')}</h1>${esc(w.legal_name || '')}<br>NIF ${esc(w.tax_id || '')}<br>${esc(w.address || '')}<br>${esc([w.phone, w.email].filter(Boolean).join(' · '))}${w.registry_no ? '<br>Nº registro industrial: ' + esc(w.registry_no) : ''}</div>
       <div style="text-align:right"><h1>${INV_KIND[inv.kind]}</h1>Nº <b>${esc(inv.full_number)}</b><br>Fecha de expedición: ${fmtDate(inv.issued_at)}${c.job_number ? `<br>Orden de reparación nº ${esc(c.job_number)}` : ''}</div></div>
     ${orig || inv.rectify_reason ? `<div class="box" style="margin-bottom:10px"><b>Rectifica</b>Factura ${esc(orig?.full_number || '')}${orig ? ' del ' + fmtDate(orig.issued_at) : ''}. Motivo: ${esc(inv.rectify_reason || '')}</div>` : ''}
+    ${replaced ? `<div class="box" style="margin-bottom:10px"><b>Sustituye a</b>Factura simplificada ${esc(replaced.full_number)} del ${fmtDate(replaced.issued_at)}.</div>` : ''}
     <div class="boxes">
       <div class="box"><b>Cliente</b>${esc(c.name || (inv.kind === 'F2' ? 'Cliente' : ''))}${c.tax_id ? '<br>NIF ' + esc(c.tax_id) : ''}${c.address ? '<br>' + esc(c.address) : ''}</div>
       <div class="box"><b>Vehículo</b>${esc(c.vehicle || '')}${c.km != null ? '<br>Km: ' + fmtKm(c.km) : ''}</div>
     </div>
     <table><thead><tr><th>Tipo</th><th>Concepto</th><th class="num">Cant.</th><th class="num">Precio</th><th class="num">Dto.</th><th class="num">Importe</th></tr></thead><tbody>${rows}</tbody></table>
     <div class="tot"><div><span>Base imponible</span><span>${fmtEur(num(inv.base))}</span></div><div><span>IVA ${String(num(inv.vat_rate)).replace('.', ',')} %</span><span>${fmtEur(num(inv.vat))}</span></div><div class="big"><span>Total</span><span>${fmtEur(num(inv.total))}</span></div></div>
-    <div class="legal">Las reparaciones tienen una garantía de 3 meses o 2.000 km, lo que antes ocurra (Real Decreto 1457/1986).${inv.kind === 'F2' ? ' Factura simplificada.' : ''}</div>
+    <div class="legal">${WARRANTY}</div>
+    <div class="sign"><div>${sealImages()}Firma y sello del taller</div><div></div></div>
   </div>`;
+  await Promise.all([...$('print').querySelectorAll('img')].map((i) => i.decode().catch(() => {})));
   const old = document.title;
   document.title = `${INV_KIND[inv.kind]} ${inv.full_number}`;
+  // El ticket se imprime en papel de 80 mm; lo demás, en A4.
+  const page = document.createElement('style');
+  if (ticket) { page.textContent = '@page{size:80mm auto;margin:3mm}'; document.head.appendChild(page); }
   window.print();
+  page.remove();
   document.title = old;
 }
 
 function renderInvoices() {
   const box = $('invoicesBody');
   $('invTestBanner').innerHTML = testBanner();
-  $('invSeries').textContent = invoicing ? `Series: ${invoicing.series} (completas) · ${invoicing.simple_series} (simplificadas) · ${invoicing.rect_series} (rectificativas)` : '';
+  $('invSeries').textContent = invoicing ? `Series: ${invoicing.series} (facturas) · ${invoicing.rect_series} (rectificativas)` : '';
   const ms = $('invMonth'), keep = ms.value;
   const months = [...new Set(invoices.map((i) => i.issued_at.slice(0, 7)))];
   ms.innerHTML = '<option value="">Todos los meses</option>' + months.map((m) => `<option value="${m}">${new Date(m + '-01T12:00').toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}</option>`).join('');
@@ -2289,27 +2469,32 @@ function renderInvoices() {
   const q = normTxt($('invSearch').value);
   const pf = $('invPay').value;
   const list = invoices.filter((i) => (!ms.value || i.issued_at.startsWith(ms.value))
-    && (!pf || (pf === 'pending' ? pendingOf(i) > 0 : ['F1', 'F2'].includes(i.kind) && pendingOf(i) === 0))
+    && (!pf || (pf === 'pending' ? pendingOf(i) > 0 : ['F1', 'F2', 'F3'].includes(i.kind) && !replacedBy(i) && pendingOf(i) === 0))
     && (!q || [i.full_number, i.customer?.name, i.customer?.tax_id, i.customer?.vehicle].some((x) => normTxt(x).includes(q))));
   const pendTotal = list.reduce((a, i) => a + pendingOf(i), 0);
-  const sum = (k) => list.reduce((a, i) => a + num(i[k]), 0);
-  $('invTotals').innerHTML = `<div><b>${list.length}</b><span>${list.length === 1 ? 'factura' : 'facturas'}</span></div><div><b>${fmtEur(sum('total'))}</b><span>total facturado</span></div><div><b>${fmtEur(sum('vat'))}</b><span>IVA repercutido</span></div><div class="${pendTotal > 0 ? 'warn' : ''}"><b>${fmtEur(pendTotal)}</b><span>pendiente de cobro</span></div>`;
+  // La simplificada ya sustituida no suma: su importe está en la nueva.
+  const counted = list.filter((i) => !replacedBy(i));
+  const sum = (k) => counted.reduce((a, i) => a + num(i[k]), 0);
+  $('invTotals').innerHTML = `<div><b>${counted.length}</b><span>${counted.length === 1 ? 'factura' : 'facturas'}</span></div><div><b>${fmtEur(sum('total'))}</b><span>total facturado</span></div><div><b>${fmtEur(sum('vat'))}</b><span>IVA repercutido</span></div><div class="${pendTotal > 0 ? 'warn' : ''}"><b>${fmtEur(pendTotal)}</b><span>pendiente de cobro</span></div>`;
   if (!invoices.length) { box.innerHTML = emptyState('invoices', 'Aún no hay facturas', 'Se emiten desde una orden lista para recoger o entregada, con "Emitir factura".'); return; }
   box.innerHTML = `<table class="inv-table"><thead><tr><th>Número</th><th>Fecha</th><th>Cliente</th><th class="num">Base</th><th class="num">IVA</th><th class="num">Total</th><th>Cobro</th><th>Estado</th><th></th></tr></thead><tbody></tbody></table>`;
   const tb = box.querySelector('tbody');
   for (const i of list) {
     const rect = invoices.find((r) => r.rectifies_id === i.id);
+    const repl = replacedBy(i);
+    const open = ['F1', 'F2', 'F3'].includes(i.kind) && !rect && !repl;
     const [st, cls] = INV_STATUS[i.status] || ['', ''];
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td><b>${esc(i.full_number)}</b><small>${INV_KIND[i.kind]}${rect ? ` · anulada por ${esc(rect.full_number)}` : ''}</small></td>
+    tr.innerHTML = `<td><b>${esc(i.full_number)}</b><small>${INV_KIND[i.kind]}${rect ? ` · anulada por ${esc(rect.full_number)}` : ''}${repl ? ` · sustituida por ${esc(repl.full_number)}` : ''}</small></td>
       <td data-label="Fecha">${fmtDate(i.issued_at)}</td>
       <td data-label="Cliente">${esc(i.customer?.name || '—')}${i.customer?.vehicle ? `<small>${esc(i.customer.vehicle)}</small>` : ''}</td>
       <td class="num" data-label="Base">${fmtEur(num(i.base))}</td><td class="num" data-label="IVA">${fmtEur(num(i.vat))}</td><td class="num" data-label="Total"><b>${fmtEur(num(i.total))}</b></td>
-      <td data-label="Cobro">${['F1', 'F2'].includes(i.kind) && !rect ? (pendingOf(i) > 0 ? `<a href="#" class="pay-link" data-pay>Pendiente ${fmtEur(pendingOf(i))}</a>` : `<a href="#" class="pay-ok" data-pay>Cobrada</a>`) : '<span class="muted">—</span>'}</td>
+      <td data-label="Cobro">${open ? (pendingOf(i) > 0 ? `<a href="#" class="pay-link" data-pay>Pendiente ${fmtEur(pendingOf(i))}</a>` : `<a href="#" class="pay-ok" data-pay>Cobrada</a>`) : '<span class="muted">—</span>'}</td>
       <td data-label="Estado"><span class="inv-st ${cls}" ${i.error ? `title="${esc(i.error)}"` : ''}>${st}</span>${['pending', 'error'].includes(i.status) ? '<small><a href="#" data-retry>Reintentar</a></small>' : ''}</td>
-      <td class="edit"><a href="#" data-print>Ver</a>${['F1', 'F2'].includes(i.kind) && !rect ? ' · <a href="#" data-rect>Rectificar</a>' : ''}</td>`;
+      <td class="edit"><a href="#" data-print>Ver</a>${open ? ' · <a href="#" data-rect>Rectificar</a>' : ''}${open && i.kind === 'F2' ? ' · <a href="#" data-exchange>Pasar a completa</a>' : ''}</td>`;
     tr.querySelector('[data-print]').onclick = (e) => { e.preventDefault(); printInvoice(i); };
     tr.querySelector('[data-rect]')?.addEventListener('click', (e) => { e.preventDefault(); rectifyInvoice(i); });
+    tr.querySelector('[data-exchange]')?.addEventListener('click', (e) => { e.preventDefault(); exchangeInvoice(i); });
     tr.querySelector('[data-pay]')?.addEventListener('click', (e) => { e.preventDefault(); payInvoice(i); });
     tr.querySelector('[data-retry]')?.addEventListener('click', async (e) => {
       e.preventDefault(); e.target.textContent = 'Enviando…';
@@ -2323,27 +2508,114 @@ function renderInvoices() {
 $('invMonth').onchange = () => renderInvoices();
 $('invPay').onchange = () => renderInvoices();
 $('invSearch').oninput = () => renderInvoices();
-/** Libro de facturas emitidas, para el gestor. */
-$('invExport').onclick = () => {
+/** Libro de facturas emitidas, para el gestor: un Excel de verdad, con formato y totales. */
+function gestorWorkbook(ExcelJS, { rows, taller, periodo, conPruebas }) {
+  const fuente = (o) => ({ name: 'Arial', size: 10, ...o });
+  const EUR = '#,##0.00 "€"', AZUL = 'FF1D4B70', CREMA = 'FFF6F3EC', LINEA = 'FFE2DCCF';
+  const hayRect = rows.some((r) => r.rectifica || r.motivo);
+  const haySust = rows.some((r) => r.sustituida);
+  const cols = [
+    ['Fecha', 'fecha', 'dd/mm/yyyy'], ['Número', 'numero'], ['Tipo', 'tipo'], ['Cliente', 'cliente'], ['NIF/CIF', 'nif'], ['Dirección', 'direccion'],
+    ['Base imponible', 'base', EUR, true], ['% IVA', 'ivaPct', '0"%"'], ['Cuota de IVA', 'iva', EUR, true], ['Total', 'total', EUR, true],
+    ['Cobrado', 'cobrado', EUR, true], ['Pendiente', 'pendiente', EUR, true], ['Forma de pago', 'pago'], ['Estado', 'estado'],
+    ...(hayRect ? [['Rectifica a', 'rectifica'], ['Motivo', 'motivo']] : []),
+    ...(haySust ? [['Sustituida por', 'sustituida']] : []),
+  ];
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet('Facturas', { views: [{ showGridLines: false }] });
+  ws.getCell('A1').value = 'Libro de facturas emitidas';
+  ws.getCell('A1').font = fuente({ bold: true, size: 16, color: { argb: AZUL } });
+  ws.getCell('A2').value = `${taller} · ${periodo}`;
+  ws.getCell('A2').font = fuente({ color: { argb: 'FF3E4C5C' } });
+  if (conPruebas) {
+    ws.getCell('A3').value = 'Incluye facturas de prueba, sin validez fiscal';
+    ws.getCell('A3').font = fuente({ bold: true, color: { argb: 'FFB45309' } });
+  }
+  const top = 5;
+  const head = ws.getRow(top);
+  cols.forEach(([t, , , sum], i) => {
+    const c = head.getCell(i + 1);
+    c.value = t;
+    c.font = fuente({ bold: true, color: { argb: 'FFFFFFFF' } });
+    c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: AZUL } };
+    c.alignment = { vertical: 'middle', horizontal: sum ? 'right' : 'left', wrapText: true };
+  });
+  head.height = 30;
+  rows.forEach((r, n) => {
+    const row = ws.getRow(top + 1 + n);
+    cols.forEach(([, k, fmt], i) => {
+      const c = row.getCell(i + 1);
+      c.value = r[k] ?? null;
+      if (fmt) c.numFmt = fmt;
+      if (n % 2) c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: CREMA } };
+      c.border = { bottom: { style: 'thin', color: { argb: LINEA } } };
+      c.alignment = { vertical: 'middle', horizontal: k === 'fecha' || k === 'ivaPct' ? 'left' : undefined };
+      c.font = k === 'pendiente' && r[k] > 0 ? fuente({ bold: true, color: { argb: 'FFB45309' } }) : fuente();
+    });
+  });
+  const first = top + 1, last = top + rows.length, foot = ws.getRow(last + 1);
+  cols.forEach(([, k, fmt, sum], i) => {
+    const c = foot.getCell(i + 1);
+    if (i === 0) c.value = `Total (${rows.filter((r) => !r.sustituida).length})`;
+    if (sum) {
+      const L = ws.getColumn(i + 1).letter;
+      // La simplificada sustituida no suma: su importe está en la factura nueva.
+      const Z = ws.getColumn(cols.length).letter;
+      c.value = { formula: haySust ? `SUMIF(${Z}${first}:${Z}${last},"",${L}${first}:${L}${last})` : `SUM(${L}${first}:${L}${last})`,
+        result: Math.round(rows.reduce((a, r) => a + (r.sustituida ? 0 : r[k] || 0), 0) * 100) / 100 };
+      c.numFmt = fmt;
+    }
+    c.font = fuente({ bold: true });
+    c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE8EEF4' } };
+    c.border = { top: { style: 'medium', color: { argb: AZUL } } };
+  });
+  cols.forEach(([t, k, fmt], i) => {
+    const largo = Math.max(t.length, ...rows.map((r) => (fmt ? 11 : String(r[k] ?? '').length)));
+    ws.getColumn(i + 1).width = Math.min(Math.max(largo + 2, fmt === EUR ? 13 : 10), 38);
+  });
+  ws.autoFilter = { from: { row: top, column: 1 }, to: { row: last, column: cols.length } };
+  ws.views = [{ state: 'frozen', ySplit: top, showGridLines: false }];
+  ws.pageSetup = { orientation: 'landscape', paperSize: 9, fitToPage: true, fitToWidth: 1, fitToHeight: 0, printTitlesRow: `${top}:${top}` };
+  return wb;
+}
+$('invExport').onclick = async () => {
   const m = $('invMonth').value;
   const list = invoices.filter((i) => !m || i.issued_at.startsWith(m)).slice().reverse();
   if (!list.length) return;
-  downloadCsv(`facturas-${slug(workshop.name)}-${m || 'todas'}.csv`,
-    ['Fecha de expedición', 'Número', 'Tipo', 'Cliente', 'NIF/CIF', 'Dirección', 'Base imponible', 'Tipo de IVA %', 'Cuota de IVA', 'Total', 'Cobrado', 'Pendiente', 'Forma de pago', 'Rectifica a', 'Motivo', 'Estado'],
-    list.map((i) => [fmtDate(i.issued_at), i.full_number, INV_KIND[i.kind], i.customer?.name || '', i.customer?.tax_id || '', i.customer?.address || '',
-      num(i.base), num(i.vat_rate), num(i.vat), num(i.total), paidOf(i), pendingOf(i),
-      [...new Set(payments.filter((p) => p.invoice_id === i.id).map((p) => PAY_METHOD[p.method]))].join(', '),
-      invoices.find((o) => o.id === i.rectifies_id)?.full_number || '', i.rectify_reason || '', INV_STATUS[i.status]?.[0] || i.status]));
+  const btn = $('invExport'), label = btn.textContent;
+  btn.disabled = true; btn.textContent = 'Preparando…';
+  try {
+    if (!window.ExcelJS) {
+      await new Promise((ok, ko) => { const sc = document.createElement('script'); sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js'; sc.onload = ok; sc.onerror = ko; document.head.appendChild(sc); });
+    }
+    const rows = list.map((i) => {
+      const d = new Date(i.issued_at);
+      return { fecha: new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())), numero: i.full_number, tipo: INV_KIND[i.kind], cliente: i.customer?.name || '', nif: i.customer?.tax_id || '', direccion: i.customer?.address || '',
+        base: num(i.base), ivaPct: num(i.vat_rate), iva: num(i.vat), total: num(i.total), cobrado: paidOf(i), pendiente: pendingOf(i),
+        pago: [...new Set(payments.filter((p) => p.invoice_id === i.id).map((p) => PAY_METHOD[p.method]))].join(', '), estado: INV_STATUS[i.status]?.[0] || i.status,
+        rectifica: invoices.find((o) => o.id === i.rectifies_id)?.full_number || '', motivo: i.rectify_reason || '', sustituida: replacedBy(i)?.full_number || '' };
+    });
+    const periodo = m ? new Date(m + '-15T12:00:00').toLocaleDateString('es-ES', { month: 'long', year: 'numeric' }) : 'Todas las facturas';
+    const wb = gestorWorkbook(window.ExcelJS, { rows, taller: [workshop.legal_name || workshop.name, workshop.tax_id].filter(Boolean).join(' · '), periodo, conPruebas: list.some((i) => !i.live) });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([await wb.xlsx.writeBuffer()], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+    a.download = `facturas-${slug(workshop.name)}-${m || 'todas'}.xlsx`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  } catch {
+    await notice('<h3>No se pudo preparar el Excel</h3><p>Comprueba la conexión y vuelve a intentarlo.</p>');
+  } finally {
+    btn.disabled = false; btn.textContent = label;
+  }
 };
 $('invSeriesBtn').onclick = async (e) => {
   e.preventDefault();
   const r = await dialog(`<h3>Series de facturación</h3>
-    <p class="muted">El prefijo de cada tipo de factura. Si ya llevabas otra numeración, pon tu prefijo: sigue desde el último número que haya en Garaje con esa serie.</p>
-    <div class="row3"><div><label>Completas</label><input name="s" value="${esc(invoicing.series)}" maxlength="12"></div>
-      <div><label>Simplificadas</label><input name="t" value="${esc(invoicing.simple_series)}" maxlength="12"></div>
+    <p class="muted">Las completas y las simplificadas van en la misma serie. Si ya llevabas otra numeración, pon tu prefijo: sigue desde el último número que haya en Garaje con esa serie.</p>
+    <div class="row2"><div><label>Facturas</label><input name="s" value="${esc(invoicing.series)}" maxlength="12"></div>
       <div><label>Rectificativas</label><input name="r" value="${esc(invoicing.rect_series)}" maxlength="12"></div></div>`, 'Guardar', (fd) => fd);
   if (!r) return;
-  const { error } = await sb.rpc('set_invoice_series', { p_workshop: workshop.id, p_series: r.s, p_simple: r.t, p_rect: r.r });
+  const { error } = await sb.rpc('set_invoice_series', { p_workshop: workshop.id, p_series: r.s, p_simple: r.s, p_rect: r.r });
   if (error) { await notice(`<h3>No se pudo guardar</h3><p>${esc(error.message)}</p>`); return; }
   ({ data: invoicing } = await sb.from('workshop_invoicing').select('*').eq('workshop_id', workshop.id).maybeSingle());
   renderInvoices();
@@ -2372,16 +2644,17 @@ function renderParts() {
   const q = normTxt($('partSearch').value);
   // Filtro por proveedor (se rellena con los que hay).
   const ps = $('partSupplier'), keep = ps.value;
-  ps.innerHTML = '<option value="">Todos los proveedores</option><option value="none">Sin proveedor</option>' + suppliers.map((s) => `<option value="${s.id}">${esc(s.name)}</option>`).join('');
+  ps.innerHTML = '<option value="">Todos los proveedores</option><option value="none">Sin proveedor</option><option value="low">Por debajo del mínimo</option>' + suppliers.map((s) => `<option value="${s.id}">${esc(s.name)}</option>`).join('');
   ps.value = keep;
   const supF = ps.value;
-  const list = parts.filter((p) => (!supF || (supF === 'none' ? !p.supplier_id : p.supplier_id === supF))
+  const isLow = (p) => p.stock != null && p.min_stock != null && num(p.stock) <= num(p.min_stock);
+  const list = parts.filter((p) => (!supF || (supF === 'low' ? isLow(p) : supF === 'none' ? !p.supplier_id : p.supplier_id === supF))
     && (!q || [p.description, p.brand, p.reference, normRef(p.reference)].some((x) => normTxt(x).includes(q))));
   const tb = $('partsBody');
   tb.innerHTML = '';
   show('noParts', parts.length === 0);
   const noPrice = parts.filter((p) => p.price == null).length;
-  $('partsCount').textContent = parts.length ? `${parts.length} ${parts.length === 1 ? 'pieza' : 'piezas'}${noPrice ? ` · ${noPrice} sin PVP` : ''}${q || supF ? ` · ${list.length} con este filtro` : ''}` : '';
+  $('partsCount').textContent = parts.length ? `${parts.length} ${parts.length === 1 ? 'pieza' : 'piezas'}${noPrice ? ` · ${noPrice} sin PVP` : ''}${parts.some(isLow) ? ` · ${parts.filter(isLow).length} por debajo del mínimo` : ''}${q || supF ? ` · ${list.length} con este filtro` : ''}` : '';
   for (const p of list.slice(0, 400)) {
     const sup = suppliers.find((s) => s.id === p.supplier_id);
     const tr = document.createElement('tr');
@@ -2391,9 +2664,11 @@ function renderParts() {
       <td data-label="Proveedor">${esc(sup?.name || '')}</td>
       <td class="num" data-label="Coste"><input class="cell-in" data-k="cost" inputmode="decimal" value="${dec2(p.cost)}" placeholder="—" aria-label="Coste de ${esc(p.description)}">${p.list_price != null ? `<small class="marg" title="PVP de la tarifa del proveedor">Tarifa ${dec2(p.list_price)}</small>` : ''}</td>
       <td class="num" data-label="PVP"><input class="cell-in" data-k="price" inputmode="decimal" value="${dec2(p.price)}" placeholder="—" aria-label="PVP de ${esc(p.description)}">${marg != null ? `<small class="marg">${marg >= 0 ? '+' : ''}${marg} %</small>` : ''}</td>
+      <td class="num" data-label="Stock"><a href="#" data-stock>${p.stock != null ? esc(String(num(p.stock)).replace('.', ',')) : 'Llevar'}</a>${isLow(p) ? '<small class="stock-low">Pedir</small>' : ''}</td>
       <td class="num" data-label="Usos">${p.uses}</td>
       <td class="edit"><a href="#" data-edit>Editar</a></td>`;
     tr.querySelector('[data-edit]').onclick = (e) => { e.preventDefault(); editPart(p); };
+    tr.querySelector('[data-stock]').onclick = (e) => { e.preventDefault(); stockPart(p); };
     // Precio directamente en la tabla: se guarda al salir del campo.
     for (const inp of tr.querySelectorAll('.cell-in')) {
       inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') inp.blur(); });
@@ -2412,7 +2687,7 @@ function renderParts() {
     }
     tb.appendChild(tr);
   }
-  if (list.length > 400) tb.insertAdjacentHTML('beforeend', `<tr><td colspan="7" class="muted">Se muestran 400 de ${list.length}. Busca para afinar.</td></tr>`);
+  if (list.length > 400) tb.insertAdjacentHTML('beforeend', `<tr><td colspan="8" class="muted">Se muestran 400 de ${list.length}. Busca para afinar.</td></tr>`);
 }
 $('newPartBtn').onclick = () => editPart({});
 async function editPart(p) {
@@ -2423,16 +2698,176 @@ async function editPart(p) {
     <label>Trabajo del plan</label><select name="catalog_id"><option value="">—</option>${itemOptions({}, p.catalog_id)}</select>
     <label>Proveedor</label><select name="supplier_id">${supOpts}</select>
     <div class="row2"><div><label>Coste (sin IVA)</label><input name="cost" inputmode="decimal" value="${esc(p.cost ?? '')}"></div><div><label>PVP (sin IVA)</label><input name="price" inputmode="decimal" value="${esc(p.price ?? '')}"></div></div>
+    <label>Avisar cuando queden (mínimo de stock)</label><input name="min_stock" inputmode="decimal" value="${esc(p.min_stock ?? '')}" placeholder="Opcional">
     ${p.id ? '<p style="margin-top:14px"><a href="#" id="delPart" style="color:#E5484D">Borrar esta pieza</a></p>' : ''}`, 'Guardar', (fd) => fd, (form) => {
     const d = form.querySelector('#delPart');
     if (d) d.onclick = async (e) => { e.preventDefault(); if (!confirm('¿Borrar la pieza?')) return; await sb.from('workshop_parts').delete().eq('id', p.id); $('dlg').close(); await loadParts(); };
   });
   if (!res) return;
-  const row = { workshop_id: workshop.id, description: res.description.trim(), brand: res.brand.trim() || null, reference: res.reference.trim() || null, catalog_id: res.catalog_id || null, supplier_id: res.supplier_id || null, cost: num(res.cost), price: num(res.price) };
-  const { error } = p.id ? await sb.from('workshop_parts').update(row).eq('id', p.id) : await sb.from('workshop_parts').insert(row);
+  const row = { workshop_id: workshop.id, description: res.description.trim(), brand: res.brand.trim() || null, reference: res.reference.trim() || null, catalog_id: res.catalog_id || null, supplier_id: res.supplier_id || null, cost: num(res.cost), price: num(res.price), min_stock: num(res.min_stock) };
+  const { data, error } = p.id ? await sb.from('workshop_parts').update(row).eq('id', p.id).select('*').single() : await sb.from('workshop_parts').insert(row).select('*').single();
   if (error) alert('No se pudo guardar: ' + error.message);
   await loadParts();
+  return error ? null : data;
 }
+
+// ------------------------------------------------------------------ inventario
+// Cada entrada, recuento o salida por orden queda apuntada (supabase/036_taller_real.sql).
+const MOVE_KIND = { in: 'Entrada', out: 'Salida', count: 'Recuento' };
+async function stockPart(p) {
+  const { data: moves } = await sb.from('part_movements').select('*').eq('part_id', p.id).order('created_at', { ascending: false }).limit(8);
+  const qty = (v) => String(num(v)).replace('.', ',');
+  const supOpts = '<option value="">—</option>' + suppliers.map((s) => `<option value="${s.id}" ${s.id === p.supplier_id ? 'selected' : ''}>${esc(s.name)}</option>`).join('');
+  const r = await dialog(`<h3>Inventario: ${esc(p.description)}</h3>
+    <p class="muted" style="margin-top:0">${esc([p.brand, p.reference].filter(Boolean).join(' · '))}${p.stock != null ? ` <b>Quedan ${qty(p.stock)}</b>${p.cost != null ? ` · valen ${fmtEur(num(p.stock) * num(p.cost))} a coste` : ''}` : ' Todavía no llevas el stock de esta pieza.'}</p>
+    <div class="inv-kind"><label class="chk"><input type="radio" name="kind" value="in" checked><span><b>Entrada</b><small>Me ha llegado del proveedor: se suma.</small></span></label>
+      <label class="chk"><input type="radio" name="kind" value="count"><span><b>Recuento</b><small>He contado y tengo esta cantidad.</small></span></label></div>
+    <label>Cantidad *</label><input name="qty" inputmode="decimal" required>
+    <div id="moveIn"><div class="row2"><div><label>Coste unidad (sin IVA)</label><input name="cost" inputmode="decimal" value="${esc(p.cost ?? '')}"></div>
+      <div><label>Proveedor</label><select name="supplier">${supOpts}</select></div></div>
+      <label>Albarán o nota</label><input name="note" maxlength="300"></div>
+    ${(moves || []).length ? `<h4 style="margin:14px 0 6px">Últimos movimientos</h4><ul class="hist-list">${moves.map((m) => `<li><span>${fmtDate(m.created_at)} · ${MOVE_KIND[m.kind]} · <b>${num(m.qty) > 0 ? '+' : ''}${qty(m.qty)}</b>${m.unit_cost != null ? ` · ${fmtEur(num(m.unit_cost))}/u` : ''}</span>${m.note ? `<small>${esc(m.note)}</small>` : ''}</li>`).join('')}</ul>` : ''}`,
+  'Guardar', (fd) => fd, (form) => { for (const rd of form.querySelectorAll('input[name=kind]')) rd.onchange = () => form.querySelector('#moveIn').classList.toggle('hidden', form.kind.value !== 'in'); });
+  if (!r) return;
+  const n = num(r.qty);
+  if (n == null || (r.kind === 'in' && n <= 0)) { await notice('<h3>La cantidad no es válida</h3>'); return; }
+  const row = { workshop_id: workshop.id, part_id: p.id, kind: r.kind, qty: r.kind === 'in' ? n : Math.round((n - (num(p.stock) ?? 0)) * 100) / 100 };
+  if (r.kind === 'in') Object.assign(row, { unit_cost: num(r.cost), supplier_id: r.supplier || null, note: (r.note || '').trim() || null });
+  const { error } = await sb.from('part_movements').insert(row);
+  if (error) { await notice(`<h3>No se pudo guardar</h3><p>${esc(error.message)}</p>`); return; }
+  await loadParts();
+}
+
+// ------------------------------------------------------------------ trabajos
+// La lista de trabajos del taller, cada uno con su número: en la orden basta
+// con escribir el número y pulsar Intro.
+const STARTER_WORKS = [
+  ['Cambio de aceite y filtro', 0.5, 'oil'], ['Cambio de filtro de aire', 0.2, 'air_filter'], ['Cambio de filtro de habitáculo', 0.3, 'cabin_filter'], ['Cambio de filtro de combustible', 0.5, 'fuel_filter'],
+  ['Pastillas de freno delanteras', 1, 'brake_pads'], ['Pastillas de freno traseras', 1, 'brake_pads'], ['Discos y pastillas delanteros', 1.5, 'brake_pads'], ['Cambio de líquido de frenos', 0.7, 'brake_fluid'],
+  ['Cambio de refrigerante', 0.8, 'coolant'], ['Kit de distribución', 4, 'timing_belt'], ['Correa de accesorios', 0.8, 'aux_belt'], ['Kit de embrague', 5, 'clutch'],
+  ['Cambio de batería', 0.3, 'battery'], ['Amortiguadores delanteros', 2, 'shocks'], ['Carga de aire acondicionado', 0.8, 'ac_service'], ['Montaje y equilibrado de neumático', 0.3, 'tyres'],
+  ['Alineado de dirección', 0.8, 'tyres'], ['Cambio de bujías', 0.7, 'spark_plugs'], ['Pre-ITV', 0.5, null], ['Diagnosis con máquina', 0.5, null],
+];
+async function loadWorks() {
+  const { data, error } = await sb.from('workshop_works').select('*').eq('workshop_id', workshop.id).order('code');
+  if (error) { console.warn(error); return; }
+  works = data || [];
+  if (tab === 'works') renderWorks();
+}
+$('workSearch').addEventListener('input', () => renderWorks());
+function renderWorks() {
+  const q = normTxt($('workSearch').value);
+  const list = works.filter((w) => !q || String(w.code).startsWith(q) || normTxt(w.name).includes(q));
+  $('worksCount').textContent = works.length ? `${works.length} ${works.length === 1 ? 'trabajo' : 'trabajos'}${q ? ` · ${list.length} con esta búsqueda` : ''}` : '';
+  show('noWorks', !works.length);
+  show('worksTable', works.length > 0);
+  const tb = $('worksBody');
+  tb.innerHTML = '';
+  for (const w of list) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td class="work-no" data-label="Nº"><b>${w.code}</b></td><td><b>${esc(w.name)}</b></td>
+      <td class="num" data-label="Horas">${w.hours != null ? esc(String(num(w.hours)).replace('.', ',')) : ''}</td>
+      <td class="num" data-label="Precio">${w.price != null ? fmtEur(num(w.price)) : w.hours != null ? `<span class="muted">${fmtEur(num(w.hours) * num(workshop.labor_rate))}</span>` : ''}</td>
+      <td class="num" data-label="Usos">${w.uses}</td><td class="edit"><a href="#" data-edit>Editar</a></td>`;
+    tr.querySelector('[data-edit]').onclick = (e) => { e.preventDefault(); editWork(w); };
+    tb.appendChild(tr);
+  }
+}
+const nextWorkCode = () => Math.max(0, ...works.map((w) => w.code)) + 1;
+/** Crea o edita un trabajo; devuelve el guardado (o null). */
+async function editWork(w) {
+  const r = await dialog(`<h3>${w.id ? 'Editar trabajo' : 'Nuevo trabajo'}</h3>
+    <div class="row-work"><div><label>Número *</label><input name="code" inputmode="numeric" required value="${esc(w.code ?? nextWorkCode())}"></div>
+      <div><label>Trabajo *</label><input name="name" required maxlength="200" value="${esc(w.name || '')}" placeholder="Cambio de aceite y filtro"></div></div>
+    <div class="row2"><div><label>Horas habituales</label><input name="hours" inputmode="decimal" value="${esc(w.hours ?? '')}" placeholder="A ${esc(workshop.labor_rate)} €/h"></div>
+      <div><label>Precio cerrado sin IVA</label><input name="price" inputmode="decimal" value="${esc(w.price ?? '')}" placeholder="Opcional"></div></div>
+    <label>En el plan de mantenimiento del cliente cuenta como</label><select name="catalog"><option value="">Nada en concreto</option>${itemOptions({}, w.catalog_id ?? guessCatalog(w.name) ?? '')}</select>
+    ${w.id ? '<p style="margin-top:14px"><a href="#" id="delWork" style="color:#E5484D">Borrar este trabajo</a></p>' : ''}`, 'Guardar', (fd) => fd, (form) => {
+    const d = form.querySelector('#delWork');
+    if (d) d.onclick = async (e) => { e.preventDefault(); if (!confirm('¿Borrar este trabajo de la lista? Las órdenes que ya lo llevan no cambian.')) return; await sb.from('workshop_works').delete().eq('id', w.id); $('dlg').close(); await loadWorks(); };
+  });
+  if (!r) return null;
+  const row = { workshop_id: workshop.id, code: parseInt(digitsOf(r.code), 10), name: r.name.trim(), hours: num(r.hours), price: num(r.price), catalog_id: r.catalog || null };
+  if (!(row.code > 0) || !row.name) { await notice('<h3>Falta el número o el nombre</h3>'); return null; }
+  const { data, error } = w.id ? await sb.from('workshop_works').update(row).eq('id', w.id).select('*').single() : await sb.from('workshop_works').insert(row).select('*').single();
+  if (error) { await notice(`<h3>No se pudo guardar</h3><p>${esc(/workshop_works_workshop_id_code/.test(error.message) ? `Ya tienes un trabajo con el número ${row.code}.` : error.message)}</p>`); return null; }
+  await loadWorks();
+  return data;
+}
+$('newWorkBtn').onclick = () => editWork({});
+async function addStarterWorks() {
+  const have = new Set(works.map((w) => normTxt(w.name)));
+  const missing = STARTER_WORKS.filter(([n]) => !have.has(normTxt(n)));
+  if (!missing.length) { await notice('<h3>Ya los tienes</h3><p class="muted">Todos los trabajos habituales ya están en tu lista.</p>'); return; }
+  if (!(await dialog(`<h3>Añadir ${missing.length} trabajos habituales</h3><p class="muted">Con su número y unas horas orientativas: cámbialos a tu gusto.</p>
+    <div class="starter-list">${missing.map(([n]) => `<span class="pill">${esc(n)}</span>`).join('')}</div>`, 'Añadirlos', () => true))) return;
+  let code = nextWorkCode();
+  const { error } = await sb.from('workshop_works').insert(missing.map(([name, hours, id]) => ({ workshop_id: workshop.id, code: code++, name, hours, catalog_id: id && catalogNames[id] ? id : null })));
+  if (error) { await notice(`<h3>No se pudieron añadir</h3><p>${esc(error.message)}</p>`); return; }
+  await loadWorks();
+}
+$('starterWorksBtn').onclick = addStarterWorks;
+for (const b of document.querySelectorAll('#noWorks [data-go]')) b.onclick = () => (b.dataset.go === 'starter' ? addStarterWorks() : editWork({}));
+
+// ------------------------------------------------------------------ beneficio
+// Lo que deja cada orden: venta sin IVA menos el coste de las piezas. El coste se
+// guarda al entregar (job_costs); si no está, se usa el coste actual de la pieza.
+function partOfLine(l) {
+  return parts.find((p) => p.id === l.part_id)
+    || (l.reference ? parts.find((p) => normRef(p.reference) === normRef(l.reference) && normTxt(p.brand) === normTxt(l.brand)) : null)
+    || (l.description ? (() => { const m = parts.filter((p) => normTxt(p.description) === normTxt(l.description)); return m.length === 1 ? m[0] : null; })() : null);
+}
+function jobMargin(j, items) {
+  const r = { labor: 0, sale: 0, cost: 0, missing: 0, suppliers: new Map() };
+  let n = 0;
+  for (const l of j.lines || []) {
+    if (l.kind !== 'part') { r.labor += lineTotal(l); continue; }
+    const it = items?.[n++], p = partOfLine(l);
+    const unit = num(it?.unit_cost ?? p?.cost);
+    const sale = lineTotal(l), cost = unit == null ? null : unit * (num(l.qty) ?? 1);
+    r.sale += sale;
+    if (cost == null) r.missing++; else r.cost += cost;
+    const sup = it?.supplier_id || l.supplier_id || p?.supplier_id || '';
+    const g = r.suppliers.get(sup) || { sale: 0, cost: 0 };
+    g.sale += sale; g.cost += cost ?? 0;
+    r.suppliers.set(sup, g);
+  }
+  r.profit = r.labor + r.sale - r.cost;
+  return r;
+}
+async function renderProfit() {
+  const [{ data: list }, { data: costs }] = await Promise.all([
+    sb.from('jobs').select('*').eq('workshop_id', workshop.id).eq('status', 'delivered').order('delivered_at', { ascending: false }).limit(3000),
+    sb.from('job_costs').select('job_id,items').eq('workshop_id', workshop.id).limit(3000),
+  ]);
+  const itemsOf = Object.fromEntries((costs || []).map((c) => [c.job_id, c.items]));
+  const done = list || [];
+  const ms = $('profitMonth'), keep = ms.value;
+  const months = [...new Set(done.map((j) => (j.delivered_at || '').slice(0, 7)).filter(Boolean))];
+  ms.innerHTML = '<option value="">Desde el principio</option>' + months.map((m) => `<option value="${m}">${new Date(m + '-01T12:00').toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}</option>`).join('');
+  ms.value = months.includes(keep) ? keep : '';
+  const rows = done.filter((j) => !ms.value || (j.delivered_at || '').startsWith(ms.value)).map((j) => ({ j, m: jobMargin(j, itemsOf[j.id]) }));
+  const t = rows.reduce((a, { m }) => { a.labor += m.labor; a.sale += m.sale; a.cost += m.cost; a.missing += m.missing; for (const [k, g] of m.suppliers) { const x = a.sup.get(k) || { sale: 0, cost: 0 }; x.sale += g.sale; x.cost += g.cost; a.sup.set(k, x); } return a; }, { labor: 0, sale: 0, cost: 0, missing: 0, sup: new Map() });
+  const sales = t.labor + t.sale, profit = sales - t.cost;
+  const pct = (p, v) => (v > 0 ? Math.round(p / v * 100) + ' %' : '');
+  const stockValue = parts.reduce((a, p) => a + (p.stock != null && p.cost != null && num(p.stock) > 0 ? num(p.stock) * num(p.cost) : 0), 0);
+  $('profitCards').innerHTML = `<div><b>${fmtEur(sales)}</b><span>ventas sin IVA</span></div><div><b>${fmtEur(t.labor)}</b><span>mano de obra</span></div><div><b>${fmtEur(t.sale)}</b><span>piezas vendidas</span></div>
+    <div><b>${fmtEur(t.cost)}</b><span>coste de las piezas</span></div><div class="good"><b>${fmtEur(profit)}</b><span>beneficio · ${pct(profit, sales) || '—'}</span></div><div><b>${fmtEur(stockValue)}</b><span>en el almacén, a coste</span></div>`;
+  $('profitWarn').textContent = t.missing ? `${t.missing} ${t.missing === 1 ? 'pieza vendida no tiene' : 'piezas vendidas no tienen'} coste: el beneficio real será menor. Ponles el coste en Piezas.` : '';
+  show('noProfit', !rows.length);
+  show('profitBody', rows.length > 0);
+  $('profitSup').innerHTML = [...t.sup.entries()].sort((a, b) => b[1].sale - a[1].sale).map(([k, g]) => `<tr><td><b>${esc(suppliers.find((s) => s.id === k)?.name || 'Sin proveedor')}</b></td><td class="num" data-label="Venta">${fmtEur(g.sale)}</td><td class="num" data-label="Coste">${fmtEur(g.cost)}</td><td class="num" data-label="Beneficio"><b>${fmtEur(g.sale - g.cost)}</b> <small class="marg">${pct(g.sale - g.cost, g.sale)}</small></td></tr>`).join('') || '<tr><td colspan="4" class="muted">No se han vendido piezas en este periodo.</td></tr>';
+  const jb = $('profitJobs');
+  jb.innerHTML = '';
+  for (const { j, m } of rows.slice(0, 200)) {
+    const tr = document.createElement('tr');
+    tr.className = 'click-row';
+    tr.innerHTML = `<td><b>OR ${j.number}</b><small>${fmtDate(j.delivered_at)}</small></td><td data-label="Cliente">${esc(j.customer_name || '—')}</td><td class="num" data-label="Venta">${fmtEur(m.labor + m.sale)}</td><td class="num" data-label="Coste">${fmtEur(m.cost)}${m.missing ? ` <small class="stock-low">${m.missing} sin coste</small>` : ''}</td><td class="num" data-label="Beneficio"><b>${fmtEur(m.profit)}</b></td>`;
+    tr.onclick = () => openJob(j);
+    jb.appendChild(tr);
+  }
+}
+$('profitMonth').onchange = () => renderProfit();
 
 // ------------------------------------------------------------------ importar piezas
 /** Importe con formato español o inglés: "1.234,56 €", "12,5", "12.50". */
@@ -2756,15 +3191,40 @@ function renderCustomers() {
     || carsOf(c).some((v) => (qp.length >= 3 && normPlate(v.plate).includes(qp)) || normTxt(`${v.make} ${v.model}`).includes(q));
   const list = wsCustomers.filter(match).sort((a, b) => a.name.localeCompare(b.name, 'es'));
   const orphans = wsVehicles.filter((v) => !v.customer_id && (!q || normPlate(v.plate).includes(qp) || normTxt(`${v.make} ${v.model}`).includes(q)));
-  $('custCount').textContent = wsCustomers.length || wsVehicles.length
-    ? `${wsCustomers.length} ${wsCustomers.length === 1 ? 'cliente' : 'clientes'} · ${wsVehicles.length} ${wsVehicles.length === 1 ? 'coche' : 'coches'}${q ? ` · ${list.length} con esta búsqueda` : ''}` : '';
+  // Los que usan Garaje y le han pasado su código, agrupados por dueño (sin repetir
+  // los que ya están enlazados a una ficha del taller).
+  const linkedIds = new Set(wsVehicles.map((v) => v.linked_vehicle_id).filter(Boolean));
+  const garajeGroups = new Map();
+  for (const row of vehicles.filter((v) => isClientCar(v) && !linkedIds.has(v.id))) {
+    const o = ownerOf(row.id);
+    const key = o?.user_id || o?.phone || row.id;
+    if (!garajeGroups.has(key)) garajeGroups.set(key, { owner: o, rows: [] });
+    garajeGroups.get(key).rows.push(row);
+  }
+  const garajeAll = [...garajeGroups.values()];
+  const garajeList = garajeAll.filter((g) => !q || normTxt(g.owner?.display_name).includes(q) || (qd.length >= 3 && digitsOf(g.owner?.phone).includes(qd))
+    || g.rows.some((r) => { const s = summary(r); return (qp.length >= 3 && normPlate(s.plate).includes(qp)) || normTxt(s.name).includes(q); }));
+  const clientCount = wsCustomers.length + garajeAll.length, carCount = wsVehicles.length + garajeAll.reduce((a, g) => a + g.rows.length, 0);
+  $('custCount').textContent = clientCount || carCount
+    ? `${clientCount} ${clientCount === 1 ? 'cliente' : 'clientes'} · ${carCount} ${carCount === 1 ? 'coche' : 'coches'}${q ? ` · ${list.length + garajeList.length} con esta búsqueda` : ''}` : '';
   const box = $('custList');
-  if (!wsCustomers.length && !wsVehicles.length) {
+  if (!clientCount && !carCount) {
     box.innerHTML = emptyState('customers', 'Aún no hay clientes', 'Tráelos de tu programa de gestión con "Importar de mi programa" (un Excel de clientes y coches, y otro con el historial), o crea uno con "+ Cliente".');
     return;
   }
   box.innerHTML = '';
   const carChip = (v) => `<button class="car-chip${v.linked_vehicle_id ? ' linked' : ''}" data-car="${v.id}" ${v.linked_vehicle_id ? 'title="Usa Garaje"' : ''}><b>${esc(v.plate || '—')}</b> ${esc([v.make, v.model].filter(Boolean).join(' '))}${v.linked_vehicle_id ? ' ✓' : ''}</button>`;
+  const cards = [];
+  for (const g of garajeList) {
+    const el = document.createElement('div');
+    el.className = 'card cust-card';
+    const o = g.owner, who = o?.display_name || 'Cliente de Garaje';
+    el.innerHTML = `<div class="cust-top"><div class="cust-static"><b>${esc(who)}</b> <span class="pill garaje-pill">Usa Garaje</span><small>${o?.phone ? esc(fmtPhone(o.phone)) : 'sin teléfono'}</small></div>
+        <div class="icons">${o && !isMe(o) ? contactButtons(o.phone, o.phone ? null : o.email, `Hola ${who.split(' ')[0]}, te escribo de ${workshop.name}.`, who) : ''}</div></div>
+      <div class="cust-cars">${g.rows.map((r) => { const s = summary(r); return `<button class="car-chip linked" data-garaje="${r.id}"><b>${esc(s.plate || '—')}</b> ${esc(s.name)} ✓</button>`; }).join('')}</div>`;
+    for (const b of el.querySelectorAll('[data-garaje]')) b.onclick = () => openVehicle(vehicles.find((v) => v.id === b.dataset.garaje));
+    cards.push([who, el]);
+  }
   for (const c of list.slice(0, 300)) {
     const el = document.createElement('div');
     el.className = 'card cust-card';
@@ -2774,8 +3234,9 @@ function renderCustomers() {
     el.querySelector('.cust-top > div').onclick = () => editCustomer(c);
     for (const b of el.querySelectorAll('[data-car]')) b.onclick = () => openWsVehicle(wsVehicles.find((v) => v.id === b.dataset.car));
     el.querySelector('[data-addcar]').onclick = () => editWsVehicle({ customer_id: c.id });
-    box.appendChild(el);
+    cards.push([c.name, el]);
   }
+  for (const [, el] of cards.sort((a, b) => a[0].localeCompare(b[0], 'es'))) box.appendChild(el);
   if (orphans.length) {
     const el = document.createElement('div');
     el.className = 'card cust-card';
@@ -2825,7 +3286,7 @@ async function editWsVehicle(v) {
   const r = await dialog(`<h3>${v.id ? 'Editar coche' : 'Nuevo coche'}</h3>
     <div class="row2"><div><label>Matrícula</label><input name="plate" maxlength="12" value="${esc(v.plate || '')}" placeholder="1234 ABC" autocapitalize="characters"></div>
       <div><label>Cliente</label><select name="customer">${custOpts}</select></div></div>
-    <div class="row3"><div><label>Marca</label><input name="make" list="brands" value="${esc(v.make || '')}"></div><div><label>Modelo</label><input name="model" value="${esc(v.model || '')}"></div><div><label>Año</label><input name="year" inputmode="numeric" value="${esc(v.year || '')}"></div></div>
+    <div class="row3"><div><label>Marca</label><input name="make" list="carMakes" value="${esc(v.make || '')}"></div><div><label>Modelo</label><input name="model" value="${esc(v.model || '')}"></div><div><label>Año</label><input name="year" inputmode="numeric" value="${esc(v.year || '')}"></div></div>
     <div class="row3"><div><label>Versión / motor</label><input name="version" value="${esc(v.version || '')}" placeholder="1.6 TDI 115 CV"></div>
       <div><label>Combustible</label><select name="fuel">${FUELS.map(([k, t]) => `<option value="${k}" ${k === (v.fuel || '') ? 'selected' : ''}>${t}</option>`).join('')}</select></div>
       <div><label>Km</label><input name="km" inputmode="numeric" value="${esc(v.km ?? '')}"></div></div>
@@ -2865,7 +3326,7 @@ async function openWsVehicle(v) {
     ['edit', 'Editar', 'btn ghost small'], ...(vjobs.length ? [] : [['del', 'Borrar', 'btn ghost small']])]);
   if (choice === 'job') openJob(open);
   if (choice === 'new') newJobFor(pseudoVehicle(v), { assigned_to: myRole === 'mechanic' ? session.user.id : null });
-  if (choice === 'garaje') { setTab('cars'); openVehicle(vehicles.find((x) => x.id === v.linked_vehicle_id)); }
+  if (choice === 'garaje') { setTab('customers'); openVehicle(vehicles.find((x) => x.id === v.linked_vehicle_id)); }
   if (choice === 'invite') inviteToGaraje(v);
   if (choice === 'edit') { const saved = await editWsVehicle(v); if (saved) openWsVehicle(saved); }
   if (choice === 'del' && window.confirm('¿Borrar este coche y su historial importado?')) {
@@ -2880,7 +3341,7 @@ async function quickCustomerCar() {
   const r = await dialog(`<h3>Cliente y coche nuevos</h3>
     <p class="muted" style="margin-top:0">Para clientes que no usan Garaje. Quedan en la pestaña Clientes.</p>
     <div class="row2"><div><label>Nombre *</label><input name="name" required maxlength="200"></div><div><label>Teléfono</label><input name="phone" type="tel"></div></div>
-    <div class="row3"><div><label>Matrícula *</label><input name="plate" required maxlength="12" placeholder="1234 ABC" autocapitalize="characters"></div><div><label>Marca</label><input name="make" list="brands"></div><div><label>Modelo</label><input name="model"></div></div>`,
+    <div class="row3"><div><label>Matrícula *</label><input name="plate" required maxlength="12" placeholder="1234 ABC" autocapitalize="characters"></div><div><label>Marca</label><input name="make" list="carMakes"></div><div><label>Modelo</label><input name="model"></div></div>`,
   'Crear', (fd) => fd);
   if (!r || !r.name.trim() || !normPlate(r.plate)) return null;
   const existing = wsVehicles.find((v) => normPlate(v.plate) === normPlate(r.plate));
@@ -3265,7 +3726,7 @@ async function linkToGaraje(ws, g) {
     }
     await sb.from('workshop_vehicles').update({ linked_vehicle_id: g.id, updated_at: new Date().toISOString() }).eq('id', ws.id);
     await Promise.all([loadCustomers(), loadVehicles()]);
-    await notice(`<h3>Enlazado</h3><p class="muted">${(hist || []).length ? 'Su historial ya está en su Garaje. ' : ''}Las próximas órdenes ábrelas desde su coche de Garaje (en Coches o en Clientes).</p>`);
+    await notice(`<h3>Enlazado</h3><p class="muted">${(hist || []).length ? 'Su historial ya está en su Garaje. ' : ''}Las próximas órdenes ábrelas desde su coche de Garaje, en Clientes.</p>`);
   } catch (e) {
     await notice(`<h3>No se pudo enlazar</h3><p>${esc(e.message || String(e))}</p>`);
   }

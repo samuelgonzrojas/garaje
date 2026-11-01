@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Garaje Taller">
 <link rel="stylesheet" href="../style.css?v=20261014a">
-<link rel="stylesheet" href="taller.css?v=20261013m">
+<link rel="stylesheet" href="taller.css?v=20261101b">
 </head>
 <body>
 <div class="wrap panel">
@@ -34,8 +34,10 @@
   <button data-tab="cars" data-icon="cars"><span>Coches</span></button>
   <button data-tab="customers" data-icon="customers" class="secondary"><span>Clientes</span><i class="nbadge hidden" id="custBadge"></i></button>
   <button data-tab="invoices" data-icon="invoices" class="secondary hidden"><span>Facturas</span></button>
+  <button data-tab="works" data-icon="works" class="secondary"><span>Trabajos</span></button>
   <button data-tab="parts" data-icon="parts" class="secondary"><span>Piezas</span></button>
   <button data-tab="suppliers" data-icon="suppliers" class="secondary"><span>Proveedores</span></button>
+  <button data-tab="profit" data-icon="profit" class="secondary"><span>Beneficio</span></button>
   <button data-tab="team" data-icon="team" class="secondary"><span>Equipo</span></button>
   <button data-tab="settings" data-icon="settings" class="secondary"><span>Mi taller</span></button>
   <button data-more data-icon="more" class="more-btn"><span>Más</span></button>
@@ -178,6 +180,7 @@
       <div class="card">
         <div class="top"><h3 style="margin:0">Presupuesto</h3>
           <div><button class="btn ghost small" id="orderPartsBtn">Pedir piezas</button> <button class="btn ghost small" id="addLabor">+ Mano de obra</button> <button class="btn ghost small" id="addPart">+ Pieza</button></div></div>
+        <div class="quick-add" id="quickAddWrap"><input id="quickAdd" type="search" placeholder="Nº de trabajo, trabajo o pieza, y pulsa Intro" autocomplete="off"><div class="quick-list hidden" id="quickList"></div></div>
         <div id="jLines"></div>
         <div class="totals" id="jTotals"></div>
         <div class="top" style="margin-top:12px">
@@ -211,7 +214,7 @@
 <!-- COCHES -->
 <section id="tab-cars" class="tab hidden no-print">
   <div class="top page-head">
-    <div><h2 style="margin:0">Coches</h2><p class="sub" style="margin:2px 0 0">Los que te han dado acceso desde la app (Mi coche → Compartir → Taller), con su dueño y su teléfono.</p></div>
+    <div><h2 style="margin:0">Coches</h2><p class="sub" id="carsSub" style="margin:2px 0 0"></p></div>
     <form id="joinForm" style="display:flex;gap:8px;align-items:center">
       <input id="joinCode" placeholder="Código o enlace" style="width:190px" autocomplete="off">
       <button class="btn small">Tengo un código</button>
@@ -281,6 +284,36 @@
   <p class="leave hidden" id="vLeaveWrap"><a href="#" id="vLeave">Dejar de ver este coche</a></p>
 </section>
 
+<!-- TRABAJOS -->
+<section id="tab-works" class="tab hidden no-print">
+  <div class="top page-head">
+    <div><h2 style="margin:0">Trabajos</h2><p class="sub" style="margin:2px 0 0">Tu lista de trabajos, cada uno con su número: en la orden escribes el número, pulsas Intro y ya está.</p></div>
+    <button class="btn" id="newWorkBtn">+ Trabajo</button>
+  </div>
+  <div class="board-tools parts-tools"><input id="workSearch" type="search" placeholder="Buscar por número o nombre…" autocomplete="off"><button class="btn ghost small" id="starterWorksBtn">+ Trabajos habituales</button></div>
+  <p class="muted parts-count" id="worksCount"></p>
+  <div class="card" style="padding:0;overflow-x:auto" id="worksTable">
+    <table class="list"><thead><tr><th>Nº</th><th>Trabajo</th><th class="num">Horas</th><th class="num">Precio sin IVA</th><th class="num">Usos</th><th></th></tr></thead><tbody id="worksBody"></tbody></table>
+  </div>
+  <div class="empty hidden" id="noWorks" data-icon="works"><b>Aún no tienes trabajos</b><p>Empieza con los habituales y cámbialos a tu gusto, o crea los tuyos.</p>
+    <div class="actions" style="justify-content:center;margin-top:12px"><button class="btn" data-go="starter">+ Trabajos habituales</button><button class="btn ghost" data-go="new">+ Trabajo</button></div></div>
+</section>
+
+<!-- BENEFICIO -->
+<section id="tab-profit" class="tab hidden no-print">
+  <div class="top page-head">
+    <div><h2 style="margin:0">Beneficio</h2><p class="sub" style="margin:2px 0 0">Lo que te dejan las órdenes entregadas: lo vendido sin IVA menos lo que te costaron las piezas, y de qué proveedor vienen.</p></div>
+    <select id="profitMonth" class="part-sup"></select>
+  </div>
+  <div class="inv-totals-row profit-cards" id="profitCards"></div>
+  <p class="stock-low" id="profitWarn"></p>
+  <div class="empty hidden" id="noProfit" data-icon="profit"><b>Sin órdenes entregadas en este periodo</b><p>El beneficio sale de las órdenes al entregarlas.</p></div>
+  <div id="profitBody">
+    <div class="card" style="padding:0;overflow-x:auto"><h3 class="card-h">Por proveedor</h3><table class="list"><thead><tr><th>Proveedor</th><th class="num">Venta</th><th class="num">Coste</th><th class="num">Beneficio</th></tr></thead><tbody id="profitSup"></tbody></table></div>
+    <div class="card" style="padding:0;overflow-x:auto"><h3 class="card-h">Por orden</h3><table class="list"><thead><tr><th>Orden</th><th>Cliente</th><th class="num">Venta</th><th class="num">Coste</th><th class="num">Beneficio</th></tr></thead><tbody id="profitJobs"></tbody></table></div>
+  </div>
+</section>
+
 <!-- PIEZAS -->
 <section id="tab-parts" class="tab hidden no-print">
   <div class="top page-head">
@@ -297,7 +330,7 @@
   <p class="muted parts-count" id="partsCount"></p>
   <div class="card" style="padding:0;overflow-x:auto">
     <table class="list">
-      <thead><tr><th>Pieza</th><th>Marca y referencia</th><th>Proveedor</th><th class="num">Coste</th><th class="num">PVP</th><th class="num">Usos</th><th></th></tr></thead>
+      <thead><tr><th>Pieza</th><th>Marca y referencia</th><th>Proveedor</th><th class="num">Coste</th><th class="num">PVP</th><th class="num">Stock</th><th class="num">Usos</th><th></th></tr></thead>
       <tbody id="partsBody"></tbody>
     </table>
     <div class="empty hidden" id="noParts" data-icon="parts"><b>Tu biblioteca de piezas está vacía</b><p>La forma más rápida: importa el Excel de tu programa de gestión o la tarifa de tu proveedor (o copia y pega las celdas). O empieza con las piezas habituales y ponles precio.</p>
@@ -321,6 +354,8 @@
     <div><h2 style="margin:0">Clientes</h2><p class="sub" style="margin:2px 0 0">Tus clientes y sus coches, también los que no usan Garaje. Tráelos de tu programa de gestión y ábreles órdenes como a cualquiera.</p></div>
     <div class="head-btns"><button class="btn ghost" id="importCustomersBtn">Importar de mi programa</button> <button class="btn" id="newCustomerBtn">+ Cliente</button></div>
   </div>
+  <form id="custJoinForm" class="cust-join"><span class="muted">¿Un cliente con Garaje te da su código de taller?</span><input id="custJoinCode" placeholder="Código o enlace" autocomplete="off"><button class="btn ghost small">Añadir su coche</button></form>
+  <div class="err" id="custErr"></div>
   <div id="nudgeBox"></div>
   <div class="board-tools"><input id="custSearch" type="search" placeholder="Buscar por nombre, teléfono, NIF o matrícula…" autocomplete="off"></div>
   <p class="muted" id="custCount" style="font-size:14px"></p>
@@ -383,7 +418,7 @@
 </footer>
 </div>
 <datalist id="brands"></datalist>
-<datalist id="partNames"></datalist>
-<script type="module" src="app.js?v=20261013m"></script>
+<datalist id="carMakes"></datalist>
+<script type="module" src="app.js?v=20261101b"></script>
 </body>
 </html>
