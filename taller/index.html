@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Garaje Taller">
 <link rel="stylesheet" href="../style.css?v=20261014a">
-<link rel="stylesheet" href="taller.css?v=20261101h">
+<link rel="stylesheet" href="taller.css?v=20261101j">
 </head>
 <body>
 <div class="wrap panel">
@@ -376,6 +376,7 @@
     <button class="btn ghost" id="invExport">Descargar para el gestor (Excel)</button>
   </div>
   <div id="invTestBanner"></div>
+  <details class="card hidden" id="invPendingBox"><summary>Entregadas sin facturar <span class="inv-count" id="invPendingCount"></span></summary><div id="invPending" style="margin-top:10px"></div></details>
   <div class="board-tools">
     <input id="invSearch" type="search" placeholder="Buscar por número, cliente, NIF o matrícula…" autocomplete="off">
     <select id="invMonth"></select>
@@ -426,6 +427,6 @@
 </div>
 <datalist id="brands"></datalist>
 <datalist id="carMakes"></datalist>
-<script type="module" src="app.js?v=20261101h"></script>
+<script type="module" src="app.js?v=20261101j"></script>
 </body>
 </html>

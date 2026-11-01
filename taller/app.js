@@ -4,7 +4,7 @@
 // (unión por id de eventos y lecturas); las órdenes, piezas, proveedores y
 // mensajes van en sus propias tablas.
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-import { BRANDS, CAR_MAKES, searchUrl } from './brands.js?v=20261101h';
+import { BRANDS, CAR_MAKES, searchUrl } from './brands.js?v=20261101j';
 
 const SUPABASE_URL = 'https://pzgqgligxmwnwvozfwcl.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_zPxM3Ul4VYkudB1D_lhUZw_lUy6K52g';
@@ -817,7 +817,7 @@ function renderVehicleJobs(row) {
   for (const j of js) {
     const b = document.createElement('button');
     b.className = 'vj-row';
-    b.innerHTML = `<span class="num-tag">OR ${j.number}</span><b>${esc(j.customer_request ? j.customer_request.slice(0, 70) : 'Orden de trabajo')}</b><span class="status ${j.status}">${STATUS[j.status]}</span>${isManager() && (j.lines || []).length ? `<small>${fmtEur(totals(j).total)}</small>` : ''}`;
+    b.innerHTML = jobRowHtml(j);
     b.onclick = () => openJob(j);
     box.appendChild(b);
   }
@@ -958,7 +958,7 @@ function jobCard(j) {
   el.className = 'jcard';
   const who = j.assigned_to ? nameOf(j.assigned_to) : '';
   const total = isManager() && (j.lines || []).length ? fmtEur(totals(j).total) : '';
-  const inv = isManager() && j.status === 'delivered' ? (j.invoice_ref ? `<span class="inv done" title="Factura ${esc(j.invoice_ref)}">Facturada</span>` : '<span class="inv">Sin facturar</span>') : '';
+  const inv = invoiceTag(j);
   el.innerHTML = `${photoImg(s.photo, 44)}<span class="num-tag">OR ${j.number}</span>${j.lead_id ? '<span class="badge workshop">Garaje</span>' : ''}<b>${esc(s.name)}</b>
     <small>${esc(s.plate)}${j.customer_name ? ' · ' + esc(j.customer_name) : ''}</small>
     ${j.customer_request ? `<small class="req">${esc(j.customer_request.slice(0, 80))}</small>` : ''}
@@ -966,6 +966,18 @@ function jobCard(j) {
       ${who ? `<span class="avatar mini" title="Responsable: ${esc(who)}">${esc(who.trim()[0].toUpperCase())}</span>` : ''}</div>`;
   el.onclick = () => openJob(j);
   return el;
+}
+/** Etiqueta de facturada o sin facturar de una orden entregada. */
+function invoiceTag(j) {
+  if (!isManager() || j.status !== 'delivered') return '';
+  return j.invoice_ref ? `<span class="inv done" title="Factura ${esc(j.invoice_ref)}">Facturada</span>` : '<span class="inv">Sin facturar</span>';
+}
+/** Lo que se hizo en una orden: sus líneas o, si aún no tiene, lo que pidió el cliente. */
+const jobWork = (j) => (j.lines || []).map((l) => l.description).filter(Boolean).join(', ') || j.customer_request || 'Orden de trabajo';
+/** Una orden en una lista: lo que se hizo, estado, factura, fecha e importe. */
+function jobRowHtml(j) {
+  const amount = isManager() && (j.lines || []).length ? ` · ${fmtEur(totals(j).total)}` : '';
+  return `<span class="num-tag">OR ${j.number}</span><b>${esc(jobWork(j).slice(0, 160))}</b><span class="status ${j.status}">${STATUS[j.status]}</span>${invoiceTag(j)}<small>${fmtDate(j.delivered_at || j.created_at)}${j.km != null ? ' · ' + fmtKm(j.km) : ''}${amount}</small>`;
 }
 /** Órdenes que pasan el buscador y "Solo las mías". */
 function visibleJobs() {
@@ -1085,6 +1097,8 @@ function renderBoard() {
   show('invCount', isManager() && pending.length > 0);
   const onlyPending = isManager() && $('onlyUninvoiced').checked;
   const closed = shown.filter((j) => (onlyPending ? j.status === 'delivered' && !j.invoice_ref : ['delivered', 'cancelled'].includes(j.status))).slice(0, onlyPending ? 300 : 30);
+  // Al buscar se abre si hay alguna: plegada, parece que la orden ha desaparecido.
+  if ($('jobSearch').value.trim()) $('doneBox').open = closed.length > 0;
   if (closed.length === 0) done.innerHTML = `<p class="muted">${onlyPending ? 'Están todas facturadas.' : $('jobSearch').value.trim() ? 'Ninguna coincide con la búsqueda.' : 'Ninguna todavía.'}</p>`;
   for (const j of closed) done.appendChild(jobCard(j));
 }
@@ -1762,7 +1776,7 @@ function renderProgress() {
   }).join('');
   // Avisos: retraso, rechazo, entregada o cancelada.
   const late = job.promised_at && job.promised_at < today() && !['ready', 'delivered', 'cancelled'].includes(st);
-  const alert = st === 'delivered' ? `<b>Entregada${job.delivered_at ? ' el ' + fmtDate(job.delivered_at) : ''}.</b> Los trabajos ya están en el historial del coche; la orden queda de solo lectura.${isManager() && !job.invoice_ref ? ' <b>Falta pasarla a facturar.</b>' : ''}`
+  const alert = st === 'delivered' ? `<b>Entregada${job.delivered_at ? ' el ' + fmtDate(job.delivered_at) : ''}.</b> Los trabajos ya están en el historial del coche; la orden queda de solo lectura.${isManager() && !job.invoice_ref ? ` <b>${invoicing ? 'Falta emitir la factura.' : 'Falta pasarla a facturar.'}</b>` : ''}`
     : st === 'cancelled' ? '<b>Orden cancelada.</b> Queda de solo lectura.'
     : st === 'rejected' ? `<b>El cliente ha rechazado el presupuesto</b>${job.decision_note ? ': «' + esc(job.decision_note) + '»' : '.'} Cámbialo y vuelve a enviarlo, o llámale.`
     : late ? `<b>Va con retraso:</b> la entrega estaba prevista el ${fmtDate(job.promised_at)}. Avisa al cliente o cambia la fecha.` : '';
@@ -2169,7 +2183,7 @@ async function sendQuote() {
 
 // Entregar: pasa los trabajos al historial del coche y enseña a la biblioteca.
 async function deliver() {
-  if (!(await dialog('<h3>Entregar el vehículo</h3><p class="muted">Se marca como entregado y los trabajos pasan al historial del coche en el móvil del cliente, con la firma del taller. Después la orden queda de solo lectura.</p>', 'Entregar', () => true))) return;
+  if (!(await dialog(`<h3>Entregar el vehículo</h3><p class="muted">Se marca como entregado y los trabajos pasan al historial del coche en el móvil del cliente, con la firma del taller. Después la orden queda de solo lectura${invoicing && isManager() && !job.invoice_ref ? '; la factura la puedes emitir también después, desde Facturas' : ''}.</p>`, 'Entregar', () => true))) return;
   if (!(await saveJob())) return;
   try {
     if (!job.history_written) {
@@ -2496,7 +2510,6 @@ async function issueInvoice() {
   const canSimple = t.total <= 400;
   const simpleDefault = canSimple && !j.customer_tax_id;
   const r = await dialog(`<h3>Factura de la OR ${j.number}</h3>
-    ${testBanner()}
     <div class="inv-kind">
       <label class="chk"><input type="radio" name="kind" value="F1" ${simpleDefault ? '' : 'checked'}><span><b>Factura completa</b><small>Con los datos del cliente. La que necesita una empresa o un autónomo.</small></span></label>
       <label class="chk${canSimple ? '' : ' off'}"><input type="radio" name="kind" value="F2" ${simpleDefault ? 'checked' : ''} ${canSimple ? '' : 'disabled'}><span><b>Factura simplificada</b><small>${canSimple ? 'Un ticket: hasta 400 € con IVA y sin datos del cliente.' : 'Solo hasta 400 € con IVA; esta pasa.'}</small></span></label>
@@ -2548,7 +2561,6 @@ async function issueInvoice() {
 
 async function rectifyInvoice(inv) {
   const r = await dialog(`<h3>Rectificar la factura ${esc(inv.full_number)}</h3>
-    ${testBanner()}
     <p class="muted">Se emite una factura rectificativa (${esc(invCode(invoicing.rect_series, invoicing.rect_next_no))}) que la anula entera, en negativo. Después puedes volver a facturar la orden con los datos buenos.</p>
     <label>Motivo</label>
     <select name="why"><option>Error en los datos del cliente</option><option>Error en los importes o el IVA</option><option>Trabajo o pieza que no se hizo</option><option>Devolución o descuento posterior</option><option value="">Otro (escríbelo)</option></select>
@@ -2570,7 +2582,6 @@ async function exchangeInvoice(inv) {
   const c = inv.customer || {};
   const j = jobs.find((x) => x.id === inv.job_id);
   const r = await dialog(`<h3>Pasar ${esc(inv.full_number)} a factura completa</h3>
-    ${testBanner()}
     <p class="muted">Se emite una factura nueva (${esc(invCode(invoicing.series, invoicing.next_no))}) con los datos del cliente y los mismos importes, que indica que sustituye a esta. La simplificada se conserva y sus cobros pasan a la nueva.</p>
     <label>Nombre o razón social *</label><input name="name" required maxlength="200" value="${esc(c.name || '')}">
     <div class="row2"><div><label>NIF / DNI / CIF *</label><input name="tax" required maxlength="20" value="${esc(j?.customer_tax_id || '')}" autocomplete="off"></div>
@@ -2734,6 +2745,19 @@ async function openInvoice(i) {
 function renderInvoices() {
   const box = $('invoicesBody');
   $('invTestBanner').innerHTML = testBanner();
+  const pendingJobs = uninvoiced();
+  show('invPendingBox', pendingJobs.length > 0);
+  $('invPendingCount').textContent = pendingJobs.length;
+  const pendingBox = $('invPending');
+  pendingBox.innerHTML = '';
+  for (const j of pendingJobs) {
+    const b = document.createElement('button');
+    b.className = 'vj-row';
+    const v = vehicleOf(j);
+    b.innerHTML = `${jobRowHtml(j)}<small>${esc([v ? summary(v).plate : '', j.customer_name].filter(Boolean).join(' · '))}</small>`;
+    b.onclick = () => openJob(j);
+    pendingBox.appendChild(b);
+  }
   $('invSeries').textContent = invoicing ? `Series: ${invoicing.series} (facturas) · ${invoicing.rect_series} (rectificativas)` : '';
   const ms = $('invMonth'), keep = ms.value;
   const months = [...new Set(invoices.map((i) => i.issued_at.slice(0, 7)))];
@@ -3634,18 +3658,23 @@ async function openWsVehicle(v) {
   const vjobs = jobs.filter((j) => j.ws_vehicle_id === v.id);
   const open = vjobs.find((j) => !['delivered', 'cancelled'].includes(j.status));
   const s = summary(pseudoVehicle(v));
+  // Órdenes (se abren al pulsar) e historial importado, lo último primero. Lo que
+  // salió de una orden que ya no está en la lista se enseña como historial.
+  const entries = [
+    ...vjobs.map((j) => ({ at: j.delivered_at || j.created_at, html: `<button class="vj-row" value="open:${j.id}">${jobRowHtml(j)}</button>` })),
+    ...(hist || []).filter((h) => h.source !== 'job' || !vjobs.some((j) => j.id === h.job_id)).map((h) => ({ at: h.at, html: `<span>${fmtDate(h.at)}${h.km != null ? ' · ' + fmtKm(h.km) : ''}${h.doc_ref ? ' · ' + esc(h.doc_ref) : ''}${isManager() && h.amount != null ? ` · <b>${fmtEur(num(h.amount))}</b>` : ''}</span><small>${esc(h.description)}</small>` })),
+  ].sort((a, b) => String(b.at).localeCompare(String(a.at)));
   const choice = await choose(`<h3>${esc(s.name)}</h3>
     <p class="muted" style="margin-top:0"><span class="plate">${esc(s.plate || 'Sin matrícula')}</span> ${esc([v.version, v.vin ? 'VIN ' + v.vin : '', v.km != null ? fmtKm(v.km) : ''].filter(Boolean).join(' · '))}</p>
     ${c ? `<div class="lead-who"><div><b>${esc(c.name)}</b><small>${esc([c.phone, c.tax_id].filter(Boolean).join(' · '))}</small></div><div class="icons">${contactButtons(c.phone, c.email, `Hola ${c.name.split(' ')[0]}, te escribo de ${workshop.name} por tu ${s.name}.`, c.name)}</div></div>` : '<p class="muted">Sin cliente asignado.</p>'}
     ${v.notes ? `<p class="lead-msg">${esc(v.notes)}</p>` : ''}
     ${v.linked_vehicle_id ? '<p class="muted">✓ Este cliente ya usa Garaje: su coche está enlazado.</p>' : v.invited_at ? `<p class="muted">Invitado a Garaje el ${fmtDate(v.invited_at)}.</p>` : ''}
     <h4 style="margin:14px 0 6px">Historial</h4>
-    ${vjobs.length || (hist || []).length ? `<ul class="hist-list">${vjobs.map((j) => `<li><span>${fmtDate(j.delivered_at || j.created_at)} · <b>OR ${j.number}</b> · ${esc(STATUS[j.status])}</span><small>${esc(j.customer_request || '')}</small></li>`).join('')}
-      ${(hist || []).filter((h) => h.source !== 'job').map((h) => `<li><span>${fmtDate(h.at)}${h.km != null ? ' · ' + fmtKm(h.km) : ''}${h.doc_ref ? ' · ' + esc(h.doc_ref) : ''}${isManager() && h.amount != null ? ` · <b>${fmtEur(num(h.amount))}</b>` : ''}</span><small>${esc(h.description)}</small></li>`).join('')}</ul>`
-      : '<p class="muted">Sin trabajos todavía.</p>'}`,
+    ${entries.length ? `<ul class="hist-list">${entries.map((e) => `<li>${e.html}</li>`).join('')}</ul>` : '<p class="muted">Sin trabajos todavía.</p>'}`,
   [...(v.linked_vehicle_id && vehicles.some((x) => x.id === v.linked_vehicle_id) ? [['garaje', 'Ver su coche en Garaje', 'btn small']] : [[open ? 'job' : 'new', open ? `Ver OR ${open.number}` : 'Abrir orden', 'btn small']]),
     ...(!v.linked_vehicle_id && c?.phone ? [['invite', v.invited_at ? 'Invitar otra vez a Garaje' : 'Invitar a Garaje', 'btn ghost small']] : []),
     ['edit', 'Editar', 'btn ghost small'], ...(vjobs.length ? [] : [['del', 'Borrar', 'btn ghost small']])]);
+  if (choice?.startsWith('open:')) openJob(vjobs.find((j) => j.id === choice.slice(5)));
   if (choice === 'job') openJob(open);
   if (choice === 'new') newJobFor(pseudoVehicle(v), { assigned_to: myRole === 'mechanic' ? session.user.id : null });
   if (choice === 'garaje') { setTab('customers'); openVehicle(vehicles.find((x) => x.id === v.linked_vehicle_id)); }

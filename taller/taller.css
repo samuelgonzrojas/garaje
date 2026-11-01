@@ -805,6 +805,8 @@ dialog#dlg{max-width:760px}
 .hist-list li{padding:7px 0;border-top:1px solid var(--line);display:flex;flex-direction:column}
 .hist-list li:first-child{border-top:0}
 .hist-list small{color:var(--muted)}
+.hist-list li:has(>.vj-row){padding:0}
+.hist-list .vj-row{padding:9px 2px}
 .imp-kind{display:flex;flex-direction:column;gap:6px;margin:4px 0 10px}
 .imp-kind label.chk{align-items:flex-start;margin:0;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--card-2)}
 .imp-kind label.chk span{display:flex;flex-direction:column}
