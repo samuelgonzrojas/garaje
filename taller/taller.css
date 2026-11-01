@@ -929,3 +929,15 @@ td .stock-low{display:block;margin:0}
 .pdf-holder .doc.ticket{margin:0 auto}
 .appt-match{display:block;margin-top:4px;font-size:13px}
 .appt-match:empty{display:none}
+
+/* Menú del perfil */
+.tabs .in-menu{display:none!important}
+.userbox{position:relative}
+.user-btn{display:flex;align-items:center;gap:8px;min-width:0;padding:4px 6px 4px 4px;background:var(--card);border:1px solid var(--line);border-radius:14px;color:inherit;font:inherit;cursor:pointer}
+.user-btn:hover,.user-btn.on{border-color:var(--brand-2)}
+.user-chev{width:20px;height:20px;fill:var(--muted);flex:none}
+.user-menu{position:absolute;right:0;top:calc(100% + 6px);z-index:60;width:260px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:6px;box-shadow:0 12px 32px rgba(0,0,0,.28)}
+.user-menu a,.user-menu button{display:flex;align-items:center;gap:10px;width:100%;padding:10px;background:none;border:0;border-radius:10px;color:var(--ink);font:inherit;font-size:14px;text-align:left;text-decoration:none;cursor:pointer}
+.user-menu a:hover,.user-menu button:hover,.user-menu button.on{background:var(--card-2)}
+.user-menu svg{width:19px;height:19px;fill:var(--muted);flex:none}
+#userMenuTabs{border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:6px}

@@ -4,7 +4,7 @@
 // (unión por id de eventos y lecturas); las órdenes, piezas, proveedores y
 // mensajes van en sus propias tablas.
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-import { BRANDS, CAR_MAKES, searchUrl } from './brands.js?v=20261101d';
+import { BRANDS, CAR_MAKES, searchUrl } from './brands.js?v=20261101e';
 
 const SUPABASE_URL = 'https://pzgqgligxmwnwvozfwcl.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_zPxM3Ul4VYkudB1D_lhUZw_lUy6K52g';
@@ -55,6 +55,8 @@ const fmtKm = (n) => n == null ? '—' : new Intl.NumberFormat('es-ES').format(n
 const fmtDate = (iso) => iso ? new Date(iso.length === 10 ? iso + 'T12:00:00' : iso).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—';
 const fmtTime = (iso) => new Date(iso).toLocaleString('es-ES', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
 const fmtEur = (n) => n == null || isNaN(n) ? '' : new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(n);
+/** «Octubre de 2026», a partir de 2026-10. */
+const monthLabel = (m) => { const t = new Date(m + '-15T12:00:00').toLocaleDateString('es-ES', { month: 'long', year: 'numeric' }); return t[0].toUpperCase() + t.slice(1); };
 const num = (v) => { const n = parseFloat(String(v ?? '').replace(',', '.')); return isNaN(n) ? null : n; };
 const newId = () => (Date.now() * 1000).toString(36) + '-' + Math.floor(Math.random() * 2 ** 30).toString(36);
 const today = () => new Date().toISOString().slice(0, 10);
@@ -574,13 +576,27 @@ $('skipSetup').onclick = (e) => { e.preventDefault(); localStorage.setItem('gara
 
 // ------------------------------------------------------------------ pestañas
 for (const b of document.querySelectorAll('.tabs button[data-tab]')) b.onclick = () => setTab(b.dataset.tab);
-// "Más" (móvil): Piezas, Proveedores, Mi taller y salir en una hoja desde abajo.
+// Menú del perfil, arriba a la derecha: Mi taller, Equipo, Beneficio, fallos y salir.
+const closeUserMenu = () => { show('userMenu', false); $('userMenuBtn').setAttribute('aria-expanded', 'false'); };
+$('userMenuBtn').onclick = (e) => {
+  e.stopPropagation();
+  if (!$('userMenu').classList.contains('hidden')) return closeUserMenu();
+  const items = [...document.querySelectorAll('.tabs button.in-menu')].filter((b) => !b.classList.contains('hidden'));
+  $('userMenuTabs').innerHTML = items.map((b) => `<button type="button" role="menuitem" class="${b.classList.contains('on') ? 'on' : ''}" data-go="${b.dataset.tab}">${svgIcon(b.dataset.icon)}${esc(b.textContent.trim())}</button>`).join('');
+  for (const it of $('userMenuTabs').querySelectorAll('[data-go]')) it.onclick = () => setTab(it.dataset.go);
+  show('userMenuTabs', items.length > 0);
+  show('userMenu');
+  $('userMenuBtn').setAttribute('aria-expanded', 'true');
+};
+$('userMenu').addEventListener('click', closeUserMenu);
+document.addEventListener('click', (e) => { if (!$('userMenu').contains(e.target)) closeUserMenu(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeUserMenu(); });
+// "Más" (móvil): Clientes, Facturas, Trabajos, Piezas y Proveedores en una hoja desde abajo.
 document.querySelector('.tabs .more-btn').onclick = () => {
   const items = [...document.querySelectorAll('.tabs button.secondary')].filter((b) => !b.classList.contains('hidden'));
-  $('moreList').innerHTML = items.map((b) => `<button class="sheet-item" data-go="${b.dataset.tab}"><i class="ni">${svgIcon(b.dataset.icon)}</i>${esc(b.textContent.trim())}</button>`).join('')
-    + `<button class="sheet-item" data-go="logout"><i class="ni">${svgIcon('logout')}</i>Salir</button>`;
+  $('moreList').innerHTML = items.map((b) => `<button class="sheet-item" data-go="${b.dataset.tab}"><i class="ni">${svgIcon(b.dataset.icon)}</i>${esc(b.textContent.trim())}</button>`).join('');
   for (const it of $('moreList').querySelectorAll('[data-go]')) {
-    it.onclick = () => { $('moreSheet').close(); if (it.dataset.go === 'logout') $('logout').click(); else setTab(it.dataset.go); };
+    it.onclick = () => { $('moreSheet').close(); setTab(it.dataset.go); };
   }
   $('moreSheet').showModal();
 };
@@ -588,7 +604,8 @@ $('moreSheet').onclick = (e) => { if (e.target === $('moreSheet')) $('moreSheet'
 function setTab(t) {
   tab = t;
   for (const b of document.querySelectorAll('.tabs button[data-tab]')) b.classList.toggle('on', b.dataset.tab === t);
-  document.querySelector('.tabs .more-btn').classList.toggle('on', ['works', 'parts', 'suppliers', 'profit', 'team', 'settings', 'invoices', 'customers'].includes(t));
+  document.querySelector('.tabs .more-btn').classList.toggle('on', ['works', 'parts', 'suppliers', 'invoices', 'customers'].includes(t));
+  $('userMenuBtn').classList.toggle('on', ['profit', 'team', 'settings'].includes(t));
   for (const id of ['tab-jobs', 'tab-leads', 'tab-agenda', 'tab-cars', 'tab-customers', 'tab-works', 'tab-parts', 'tab-suppliers', 'tab-profit', 'tab-team', 'tab-settings', 'tab-invoices', 'job', 'vehicle']) show(id, false);
   show('tab-' + t);
   if (t === 'jobs') renderBoard();
@@ -2639,7 +2656,7 @@ function renderInvoices() {
   $('invSeries').textContent = invoicing ? `Series: ${invoicing.series} (facturas) · ${invoicing.rect_series} (rectificativas)` : '';
   const ms = $('invMonth'), keep = ms.value;
   const months = [...new Set(invoices.map((i) => i.issued_at.slice(0, 7)))];
-  ms.innerHTML = '<option value="">Todos los meses</option>' + months.map((m) => `<option value="${m}">${new Date(m + '-01T12:00').toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}</option>`).join('');
+  ms.innerHTML = '<option value="">Todos los meses</option>' + months.map((m) => `<option value="${m}">${monthLabel(m)}</option>`).join('');
   ms.value = months.includes(keep) ? keep : (keep === '' ? '' : months[0] || '');
   const q = normTxt($('invSearch').value);
   const pf = $('invPay').value;
@@ -2768,7 +2785,7 @@ $('invExport').onclick = async () => {
         pago: [...new Set(payments.filter((p) => p.invoice_id === i.id).map((p) => PAY_METHOD[p.method]))].join(', '), estado: INV_STATUS[i.status]?.[0] || i.status,
         rectifica: invoices.find((o) => o.id === i.rectifies_id)?.full_number || '', motivo: i.rectify_reason || '', sustituida: replacedBy(i)?.full_number || '' };
     });
-    const periodo = m ? new Date(m + '-15T12:00:00').toLocaleDateString('es-ES', { month: 'long', year: 'numeric' }) : 'Todas las facturas';
+    const periodo = m ? monthLabel(m) : 'Todas las facturas';
     const wb = gestorWorkbook(window.ExcelJS, { rows, taller: [workshop.legal_name || workshop.name, workshop.tax_id].filter(Boolean).join(' · '), periodo, conPruebas: list.some((i) => !i.live) });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([await wb.xlsx.writeBuffer()], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
@@ -3017,7 +3034,7 @@ async function renderProfit() {
   const done = list || [];
   const ms = $('profitMonth'), keep = ms.value;
   const months = [...new Set(done.map((j) => (j.delivered_at || '').slice(0, 7)).filter(Boolean))];
-  ms.innerHTML = '<option value="">Desde el principio</option>' + months.map((m) => `<option value="${m}">${new Date(m + '-01T12:00').toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}</option>`).join('');
+  ms.innerHTML = '<option value="">Desde el principio</option>' + months.map((m) => `<option value="${m}">${monthLabel(m)}</option>`).join('');
   ms.value = months.includes(keep) ? keep : '';
   const rows = done.filter((j) => !ms.value || (j.delivered_at || '').startsWith(ms.value)).map((j) => ({ j, m: jobMargin(j, itemsOf[j.id]) }));
   const t = rows.reduce((a, { m }) => { a.labor += m.labor; a.sale += m.sale; a.cost += m.cost; a.missing += m.missing; for (const [k, g] of m.suppliers) { const x = a.sup.get(k) || { sale: 0, cost: 0 }; x.sale += g.sale; x.cost += g.cost; a.sup.set(k, x); } return a; }, { labor: 0, sale: 0, cost: 0, missing: 0, sup: new Map() });
@@ -3423,8 +3440,30 @@ $('custSearch').addEventListener('input', () => renderCustomers());
 $('newCustomerBtn').onclick = () => editCustomer({});
 $('importCustomersBtn').onclick = () => importFromDms();
 
+/** Borra un cliente y, si se pide, sus coches. Los que tienen órdenes se conservan, sin dueño. */
+async function deleteCustomer(c, cars) {
+  const carName = (v) => esc(v.plate || [v.make, v.model].filter(Boolean).join(' ') || 'Coche');
+  const { data: used } = cars.length ? await sb.from('jobs').select('ws_vehicle_id').in('ws_vehicle_id', cars.map((v) => v.id)) : { data: [] };
+  const withJobs = new Set((used || []).map((j) => j.ws_vehicle_id));
+  const free = cars.filter((v) => !withJobs.has(v.id)), kept = cars.filter((v) => withJobs.has(v.id));
+  const choice = await choose(`<h3>¿Borrar a ${esc(c.name)}?</h3>
+    ${cars.length ? `<p class="muted" style="margin-top:0">Tiene ${cars.length === 1 ? 'este coche' : `estos ${cars.length} coches`}: ${cars.map(carName).join(', ')}.</p>` : '<p class="muted" style="margin-top:0">No se puede deshacer.</p>'}
+    ${kept.length ? `<p class="muted">${kept.map(carName).join(', ')} ${kept.length === 1 ? 'tiene órdenes y se queda' : 'tienen órdenes y se quedan'} en «Coches sin cliente», para no perder su historial.</p>` : ''}
+    ${free.length ? '<p class="muted">Al borrar un coche se borra también su historial importado. No se puede deshacer.</p>' : ''}`,
+  free.length ? [['all', free.length === 1 && !kept.length ? 'Borrar cliente y coche' : `Borrar cliente y ${free.length === 1 ? '1 coche' : free.length + ' coches'}`, 'btn small'], ['only', 'Solo el cliente', 'btn ghost small']] : [['only', 'Borrar cliente', 'btn small']]);
+  if (!choice) return;
+  if (choice === 'all') {
+    const { error } = await sb.from('workshop_vehicles').delete().in('id', free.map((v) => v.id));
+    if (error) { await notice(`<h3>No se pudieron borrar los coches</h3><p>${esc(error.message)}</p>`); await loadCustomers(); return; }
+  }
+  const { error } = await sb.from('workshop_customers').delete().eq('id', c.id);
+  if (error) await notice(`<h3>No se pudo borrar el cliente</h3><p>${esc(error.message)}</p>`);
+  await loadCustomers();
+}
+
 async function editCustomer(c) {
   const cars = wsVehicles.filter((v) => v.customer_id === c.id);
+  let wantsDelete = false;
   const r = await dialog(`<h3>${c.id ? esc(c.name) : 'Nuevo cliente'}</h3>
     <label>Nombre o razón social *</label><input name="name" required maxlength="200" value="${esc(c.name || '')}">
     <div class="row2"><div><label>Teléfono</label><input name="phone" type="tel" value="${esc(c.phone || '')}"></div><div><label>Correo</label><input name="email" type="email" value="${esc(c.email || '')}"></div></div>
@@ -3434,14 +3473,9 @@ async function editCustomer(c) {
     ${c.id ? '<p style="margin-top:14px"><a href="#" id="delCust" style="color:#E5484D">Borrar este cliente</a></p>' : ''}`,
   'Guardar', (fd) => fd, (form) => {
     const d = form.querySelector('#delCust');
-    if (d) d.onclick = async (e) => {
-      e.preventDefault();
-      if (!window.confirm(`¿Borrar a ${c.name}? Sus coches se quedan, sin dueño.`)) return;
-      $('dlg').close();
-      await sb.from('workshop_customers').delete().eq('id', c.id);
-      await loadCustomers();
-    };
+    if (d) d.onclick = (e) => { e.preventDefault(); wantsDelete = true; $('dlg').close(); };
   });
+  if (wantsDelete) { await deleteCustomer(c, cars); return null; }
   if (!r) return null;
   const row = { workshop_id: workshop.id, name: r.name.trim(), phone: r.phone.trim() || null, email: r.email.trim() || null,
     tax_id: r.tax_id.trim().toUpperCase() || null, address: r.address.trim() || null, notes: r.notes.trim() || null, updated_at: new Date().toISOString() };
