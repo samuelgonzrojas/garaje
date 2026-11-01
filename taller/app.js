@@ -4,7 +4,7 @@
 // (unión por id de eventos y lecturas); las órdenes, piezas, proveedores y
 // mensajes van en sus propias tablas.
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-import { BRANDS, CAR_MAKES, searchUrl } from './brands.js?v=20261101j';
+import { BRANDS, CAR_MAKES, searchUrl } from './brands.js?v=20261102a';
 
 const SUPABASE_URL = 'https://pzgqgligxmwnwvozfwcl.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_zPxM3Ul4VYkudB1D_lhUZw_lUy6K52g';
@@ -2970,7 +2970,7 @@ function renderParts() {
       <td data-label="Proveedor">${esc(sup?.name || '')}</td>
       <td class="num" data-label="Coste"><input class="cell-in" data-k="cost" inputmode="decimal" value="${dec2(p.cost)}" placeholder="—" aria-label="Coste de ${esc(p.description)}">${p.list_price != null ? `<small class="marg" title="PVP de la tarifa del proveedor">Tarifa ${dec2(p.list_price)}</small>` : ''}</td>
       <td class="num" data-label="PVP"><input class="cell-in" data-k="price" inputmode="decimal" value="${dec2(p.price)}" placeholder="—" aria-label="PVP de ${esc(p.description)}">${marg != null ? `<small class="marg">${marg >= 0 ? '+' : ''}${marg} %</small>` : ''}</td>
-      <td class="num" data-label="Stock"><a href="#" data-stock>${p.stock != null ? esc(String(num(p.stock)).replace('.', ',')) : 'Llevar'}</a>${isLow(p) ? '<small class="stock-low">Pedir</small>' : ''}</td>
+      <td class="num" data-label="Stock"><a href="#" data-stock>${p.stock != null ? esc(String(num(p.stock)).replace('.', ',')) : 'Añadir'}</a>${isLow(p) ? '<small class="stock-low">Pedir</small>' : ''}</td>
       <td class="num" data-label="Usos">${p.uses}</td>
       <td class="edit"><a href="#" data-edit>Editar</a></td>`;
     tr.querySelector('[data-edit]').onclick = (e) => { e.preventDefault(); editPart(p); };
@@ -3025,7 +3025,7 @@ async function stockPart(p) {
   const qty = (v) => String(num(v)).replace('.', ',');
   const supOpts = '<option value="">—</option>' + suppliers.map((s) => `<option value="${s.id}" ${s.id === p.supplier_id ? 'selected' : ''}>${esc(s.name)}</option>`).join('');
   const r = await dialog(`<h3>Inventario: ${esc(p.description)}</h3>
-    <p class="muted" style="margin-top:0">${esc([p.brand, p.reference].filter(Boolean).join(' · '))}${p.stock != null ? ` <b>Quedan ${qty(p.stock)}</b>${p.cost != null ? ` · valen ${fmtEur(num(p.stock) * num(p.cost))} a coste` : ''}` : ' Todavía no llevas el stock de esta pieza.'}</p>
+    <p class="muted" style="margin-top:0">${esc([p.brand, p.reference].filter(Boolean).join(' · '))}${p.stock != null ? ` <b>Quedan ${qty(p.stock)}</b>${p.cost != null ? ` · valen ${fmtEur(num(p.stock) * num(p.cost))} a coste` : ''}` : ' Todavía no tienes stock apuntado de esta pieza.'}</p>
     <div class="inv-kind"><label class="chk"><input type="radio" name="kind" value="in" checked><span><b>Entrada</b><small>Me ha llegado del proveedor: se suma.</small></span></label>
       <label class="chk"><input type="radio" name="kind" value="count"><span><b>Recuento</b><small>He contado y tengo esta cantidad.</small></span></label></div>
     <label>Cantidad *</label><input name="qty" inputmode="decimal" required>
