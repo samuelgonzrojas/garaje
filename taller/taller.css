@@ -220,7 +220,7 @@ label{font-weight:600;color:var(--muted)}
 .icon-btn svg{width:19px;height:19px;fill:currentColor}
 
 /* Navegación con iconos y píldora (escritorio) */
-.tabs{position:sticky;top:8px;z-index:30;gap:4px;padding:6px;margin:0 0 18px;background:var(--card);border:1px solid var(--line);border-radius:18px;border-bottom:1px solid var(--line);box-shadow:0 1px 2px rgba(16,24,40,.04)}
+.tabs{position:sticky;top:8px;z-index:30;justify-content:safe center;gap:4px;padding:6px;margin:0 0 18px;background:var(--card);border:1px solid var(--line);border-radius:18px;border-bottom:1px solid var(--line);box-shadow:0 1px 2px rgba(16,24,40,.04)}
 .tabs button{display:flex;align-items:center;gap:8px;padding:8px 14px 8px 10px;border-radius:12px;border:0;border-bottom:0;color:var(--muted);font-weight:600;position:relative}
 .tabs button:hover{color:var(--ink);background:var(--card-2)}
 .tabs button.on{background:var(--brand-soft);color:var(--ink);border-bottom-color:transparent}

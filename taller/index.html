@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Garaje Taller">
 <link rel="stylesheet" href="../style.css?v=20261014a">
-<link rel="stylesheet" href="taller.css?v=20261101g">
+<link rel="stylesheet" href="taller.css?v=20261101h">
 </head>
 <body>
 <div class="wrap panel">
@@ -315,6 +315,7 @@
   <p class="stock-low" id="profitWarn"></p>
   <div class="empty hidden" id="noProfit" data-icon="profit"><b>Sin órdenes entregadas en este periodo</b><p>El beneficio sale de las órdenes al entregarlas.</p></div>
   <div id="profitBody">
+    <div class="card hidden" style="padding:0;overflow-x:auto" id="profitTeamCard"><h3 class="card-h">Por mecánico</h3><table class="list"><thead><tr><th>Mecánico</th><th class="num">Venta</th><th class="num">Coste</th><th class="num">Beneficio</th></tr></thead><tbody id="profitTeam"></tbody></table></div>
     <div class="card" style="padding:0;overflow-x:auto"><h3 class="card-h">Por proveedor</h3><table class="list"><thead><tr><th>Proveedor</th><th class="num">Venta</th><th class="num">Coste</th><th class="num">Beneficio</th></tr></thead><tbody id="profitSup"></tbody></table></div>
     <div class="card" style="padding:0;overflow-x:auto"><h3 class="card-h">Por orden</h3><table class="list"><thead><tr><th>Orden</th><th>Cliente</th><th class="num">Venta</th><th class="num">Coste</th><th class="num">Beneficio</th></tr></thead><tbody id="profitJobs"></tbody></table></div>
   </div>
@@ -425,6 +426,6 @@
 </div>
 <datalist id="brands"></datalist>
 <datalist id="carMakes"></datalist>
-<script type="module" src="app.js?v=20261101g"></script>
+<script type="module" src="app.js?v=20261101h"></script>
 </body>
 </html>

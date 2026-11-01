@@ -4,7 +4,7 @@
 // (unión por id de eventos y lecturas); las órdenes, piezas, proveedores y
 // mensajes van en sus propias tablas.
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-import { BRANDS, CAR_MAKES, searchUrl } from './brands.js?v=20261101g';
+import { BRANDS, CAR_MAKES, searchUrl } from './brands.js?v=20261101h';
 
 const SUPABASE_URL = 'https://pzgqgligxmwnwvozfwcl.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_zPxM3Ul4VYkudB1D_lhUZw_lUy6K52g';
@@ -103,7 +103,7 @@ function contactButtons(phone, email, waText = '', who = '') {
   const t = waText ? '?text=' + encodeURIComponent(waText) : '';
   const to = who ? ' a ' + who : '';
   return (phone ? iconLink('call', 'tel:' + String(phone).replace(/\s/g, ''), 'Llamar' + to) + iconLink('whatsapp', waUrl(phone) + t, 'WhatsApp' + to, true) : '')
-    + (email ? iconLink('mail', 'mailto:' + email, 'Correo' + to) : '');
+    + (email ? iconLink('mail', `mailto:${email}?subject=${encodeURIComponent(workshop?.name || '')}${waText ? '&body=' + encodeURIComponent(waText) : ''}`, 'Correo' + to) : '');
 }
 /** Dueño y familiares del coche (sin los talleres). */
 const peopleOf = (vehicleId) => (people[vehicleId] || []).filter((p) => p.role !== 'workshop');
@@ -2162,9 +2162,9 @@ async function sendQuote() {
   const c = collectJob();
   if (c.lines.length === 0) { $('jErr').textContent = 'Añade al menos una línea al presupuesto.'; return; }
   const t = totals({ ...job, lines: c.lines });
-  if (!(await dialog(`<h3>Enviar el presupuesto</h3><p class="muted">Le llega al móvil del cliente para que lo apruebe o lo rechace.</p><p class="big-total">${fmtEur(t.total)} <small>con IVA</small></p>`, 'Enviar al cliente', () => true))) return;
+  if (!(await dialog(`<h3>Enviar el presupuesto</h3><p class="muted">Le llega al móvil del cliente para que lo apruebe o lo rechace.</p><p class="big-total">${fmtEur(t.base)} <small>sin IVA</small></p>`, 'Enviar al cliente', () => true))) return;
   if (!(await saveJob({ status: 'quote_sent', quote_sent_at: new Date().toISOString(), decision: null, decided_at: null, decision_note: null }))) return;
-  await postMessage(`Te hemos enviado el presupuesto: ${fmtEur(t.total)} con IVA. Puedes aprobarlo o rechazarlo desde la app.`, true);
+  await postMessage(`Te hemos enviado el presupuesto: ${fmtEur(t.base)} sin IVA; el IVA se añade en la factura. Puedes aprobarlo o rechazarlo desde la app.`, true);
 }
 
 // Entregar: pasa los trabajos al historial del coche y enseña a la biblioteca.
@@ -3153,6 +3153,15 @@ async function renderProfit() {
   show('noProfit', !rows.length);
   show('profitBody', rows.length > 0);
   $('profitSup').innerHTML = [...t.sup.entries()].sort((a, b) => b[1].sale - a[1].sale).map(([k, g]) => `<tr><td><b>${esc(suppliers.find((s) => s.id === k)?.name || 'Sin proveedor')}</b></td><td class="num" data-label="Venta">${fmtEur(g.sale)}</td><td class="num" data-label="Coste">${fmtEur(g.cost)}</td><td class="num" data-label="Beneficio"><b>${fmtEur(g.sale - g.cost)}</b> <small class="marg">${pct(g.sale - g.cost, g.sale)}</small></td></tr>`).join('') || '<tr><td colspan="4" class="muted">No se han vendido piezas en este periodo.</td></tr>';
+  // Quién hizo cada orden: su responsable. Solo si el taller los asigna.
+  const byMech = new Map();
+  for (const { j, m } of rows) {
+    const g = byMech.get(j.assigned_to || '') || { sale: 0, cost: 0 };
+    g.sale += m.labor + m.sale; g.cost += m.cost;
+    byMech.set(j.assigned_to || '', g);
+  }
+  show('profitTeamCard', [...byMech.keys()].some(Boolean));
+  $('profitTeam').innerHTML = [...byMech.entries()].sort((a, b) => (b[1].sale - b[1].cost) - (a[1].sale - a[1].cost)).map(([k, g]) => `<tr><td><b>${esc(k ? nameOf(k) || 'Sin nombre' : 'Sin asignar')}</b></td><td class="num" data-label="Venta">${fmtEur(g.sale)}</td><td class="num" data-label="Coste">${fmtEur(g.cost)}</td><td class="num" data-label="Beneficio"><b>${fmtEur(g.sale - g.cost)}</b> <small class="marg">${pct(g.sale - g.cost, g.sale)}</small></td></tr>`).join('');
   const jb = $('profitJobs');
   jb.innerHTML = '';
   for (const { j, m } of rows.slice(0, 200)) {
