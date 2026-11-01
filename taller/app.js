@@ -4,7 +4,7 @@
 // (unión por id de eventos y lecturas); las órdenes, piezas, proveedores y
 // mensajes van en sus propias tablas.
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-import { BRANDS, CAR_MAKES, searchUrl } from './brands.js?v=20261101b';
+import { BRANDS, CAR_MAKES, searchUrl } from './brands.js?v=20261101c';
 
 const SUPABASE_URL = 'https://pzgqgligxmwnwvozfwcl.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_zPxM3Ul4VYkudB1D_lhUZw_lUy6K52g';
@@ -1293,7 +1293,7 @@ function agendaItems() {
     if (a.status === 'declined') continue;
     const v = a.vehicle_id ? vehicles.find((x) => x.id === a.vehicle_id) : a.ws_vehicle_id ? wsVehicleRow(a.ws_vehicle_id) : null;
     items.push({ kind: a.status === 'requested' ? 'pedida' : 'cita', at: new Date(a.starts_at), minutes: a.minutes, title: a.title,
-      sub: [v ? summary(v).name : a.plate || '', esc(a.customer_name || ''), a.assigned_to ? '→ ' + esc(nameOf(a.assigned_to)) : ''].filter(Boolean).join(' · '), appt: a });
+      sub: [esc(v ? summary(v).name : [a.car, a.plate].filter(Boolean).join(' · ')), esc(a.customer_name || ''), a.assigned_to ? '→ ' + esc(nameOf(a.assigned_to)) : ''].filter(Boolean).join(' · '), appt: a });
   }
   for (const l of leads) {
     const j = l.job_id ? jobs.find((x) => x.id === l.job_id) : null;
@@ -1496,7 +1496,7 @@ async function openAgendaItem(it) {
   const buttons = [];
   if (it.kind === 'pedida') buttons.push(['confirm', 'Confirmar', 'btn small'], ['decline', 'Rechazar', 'btn ghost small']);
   if (j) buttons.push(['job', 'Ver orden', 'btn small']);
-  if (a && !j && it.kind !== 'pedida' && ((a.vehicle_id && vehicles.some((v) => v.id === a.vehicle_id)) || (a.ws_vehicle_id && wsVehicleRow(a.ws_vehicle_id)))) buttons.push(['open', 'Abrir orden', 'btn small']);
+  if (a && !j && it.kind !== 'pedida') buttons.push(['open', 'Abrir orden', 'btn small']);
   if (l && isManager()) buttons.push(['lead', 'Ver solicitud', j ? 'btn ghost small' : 'btn small']);
   if (!it.allDay) buttons.push(['ics', 'Añadir a mi calendario', 'btn ghost small']);
   if (a) buttons.push(['edit', 'Editar', 'btn ghost small'], ['del', 'Borrar', 'btn ghost small']);
@@ -1533,7 +1533,14 @@ async function openAgendaItem(it) {
     await loadAppointments();
   }
   if (choice === 'open') {
-    const row = a.ws_vehicle_id ? wsVehicleRow(a.ws_vehicle_id) : vehicles.find((v) => v.id === a.vehicle_id);
+    let row = a.ws_vehicle_id ? wsVehicleRow(a.ws_vehicle_id) : vehicles.find((v) => v.id === a.vehicle_id);
+    // Nota de teléfono: al llegar el coche, se crean su cliente y su ficha con lo apuntado.
+    if (!row) {
+      const v = await quickCustomerCar({ name: a.customer_name, phone: a.customer_phone, plate: a.plate, car: a.car });
+      if (!v) return;
+      row = pseudoVehicle(v);
+      await sb.from('workshop_appointments').update({ ws_vehicle_id: v.id, updated_at: new Date().toISOString() }).eq('id', a.id);
+    }
     const created = await newJobFor(row, { customer_request: [a.title, a.notes].filter(Boolean).join('. '), customer_name: a.customer_name, customer_phone: a.customer_phone, assigned_to: a.assigned_to });
     if (created) { await sb.from('workshop_appointments').update({ job_id: created.id, updated_at: new Date().toISOString() }).eq('id', a.id); loadAppointments(); }
   }
@@ -1549,21 +1556,27 @@ async function editAppointment(a = {}) {
   })();
   const local = new Date(start.getTime() - start.getTimezoneOffset() * 60000).toISOString();
   const durs = [[15, '15 min'], [30, '30 min'], [45, '45 min'], [60, '1 hora'], [90, '1 h 30 min'], [120, '2 horas'], [180, '3 horas'], [240, '4 horas'], [480, 'Todo el día']];
-  const carOpts = '<option value="">Sin coche</option>' + vehicles.map((v) => { const s = summary(v); const o = ownerOf(v.id); return `<option value="${v.id}" ${v.id === a.vehicle_id ? 'selected' : ''}>${esc(s.name)}${s.plate ? ' · ' + esc(s.plate) : ''}${o ? ' · ' + esc(o.display_name) : ''}</option>`; }).join('')
+  const carOpts = '<option value="">Sin registrar (nota de teléfono)</option>' + vehicles.map((v) => { const s = summary(v); const o = ownerOf(v.id); return `<option value="${v.id}" ${v.id === a.vehicle_id ? 'selected' : ''}>${esc(s.name)}${s.plate ? ' · ' + esc(s.plate) : ''}${o ? ' · ' + esc(o.display_name) : ''}</option>`; }).join('')
     + (wsVehicles.length ? `<optgroup label="Clientes del taller">${wsVehicles.map((v) => { const s = summary(pseudoVehicle(v)); const c = customerOfVehicle(v); return `<option value="${wsKey(v.id)}" ${v.id === a.ws_vehicle_id ? 'selected' : ''}>${esc(s.plate || 'Sin matrícula')} · ${esc(s.name)}${c ? ' · ' + esc(c.name) : ''}</option>`; }).join('')}</optgroup>` : '');
   const r = await dialog(`<h3>${a.id ? 'Editar cita' : 'Nueva cita'}</h3>
     <label>Qué</label><input name="title" required maxlength="200" value="${esc(a.title || '')}" placeholder="Revisión, ITV, cambio de ruedas…">
     <div class="row3"><div><label>Día</label><input name="day" type="date" required value="${local.slice(0, 10)}"></div>
       <div><label>Hora</label><input name="time" type="time" required step="900" value="${local.slice(11, 16)}"></div>
       <div><label>Duración</label><select name="minutes">${durs.map(([m, t]) => `<option value="${m}" ${m === (a.minutes || 60) ? 'selected' : ''}>${t}</option>`).join('')}</select></div></div>
-    <label>Coche</label><select name="vehicle">${carOpts}</select>
     <div class="row2"><div><label>Cliente</label><input name="name" value="${esc(a.customer_name || '')}"></div>
       <div><label>Teléfono</label><input name="phone" type="tel" value="${esc(a.customer_phone || '')}"></div></div>
+    <label>Coche</label><select name="vehicle">${carOpts}</select>
+    <div class="row2" id="apptFree"><div><label>Matrícula</label><input name="plate" maxlength="12" autocapitalize="characters" value="${esc(a.plate || '')}" placeholder="Si te la dice"></div>
+      <div><label>Qué coche</label><input name="car" maxlength="120" list="carMakes" value="${esc(a.car || '')}" placeholder="Seat León"></div></div>
     ${team.filter((m) => m.joined).length > 1 ? `<label>Responsable</label><select name="who">${assigneeOptions(a.assigned_to)}</select>` : ''}
     <label>Notas</label><textarea name="notes" rows="2">${esc(a.notes || '')}</textarea>`,
     a.id ? 'Guardar' : 'Crear cita', (fd) => fd, (form) => {
+      const free = () => form.querySelector('#apptFree').classList.toggle('hidden', !!form.vehicle.value);
+      free();
       // Al elegir un coche, se rellenan el cliente y el teléfono de su dueño.
       form.vehicle.onchange = () => {
+        free();
+        if (!form.vehicle.value) return;
         if (form.vehicle.value.startsWith('ws:')) {
           const c = customerOfVehicle(wsVehicles.find((v) => wsKey(v.id) === form.vehicle.value));
           if (c && !form.name.value) form.name.value = c.name;
@@ -1581,6 +1594,7 @@ async function editAppointment(a = {}) {
   const row = {
     workshop_id: workshop.id, title: r.title.trim(), starts_at: startsAt.toISOString(), minutes: parseInt(r.minutes, 10) || 60,
     vehicle_id: r.vehicle && !r.vehicle.startsWith('ws:') ? r.vehicle : null, ws_vehicle_id: r.vehicle?.startsWith('ws:') ? r.vehicle.slice(3) : null, customer_name: (r.name || '').trim() || null, customer_phone: (r.phone || '').trim() || null,
+    plate: r.vehicle ? null : normPlate(r.plate) || null, car: r.vehicle ? null : (r.car || '').trim() || null,
     assigned_to: r.who || a.assigned_to || null, notes: (r.notes || '').trim() || null, updated_at: new Date().toISOString(),
   };
   const q = a.id ? sb.from('workshop_appointments').update(row).eq('id', a.id) : sb.from('workshop_appointments').insert(row);
@@ -1762,7 +1776,7 @@ function renderJobHead() {
   if (['ready', 'delivered'].includes(st) && isManager()) {
     const inv = invoicing ? invoiceOfJob(job.id) : null;
     if (inv) {
-      btn(`Factura ${inv.full_number}`, () => printInvoice(inv), 'btn ghost small');
+      btn(`Factura ${inv.full_number}`, () => openInvoice(inv), 'btn ghost small');
       if (pendingOf(inv) > 0) btn(`Cobrar ${fmtEur(pendingOf(inv))}`, () => payInvoice(inv), 'btn small');
     }
     else if (invoicing) btn('Emitir factura', issueInvoice, st === 'delivered' ? 'btn small' : 'btn ghost small');
@@ -1784,7 +1798,7 @@ function renderLines() {
   const box = $('jLines');
   box.innerHTML = (job.lines || []).length
     ? '<div class="qhead"><span>Tipo</span><span>Descripción</span><span>Cant. / horas</span><span>€/u sin IVA</span><span>Dto %</span><span>Total</span><span></span></div>'
-    : '<p class="muted">Escribe arriba el número de un trabajo, su nombre o una pieza y pulsa Intro.</p>';
+    : '<p class="muted">Pulsa en la casilla de arriba para elegir un trabajo, o escribe su número o una pieza y pulsa Intro.</p>';
   show('quickAddWrap', !isLocked());
   const supOpts = (sel) => `<option value="">Proveedor</option>` + suppliers.map((s) => `<option value="${s.id}" ${s.id === sel ? 'selected' : ''}>${esc(s.name)}</option>`).join('');
   (job.lines || []).forEach((l, i) => {
@@ -1814,6 +1828,7 @@ function renderLines() {
         if (inp.dataset.k === 'description') { const b = row.querySelector('[data-savelib]'); if (b) b.hidden = !inp.value.trim(); }
       });
     }
+    if (!isLocked()) attachPicker(row.querySelector('[data-k=description]'), (text) => lineResults(l, text), false);
     const saveLib = row.querySelector('[data-savelib]');
     if (saveLib) saveLib.onclick = () => saveLineToList(l);
     row.querySelector('.x').onclick = () => { job.lines.splice(i, 1); markDirty(); renderLines(); };
@@ -1843,52 +1858,107 @@ const partToLine = (p) => ({ kind: 'part', description: p.description, catalog_i
 function addJobLine(l) { job.lines ||= []; job.lines.push(l); markDirty(); renderLines(); }
 const workToLine = (w) => ({ kind: 'labor', description: w.name, catalog_id: w.catalog_id || guessCatalog(w.name) || '', work_id: w.id, discount: '',
   ...(w.price != null ? { qty: 1, unit_price: num(w.price) } : { qty: num(w.hours) ?? 1, unit_price: workshop.labor_rate }) });
-// Entrada rápida: número de trabajo, nombre o pieza, con Intro o eligiendo de la lista.
+// Desplegable de trabajos y piezas: se abre al entrar en la casilla y se filtra por
+// número o nombre al escribir. Sirve para la entrada rápida y para cada línea.
+const useWork = (w) => sb.from('workshop_works').update({ uses: w.uses + 1 }).eq('id', w.id).then(() => { w.uses++; });
+const workItem = (w, run) => ({ html: `<b class="q-no">${w.code}</b>${esc(w.name)}<small>${[w.price != null ? fmtEur(num(w.price)) : null, w.hours != null ? String(num(w.hours)).replace('.', ',') + ' h' : null].filter(Boolean).join(' · ')}</small>`, run, code: w.code });
+const partItem = (p, run) => ({ html: `<i class="q-part">Pieza</i>${esc(p.description)}<small>${esc([p.brand, p.reference, p.price != null ? fmtEur(num(p.price)) : null, p.stock != null ? `quedan ${String(num(p.stock)).replace('.', ',')}` : null].filter(Boolean).join(' · '))}</small>`, run });
+function matchWorks(q, max) {
+  const isNo = /^\d+$/.test(q);
+  return works.filter((w) => !q || (isNo ? String(w.code).startsWith(q) : normTxt(w.name).includes(q)))
+    .sort((a, b) => (q ? (String(b.code) === q) - (String(a.code) === q) : 0) || a.code - b.code).slice(0, max);
+}
+const matchParts = (q, max) => parts.filter((p) => !q || [p.description, p.brand, p.reference, normRef(p.reference)].some((x) => normTxt(x).includes(q))).slice(0, max);
+const noWorksItem = () => (isManager() && !works.length ? [{ html: '<i class="q-new">Nuevo</i>Aún no tienes trabajos: añadir los habituales', run: async () => { await addStarterWorks(); } }] : []);
 function quickResults(text) {
   const q = normTxt(text);
-  if (!q) return [];
-  const isNo = /^\d+$/.test(q);
-  const ws = works.filter((w) => (isNo ? String(w.code).startsWith(q) : normTxt(w.name).includes(q)))
-    .sort((a, b) => (String(b.code) === q) - (String(a.code) === q) || b.uses - a.uses || a.code - b.code).slice(0, 8)
-    .map((w) => ({ html: `<b class="q-no">${w.code}</b>${esc(w.name)}<small>${[w.price != null ? fmtEur(num(w.price)) : null, w.hours != null ? String(num(w.hours)).replace('.', ',') + ' h' : null].filter(Boolean).join(' · ')}</small>`, run: () => { addJobLine(workToLine(w)); sb.from('workshop_works').update({ uses: w.uses + 1 }).eq('id', w.id).then(() => { w.uses++; }); } }));
-  const ps = parts.filter((p) => [p.description, p.brand, p.reference, normRef(p.reference)].some((x) => normTxt(x).includes(q))).slice(0, 8)
-    .map((p) => ({ html: `<i class="q-part">Pieza</i>${esc(p.description)}<small>${esc([p.brand, p.reference, p.price != null ? fmtEur(num(p.price)) : null, p.stock != null ? `quedan ${String(num(p.stock)).replace('.', ',')}` : null].filter(Boolean).join(' · '))}</small>`, run: () => addJobLine(partToLine(p)) }));
-  const out = [...ws, ...ps];
-  if (isManager() && !isNo) {
+  const out = [...matchWorks(q, q ? 8 : 200).map((w) => workItem(w, () => { addJobLine(workToLine(w)); useWork(w); })), ...(q ? matchParts(q, 8).map((p) => partItem(p, () => addJobLine(partToLine(p)))) : noWorksItem())];
+  if (isManager() && q && !/^\d+$/.test(q)) {
     out.push({ html: `<i class="q-new">Nuevo</i>Guardar «${esc(text.trim())}» como trabajo`, run: async () => { const w = await editWork({ name: text.trim() }); if (w) addJobLine(workToLine(w)); } });
     out.push({ html: `<i class="q-new">Nueva</i>Guardar «${esc(text.trim())}» como pieza`, run: async () => { const p = await editPart({ description: text.trim() }); if (p) addJobLine(partToLine(p)); } });
   }
   return out;
 }
-let quickItems = [], quickActive = 0;
-function paintQuick() {
+/** Lo que se puede elegir en una línea: trabajos en la mano de obra, piezas en las piezas. */
+function lineResults(l, text) {
+  const q = normTxt(text);
+  const fill = (values) => { for (const k of ['work_id', 'part_id']) delete l[k]; Object.assign(l, values); markDirty(); renderLines(); };
+  return l.kind === 'part' ? matchParts(q, q ? 12 : 200).map((p) => partItem(p, () => fill(partToLine(p))))
+    : [...matchWorks(q, q ? 12 : 200).map((w) => workItem(w, () => { fill(workToLine(w)); useWork(w); })), ...(q ? [] : noWorksItem())];
+}
+const picker = { input: null, build: null, items: [], active: 0, autoFirst: true, typed: false };
+function paintPicker() {
   const box = $('quickList');
-  quickItems = quickResults($('quickAdd').value);
-  quickActive = Math.min(quickActive, Math.max(0, quickItems.length - 1));
-  show('quickList', quickItems.length > 0 || !!$('quickAdd').value.trim());
-  box.innerHTML = quickItems.length ? '' : '<p class="muted">Ningún trabajo con ese número.</p>';
-  quickItems.forEach((it, i) => {
+  if (!picker.input) return;
+  // Al entrar se ve toda la lista, aunque la línea ya tenga texto; al escribir, se filtra.
+  const text = picker.typed ? picker.input.value : '';
+  picker.items = picker.build(text);
+  if (!picker.items.length && !picker.typed) {
+    show('quickList');
+    box.innerHTML = '<p class="muted">Tu lista está vacía todavía. Escribe aquí y guárdalo con «Guardar en mis…».</p>';
+    return placePicker();
+  }
+  if (!picker.items.length && !picker.autoFirst) { show('quickList', false); return; }
+  if (picker.active >= picker.items.length) picker.active = picker.items.length - 1;
+  show('quickList');
+  box.innerHTML = picker.items.length ? '' : '<p class="muted">Nada con ese número.</p>';
+  picker.items.forEach((it, i) => {
     const b = document.createElement('button');
-    b.type = 'button'; b.className = 'q-item' + (i === quickActive ? ' on' : ''); b.innerHTML = it.html;
+    b.type = 'button'; b.className = 'q-item' + (i === picker.active ? ' on' : ''); b.innerHTML = it.html;
     b.onmousedown = (e) => e.preventDefault();
-    b.onclick = () => pickQuick(i);
+    b.onclick = () => pickItem(i);
     box.appendChild(b);
   });
+  placePicker();
+  box.querySelector('.on')?.scrollIntoView({ block: 'nearest' });
 }
-function pickQuick(i) {
-  const it = quickItems[i];
+/** Hacia abajo si cabe; si no, hacia arriba. Fija para que no la corte ninguna tarjeta. */
+function placePicker() {
+  const box = $('quickList');
+  const r = picker.input.getBoundingClientRect();
+  const up = window.innerHeight - r.bottom < 220 && r.top > window.innerHeight - r.bottom;
+  box.style.left = `${r.left}px`; box.style.width = `${Math.max(r.width, 280)}px`;
+  box.style.top = up ? 'auto' : `${r.bottom + 4}px`;
+  box.style.bottom = up ? `${window.innerHeight - r.top + 4}px` : 'auto';
+  box.style.maxHeight = `${Math.min(340, (up ? r.top : window.innerHeight - r.bottom) - 16)}px`;
+}
+function closePicker() { picker.input = null; show('quickList', false); }
+function pickItem(i) {
+  const it = picker.items[i], input = picker.input;
   if (!it) return;
-  $('quickAdd').value = ''; quickActive = 0; show('quickList', false);
+  closePicker();
+  // Antes de rellenar la línea: al repintarla, su casilla guardaría lo escrito encima de lo elegido.
+  if (input === $('quickAdd')) input.value = ''; else input.blur();
   it.run();
-  $('quickAdd').focus();
+  if (input === $('quickAdd')) requestAnimationFrame(() => { if (!$('dlg').open) input.focus(); });
 }
-$('quickAdd').addEventListener('input', () => { quickActive = 0; paintQuick(); });
-$('quickAdd').addEventListener('blur', () => show('quickList', false));
-$('quickAdd').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') { e.preventDefault(); pickQuick(quickActive); }
-  else if (e.key === 'Escape') { $('quickAdd').value = ''; show('quickList', false); }
-  else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); if (quickItems.length) { quickActive = (quickActive + (e.key === 'ArrowDown' ? 1 : quickItems.length - 1)) % quickItems.length; paintQuick(); } }
-});
+/** Conecta una casilla al desplegable. autoFirst: Intro elige la primera opción. */
+function attachPicker(input, build, autoFirst) {
+  const open = () => { picker.input = input; picker.build = build; picker.autoFirst = autoFirst; picker.typed = false; picker.active = autoFirst ? 0 : -1; paintPicker(); };
+  input.addEventListener('focus', open);
+  input.addEventListener('click', () => { if (picker.input !== input) open(); });
+  input.addEventListener('input', () => {
+    if (picker.input !== input) open();
+    picker.typed = true;
+    picker.active = autoFirst || /^\d+$/.test(input.value.trim()) ? 0 : -1;
+    paintPicker();
+  });
+  input.addEventListener('blur', () => { if (picker.input === input) closePicker(); });
+  input.addEventListener('keydown', (e) => {
+    if (picker.input !== input) return;
+    if (e.key === 'Enter') { if (picker.active >= 0) { e.preventDefault(); pickItem(picker.active); } }
+    else if (e.key === 'Escape') closePicker();
+    else if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && picker.items.length) {
+      e.preventDefault();
+      picker.active = (picker.active + (e.key === 'ArrowDown' ? 1 : picker.items.length - 1)) % picker.items.length;
+      paintPicker();
+    }
+  });
+}
+document.body.appendChild($('quickList'));   // fuera de las tarjetas, para que ninguna la recorte ni la desplace
+attachPicker($('quickAdd'), quickResults, true);
+window.addEventListener('scroll', () => { if (picker.input) placePicker(); }, { passive: true });
+window.addEventListener('resize', () => { if (picker.input) placePicker(); });
 /** Guarda una línea escrita a mano en la lista de trabajos o de piezas. */
 async function saveLineToList(l) {
   if (l.kind === 'part') {
@@ -1899,8 +1969,10 @@ async function saveLineToList(l) {
     if (w) { l.work_id = w.id; markDirty(); renderLines(); }
   }
 }
-$('addLabor').onclick = () => addJobLine({ kind: 'labor', description: '', catalog_id: '', qty: 1, unit_price: workshop.labor_rate, discount: '' });
-$('addPart').onclick = () => addJobLine({ kind: 'part', description: '', catalog_id: '', brand: '', reference: '', supplier_id: '', qty: 1, unit_price: '', discount: '' });
+// Al añadir una línea, el cursor va a su descripción y se abre el desplegable.
+const focusLastLine = () => [...$('jLines').querySelectorAll('.qline [data-k=description]')].pop()?.focus();
+$('addLabor').onclick = () => { addJobLine({ kind: 'labor', description: '', catalog_id: '', qty: 1, unit_price: workshop.labor_rate, discount: '' }); focusLastLine(); };
+$('addPart').onclick = () => { addJobLine({ kind: 'part', description: '', catalog_id: '', brand: '', reference: '', supplier_id: '', qty: 1, unit_price: '', discount: '' }); focusLastLine(); };
 
 // --- recomendaciones para este coche
 function renderRecs() {
@@ -2362,7 +2434,8 @@ async function issueInvoice() {
     $('jTaxId').value = j.customer_tax_id ?? ''; $('jAddress').value = j.customer_address ?? '';
     renderJobHead();
   }
-  const after = await choose(`<h3>Factura ${esc(data.full_number)} emitida</h3><p class="muted">${fmtEur(num(data.total))} con IVA. La tienes en la pestaña Facturas.</p>${verifactuLine(data) ? `<p class="${data.status === 'error' ? 'err' : 'muted'}">${verifactuLine(data)}</p>` : ''}`, [['print', 'Imprimir o guardar en PDF', 'btn small'], ['pay', 'Cobrar ahora', 'btn ghost small']]);
+  const after = await choose(`<h3>Factura ${esc(data.full_number)} emitida</h3><p class="muted">${fmtEur(num(data.total))} con IVA. La tienes en la pestaña Facturas.</p>${verifactuLine(data) ? `<p class="${data.status === 'error' ? 'err' : 'muted'}">${verifactuLine(data)}</p>` : ''}`, [['share', 'Enviar al cliente', 'btn small'], ['print', 'Imprimir', 'btn ghost small'], ['pay', 'Cobrar ahora', 'btn ghost small']]);
+  if (after === 'share') shareInvoice(data);
   if (after === 'print') printInvoice(data);
   if (after === 'pay') payInvoice(data);
 }
@@ -2401,7 +2474,9 @@ async function exchangeInvoice(inv) {
   if (error) { await notice(`<h3>No se pudo hacer</h3><p>${esc(error.message)}</p>`); return; }
   invoicing.next_no++;
   await Promise.all([loadInvoices(), loadJobs()]);
-  if (await choose(`<h3>Factura ${esc(data.full_number)} emitida</h3><p class="muted">Sustituye a la simplificada ${esc(inv.full_number)}.</p>`, [['print', 'Imprimir o guardar en PDF', 'btn small']]) === 'print') printInvoice(data);
+  const next = await choose(`<h3>Factura ${esc(data.full_number)} emitida</h3><p class="muted">Sustituye a la simplificada ${esc(inv.full_number)}.</p>`, [['share', 'Enviar al cliente', 'btn small'], ['print', 'Imprimir', 'btn ghost small']]);
+  if (next === 'share') shareInvoice(data);
+  if (next === 'print') printInvoice(data);
 }
 
 /** La factura simplificada, como un ticket de 80 mm y casi sin datos del cliente. */
@@ -2423,15 +2498,16 @@ function ticketHtml(inv) {
   </div>`;
 }
 
-async function printInvoice(inv) {
+/** El documento de la factura: el mismo para imprimir y para el PDF que se envía. */
+function invoiceDoc(inv) {
+  if (inv.kind === 'F2') return ticketHtml(inv);
   const w = inv.issuer || {}, c = inv.customer || {};
-  const ticket = inv.kind === 'F2';
   const orig = inv.rectifies_id ? invoices.find((i) => i.id === inv.rectifies_id) : null;
   const replaced = inv.replaces_id ? invoices.find((i) => i.id === inv.replaces_id) : null;
   const rows = (inv.lines || []).map((l) => `<tr><td>${l.kind === 'labor' ? 'Mano de obra' : 'Pieza'}</td><td>${esc(l.description)}${l.brand || l.reference ? `<br><small>${esc([l.brand, l.reference].filter(Boolean).join(' · '))}</small>` : ''}</td>
     <td class="num">${String(l.qty).replace('.', ',')}</td><td class="num">${fmtEur(num(l.unit_price))}</td><td class="num">${num(l.discount) ? String(l.discount).replace('.', ',') + ' %' : ''}</td><td class="num">${fmtEur(num(l.amount))}</td></tr>`).join('');
   // El QR de Verifactu va arriba, antes del resto (Orden HAC/1177/2024).
-  $('print').innerHTML = ticket ? ticketHtml(inv) : `<div class="doc">
+  return `<div class="doc">
     ${inv.qr ? `<div class="vf"><img src="${esc(inv.qr)}" alt="QR"><span>Factura verificable en la sede electrónica de la AEAT<br><b>VERI*FACTU</b></span></div>` : ''}
     ${inv.live ? '' : `<div class="doc-test">FACTURA DE PRUEBA${inv.qr ? ' (entorno de pruebas de Verifactu)' : ''} · SIN VALIDEZ FISCAL</div>`}
     <div class="head"><div>${workshop.logo ? `<img src="${esc(workshop.logo)}" alt="" class="doc-logo">` : ''}<h1>${esc(w.name || '')}</h1>${esc(w.legal_name || '')}<br>NIF ${esc(w.tax_id || '')}<br>${esc(w.address || '')}<br>${esc([w.phone, w.email].filter(Boolean).join(' · '))}${w.registry_no ? '<br>Nº registro industrial: ' + esc(w.registry_no) : ''}</div>
@@ -2447,6 +2523,11 @@ async function printInvoice(inv) {
     <div class="legal">${WARRANTY}</div>
     <div class="sign"><div>${sealImages()}Firma y sello del taller</div><div></div></div>
   </div>`;
+}
+
+async function printInvoice(inv) {
+  const ticket = inv.kind === 'F2';
+  $('print').innerHTML = invoiceDoc(inv);
   await Promise.all([...$('print').querySelectorAll('img')].map((i) => i.decode().catch(() => {})));
   const old = document.title;
   document.title = `${INV_KIND[inv.kind]} ${inv.full_number}`;
@@ -2456,6 +2537,88 @@ async function printInvoice(inv) {
   window.print();
   page.remove();
   document.title = old;
+}
+
+/** Crea el PDF de la factura y devuelve un enlace privado que caduca a los 30 días. */
+async function invoiceLink(inv) {
+  if (!window.html2pdf) {
+    await new Promise((ok, ko) => { const sc = document.createElement('script'); sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js'; sc.onload = ok; sc.onerror = ko; document.head.appendChild(sc); });
+  }
+  const ticket = inv.kind === 'F2';
+  const holder = document.createElement('div');
+  holder.className = 'pdf-holder';
+  holder.style.width = ticket ? '302px' : '718px';
+  holder.innerHTML = invoiceDoc(inv);
+  document.body.appendChild(holder);
+  try {
+    await Promise.all([...holder.querySelectorAll('img')].map((i) => i.decode().catch(() => {})));
+    const mm = holder.offsetHeight * 25.4 / 96;
+    const blob = await window.html2pdf().set({
+      margin: ticket ? [3, 0, 3, 0] : 10,
+      image: { type: 'jpeg', quality: 0.92 },
+      html2canvas: { scale: 2, backgroundColor: '#ffffff', useCORS: true },
+      jsPDF: { unit: 'mm', format: ticket ? [80, Math.ceil(mm) + 8] : 'a4' },
+    }).from(holder.firstElementChild).outputPdf('blob');
+    const path = `${workshop.id}/${inv.id}/Factura-${inv.full_number}.pdf`;
+    const bucket = sb.storage.from('invoice-pdfs');
+    const { error } = await bucket.upload(path, blob, { contentType: 'application/pdf', upsert: true });
+    if (error) throw new Error(error.message);
+    const { data, error: e2 } = await bucket.createSignedUrl(path, 30 * 24 * 3600);
+    if (e2) throw new Error(e2.message);
+    return data.signedUrl;
+  } finally {
+    holder.remove();
+  }
+}
+/** Teléfono y correo del cliente de la factura, si se saben. */
+function invoiceContact(inv) {
+  const j = jobs.find((x) => x.id === inv.job_id);
+  const ws = j?.ws_vehicle_id ? wsVehicles.find((v) => v.id === j.ws_vehicle_id) : null;
+  const c = ws ? customerOfVehicle(ws) : null;
+  const o = j?.vehicle_id ? ownerOf(j.vehicle_id) : null;
+  return { phone: j?.customer_phone || c?.phone || o?.phone || '', email: c?.email || o?.email || '' };
+}
+/** Enviar la factura: un mensaje con el enlace a su PDF, por WhatsApp o por correo. */
+async function shareInvoice(inv) {
+  const waiting = choose(`<h3>Preparando la factura ${esc(inv.full_number)}…</h3><p class="muted">Un momento, estamos creando el PDF.</p>`, []);
+  let url = null;
+  try { url = await invoiceLink(inv); } catch (e) { console.warn(e); }
+  $('dlg').close();
+  await waiting;
+  if (!url) { await notice('<h3>No se pudo preparar el PDF</h3><p>Comprueba la conexión y vuelve a intentarlo.</p>'); return; }
+  const c = inv.customer || {}, to = invoiceContact(inv);
+  const first = (c.name || '').trim().split(/\s+/)[0];
+  const text = `Hola${first ? ' ' + first : ''}, te enviamos tu factura ${inv.full_number} de ${workshop.name}, de ${fmtEur(num(inv.total))}. Puedes verla y guardarla aquí durante 30 días:\n${url}`;
+  const subject = `Factura ${inv.full_number} de ${workshop.name}`;
+  const done = choose(`<h3>Enviar la factura ${esc(inv.full_number)}</h3>
+    ${c.name ? `<p class="muted" style="margin-top:0">A ${esc(c.name)}, ${fmtEur(num(inv.total))}</p>` : ''}
+    <div class="row2"><div><label>WhatsApp</label><input id="shareTel" type="tel" value="${esc(to.phone)}" placeholder="Sin número, eliges el chat"></div>
+      <div><label>Correo</label><input id="shareMailTo" type="email" value="${esc(to.email)}" placeholder="correo@ejemplo.com"></div></div>
+    <div class="inv-share"><a class="btn small" id="shareWa" target="_blank" rel="noopener">Enviar por WhatsApp</a><a class="btn ghost small" id="shareMail">Enviar por correo</a><button type="button" class="link-btn" id="shareCopy">Copiar el enlace</button></div>`, []);
+  const paint = () => {
+    const tel = $('shareTel').value.trim();
+    $('shareWa').href = `${tel ? waUrl(tel) : 'https://wa.me/'}?text=${encodeURIComponent(text)}`;
+    $('shareMail').href = `mailto:${encodeURIComponent($('shareMailTo').value.trim()).replace('%40', '@')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`;
+  };
+  $('shareTel').oninput = paint; $('shareMailTo').oninput = paint; paint();
+  $('shareCopy').onclick = async () => { try { await navigator.clipboard.writeText(url); $('shareCopy').textContent = 'Enlace copiado ✓'; } catch { window.prompt('Copia el enlace:', url); } };
+  await done;
+}
+/** La ficha de una factura: todo lo que se puede hacer con ella, en un solo sitio. */
+async function openInvoice(i) {
+  const rect = invoices.find((r) => r.rectifies_id === i.id), repl = replacedBy(i);
+  const open = ['F1', 'F2', 'F3'].includes(i.kind) && !rect && !repl;
+  const pend = pendingOf(i);
+  const choice = await choose(`<h3>${INV_KIND[i.kind]} ${esc(i.full_number)}</h3>
+    <p class="muted" style="margin-top:0">${fmtDate(i.issued_at)}${i.customer?.name ? ' · ' + esc(i.customer.name) : ''}<br><b>${fmtEur(num(i.total))}</b>${open ? ` · ${pend > 0 ? 'pendiente ' + fmtEur(pend) : 'cobrada'}` : ''}</p>
+    ${rect ? `<p class="muted">Anulada por ${esc(rect.full_number)}.</p>` : ''}${repl ? `<p class="muted">Sustituida por ${esc(repl.full_number)}.</p>` : ''}`,
+  [...(repl ? [] : [['share', 'Enviar al cliente', 'btn small']]), ['print', 'Imprimir', 'btn ghost small'], ...(pend > 0 ? [['pay', 'Cobrar', 'btn ghost small']] : []),
+    ...(open ? [['rect', 'Rectificar', 'link-btn']] : []), ...(open && i.kind === 'F2' ? [['exchange', 'Pasar a completa', 'link-btn']] : [])]);
+  if (choice === 'share') shareInvoice(i);
+  if (choice === 'print') printInvoice(i);
+  if (choice === 'pay') payInvoice(i);
+  if (choice === 'rect') rectifyInvoice(i);
+  if (choice === 'exchange') exchangeInvoice(i);
 }
 
 function renderInvoices() {
@@ -2491,10 +2654,8 @@ function renderInvoices() {
       <td class="num" data-label="Base">${fmtEur(num(i.base))}</td><td class="num" data-label="IVA">${fmtEur(num(i.vat))}</td><td class="num" data-label="Total"><b>${fmtEur(num(i.total))}</b></td>
       <td data-label="Cobro">${open ? (pendingOf(i) > 0 ? `<a href="#" class="pay-link" data-pay>Pendiente ${fmtEur(pendingOf(i))}</a>` : `<a href="#" class="pay-ok" data-pay>Cobrada</a>`) : '<span class="muted">—</span>'}</td>
       <td data-label="Estado"><span class="inv-st ${cls}" ${i.error ? `title="${esc(i.error)}"` : ''}>${st}</span>${['pending', 'error'].includes(i.status) ? '<small><a href="#" data-retry>Reintentar</a></small>' : ''}</td>
-      <td class="edit"><a href="#" data-print>Ver</a>${open ? ' · <a href="#" data-rect>Rectificar</a>' : ''}${open && i.kind === 'F2' ? ' · <a href="#" data-exchange>Pasar a completa</a>' : ''}</td>`;
-    tr.querySelector('[data-print]').onclick = (e) => { e.preventDefault(); printInvoice(i); };
-    tr.querySelector('[data-rect]')?.addEventListener('click', (e) => { e.preventDefault(); rectifyInvoice(i); });
-    tr.querySelector('[data-exchange]')?.addEventListener('click', (e) => { e.preventDefault(); exchangeInvoice(i); });
+      <td class="edit"><a href="#" data-print>Abrir</a></td>`;
+    tr.querySelector('[data-print]').onclick = (e) => { e.preventDefault(); openInvoice(i); };
     tr.querySelector('[data-pay]')?.addEventListener('click', (e) => { e.preventDefault(); payInvoice(i); });
     tr.querySelector('[data-retry]')?.addEventListener('click', async (e) => {
       e.preventDefault(); e.target.textContent = 'Enviando…';
@@ -3337,16 +3498,19 @@ async function openWsVehicle(v) {
 }
 
 /** Cliente y coche nuevos de una vez (desde "Nueva orden"). */
-async function quickCustomerCar() {
+async function quickCustomerCar(pre = {}) {
+  const [preMake, ...preModel] = (pre.car || '').trim().split(/\s+/);
   const r = await dialog(`<h3>Cliente y coche nuevos</h3>
     <p class="muted" style="margin-top:0">Para clientes que no usan Garaje. Quedan en la pestaña Clientes.</p>
-    <div class="row2"><div><label>Nombre *</label><input name="name" required maxlength="200"></div><div><label>Teléfono</label><input name="phone" type="tel"></div></div>
-    <div class="row3"><div><label>Matrícula *</label><input name="plate" required maxlength="12" placeholder="1234 ABC" autocapitalize="characters"></div><div><label>Marca</label><input name="make" list="carMakes"></div><div><label>Modelo</label><input name="model"></div></div>`,
+    <div class="row2"><div><label>Nombre *</label><input name="name" required maxlength="200" value="${esc(pre.name || '')}"></div><div><label>Teléfono</label><input name="phone" type="tel" value="${esc(pre.phone || '')}"></div></div>
+    <div class="row3"><div><label>Matrícula *</label><input name="plate" required maxlength="12" placeholder="1234 ABC" autocapitalize="characters" value="${esc(pre.plate || '')}"></div><div><label>Marca</label><input name="make" list="carMakes" value="${esc(preMake || '')}"></div><div><label>Modelo</label><input name="model" value="${esc(preModel.join(' '))}"></div></div>`,
   'Crear', (fd) => fd);
   if (!r || !r.name.trim() || !normPlate(r.plate)) return null;
   const existing = wsVehicles.find((v) => normPlate(v.plate) === normPlate(r.plate));
   if (existing) return existing;
-  const { data: c, error: e1 } = await sb.from('workshop_customers').insert({ workshop_id: workshop.id, name: r.name.trim(), phone: r.phone.trim() || null }).select('*').single();
+  // Si ya es cliente (mismo teléfono), el coche nuevo va a su ficha.
+  const known = digitsOf(r.phone).length >= 9 ? wsCustomers.find((x) => digitsOf(x.phone) === digitsOf(r.phone)) : null;
+  const { data: c, error: e1 } = known ? { data: known } : await sb.from('workshop_customers').insert({ workshop_id: workshop.id, name: r.name.trim(), phone: r.phone.trim() || null }).select('*').single();
   if (e1) { await notice(`<h3>No se pudo crear</h3><p>${esc(e1.message)}</p>`); return null; }
   const { data: v, error: e2 } = await sb.from('workshop_vehicles').insert({ workshop_id: workshop.id, customer_id: c.id, plate: normPlate(r.plate), make: r.make.trim() || null, model: r.model.trim() || null }).select('*').single();
   if (e2) { await notice(`<h3>No se pudo crear el coche</h3><p>${esc(e2.message)}</p>`); return null; }

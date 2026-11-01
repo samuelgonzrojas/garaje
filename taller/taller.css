@@ -867,7 +867,7 @@ dialog#dlg{max-width:760px}
 /* Entrada rápida de trabajos y piezas */
 .quick-add{position:relative;margin:10px 0}
 .quick-add input{width:100%}
-.quick-list{position:absolute;z-index:20;left:0;right:0;top:calc(100% + 4px);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:4px;box-shadow:0 8px 24px rgba(0,0,0,.15);max-height:340px;overflow:auto}
+.quick-list{position:fixed;z-index:50;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:4px;box-shadow:0 8px 24px rgba(0,0,0,.25);max-height:340px;overflow:auto}
 .quick-list p{margin:8px 10px;font-size:14px}
 .q-item{display:block;width:100%;text-align:left;background:transparent;border:0;border-radius:8px;padding:8px 10px;font:inherit;color:inherit;cursor:pointer}
 .q-item.on,.q-item:hover{background:var(--card-2)}
@@ -920,3 +920,10 @@ td .stock-low{display:block;margin:0}
 #profitBody .card{margin-bottom:12px}
 .click-row{cursor:pointer}
 .click-row small{display:block;color:var(--muted)}
+
+/* Enviar la factura */
+.inv-share{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px}
+.inv-share a{text-decoration:none}
+.dlg-actions .link-btn{margin-right:auto}
+.pdf-holder{position:fixed;left:-10000px;top:0;background:#fff;color:#000}
+.pdf-holder .doc.ticket{margin:0 auto}
