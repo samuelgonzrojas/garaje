@@ -927,3 +927,5 @@ td .stock-low{display:block;margin:0}
 .dlg-actions .link-btn{margin-right:auto}
 .pdf-holder{position:fixed;left:-10000px;top:0;background:#fff;color:#000}
 .pdf-holder .doc.ticket{margin:0 auto}
+.appt-match{display:block;margin-top:4px;font-size:13px}
+.appt-match:empty{display:none}

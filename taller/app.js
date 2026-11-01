@@ -4,7 +4,7 @@
 // (unión por id de eventos y lecturas); las órdenes, piezas, proveedores y
 // mensajes van en sus propias tablas.
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-import { BRANDS, CAR_MAKES, searchUrl } from './brands.js?v=20261101c';
+import { BRANDS, CAR_MAKES, searchUrl } from './brands.js?v=20261101d';
 
 const SUPABASE_URL = 'https://pzgqgligxmwnwvozfwcl.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_zPxM3Ul4VYkudB1D_lhUZw_lUy6K52g';
@@ -1496,14 +1496,15 @@ async function openAgendaItem(it) {
   const buttons = [];
   if (it.kind === 'pedida') buttons.push(['confirm', 'Confirmar', 'btn small'], ['decline', 'Rechazar', 'btn ghost small']);
   if (j) buttons.push(['job', 'Ver orden', 'btn small']);
-  if (a && !j && it.kind !== 'pedida') buttons.push(['open', 'Abrir orden', 'btn small']);
+  const unregistered = a && !j && it.kind !== 'pedida' && !a.vehicle_id && !a.ws_vehicle_id;
+  if (a && !j && it.kind !== 'pedida') buttons.push(['open', unregistered ? 'Registrar y abrir orden' : 'Abrir orden', 'btn small']);
   if (l && isManager()) buttons.push(['lead', 'Ver solicitud', j ? 'btn ghost small' : 'btn small']);
   if (!it.allDay) buttons.push(['ics', 'Añadir a mi calendario', 'btn ghost small']);
   if (a) buttons.push(['edit', 'Editar', 'btn ghost small'], ['del', 'Borrar', 'btn ghost small']);
   const choice = await choose(`<small class="ag-kind ${it.kind}">${label}</small><h3>${esc(it.title)}</h3>
     <p class="ag-when">${svgIcon('agenda')} ${it.allDay ? fmtDate(j.promised_at) : `${DAYS[(it.at.getDay() + 6) % 7]} ${it.at.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })}, ${hhmm(it.at)}–${hhmm(endAt)}`}</p>
     ${it.sub ? `<p class="muted">${it.sub}</p>` : ''}
-    ${a?.plate ? `<p class="muted">Matrícula: <b>${esc(a.plate)}</b></p>` : ''}
+    ${a?.plate ? `<p class="muted">Matrícula: <b>${esc(a.plate)}</b>${unregistered ? ' · sin registrar' : ''}</p>` : ''}
     ${a?.notes ? `<p class="lead-msg">${esc(a.notes)}</p>` : ''}
     ${phone ? `<div class="lead-who"><div><b>${esc(who || 'Cliente')}</b><small>${esc(fmtPhone(phone))}</small></div><div class="icons">${contactButtons(phone, null, `Hola${who ? ' ' + who : ''}, te escribo de ${workshop?.name || 'el taller'} por tu cita del ${it.at.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })}.`, who || 'el cliente')}</div></div>` : ''}`,
     buttons);
@@ -1536,10 +1537,17 @@ async function openAgendaItem(it) {
     let row = a.ws_vehicle_id ? wsVehicleRow(a.ws_vehicle_id) : vehicles.find((v) => v.id === a.vehicle_id);
     // Nota de teléfono: al llegar el coche, se crean su cliente y su ficha con lo apuntado.
     if (!row) {
-      const v = await quickCustomerCar({ name: a.customer_name, phone: a.customer_phone, plate: a.plate, car: a.car });
-      if (!v) return;
-      row = pseudoVehicle(v);
-      await sb.from('workshop_appointments').update({ ws_vehicle_id: v.id, updated_at: new Date().toISOString() }).eq('id', a.id);
+      const p = normPlate(a.plate);
+      const garaje = p ? vehicles.find((x) => normPlate(summary(x).plate) === p) : null;
+      if (garaje) {
+        row = garaje;
+        await sb.from('workshop_appointments').update({ vehicle_id: garaje.id, updated_at: new Date().toISOString() }).eq('id', a.id);
+      } else {
+        const v = await quickCustomerCar({ name: a.customer_name, phone: a.customer_phone, plate: a.plate, car: a.car }, true);
+        if (!v) return;
+        row = pseudoVehicle(v);
+        await sb.from('workshop_appointments').update({ ws_vehicle_id: v.id, updated_at: new Date().toISOString() }).eq('id', a.id);
+      }
     }
     const created = await newJobFor(row, { customer_request: [a.title, a.notes].filter(Boolean).join('. '), customer_name: a.customer_name, customer_phone: a.customer_phone, assigned_to: a.assigned_to });
     if (created) { await sb.from('workshop_appointments').update({ job_id: created.id, updated_at: new Date().toISOString() }).eq('id', a.id); loadAppointments(); }
@@ -1556,8 +1564,14 @@ async function editAppointment(a = {}) {
   })();
   const local = new Date(start.getTime() - start.getTimezoneOffset() * 60000).toISOString();
   const durs = [[15, '15 min'], [30, '30 min'], [45, '45 min'], [60, '1 hora'], [90, '1 h 30 min'], [120, '2 horas'], [180, '3 horas'], [240, '4 horas'], [480, 'Todo el día']];
-  const carOpts = '<option value="">Sin registrar (nota de teléfono)</option>' + vehicles.map((v) => { const s = summary(v); const o = ownerOf(v.id); return `<option value="${v.id}" ${v.id === a.vehicle_id ? 'selected' : ''}>${esc(s.name)}${s.plate ? ' · ' + esc(s.plate) : ''}${o ? ' · ' + esc(o.display_name) : ''}</option>`; }).join('')
-    + (wsVehicles.length ? `<optgroup label="Clientes del taller">${wsVehicles.map((v) => { const s = summary(pseudoVehicle(v)); const c = customerOfVehicle(v); return `<option value="${wsKey(v.id)}" ${v.id === a.ws_vehicle_id ? 'selected' : ''}>${esc(s.plate || 'Sin matrícula')} · ${esc(s.name)}${c ? ' · ' + esc(c.name) : ''}</option>`; }).join('')}</optgroup>` : '');
+  // Los coches que ya conoce el taller. Si la matrícula no es de ninguno, queda apuntada
+  // y el coche se registra al abrir la orden.
+  const known = [
+    ...vehicles.map((v) => { const x = summary(v), o = ownerOf(v.id); return { vehicle_id: v.id, plate: x.plate, label: [x.name, o?.display_name].filter(Boolean).join(' · '), name: o?.display_name, phone: o?.phone }; }),
+    ...wsVehicles.filter((v) => !v.linked_vehicle_id).map((v) => { const x = summary(pseudoVehicle(v)), c = customerOfVehicle(v); return { ws_vehicle_id: v.id, plate: v.plate, label: [x.name, c?.name].filter(Boolean).join(' · '), name: c?.name, phone: c?.phone }; }),
+  ].filter((k) => normPlate(k.plate));
+  const findCar = (plate) => { const p = normPlate(plate); return p ? known.find((k) => normPlate(k.plate) === p) : null; };
+  const linked = known.find((k) => (a.vehicle_id && k.vehicle_id === a.vehicle_id) || (a.ws_vehicle_id && k.ws_vehicle_id === a.ws_vehicle_id));
   const r = await dialog(`<h3>${a.id ? 'Editar cita' : 'Nueva cita'}</h3>
     <label>Qué</label><input name="title" required maxlength="200" value="${esc(a.title || '')}" placeholder="Revisión, ITV, cambio de ruedas…">
     <div class="row3"><div><label>Día</label><input name="day" type="date" required value="${local.slice(0, 10)}"></div>
@@ -1565,36 +1579,34 @@ async function editAppointment(a = {}) {
       <div><label>Duración</label><select name="minutes">${durs.map(([m, t]) => `<option value="${m}" ${m === (a.minutes || 60) ? 'selected' : ''}>${t}</option>`).join('')}</select></div></div>
     <div class="row2"><div><label>Cliente</label><input name="name" value="${esc(a.customer_name || '')}"></div>
       <div><label>Teléfono</label><input name="phone" type="tel" value="${esc(a.customer_phone || '')}"></div></div>
-    <label>Coche</label><select name="vehicle">${carOpts}</select>
-    <div class="row2" id="apptFree"><div><label>Matrícula</label><input name="plate" maxlength="12" autocapitalize="characters" value="${esc(a.plate || '')}" placeholder="Si te la dice"></div>
-      <div><label>Qué coche</label><input name="car" maxlength="120" list="carMakes" value="${esc(a.car || '')}" placeholder="Seat León"></div></div>
+    <div class="row2"><div><label>Matrícula</label><input name="plate" maxlength="12" autocapitalize="characters" autocomplete="off" list="apptPlates" value="${esc(linked?.plate || a.plate || '')}" placeholder="1234 ABC"></div>
+      <div id="apptFree"><label>Qué coche</label><input name="car" maxlength="120" list="carMakes" value="${esc(a.car || '')}" placeholder="Seat León"></div></div>
+    <small class="muted appt-match" id="apptMatch"></small>
+    <datalist id="apptPlates">${known.map((k) => `<option value="${esc(k.plate)}">${esc(k.label)}</option>`).join('')}</datalist>
     ${team.filter((m) => m.joined).length > 1 ? `<label>Responsable</label><select name="who">${assigneeOptions(a.assigned_to)}</select>` : ''}
     <label>Notas</label><textarea name="notes" rows="2">${esc(a.notes || '')}</textarea>`,
     a.id ? 'Guardar' : 'Crear cita', (fd) => fd, (form) => {
-      const free = () => form.querySelector('#apptFree').classList.toggle('hidden', !!form.vehicle.value);
-      free();
-      // Al elegir un coche, se rellenan el cliente y el teléfono de su dueño.
-      form.vehicle.onchange = () => {
-        free();
-        if (!form.vehicle.value) return;
-        if (form.vehicle.value.startsWith('ws:')) {
-          const c = customerOfVehicle(wsVehicles.find((v) => wsKey(v.id) === form.vehicle.value));
-          if (c && !form.name.value) form.name.value = c.name;
-          if (c?.phone && !form.phone.value) form.phone.value = c.phone;
-          return;
-        }
-        const o = ownerOf(form.vehicle.value);
-        if (o && !form.name.value) form.name.value = o.display_name || '';
-        if (o?.phone && !form.phone.value) form.phone.value = o.phone;
+      // Si la matrícula ya es de un coche, se rellenan el cliente y el teléfono de su dueño.
+      const check = () => {
+        const car = findCar(form.plate.value);
+        form.querySelector('#apptFree').classList.toggle('hidden', !!car);
+        form.querySelector('#apptMatch').textContent = car ? `✓ Ya lo tienes: ${car.label}`
+          : normPlate(form.plate.value) ? 'Coche sin registrar: se registra solo cuando abras la orden.' : '';
+        if (car && car.name && !form.elements.name.value) form.elements.name.value = car.name;
+        if (car?.phone && !form.phone.value) form.phone.value = car.phone;
       };
+      form.plate.addEventListener('input', check);
+      check();
     });
   if (!r) return;
   const startsAt = new Date(`${r.day}T${r.time}`);
   if (isNaN(startsAt)) { alert('Revisa el día y la hora.'); return; }
+  const car = findCar(r.plate);
+  const keepCar = !normPlate(r.plate) && !linked;   // un coche sin matrícula se queda como estaba
   const row = {
     workshop_id: workshop.id, title: r.title.trim(), starts_at: startsAt.toISOString(), minutes: parseInt(r.minutes, 10) || 60,
-    vehicle_id: r.vehicle && !r.vehicle.startsWith('ws:') ? r.vehicle : null, ws_vehicle_id: r.vehicle?.startsWith('ws:') ? r.vehicle.slice(3) : null, customer_name: (r.name || '').trim() || null, customer_phone: (r.phone || '').trim() || null,
-    plate: r.vehicle ? null : normPlate(r.plate) || null, car: r.vehicle ? null : (r.car || '').trim() || null,
+    vehicle_id: car?.vehicle_id || (keepCar ? a.vehicle_id : null) || null, ws_vehicle_id: car?.ws_vehicle_id || (keepCar ? a.ws_vehicle_id : null) || null, customer_name: (r.name || '').trim() || null, customer_phone: (r.phone || '').trim() || null,
+    plate: car ? null : normPlate(r.plate) || null, car: car ? null : (r.car || '').trim() || null,
     assigned_to: r.who || a.assigned_to || null, notes: (r.notes || '').trim() || null, updated_at: new Date().toISOString(),
   };
   const q = a.id ? sb.from('workshop_appointments').update(row).eq('id', a.id) : sb.from('workshop_appointments').insert(row);
@@ -3498,9 +3510,10 @@ async function openWsVehicle(v) {
 }
 
 /** Cliente y coche nuevos de una vez (desde "Nueva orden"). */
-async function quickCustomerCar(pre = {}) {
+async function quickCustomerCar(pre = {}, auto = false) {
   const [preMake, ...preModel] = (pre.car || '').trim().split(/\s+/);
-  const r = await dialog(`<h3>Cliente y coche nuevos</h3>
+  // Desde una cita con nombre y matrícula no hace falta preguntar nada más.
+  const r = auto && (pre.name || '').trim() && normPlate(pre.plate) ? { name: pre.name, phone: pre.phone || '', plate: pre.plate, make: preMake || '', model: preModel.join(' ') } : await dialog(`<h3>Cliente y coche nuevos</h3>
     <p class="muted" style="margin-top:0">Para clientes que no usan Garaje. Quedan en la pestaña Clientes.</p>
     <div class="row2"><div><label>Nombre *</label><input name="name" required maxlength="200" value="${esc(pre.name || '')}"></div><div><label>Teléfono</label><input name="phone" type="tel" value="${esc(pre.phone || '')}"></div></div>
     <div class="row3"><div><label>Matrícula *</label><input name="plate" required maxlength="12" placeholder="1234 ABC" autocapitalize="characters" value="${esc(pre.plate || '')}"></div><div><label>Marca</label><input name="make" list="carMakes" value="${esc(preMake || '')}"></div><div><label>Modelo</label><input name="model" value="${esc(preModel.join(' '))}"></div></div>`,
