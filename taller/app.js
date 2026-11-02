@@ -4,7 +4,7 @@
 // (unión por id de eventos y lecturas); las órdenes, piezas, proveedores y
 // mensajes van en sus propias tablas.
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-import { BRANDS, CAR_MAKES, searchUrl } from './brands.js?v=20261102a';
+import { BRANDS, CAR_MAKES, searchUrl } from './brands.js?v=20261102b';
 
 const SUPABASE_URL = 'https://pzgqgligxmwnwvozfwcl.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_zPxM3Ul4VYkudB1D_lhUZw_lUy6K52g';
@@ -1714,6 +1714,7 @@ function openJob(j) {
   show('jBilling', isManager());
   $('jRequest').value = job.customer_request ?? '';
   $('jIntake').value = job.intake_notes ?? '';
+  $('jNotes').value = job.customer_notes ?? '';
   $('jAssigned').innerHTML = assigneeOptions(job.assigned_to);
   $('jAssigned').disabled = !isManager();
   $('jErr').textContent = ''; setSaveState('');
@@ -1757,7 +1758,7 @@ function markDirty() {
 }
 window.addEventListener('beforeunload', (e) => { if (job && dirty) { e.preventDefault(); e.returnValue = ''; } });
 const isLocked = () => ['delivered', 'cancelled'].includes(job?.status);
-for (const id of ['jKm', 'jFuel', 'jPromised', 'jCustomer', 'jPhone', 'jTaxId', 'jAddress', 'jRequest', 'jIntake', 'jAssigned']) $(id).addEventListener('input', markDirty);
+for (const id of ['jKm', 'jFuel', 'jPromised', 'jCustomer', 'jPhone', 'jTaxId', 'jAddress', 'jRequest', 'jIntake', 'jNotes', 'jAssigned']) $(id).addEventListener('input', markDirty);
 $('jAssigned').addEventListener('change', markDirty);
 $('jPhone').addEventListener('input', renderPhoneIcons);
 $('jCustomer').addEventListener('input', renderPhoneIcons);
@@ -1845,7 +1846,7 @@ function renderLines() {
   const box = $('jLines');
   box.innerHTML = (job.lines || []).length
     ? '<div class="qhead"><span>Tipo</span><span>Descripción</span><span>Cant. / horas</span><span>€/u sin IVA</span><span>Dto %</span><span>Total</span><span></span></div>'
-    : '<p class="muted">Pulsa en la casilla de arriba para elegir un trabajo, o escribe su número o una pieza y pulsa Intro.</p>';
+    : '<p class="muted">Pulsa en la casilla de abajo para elegir un trabajo, o escribe su número o una pieza y pulsa Intro.</p>';
   show('quickAddWrap', !isLocked());
   const supOpts = (sel) => `<option value="">Proveedor</option>` + suppliers.map((s) => `<option value="${s.id}" ${s.id === sel ? 'selected' : ''}>${esc(s.name)}</option>`).join('');
   (job.lines || []).forEach((l, i) => {
@@ -2143,6 +2144,7 @@ function collectJob() {
     customer_address: $('jAddress').value.trim() || null,
     customer_request: $('jRequest').value.trim() || null,
     intake_notes: $('jIntake').value.trim() || null,
+    customer_notes: $('jNotes').value.trim() || null,
     assigned_to: $('jAssigned').value || null,
     lines: (job.lines || []).filter((l) => (l.description || '').trim() || num(l.unit_price)).map((l) => ({
       ...l, qty: num(l.qty) ?? 1, unit_price: num(l.unit_price), discount: num(l.discount),
@@ -2178,7 +2180,7 @@ async function sendQuote() {
   const t = totals({ ...job, lines: c.lines });
   if (!(await dialog(`<h3>Enviar el presupuesto</h3><p class="muted">Le llega al móvil del cliente para que lo apruebe o lo rechace.</p><p class="big-total">${fmtEur(t.base)} <small>sin IVA</small></p>`, 'Enviar al cliente', () => true))) return;
   if (!(await saveJob({ status: 'quote_sent', quote_sent_at: new Date().toISOString(), decision: null, decided_at: null, decision_note: null }))) return;
-  await postMessage(`Te hemos enviado el presupuesto: ${fmtEur(t.base)} sin IVA; el IVA se añade en la factura. Puedes aprobarlo o rechazarlo desde la app.`, true);
+  await postMessage(`Te hemos enviado el presupuesto: ${fmtEur(t.base)} sin IVA; el IVA se añade en la factura. Puedes aprobarlo o rechazarlo desde la app.${c.customer_notes ? `\n\nObservaciones: ${c.customer_notes}` : ''}`, true);
 }
 
 // Entregar: pasa los trabajos al historial del coche y enseña a la biblioteca.
@@ -2302,6 +2304,7 @@ async function printDoc(kind) {
     ${rows ? `<table><thead><tr><th>Tipo</th><th>Concepto</th><th class="num">Cant.</th><th class="num">Precio</th><th class="num">Dto.</th><th class="num">Importe</th></tr></thead><tbody>${rows}</tbody></table>
     ${kind === 'quote' ? `<div class="tot"><div class="big"><span>Total sin IVA</span><span>${fmtEur(t.base)}</span></div><div class="tot-note">IVA no incluido: el ${num(job.vat)} % se añade en la factura.</div></div>`
       : `<div class="tot"><div><span>Base imponible</span><span>${fmtEur(t.base)}</span></div><div><span>IVA ${num(job.vat)} %</span><span>${fmtEur(t.vat)}</span></div><div class="big"><span>Total</span><span>${fmtEur(t.total)}</span></div></div>`}` : ''}
+    ${kind === 'quote' ? docNotes(job.customer_notes) : ''}
     <div class="legal">${kind === 'quote'
       ? 'Presupuesto conforme al Real Decreto 1457/1986. El usuario puede aceptarlo firmando este documento o desde la app Garaje. Las piezas sustituidas se entregarán al cliente si así lo solicita. Este presupuesto no es una factura.'
       : 'El usuario autoriza la reparación descrita y deposita el vehículo en el taller. Este documento sirve como resguardo de depósito (Real Decreto 1457/1986): preséntelo para retirar el vehículo. No es una factura.'}</div>
@@ -2517,6 +2520,7 @@ async function issueInvoice() {
     <div id="invCustomer"><label>Nombre o razón social del cliente</label><input name="name" maxlength="200" value="${esc(j.customer_name || '')}">
     <div class="row2"><div><label>NIF / DNI / CIF</label><input name="tax" maxlength="20" value="${esc(j.customer_tax_id || '')}" placeholder="Si es empresa o autónomo" autocomplete="off"></div>
       <div><label>Dirección</label><input name="addr" maxlength="300" value="${esc(j.customer_address || '')}" placeholder="Si es empresa o autónomo" autocomplete="off"></div></div></div>
+    <label>Observaciones para el cliente (opcional)</label><textarea name="notes" rows="2" maxlength="2000">${esc(j.customer_notes || '')}</textarea>
     <div class="inv-totals"><span>Base ${fmtEur(t.base)}</span><span>IVA ${num(j.vat) ?? 21} % ${fmtEur(t.vat)}</span><b>Total ${fmtEur(t.total)}</b></div>
     <p class="muted" style="font-size:13px;margin:6px 0 0">Se numera sola (<b id="invNext"></b>) con las líneas de la orden. Una factura no se borra ni se cambia: si te equivocas, se corrige con una rectificativa.</p>`,
   'Emitir factura', (fd) => fd, (form) => {
@@ -2540,7 +2544,7 @@ async function issueInvoice() {
   // El ticket no lleva datos fiscales del cliente; el nombre queda solo para buscarlo aquí.
   const simple = r.kind === 'F2';
   const customer = { name: (r.name || '').trim() || null, tax_id: simple ? null : (r.tax || '').trim().toUpperCase() || null, address: simple ? null : (r.addr || '').trim() || null,
-    vehicle: [s.name, s.plate].filter(Boolean).join(' · ') || null, km: j.km ?? null, job_number: j.number };
+    vehicle: [s.name, s.plate].filter(Boolean).join(' · ') || null, km: j.km ?? null, job_number: j.number, notes: (r.notes || '').trim() || null };
   const { data: issued, error } = await sb.rpc('issue_invoice', { p_job: j.id, p_simplified: r.kind === 'F2', p_customer: customer });
   if (error) { await notice(`<h3>No se pudo emitir la factura</h3><p>${esc(error.message)}</p>`); return; }
   let data = issued;
@@ -2597,6 +2601,7 @@ async function exchangeInvoice(inv) {
 }
 
 /** Nota y forma de pago que el taller pone en sus facturas, tal como estaban al emitirla. */
+const docNotes = (text) => (text ? `<div class="box doc-notes"><b>Observaciones</b>${esc(text)}</div>` : '');
 const invoiceExtras = (w) => (w.note || w.payment ? `<div class="doc-extras">${w.note ? `<p>${esc(w.note)}</p>` : ''}${w.payment ? `<p>Forma de pago: ${esc(w.payment)}</p>` : ''}</div>` : '');
 /** La factura simplificada, como un ticket de 80 mm y casi sin datos del cliente. */
 function ticketHtml(inv) {
@@ -2612,6 +2617,7 @@ function ticketHtml(inv) {
     <div class="t-row"><span>Base imponible</span><span>${fmtEur(num(inv.base))}</span></div>
     <div class="t-row"><span>IVA ${String(num(inv.vat_rate)).replace('.', ',')} %</span><span>${fmtEur(num(inv.vat))}</span></div>
     <div class="t-row t-total"><span>TOTAL</span><span>${fmtEur(num(inv.total))}</span></div>
+    ${docNotes(c.notes)}
     ${invoiceExtras(w)}
     <div class="t-seal">${sealImages()}Firma y sello del taller</div>
     <div class="legal">${WARRANTY}</div>
@@ -2640,6 +2646,7 @@ function invoiceDoc(inv) {
     </div>
     <table><thead><tr><th>Tipo</th><th>Concepto</th><th class="num">Cant.</th><th class="num">Precio</th><th class="num">Dto.</th><th class="num">Importe</th></tr></thead><tbody>${rows}</tbody></table>
     <div class="tot"><div><span>Base imponible</span><span>${fmtEur(num(inv.base))}</span></div><div><span>IVA ${String(num(inv.vat_rate)).replace('.', ',')} %</span><span>${fmtEur(num(inv.vat))}</span></div><div class="big"><span>Total</span><span>${fmtEur(num(inv.total))}</span></div></div>
+    ${docNotes(c.notes)}
     ${invoiceExtras(w)}
     <div class="legal">${WARRANTY}${w.privacy ? `<p>${esc(w.privacy)}</p>` : ''}</div>
     <div class="sign"><div>${sealImages()}Firma y sello del taller</div><div></div></div>

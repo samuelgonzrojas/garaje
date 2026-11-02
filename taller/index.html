@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Garaje Taller">
 <link rel="stylesheet" href="../style.css?v=20261014a">
-<link rel="stylesheet" href="taller.css?v=20261102a">
+<link rel="stylesheet" href="taller.css?v=20261102b">
 </head>
 <body>
 <div class="wrap panel">
@@ -185,10 +185,14 @@
 
       <div class="card">
         <div class="top"><h3 style="margin:0">Presupuesto</h3>
-          <div><button class="btn ghost small" id="orderPartsBtn">Pedir piezas</button> <button class="btn ghost small" id="addLabor">+ Mano de obra</button> <button class="btn ghost small" id="addPart">+ Pieza</button></div></div>
-        <div class="quick-add" id="quickAddWrap"><input id="quickAdd" type="search" placeholder="Elige un trabajo, o escribe su número o una pieza" autocomplete="off"><div class="quick-list no-print hidden" id="quickList"></div></div>
+          <div><button class="btn ghost small" id="orderPartsBtn">Pedir piezas</button></div></div>
         <div id="jLines"></div>
+        <div class="add-bar">
+          <div class="quick-add" id="quickAddWrap"><input id="quickAdd" type="search" placeholder="Elige un trabajo, o escribe su número o una pieza" autocomplete="off"><div class="quick-list no-print hidden" id="quickList"></div></div>
+          <button class="btn ghost small" id="addLabor">+ Mano de obra</button> <button class="btn ghost small" id="addPart">+ Pieza</button>
+        </div>
         <div class="totals" id="jTotals"></div>
+        <label>Observaciones para el cliente (salen en el presupuesto y en la factura)</label><textarea id="jNotes" rows="2" maxlength="2000" placeholder="Aclaraciones antes o después de la reparación"></textarea>
         <div class="top" style="margin-top:12px">
           <div class="err" id="jErr"></div>
           <div><span class="save-state" id="jSaved"></span> <button class="btn" id="jSave">Guardar</button></div>
@@ -427,6 +431,6 @@
 </div>
 <datalist id="brands"></datalist>
 <datalist id="carMakes"></datalist>
-<script type="module" src="app.js?v=20261102a"></script>
+<script type="module" src="app.js?v=20261102b"></script>
 </body>
 </html>
