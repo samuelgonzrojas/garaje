@@ -2476,6 +2476,7 @@ async function openInvoicing() {
 const INV_KIND = { F1: 'Factura', F2: 'Factura simplificada', F3: 'Factura (sustituye a simplificada)', R1: 'Factura rectificativa', R5: 'Factura rectificativa (simplificada)' };
 const INV_STATUS = { test: ['Prueba', 'test'], pending: ['Enviando a Hacienda', 'pending'], registered: ['Registrada', 'ok'], error: ['Error al registrar', 'bad'] };
 const invCode = (series, no) => series + String(no).padStart(invoicing?.digits ?? 4, '0');
+const invSimpleCode = () => invoicing.simple_series + String(invoicing.simple_next_no).padStart(invoicing.simple_digits ?? 4, '0');
 const madridYear = () => Number(new Date().toLocaleString('en-CA', { timeZone: 'Europe/Madrid', year: 'numeric' }));
 const testBanner = () => (invoicing?.mode === 'live' ? ''
   : invoicing?.mode === 'sandbox' ? '<p class="inv-test">Conectado al <b>entorno de pruebas de Verifactu</b>: las facturas se registran en pruebas, con su QR, pero <b>sin validez fiscal</b>.</p>'
@@ -2563,7 +2564,7 @@ async function issueInvoice() {
     <p class="muted" style="font-size:13px;margin:6px 0 0">Se numera sola (<b id="invNext"></b>) con las líneas de la orden. Una factura no se borra ni se cambia: si te equivocas, se corrige con una rectificativa.</p>`,
   'Emitir factura', (fd) => fd, (form) => {
     const next = () => {
-      form.querySelector('#invNext').textContent = invCode(invoicing.series, invoicing.next_no);
+      form.querySelector('#invNext').textContent = form.kind.value === 'F2' ? invSimpleCode() : invCode(invoicing.series, invoicing.next_no);
       form.querySelector('#invCustomer').classList.toggle('hidden', form.kind.value === 'F2');
     };
     for (const rd of form.querySelectorAll('input[name=kind]')) rd.onchange = next;
@@ -2803,7 +2804,7 @@ function renderInvoices() {
     b.onclick = () => openJob(j);
     pendingBox.appendChild(b);
   }
-  $('invSeries').innerHTML = invoicing ? `Próxima factura: <b>${esc(invCode(invoicing.series, invoicing.next_no))}</b> · Próxima rectificativa: <b>${esc(invCode(invoicing.rect_series, invoicing.rect_next_no))}</b>` : '';
+  $('invSeries').innerHTML = invoicing ? `Próxima factura: <b>${esc(invCode(invoicing.series, invoicing.next_no))}</b> · Próxima simplificada: <b>${esc(invSimpleCode())}</b> · Próxima rectificativa: <b>${esc(invCode(invoicing.rect_series, invoicing.rect_next_no))}</b>` : '';
   const ms = $('invMonth'), keep = ms.value;
   const months = [...new Set(invoices.map((i) => i.issued_at.slice(0, 7)))];
   ms.innerHTML = '<option value="">Todos los meses</option>' + months.map((m) => `<option value="${m}">${monthLabel(m)}</option>`).join('');
@@ -2956,29 +2957,38 @@ $('invSeriesBtn').onclick = async (e) => {
   // Con «cada año» el año va en el prefijo: F → F26-. Sin él, F0001 se repetiría cada enero.
   const withYear = (s) => (s.includes(yy) ? s : s.replace(/[-/]$/, '') + yy + '-');
   // «FCT26-284» → prefijo FCT26-, número 284, 3 cifras. Solo con el número, se queda el prefijo que hay.
-  const readNext = (form) => {
-    const m = form.next.value.trim().toUpperCase().match(/^(.*?)(\d+)$/);
-    if (!m) return { err: 'Escribe la factura con su número, por ejemplo F1400.' };
+  const parseNo = (txt, series, digits, name) => {
+    const m = txt.trim().toUpperCase().match(/^(.*?)(\d+)$/);
+    if (!m) return { err: `Escribe la ${name} con su número, por ejemplo ${series}1400.` };
     const no = parseInt(m[2], 10);
     if (no < 1) return { err: 'El número tiene que ser 1 o mayor.' };
     if (m[2].length > 8) return { err: 'El número no puede pasar de 8 cifras.' };
+    return { series: m[1] || series, no, digits: m[1] ? m[2].length : digits };
+  };
+  const readNext = (form) => {
+    const f = parseNo(form.next.value, invoicing.series, invoicing.digits ?? 4, 'factura');
+    if (f.err) return { err: f.err, field: form.next };
+    const s = parseNo(form.nextS.value, invoicing.simple_series, invoicing.simple_digits ?? 4, 'simplificada');
+    if (s.err) return { err: s.err, field: form.nextS };
     const yearly = form.yearly.checked;
-    const series = yearly ? withYear(m[1] || invoicing.series) : (m[1] || invoicing.series);
-    const rect = (yearly ? withYear(form.r.value.trim().toUpperCase()) : form.r.value.trim().toUpperCase());
-    const digits = m[1] ? m[2].length : (invoicing.digits ?? 4);
-    if (series.length > 12) return { err: 'El prefijo no puede pasar de 12 caracteres.' };
-    if (!rect || rect === series) return { err: 'Las rectificativas necesitan un prefijo distinto al de las facturas.' };
-    return { series, rect, no, digits, yearly };
+    const year = (x) => (yearly ? withYear(x) : x);
+    const series = year(f.series), simple = year(s.series), rect = year(form.r.value.trim().toUpperCase());
+    if ([series, simple, rect].some((x) => x.length > 12)) return { err: 'El prefijo no puede pasar de 12 caracteres.', field: form.next };
+    if (series === simple) return { err: 'Las simplificadas necesitan un prefijo distinto al de las facturas: lo exige la ley si haces de las dos.', field: form.nextS };
+    if (!form.r.value.trim() || rect === series || rect === simple) return { err: 'Las rectificativas necesitan su propio prefijo.', field: form.r };
+    return { series, simple, rect, no: f.no, simpleNo: s.no, digits: f.digits, simpleDigits: s.digits, yearly };
   };
   const code = (s, n, d) => s + String(n).padStart(d, '0');
   const r = await dialog(`<h3>Numeración y datos de la factura</h3>
     <label>Próxima factura</label><input name="next" required autocomplete="off" value="${esc(invCode(invoicing.series, invoicing.next_no))}">
     <small class="muted">Escríbela tal como quieres que salga. Si tu última fue la FCT26-283, pon FCT26-284.</small>
+    <label>Próxima factura simplificada</label><input name="nextS" required autocomplete="off" value="${esc(invSimpleCode())}">
+    <small class="muted">Van aparte de las completas, con su propio prefijo y su contador: lo exige la ley si haces de las dos.</small>
     <div class="inv-kind" style="margin-top:10px"><label class="chk"><input type="checkbox" name="yearly" ${invoicing.yearly_reset ? 'checked' : ''}><span><b>Empezar de 1 cada año</b><small>Lo hace solo desde el 1 de enero. El año va en el prefijo, para que no se repitan números.</small></span></label></div>
     <label>Prefijo de las rectificativas</label><input name="r" required value="${esc(invoicing.rect_series)}" maxlength="12">
     <p id="numPreview" style="font-size:14px;margin:8px 0 0"></p>
     ${invoicing.mode === 'test' ? '<p class="muted" style="font-size:13px;margin:6px 0 0">Mientras sigas facturando de verdad con tu programa, su número seguirá avanzando: vuelve a ajustar este el día que cambies del todo.</p>' : ''}
-    <p class="muted" style="font-size:13px;margin:4px 0 0">Completas y simplificadas van en la misma serie. El número de las órdenes es otro contador, que se cambia en Órdenes.</p>
+    <p class="muted" style="font-size:13px;margin:4px 0 0">El número de las órdenes es otro contador, que se cambia en Órdenes.</p>
     <label>Forma de pago</label><input name="pay" maxlength="300" value="${esc(invoicing.payment_text || '')}" placeholder="Transferencia a tu IBAN, efectivo, tarjeta…">
     <label>Nota final</label><input name="note" maxlength="300" value="${esc(invoicing.invoice_note || '')}" placeholder="Gracias por su confianza.">
     <label>Protección de datos</label><textarea name="priv" rows="5" maxlength="2000" placeholder="La cláusula que quieres que salga en tus facturas completas.">${esc(invoicing.privacy_text || '')}</textarea>
@@ -2988,13 +2998,13 @@ $('invSeriesBtn').onclick = async (e) => {
     const preview = () => {
       const n = readNext(form);
       const box = form.querySelector('#numPreview');
-      form.next.setCustomValidity('');
+      for (const x of [form.next, form.nextS, form.r]) x.setCustomValidity('');
       if (n.err) { box.textContent = n.err; return; }
       const nextYear = n.series.includes(yy) ? n.series.split(yy).join(String(Number(yy) + 1)) : n.series;
-      box.innerHTML = `La próxima factura será la <b>${esc(code(n.series, n.no, n.digits))}</b>.`
+      box.innerHTML = `La próxima factura será la <b>${esc(code(n.series, n.no, n.digits))}</b> y la próxima simplificada, la <b>${esc(code(n.simple, n.simpleNo, n.simpleDigits))}</b>.`
         + (n.yearly ? ` La primera de ${madridYear() + 1} será la <b>${esc(code(nextYear, 1, n.digits))}</b>.` : '');
     };
-    form.next.oninput = preview; form.yearly.onchange = preview; form.r.oninput = preview;
+    form.next.oninput = preview; form.nextS.oninput = preview; form.yearly.onchange = preview; form.r.oninput = preview;
     preview();
     const input = form.next;
     form.addEventListener('submit', (ev) => {
@@ -3002,13 +3012,13 @@ $('invSeriesBtn').onclick = async (e) => {
       const n = readNext(form);
       if (!n.err) return;
       ev.preventDefault();
-      input.setCustomValidity(n.err);
-      input.reportValidity();
+      n.field.setCustomValidity(n.err);
+      n.field.reportValidity();
     });
   });
   if (!r) return;
   const n = r.n;
-  const { error } = await sb.rpc('set_invoice_settings', { p_workshop: workshop.id, p_series: n.series, p_rect: n.rect, p_next: n.no, p_digits: n.digits, p_yearly: n.yearly, p_payment: r.pay, p_note: r.note, p_privacy: r.priv });
+  const { error } = await sb.rpc('set_invoice_settings', { p_workshop: workshop.id, p_series: n.series, p_simple: n.simple, p_rect: n.rect, p_next: n.no, p_simple_next: n.simpleNo, p_digits: n.digits, p_simple_digits: n.simpleDigits, p_yearly: n.yearly, p_payment: r.pay, p_note: r.note, p_privacy: r.priv });
   if (error) { await notice(`<h3>No se pudo guardar</h3><p>${esc(error.message)}</p>`); return; }
   ({ data: invoicing } = await sb.from('workshop_invoicing').select('*').eq('workshop_id', workshop.id).maybeSingle());
   renderInvoices();
