@@ -88,7 +88,7 @@
 <section id="tab-jobs" class="tab hidden no-print">
   <div class="ws-hero" id="ws-hero"></div>
   <div class="top page-head">
-    <div><h2 style="margin:0">Órdenes de trabajo</h2><p class="sub" style="margin:2px 0 0">Lo que hay hoy en el taller. El cliente ve el estado en su móvil.</p></div>
+    <div><h2 style="margin:0">Órdenes de trabajo</h2><p class="sub" style="margin:2px 0 0">Lo que hay hoy en el taller. El cliente ve el estado en su móvil.</p><p class="muted hidden" id="jobNext" style="font-size:13px;margin:2px 0 0">Próxima orden: <b id="jobNextNo"></b> · <a href="#" id="jobNextBtn">Cambiar número</a></p></div>
     <button class="btn" id="newJobBtn">+ Nueva orden</button>
   </div>
   <div class="card install-card hidden" id="installCard"></div>
@@ -380,6 +380,7 @@
     <button class="btn ghost" id="invExport">Descargar para el gestor (Excel)</button>
   </div>
   <div id="invTestBanner"></div>
+  <p class="muted" style="font-size:14px;margin:0 0 10px"><span id="invSeries"></span> · <a href="#" id="invSeriesBtn">Cambiar numeración y datos de la factura</a></p>
   <details class="card hidden" id="invPendingBox"><summary>Entregadas sin facturar <span class="inv-count" id="invPendingCount"></span></summary><div id="invPending" style="margin-top:10px"></div></details>
   <div class="board-tools">
     <input id="invSearch" type="search" placeholder="Buscar por número, cliente, NIF o matrícula…" autocomplete="off">
@@ -388,7 +389,6 @@
   </div>
   <div class="t-sum inv-sum" id="invTotals"></div>
   <div class="card" id="invoicesBody"></div>
-  <p class="muted" style="font-size:13px"><span id="invSeries"></span> · <a href="#" id="invSeriesBtn">Datos de la factura</a></p>
 </section>
 
 <!-- EQUIPO -->
@@ -431,6 +431,6 @@
 </div>
 <datalist id="brands"></datalist>
 <datalist id="carMakes"></datalist>
-<script type="module" src="app.js?v=20261102b"></script>
+<script type="module" src="app.js?v=20261104a"></script>
 </body>
 </html>

@@ -336,7 +336,12 @@ async function loadWorkshop() {
   }
   invoicing = null;
   if (workshop && myRole !== 'mechanic') {
-    const { data: inv } = await sb.from('workshop_invoicing').select('*').eq('workshop_id', workshop.id).maybeSingle();
+    let { data: inv } = await sb.from('workshop_invoicing').select('*').eq('workshop_id', workshop.id).maybeSingle();
+    // Primer día del año: enseña ya la serie nueva, sin esperar a la primera factura.
+    if (inv?.yearly_reset && inv.series_year < madridYear()) {
+      await sb.rpc('roll_invoice_year', { p_workshop: workshop.id });
+      ({ data: inv } = await sb.from('workshop_invoicing').select('*').eq('workshop_id', workshop.id).maybeSingle());
+    }
     invoicing = inv || null;
   }
   const name = workshop?.name || profile.display_name || '';
@@ -467,7 +472,7 @@ function renderWsForm(formId, data, button) {
     <details class="ws-sec"><summary>Presupuestos y órdenes</summary>
     <div class="row3">${field(WS_FIELDS[7])}${field(WS_FIELDS[8])}${field(WS_FIELDS[9])}</div>
     <div class="row2"><div><label>Margen de las piezas (%)</label><input name="parts_margin" inputmode="decimal" value="${esc(data.parts_margin ?? 35)}"><small class="muted">Para calcular el PVP al importar o con "Calcular PVP".</small></div>
-      ${workshop ? `<div><label>Siguiente nº de orden</label><input name="next_job_no" inputmode="numeric" value="${esc(data.next_job_no ?? maxNo + 1)}"><small class="muted">Si vienes de otro programa, sigue su numeración.</small></div>` : ''}</div>
+      ${workshop ? `<div><label>Siguiente nº de orden</label><input name="next_job_no" inputmode="numeric" value="${esc(Math.max(data.next_job_no ?? 0, maxNo + 1))}"><small class="muted">Si vienes de otro programa, sigue su numeración.</small></div>` : ''}</div>
     </details>
     </div><div>
       <details class="ws-sec" ${data.listed ? '' : 'open'}><summary>Aparecer en la app Garaje</summary>${listingBlock(data)}
@@ -1067,8 +1072,40 @@ function renderHero() {
   for (const t of h.querySelectorAll('[data-go="jobs"]')) t.onclick = () => $('board').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+const nextJobNo = () => Math.max(workshop?.next_job_no ?? 1, 1 + Math.max(0, ...jobs.map((j) => j.number || 0)));
+function renderJobNext() {
+  show('jobNext', !!workshop && isOwner());
+  if (workshop) $('jobNextNo').textContent = `OR ${nextJobNo()}`;
+}
+$('jobNextBtn').onclick = async (e) => {
+  e.preventDefault();
+  const maxNo = Math.max(0, ...jobs.map((j) => j.number || 0));
+  const r = await dialog(`<h3>Número de orden</h3>
+    <label>Próxima orden</label><input name="n" inputmode="numeric" required value="${esc(nextJobNo())}" autocomplete="off">
+    <p class="muted" style="font-size:13px;margin:6px 0 0">Si vienes de otro programa, pon el número siguiente al último que hiciste. Es un contador distinto del de las facturas, que se cambia en Facturas.</p>`,
+  'Guardar', (fd) => fd, (form) => {
+    const input = form.n;
+    input.oninput = () => input.setCustomValidity('');
+    // El formulario se reutiliza en todos los diálogos: este aviso solo vale mientras siga este campo.
+    form.addEventListener('submit', (ev) => {
+      if (!input.isConnected || ev.submitter?.value !== 'ok') return;
+      const n = /^\d+$/.test(input.value.trim()) ? parseInt(input.value, 10) : 0;
+      if (n > maxNo) return;
+      ev.preventDefault();
+      input.setCustomValidity(`Tiene que ser un número mayor que ${maxNo}, la última orden que tienes.`);
+      input.reportValidity();
+    });
+  });
+  if (!r) return;
+  const n = parseInt(r.n, 10);
+  const { error } = await sb.from('workshops').update({ next_job_no: n }).eq('id', workshop.id);
+  if (error) { await notice(`<h3>No se pudo guardar</h3><p>${esc(error.message)}</p>`); return; }
+  workshop.next_job_no = n;
+  renderJobNext();
+};
 function renderBoard() {
   renderOnboard();
+  renderJobNext();
   renderInstallCard();
   renderHero();
   // "Solo las mías" cuando hay equipo.
@@ -2438,7 +2475,8 @@ async function openInvoicing() {
 // contratado; hasta entonces el taller está en modo 'test' y todo sale "de prueba".
 const INV_KIND = { F1: 'Factura', F2: 'Factura simplificada', F3: 'Factura (sustituye a simplificada)', R1: 'Factura rectificativa', R5: 'Factura rectificativa (simplificada)' };
 const INV_STATUS = { test: ['Prueba', 'test'], pending: ['Enviando a Hacienda', 'pending'], registered: ['Registrada', 'ok'], error: ['Error al registrar', 'bad'] };
-const invCode = (series, no) => series + String(no).padStart(4, '0');
+const invCode = (series, no) => series + String(no).padStart(invoicing?.digits ?? 4, '0');
+const madridYear = () => Number(new Date().toLocaleString('en-CA', { timeZone: 'Europe/Madrid', year: 'numeric' }));
 const testBanner = () => (invoicing?.mode === 'live' ? ''
   : invoicing?.mode === 'sandbox' ? '<p class="inv-test">Conectado al <b>entorno de pruebas de Verifactu</b>: las facturas se registran en pruebas, con su QR, pero <b>sin validez fiscal</b>.</p>'
   : '<p class="inv-test">Modo de prueba: las facturas salen marcadas <b>sin validez fiscal</b> hasta conectar el registro en Hacienda (Verifactu).</p>');
@@ -2765,7 +2803,7 @@ function renderInvoices() {
     b.onclick = () => openJob(j);
     pendingBox.appendChild(b);
   }
-  $('invSeries').textContent = invoicing ? `Series: ${invoicing.series} (facturas) · ${invoicing.rect_series} (rectificativas)` : '';
+  $('invSeries').innerHTML = invoicing ? `Próxima factura: <b>${esc(invCode(invoicing.series, invoicing.next_no))}</b> · Próxima rectificativa: <b>${esc(invCode(invoicing.rect_series, invoicing.rect_next_no))}</b>` : '';
   const ms = $('invMonth'), keep = ms.value;
   const months = [...new Set(invoices.map((i) => i.issued_at.slice(0, 7)))];
   ms.innerHTML = '<option value="">Todos los meses</option>' + months.map((m) => `<option value="${m}">${monthLabel(m)}</option>`).join('');
@@ -2914,21 +2952,63 @@ $('invSeriesBtn').onclick = async (e) => {
   e.preventDefault();
   const w = workshop;
   const example = `Los datos personales que nos ha facilitado serán tratados por ${w.legal_name || w.name}${w.tax_id ? `, con NIF ${w.tax_id}` : ''}${w.address ? ` y domicilio en ${w.address}` : ''}, para prestarle el servicio y facturarlo, y para cumplir las obligaciones contables y fiscales. Se conservarán mientras dure la relación comercial y los años que exija la ley, y no se cederán a terceros salvo obligación legal. Puede ejercer sus derechos de acceso, rectificación, supresión y demás dirigiéndose por escrito a esa dirección, y reclamar ante la Agencia Española de Protección de Datos (aepd.es).`;
-  const r = await dialog(`<h3>Datos de la factura</h3>
-    <div class="row3"><div><label>Serie de facturas</label><input name="s" required value="${esc(invoicing.series)}" maxlength="12"></div>
-      <div><label>Siguiente número</label><input name="next" inputmode="numeric" value="${esc(invoicing.next_no)}"></div>
-      <div><label>Serie rectificativas</label><input name="r" required value="${esc(invoicing.rect_series)}" maxlength="12"></div></div>
-    <p class="muted" style="font-size:13px;margin:4px 0 0">Completas y simplificadas van en la misma serie. Si vienes de otro programa, pon el número siguiente al último que hiciste.</p>
+  const yy = String(madridYear()).slice(2);
+  // Con «cada año» el año va en el prefijo: F → F26-. Sin él, F0001 se repetiría cada enero.
+  const withYear = (s) => (s.includes(yy) ? s : s.replace(/[-/]$/, '') + yy + '-');
+  // «FCT26-284» → prefijo FCT26-, número 284, 3 cifras. Solo con el número, se queda el prefijo que hay.
+  const readNext = (form) => {
+    const m = form.next.value.trim().toUpperCase().match(/^(.*?)(\d+)$/);
+    if (!m) return { err: 'Escribe la factura con su número, por ejemplo F1400.' };
+    const no = parseInt(m[2], 10);
+    if (no < 1) return { err: 'El número tiene que ser 1 o mayor.' };
+    if (m[2].length > 8) return { err: 'El número no puede pasar de 8 cifras.' };
+    const yearly = form.yearly.checked;
+    const series = yearly ? withYear(m[1] || invoicing.series) : (m[1] || invoicing.series);
+    const rect = (yearly ? withYear(form.r.value.trim().toUpperCase()) : form.r.value.trim().toUpperCase());
+    const digits = m[1] ? m[2].length : (invoicing.digits ?? 4);
+    if (series.length > 12) return { err: 'El prefijo no puede pasar de 12 caracteres.' };
+    if (!rect || rect === series) return { err: 'Las rectificativas necesitan un prefijo distinto al de las facturas.' };
+    return { series, rect, no, digits, yearly };
+  };
+  const code = (s, n, d) => s + String(n).padStart(d, '0');
+  const r = await dialog(`<h3>Numeración y datos de la factura</h3>
+    <label>Próxima factura</label><input name="next" required autocomplete="off" value="${esc(invCode(invoicing.series, invoicing.next_no))}">
+    <small class="muted">Escríbela tal como quieres que salga. Si tu última fue la FCT26-283, pon FCT26-284.</small>
+    <div class="inv-kind" style="margin-top:10px"><label class="chk"><input type="checkbox" name="yearly" ${invoicing.yearly_reset ? 'checked' : ''}><span><b>Empezar de 1 cada año</b><small>Lo hace solo desde el 1 de enero. El año va en el prefijo, para que no se repitan números.</small></span></label></div>
+    <label>Prefijo de las rectificativas</label><input name="r" required value="${esc(invoicing.rect_series)}" maxlength="12">
+    <p id="numPreview" style="font-size:14px;margin:8px 0 0"></p>
+    ${invoicing.mode === 'test' ? '<p class="muted" style="font-size:13px;margin:6px 0 0">Mientras sigas facturando de verdad con tu programa, su número seguirá avanzando: vuelve a ajustar este el día que cambies del todo.</p>' : ''}
+    <p class="muted" style="font-size:13px;margin:4px 0 0">Completas y simplificadas van en la misma serie. El número de las órdenes es otro contador, que se cambia en Órdenes.</p>
     <label>Forma de pago</label><input name="pay" maxlength="300" value="${esc(invoicing.payment_text || '')}" placeholder="Transferencia a tu IBAN, efectivo, tarjeta…">
     <label>Nota final</label><input name="note" maxlength="300" value="${esc(invoicing.invoice_note || '')}" placeholder="Gracias por su confianza.">
     <label>Protección de datos</label><textarea name="priv" rows="5" maxlength="2000" placeholder="La cláusula que quieres que salga en tus facturas completas.">${esc(invoicing.privacy_text || '')}</textarea>
     <p style="margin:4px 0 0"><a href="#" id="privExample">Poner un texto de ejemplo</a> <span class="muted" style="font-size:13px">Revísalo: la responsabilidad de lo que diga es del taller.</span></p>
-    <p class="muted" style="font-size:13px">Se copian en cada factura al emitirla: las ya emitidas no cambian.</p>`, 'Guardar', (fd) => fd, (form) => {
+    <p class="muted" style="font-size:13px">Se copian en cada factura al emitirla: las ya emitidas no cambian.</p>`, 'Guardar', (fd) => ({ ...fd, n: readNext($('dlgForm')) }), (form) => {
     form.querySelector('#privExample').onclick = (ev) => { ev.preventDefault(); form.priv.value = example; };
+    const preview = () => {
+      const n = readNext(form);
+      const box = form.querySelector('#numPreview');
+      form.next.setCustomValidity('');
+      if (n.err) { box.textContent = n.err; return; }
+      const nextYear = n.series.includes(yy) ? n.series.split(yy).join(String(Number(yy) + 1)) : n.series;
+      box.innerHTML = `La próxima factura será la <b>${esc(code(n.series, n.no, n.digits))}</b>.`
+        + (n.yearly ? ` La primera de ${madridYear() + 1} será la <b>${esc(code(nextYear, 1, n.digits))}</b>.` : '');
+    };
+    form.next.oninput = preview; form.yearly.onchange = preview; form.r.oninput = preview;
+    preview();
+    const input = form.next;
+    form.addEventListener('submit', (ev) => {
+      if (!input.isConnected || ev.submitter?.value !== 'ok') return;
+      const n = readNext(form);
+      if (!n.err) return;
+      ev.preventDefault();
+      input.setCustomValidity(n.err);
+      input.reportValidity();
+    });
   });
   if (!r) return;
-  const next = (r.next || '').trim() ? parseInt(digitsOf(r.next), 10) : null;
-  const { error } = await sb.rpc('set_invoice_settings', { p_workshop: workshop.id, p_series: r.s, p_rect: r.r, p_next: next, p_payment: r.pay, p_note: r.note, p_privacy: r.priv });
+  const n = r.n;
+  const { error } = await sb.rpc('set_invoice_settings', { p_workshop: workshop.id, p_series: n.series, p_rect: n.rect, p_next: n.no, p_digits: n.digits, p_yearly: n.yearly, p_payment: r.pay, p_note: r.note, p_privacy: r.priv });
   if (error) { await notice(`<h3>No se pudo guardar</h3><p>${esc(error.message)}</p>`); return; }
   ({ data: invoicing } = await sb.from('workshop_invoicing').select('*').eq('workshop_id', workshop.id).maybeSingle());
   renderInvoices();
