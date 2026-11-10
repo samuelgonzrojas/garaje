@@ -17,6 +17,7 @@ const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<
 let session = null;
 let profile = null;        // { display_name, is_workshop }
 let workshop = null;       // fila de public.workshops (null si no es taller)
+let plan = null;           // fila de public.workshop_plans (supabase/043_planes.sql)
 let myRole = null;         // 'owner' | 'manager' | 'mechanic' en ese taller (supabase/019_workshop_team.sql)
 let team = [];             // equipo del taller (workshop_team)
 const isOwner = () => myRole === 'owner';
@@ -250,7 +251,7 @@ function leave() {
 
 // Versión de las condiciones para talleres (condiciones.html §6). Si cambian, se
 // sube y el dueño las vuelve a aceptar al entrar.
-const TERMS_VERSION = '2026-10-13';
+const TERMS_VERSION = '2026-11-10';
 async function askTerms() {
   if (!workshop || !isOwner() || workshop.terms_version === TERMS_VERSION) return;
   const ok = await dialog(`<h3>${workshop.terms_version ? 'Hemos actualizado las condiciones para talleres' : 'Condiciones para talleres'}</h3>
@@ -335,6 +336,7 @@ async function loadWorkshop() {
     }
   }
   invoicing = null;
+  plan = null;
   if (workshop && myRole !== 'mechanic') {
     let { data: inv } = await sb.from('workshop_invoicing').select('*').eq('workshop_id', workshop.id).maybeSingle();
     // Primer día del año: enseña ya la serie nueva, sin esperar a la primera factura.
@@ -343,6 +345,8 @@ async function loadWorkshop() {
       ({ data: inv } = await sb.from('workshop_invoicing').select('*').eq('workshop_id', workshop.id).maybeSingle());
     }
     invoicing = inv || null;
+    // Plan del taller (supabase/043_planes.sql): solo se enseña, no corta nada.
+    ({ data: plan } = await sb.from('workshop_plans').select('*').eq('workshop_id', workshop.id).maybeSingle());
   }
   const name = workshop?.name || profile.display_name || '';
   $('who').textContent = name;
@@ -447,6 +451,25 @@ async function shareBookingLink() {
   if (c === 'copy') { try { await navigator.clipboard.writeText(url); } catch { /* sin permiso */ } }
   if (c === 'wa') window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank', 'noopener');
   if (c === 'open') window.open(url, '_blank', 'noopener');
+}
+
+// ------------------------------------------------------------------ plan
+const PLAN_TEXT = {
+  fundador: ['Fundador', 'Eres de los primeros talleres de Garaje: el panel sigue gratis para ti, como se te prometió al entrar.'],
+  prueba: ['Prueba', 'Tienes el panel completo gratis durante la prueba.'],
+  gratis: ['Gratis', 'Apareces en la app y recibes solicitudes de presupuesto. Pagas solo por cliente enviado.'],
+  taller: ['Taller · 29 €/mes + IVA', 'Panel completo: órdenes, clientes, agenda, piezas y avisos a clientes.'],
+  facturas: ['Taller con facturas · 49 €/mes + IVA', 'Panel completo y facturas con Verifactu.'],
+};
+function renderPlan() {
+  const box = $('planBox');
+  if (!plan || !isManager()) { show('planBox', false); return; }
+  const [name, text] = PLAN_TEXT[plan.plan] || [plan.plan, ''];
+  const until = plan.plan === 'prueba' && plan.trial_until
+    ? ` Hasta el ${new Date(plan.trial_until + 'T12:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}.`
+    : '';
+  box.innerHTML = `<small class="muted">Tu plan</small><h3 style="margin:2px 0 4px">${esc(name)}</h3><p class="muted" style="margin:0">${esc(text + until)} <a href="../talleres.html#precio" target="_blank" rel="noopener">Ver planes y precios</a></p>`;
+  show('planBox', true);
 }
 
 function renderWsForm(formId, data, button) {
@@ -623,7 +646,7 @@ function setTab(t) {
   if (t === 'parts') renderParts();
   if (t === 'profit') renderProfit();
   if (t === 'suppliers') renderSuppliers();
-  if (t === 'settings') renderWsForm('settingsForm', workshop || {}, 'Guardar');
+  if (t === 'settings') { renderPlan(); renderWsForm('settingsForm', workshop || {}, 'Guardar'); }
   if (t === 'team') renderTeam();
   if (t === 'invoices') renderInvoices();
   if (t === 'customers') { renderCustomers(); renderNudges(); }

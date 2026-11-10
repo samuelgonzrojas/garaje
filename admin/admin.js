@@ -174,14 +174,19 @@ function renderByMonth(fees) {
 
 function renderWorkshops(ws) {
   const tb = $('workshops').querySelector('tbody');
-  tb.innerHTML = ws.length ? '' : '<tr><td colspan="5" class="muted">Ningún taller dado de alta.</td></tr>';
+  tb.innerHTML = ws.length ? '' : '<tr><td colspan="7" class="muted">Ningún taller dado de alta.</td></tr>';
   for (const w of ws) {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${esc(w.name)}</td><td>${esc(w.city || '—')}</td><td>${w.listed ? 'Sí' : 'No'}</td>
+    const plans = [['fundador', 'Fundador'], ['prueba', 'Prueba'], ['gratis', 'Gratis'], ['taller', 'Taller 29 €'], ['facturas', 'Facturas 49 €']];
+    tr.innerHTML = `<td>${esc(w.name)}${w.plan_note ? `<br><small class="muted">${esc(w.plan_note)}</small>` : ''}</td><td>${esc(w.city || '—')}</td><td>${w.listed ? 'Sí' : 'No'}</td>
+      <td><select class="plan">${plans.map(([v, l]) => `<option value="${v}" ${v === (w.plan || 'prueba') ? 'selected' : ''}>${l}</option>`).join('')}</select></td>
+      <td><input class="trial" type="date" value="${esc(w.trial_until || '')}"></td>
       <td class="num"><input class="fee" inputmode="decimal" value="${Number(w.lead_fee).toFixed(2)}"></td><td><button class="btn small">Guardar</button></td>`;
     tr.querySelector('button').onclick = async () => {
-      const fee = parseFloat(tr.querySelector('input').value.replace(',', '.'));
-      const { error } = await sb.rpc('admin_set_lead_fee', { p_workshop: w.id, p_fee: isNaN(fee) ? 0 : fee });
+      const fee = parseFloat(tr.querySelector('input.fee').value.replace(',', '.'));
+      const r1 = await sb.rpc('admin_set_lead_fee', { p_workshop: w.id, p_fee: isNaN(fee) ? 0 : fee });
+      const r2 = await sb.rpc('admin_set_plan', { p_workshop: w.id, p_plan: tr.querySelector('select.plan').value, p_trial_until: tr.querySelector('input.trial').value || null, p_note: w.plan_note || null });
+      const error = r1.error || r2.error;
       tr.querySelector('button').textContent = error ? 'Error' : 'Guardado';
       setTimeout(() => { tr.querySelector('button').textContent = 'Guardar'; }, 1500);
     };
