@@ -1,7 +1,7 @@
 {
-  "version": "1.2.0",
-  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.2.0/garaje-1.2.0-arm64.apk",
-  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.2.0/garaje-1.2.0.apk",
-  "notes": "Coches eléctricos: ya puedes dar de alta tu eléctrico con su propio plan (revisión del fabricante, frenos, batería y neumáticos), con más de 20 familias como Tesla, Renault 5, BYD, Kia EV3, MG4, Volvo EX30 o Leapmotor. En un eléctrico ya no salen el repostaje ni las gasolineras.",
+  "version": "1.3.0",
+  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.3.0/garaje-1.3.0-arm64.apk",
+  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.3.0/garaje-1.3.0.apk",
+  "notes": "La ITV pasa a Mi coche. Garaje te pregunta si has repostado cuando toca. Botón Repostaje en el widget. Nombre y teléfono necesarios para que tu taller te identifique. Arreglos al entrar con Apple y con tu correo.",
   "play_url": "https://play.google.com/store/apps/details?id=com.samuel.mantenimiento"
 }
