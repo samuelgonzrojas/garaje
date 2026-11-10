@@ -19,6 +19,7 @@ let profile = null;        // { display_name, is_workshop }
 let workshop = null;       // fila de public.workshops (null si no es taller)
 let plan = null;           // fila de public.workshop_plans (supabase/043_planes.sql)
 let billing = null;        // fila de public.workshop_billing (cobro con Stripe, supabase/044_cobro_stripe.sql)
+let garajeInvoices = [];   // facturas de las cuotas que emite Garaje (supabase/045_facturas_cuotas.sql)
 let myRole = null;         // 'owner' | 'manager' | 'mechanic' en ese taller (supabase/019_workshop_team.sql)
 let team = [];             // equipo del taller (workshop_team)
 const isOwner = () => myRole === 'owner';
@@ -340,6 +341,7 @@ async function loadWorkshop() {
   invoicing = null;
   plan = null;
   billing = null;
+  garajeInvoices = [];
   if (workshop && myRole !== 'mechanic') {
     let { data: inv } = await sb.from('workshop_invoicing').select('*').eq('workshop_id', workshop.id).maybeSingle();
     // Primer día del año: enseña ya la serie nueva, sin esperar a la primera factura.
@@ -351,6 +353,7 @@ async function loadWorkshop() {
     // Plan del taller (supabase/043_planes.sql): solo se enseña, no corta nada.
     ({ data: plan } = await sb.from('workshop_plans').select('*').eq('workshop_id', workshop.id).maybeSingle());
     ({ data: billing } = await sb.from('workshop_billing').select('*').eq('workshop_id', workshop.id).maybeSingle());
+    garajeInvoices = (await sb.from('garaje_invoices').select('*').eq('workshop_id', workshop.id).order('issued_at', { ascending: false })).data || [];
   }
   const name = workshop?.name || profile.display_name || '';
   $('who').textContent = name;
@@ -485,7 +488,11 @@ function renderPlan() {
       ? `<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn small" id="billTaller">Elegir Taller · 29 €/mes + IVA</button><button class="btn small ghost" disabled title="Cuando conectemos VERI*FACTU">Taller con facturas · próximamente</button></div>
         <p class="muted" style="font-size:13px;margin:6px 0 0">${plan.plan === 'prueba' ? 'Si lo eliges ahora, no se cobra nada hasta que acabe la prueba. ' : ''}Sin permanencia: te das de baja cuando quieras.</p>`
       : '';
-  box.innerHTML = `<small class="muted">Tu plan</small><h3 style="margin:2px 0 4px">${esc(name)}</h3><p class="muted" style="margin:0">${esc(text + until)} <a href="../talleres.html#precio" target="_blank" rel="noopener">Ver planes y precios</a></p>${subLine}${buttons}`;
+  const invList = garajeInvoices.length
+    ? `<details style="margin-top:12px"><summary>Facturas de Garaje (${garajeInvoices.length})</summary>${garajeInvoices.map((i) => `<div style="display:flex;gap:10px;align-items:center;margin-top:6px;font-size:14px"><b>${esc(i.full_number)}</b><span class="muted">${new Date(i.issued_at).toLocaleDateString('es-ES')}</span><span>${Number(i.total).toFixed(2).replace('.', ',')} €</span>${i.status === 'registered' ? '' : `<span class="muted">(${i.status === 'pending' ? 'registrando en Hacienda' : 'pendiente de revisar'})</span>`}<a href="#" data-ginv="${esc(i.id)}">Ver</a></div>`).join('')}</details>`
+    : '';
+  box.innerHTML = `<small class="muted">Tu plan</small><h3 style="margin:2px 0 4px">${esc(name)}</h3><p class="muted" style="margin:0">${esc(text + until)} <a href="../talleres.html#precio" target="_blank" rel="noopener">Ver planes y precios</a></p>${subLine}${buttons}${invList}`;
+  for (const a of box.querySelectorAll('[data-ginv]')) a.onclick = (e) => { e.preventDefault(); printGarajeInvoice(garajeInvoices.find((x) => x.id === a.dataset.ginv)); };
   const go = async (btn, body) => {
     btn.disabled = true;
     const label = btn.textContent;
@@ -500,6 +507,32 @@ function renderPlan() {
   if ($('billTaller')) $('billTaller').onclick = (e) => go(e.currentTarget, { action: 'checkout', plan: 'taller' });
   if ($('billPortal')) $('billPortal').onclick = (e) => go(e.currentTarget, { action: 'portal' });
   show('planBox', true);
+}
+
+/** Factura de la cuota que Garaje emite al taller, lista para imprimir o guardar en PDF. */
+function printGarajeInvoice(i) {
+  if (!i) return;
+  const e = (s) => esc(s ?? '');
+  const eur = (n) => Number(n).toFixed(2).replace('.', ',') + ' €';
+  const w = window.open('', '_blank');
+  if (!w) return;
+  const is = i.issuer || {}, c = i.customer || {};
+  w.document.write(`<!doctype html><html lang="es"><meta charset="utf-8"><title>Factura ${e(i.full_number)}</title>
+  <style>body{font:14px/1.5 system-ui,sans-serif;max-width:720px;margin:32px auto;padding:0 16px;color:#111}h1{font-size:22px;margin:0}
+  .row{display:flex;justify-content:space-between;gap:24px;margin:24px 0}table{width:100%;border-collapse:collapse;margin-top:16px}
+  td,th{padding:8px;border-bottom:1px solid #ddd;text-align:left}td.n,th.n{text-align:right}.tot td{border:0}.muted{color:#666}
+  .test{background:#fff3cd;padding:8px 12px;border-radius:6px;margin-bottom:16px}</style>
+  ${i.livemode ? '' : '<p class="test"><b>Factura de prueba</b> (modo de prueba de Stripe y entorno de pruebas de VERI*FACTU): sin validez fiscal.</p>'}
+  <h1>Factura ${e(i.full_number)}</h1><p class="muted">Fecha de expedición: ${new Date(i.issued_at).toLocaleDateString('es-ES')}</p>
+  <div class="row"><div><b>${e(is.trade_name || 'Garaje')}</b><br>${e(is.name)}<br>NIF ${e(is.tax_id)}<br>${e(is.address)}<br>${e(is.postal_code)} ${e(is.city)} (${e(is.province)})<br>${e(is.email)}</div>
+  <div><b>Cliente</b><br>${e(c.name)}<br>NIF ${e(c.tax_id)}<br>${e(c.address)}<br>${e(c.postal_code)} ${e(c.city)}${c.province ? ` (${e(c.province)})` : ''}</div></div>
+  <table><tr><th>Concepto</th><th class="n">Importe</th></tr><tr><td>${e(i.description)}</td><td class="n">${eur(i.base)}</td></tr>
+  <tr class="tot"><td class="n">Base imponible</td><td class="n">${eur(i.base)}</td></tr><tr class="tot"><td class="n">IVA ${Number(i.vat_rate)} %</td><td class="n">${eur(i.vat)}</td></tr>
+  <tr class="tot"><td class="n"><b>Total</b></td><td class="n"><b>${eur(i.total)}</b></td></tr></table>
+  ${i.qr ? `<div style="margin-top:24px;display:flex;gap:16px;align-items:center"><img src="${e(i.qr)}" width="120" height="120" alt="QR"><div><b>Factura verificable en la sede electrónica de la AEAT</b><br><span class="muted">VERI*FACTU</span>${i.aeat_url ? `<br><a href="${e(i.aeat_url)}">${e(i.aeat_url)}</a>` : ''}</div></div>` : ''}
+  <p class="muted" style="margin-top:24px">Pagado con tarjeta o domiciliación a través de Stripe.</p>
+  <script>window.onload=()=>window.print()<\/script></html>`);
+  w.document.close();
 }
 
 // Vuelta de Stripe tras pagar o cancelar el pago.
