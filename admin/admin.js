@@ -179,7 +179,7 @@ function renderWorkshops(ws) {
     const tr = document.createElement('tr');
     const plans = [['fundador', 'Fundador'], ['prueba', 'Prueba'], ['gratis', 'Gratis'], ['taller', 'Taller 29 €'], ['facturas', 'Facturas 49 €']];
     tr.innerHTML = `<td>${esc(w.name)}${w.plan_note ? `<br><small class="muted">${esc(w.plan_note)}</small>` : ''}</td><td>${esc(w.city || '—')}</td><td>${w.listed ? 'Sí' : 'No'}</td>
-      <td><select class="plan">${plans.map(([v, l]) => `<option value="${v}" ${v === (w.plan || 'prueba') ? 'selected' : ''}>${l}</option>`).join('')}</select></td>
+      <td><select class="plan">${plans.map(([v, l]) => `<option value="${v}" ${v === (w.plan || 'prueba') ? 'selected' : ''}>${l}</option>`).join('')}</select>${w.billing_status ? `<br><small class="muted">Stripe: ${esc(w.billing_status)}${w.billing_period_end ? ` · ${new Date(w.billing_period_end).toLocaleDateString('es-ES')}` : ''}</small>` : ''}</td>
       <td><input class="trial" type="date" value="${esc(w.trial_until || '')}"></td>
       <td class="num"><input class="fee" inputmode="decimal" value="${Number(w.lead_fee).toFixed(2)}"></td><td><button class="btn small">Guardar</button></td>`;
     tr.querySelector('button').onclick = async () => {

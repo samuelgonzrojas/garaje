@@ -18,6 +18,7 @@ let session = null;
 let profile = null;        // { display_name, is_workshop }
 let workshop = null;       // fila de public.workshops (null si no es taller)
 let plan = null;           // fila de public.workshop_plans (supabase/043_planes.sql)
+let billing = null;        // fila de public.workshop_billing (cobro con Stripe, supabase/044_cobro_stripe.sql)
 let myRole = null;         // 'owner' | 'manager' | 'mechanic' en ese taller (supabase/019_workshop_team.sql)
 let team = [];             // equipo del taller (workshop_team)
 const isOwner = () => myRole === 'owner';
@@ -338,6 +339,7 @@ async function loadWorkshop() {
   }
   invoicing = null;
   plan = null;
+  billing = null;
   if (workshop && myRole !== 'mechanic') {
     let { data: inv } = await sb.from('workshop_invoicing').select('*').eq('workshop_id', workshop.id).maybeSingle();
     // Primer día del año: enseña ya la serie nueva, sin esperar a la primera factura.
@@ -348,6 +350,7 @@ async function loadWorkshop() {
     invoicing = inv || null;
     // Plan del taller (supabase/043_planes.sql): solo se enseña, no corta nada.
     ({ data: plan } = await sb.from('workshop_plans').select('*').eq('workshop_id', workshop.id).maybeSingle());
+    ({ data: billing } = await sb.from('workshop_billing').select('*').eq('workshop_id', workshop.id).maybeSingle());
   }
   const name = workshop?.name || profile.display_name || '';
   $('who').textContent = name;
@@ -469,8 +472,43 @@ function renderPlan() {
   const until = plan.plan === 'prueba' && plan.trial_until
     ? ` Hasta el ${new Date(plan.trial_until + 'T12:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}.`
     : '';
-  box.innerHTML = `<small class="muted">Tu plan</small><h3 style="margin:2px 0 4px">${esc(name)}</h3><p class="muted" style="margin:0">${esc(text + until)} <a href="../talleres.html#precio" target="_blank" rel="noopener">Ver planes y precios</a></p>`;
+  const STATUS = { trialing: 'en prueba, sin cobros todavía', active: 'activa', past_due: 'pago pendiente: revisa tu tarjeta', canceled: 'cancelada', unpaid: 'sin pagar', incomplete: 'pago sin completar' };
+  const subscribed = billing?.stripe_subscription_id && billing.status !== 'canceled';
+  const fecha = (iso) => new Date(iso).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+  const subLine = subscribed
+    ? `<p style="margin:6px 0 0">Suscripción ${esc(STATUS[billing.status] || billing.status)}${billing.current_period_end ? (billing.cancel_at_period_end ? ` · se da de baja el ${fecha(billing.current_period_end)}` : ` · próximo cobro el ${fecha(billing.current_period_end)}`) : ''}.</p>`
+    : '';
+  const canBuy = isOwner() && !subscribed && ['prueba', 'gratis'].includes(plan.plan);
+  const buttons = !isOwner() ? '' : subscribed
+    ? '<div style="margin-top:10px"><button class="btn small ghost" id="billPortal">Gestionar suscripción</button></div>'
+    : canBuy
+      ? `<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn small" id="billTaller">Elegir Taller · 29 €/mes + IVA</button><button class="btn small ghost" disabled title="Cuando conectemos VERI*FACTU">Taller con facturas · próximamente</button></div>
+        <p class="muted" style="font-size:13px;margin:6px 0 0">${plan.plan === 'prueba' ? 'Si lo eliges ahora, no se cobra nada hasta que acabe la prueba. ' : ''}Sin permanencia: te das de baja cuando quieras.</p>`
+      : '';
+  box.innerHTML = `<small class="muted">Tu plan</small><h3 style="margin:2px 0 4px">${esc(name)}</h3><p class="muted" style="margin:0">${esc(text + until)} <a href="../talleres.html#precio" target="_blank" rel="noopener">Ver planes y precios</a></p>${subLine}${buttons}`;
+  const go = async (btn, body) => {
+    btn.disabled = true;
+    const label = btn.textContent;
+    btn.textContent = 'Abriendo…';
+    const { data, error } = await sb.functions.invoke('billing', { body: { workshop_id: workshop.id, ...body } });
+    const msg = data?.error || (error && (await error.context?.json?.().catch(() => null))?.error) || error?.message;
+    if (data?.url) { location.href = data.url; return; }
+    btn.disabled = false;
+    btn.textContent = label;
+    await notice(`<h3>No se pudo abrir el pago</h3><p>${esc(msg || 'Vuelve a intentarlo en un momento.')}</p>`);
+  };
+  if ($('billTaller')) $('billTaller').onclick = (e) => go(e.currentTarget, { action: 'checkout', plan: 'taller' });
+  if ($('billPortal')) $('billPortal').onclick = (e) => go(e.currentTarget, { action: 'portal' });
   show('planBox', true);
+}
+
+// Vuelta de Stripe tras pagar o cancelar el pago.
+const pagoParam = new URLSearchParams(location.search).get('pago');
+if (pagoParam) {
+  history.replaceState(null, '', location.pathname + location.hash);
+  setTimeout(() => notice(pagoParam === 'ok'
+    ? '<h3>¡Gracias!</h3><p>Tu suscripción está en marcha. En unos segundos verás el plan actualizado en Mi taller; si no, recarga la página.</p>'
+    : '<h3>Pago cancelado</h3><p>No se ha cobrado nada. Puedes elegir plan cuando quieras desde Mi taller.</p>'), 1500);
 }
 
 function renderWsForm(formId, data, button) {
