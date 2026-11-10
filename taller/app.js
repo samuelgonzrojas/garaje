@@ -256,6 +256,7 @@ async function askTerms() {
   if (!workshop || !isOwner() || workshop.terms_version === TERMS_VERSION) return;
   const ok = await dialog(`<h3>${workshop.terms_version ? 'Hemos actualizado las condiciones para talleres' : 'Condiciones para talleres'}</h3>
     <p class="muted">Garaje guarda los datos de tus clientes (los que importas, las citas, las órdenes y las facturas) <b>por tu cuenta</b>: tú eres el responsable y Garaje tu encargado del tratamiento. Las condiciones explican cómo los protegemos y qué te corresponde a ti.</p>
+    ${workshop.terms_version ? `<p><b>Qué cambia:</b> hay planes de pago para los talleres nuevos, con tres meses de prueba gratis y aviso 30 días antes de cobrar nada. ${plan?.plan === 'fundador' ? 'A ti no te afecta: como taller fundador, el panel sigue gratis.' : ''}</p>` : ''}
     <p><a href="../condiciones.html#talleres" target="_blank" rel="noopener">Leer las condiciones para talleres</a> · <a href="../privacidad.html#talleres" target="_blank" rel="noopener">Privacidad</a></p>
     <label class="chk terms-chk"><input type="checkbox" name="terms" required> He leído y acepto las condiciones para talleres y la política de privacidad.</label>`,
   'Aceptar', (fd) => !!fd.terms, (form) => { form.querySelector('button[value=cancel]').textContent = 'Ahora no'; });
