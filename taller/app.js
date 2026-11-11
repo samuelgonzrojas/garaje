@@ -350,7 +350,8 @@ async function loadWorkshop() {
       ({ data: inv } = await sb.from('workshop_invoicing').select('*').eq('workshop_id', workshop.id).maybeSingle());
     }
     invoicing = inv || null;
-    // Plan del taller (supabase/043_planes.sql): solo se enseña, no corta nada.
+    // Plan del taller (supabase/043_planes.sql). En el plan gratis solo quedan Solicitudes,
+    // Agenda y Mi taller (ver planLimited); los datos no se borran.
     ({ data: plan } = await sb.from('workshop_plans').select('*').eq('workshop_id', workshop.id).maybeSingle());
     ({ data: billing } = await sb.from('workshop_billing').select('*').eq('workshop_id', workshop.id).maybeSingle());
     garajeInvoices = (await sb.from('garaje_invoices').select('*').eq('workshop_id', workshop.id).order('issued_at', { ascending: false })).data || [];
@@ -367,6 +368,7 @@ async function loadWorkshop() {
     : ['jobs', 'leads', 'agenda', 'cars', 'customers', 'works', 'parts', 'suppliers', 'profit', 'team', 'settings', ...(invoicing ? ['invoices'] : [])];
   const off = [...(toolOn('parts') ? [] : ['parts', 'suppliers', 'profit']), ...(toolOn('team') ? [] : ['team'])];
   for (let i = allowed.length - 1; i >= 0; i--) if (off.includes(allowed[i])) allowed.splice(i, 1);
+  if (planLimited()) for (let i = allowed.length - 1; i >= 0; i--) if (!GRATIS_TABS.includes(allowed[i])) allowed.splice(i, 1);
   for (const b of document.querySelectorAll('.tabs button[data-tab]')) b.classList.toggle('hidden', !allowed.includes(b.dataset.tab));
   if (!allowed.includes(tab)) tab = allowed[0];
   document.querySelector('.tabs .more-btn').classList.toggle('no-more', !workshop);
@@ -468,11 +470,37 @@ const PLAN_TEXT = {
   taller: ['Taller · 29 €/mes + IVA', 'Panel completo: órdenes, clientes, agenda, piezas y avisos a clientes.'],
   facturas: ['Taller con facturas · 49 €/mes + IVA', 'Panel completo y facturas con Verifactu.'],
 };
+// La prueba que ya pasó cuenta como plan gratis aunque nadie haya cambiado la fila.
+function effectivePlan() {
+  if (!plan) return null;
+  if (plan.plan === 'prueba' && plan.trial_until && plan.trial_until < madridToday()) return 'gratis';
+  return plan.plan;
+}
+const GRATIS_TABS = ['leads', 'agenda', 'settings'];
+const planLimited = () => effectivePlan() === 'gratis';
+function madridToday() {
+  return new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Madrid' });
+}
+/** Aviso arriba de Solicitudes cuando el taller está en el plan gratis. */
+function renderPlanBanner() {
+  const el = $('planBanner');
+  if (!el) return;
+  const on = planLimited() && isManager();
+  el.classList.toggle('hidden', !on);
+  if (!on) return;
+  const wasTrial = plan?.plan === 'prueba';
+  el.innerHTML = `<b>${wasTrial ? 'Tu prueba ha terminado' : 'Estás en el plan gratis'}</b>
+    <p class="muted" style="margin:4px 0 8px">Sigues apareciendo en la app y recibiendo solicitudes de presupuesto. Órdenes, clientes, coches, trabajos y piezas vuelven con el plan Taller, con todos tus datos tal y como los dejaste.</p>
+    ${isOwner() ? '<button class="btn small" id="planBannerGo">Ver el plan Taller</button>' : '<p class="muted" style="margin:0;font-size:13px">El plan lo elige el dueño del taller.</p>'}`;
+  if ($('planBannerGo')) $('planBannerGo').onclick = () => setTab('settings');
+}
 function renderPlan() {
   const box = $('planBox');
+  renderPlanBanner();
   if (!plan || !isManager()) { show('planBox', false); return; }
-  const [name, text] = PLAN_TEXT[plan.plan] || [plan.plan, ''];
-  const until = plan.plan === 'prueba' && plan.trial_until
+  const eff = effectivePlan();
+  const [name, text] = PLAN_TEXT[eff] || [eff, ''];
+  const until = eff === 'prueba' && plan.trial_until
     ? ` Hasta el ${new Date(plan.trial_until + 'T12:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}.`
     : '';
   const STATUS = { trialing: 'en prueba, sin cobros todavía', active: 'activa', past_due: 'pago pendiente: revisa tu tarjeta', canceled: 'cancelada', unpaid: 'sin pagar', incomplete: 'pago sin completar' };
@@ -481,15 +509,15 @@ function renderPlan() {
   const subLine = subscribed
     ? `<p style="margin:6px 0 0">Suscripción ${esc(STATUS[billing.status] || billing.status)}${billing.current_period_end ? (billing.cancel_at_period_end ? ` · se da de baja el ${fecha(billing.current_period_end)}` : ` · próximo cobro el ${fecha(billing.current_period_end)}`) : ''}.</p>`
     : '';
-  const canBuy = isOwner() && !subscribed && ['prueba', 'gratis'].includes(plan.plan);
+  const canBuy = isOwner() && !subscribed && ['prueba', 'gratis'].includes(eff);
   const buttons = !isOwner() ? '' : subscribed
     ? '<div style="margin-top:10px"><button class="btn small ghost" id="billPortal">Gestionar suscripción</button></div>'
     : canBuy
       ? `<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn small" id="billTaller">Elegir Taller · 29 €/mes + IVA</button><button class="btn small ghost" disabled title="Cuando conectemos VERI*FACTU">Taller con facturas · próximamente</button></div>
-        <p class="muted" style="font-size:13px;margin:6px 0 0">${plan.plan === 'prueba' ? 'Si lo eliges ahora, no se cobra nada hasta que acabe la prueba. ' : ''}Sin permanencia: te das de baja cuando quieras.</p>`
+        <p class="muted" style="font-size:13px;margin:6px 0 0">${eff === 'prueba' ? 'Si lo eliges ahora, no se cobra nada hasta que acabe la prueba. ' : ''}Sin permanencia: te das de baja cuando quieras.</p>`
       : '';
   const invList = garajeInvoices.length
-    ? `<details style="margin-top:12px"><summary>Facturas de Garaje (${garajeInvoices.length})</summary>${garajeInvoices.map((i) => `<div style="display:flex;gap:10px;align-items:center;margin-top:6px;font-size:14px"><b>${esc(i.full_number)}</b><span class="muted">${new Date(i.issued_at).toLocaleDateString('es-ES')}</span><span>${Number(i.total).toFixed(2).replace('.', ',')} €</span>${i.status === 'registered' ? '' : `<span class="muted">(${i.status === 'pending' ? 'registrando en Hacienda' : 'pendiente de revisar'})</span>`}<a href="#" data-ginv="${esc(i.id)}">Ver</a></div>`).join('')}</details>`
+    ? `<details style="margin-top:12px"><summary>Facturas de Garaje (${garajeInvoices.length})</summary>${garajeInvoices.map((i) => `<div style="display:flex;gap:10px;align-items:center;margin-top:6px;font-size:14px"><b>${esc(i.full_number)}</b>${i.kind === 'R1' ? '<span class="muted">rectificativa</span>' : ''}<span class="muted">${new Date(i.issued_at).toLocaleDateString('es-ES')}</span><span>${Number(i.total).toFixed(2).replace('.', ',')} €</span>${i.status === 'registered' ? '' : `<span class="muted">(${i.status === 'pending' ? 'registrando en Hacienda' : 'pendiente de revisar'})</span>`}<a href="#" data-ginv="${esc(i.id)}">Ver</a></div>`).join('')}</details>`
     : '';
   box.innerHTML = `<small class="muted">Tu plan</small><h3 style="margin:2px 0 4px">${esc(name)}</h3><p class="muted" style="margin:0">${esc(text + until)} <a href="../talleres.html#precio" target="_blank" rel="noopener">Ver planes y precios</a></p>${subLine}${buttons}${invList}`;
   for (const a of box.querySelectorAll('[data-ginv]')) a.onclick = (e) => { e.preventDefault(); printGarajeInvoice(garajeInvoices.find((x) => x.id === a.dataset.ginv)); };
@@ -517,20 +545,20 @@ function printGarajeInvoice(i) {
   const w = window.open('', '_blank');
   if (!w) return;
   const is = i.issuer || {}, c = i.customer || {};
-  w.document.write(`<!doctype html><html lang="es"><meta charset="utf-8"><title>Factura ${e(i.full_number)}</title>
+  w.document.write(`<!doctype html><html lang="es"><meta charset="utf-8"><title>${i.kind === 'R1' ? 'Rectificativa' : 'Factura'} ${e(i.full_number)}</title>
   <style>body{font:14px/1.5 system-ui,sans-serif;max-width:720px;margin:32px auto;padding:0 16px;color:#111}h1{font-size:22px;margin:0}
   .row{display:flex;justify-content:space-between;gap:24px;margin:24px 0}table{width:100%;border-collapse:collapse;margin-top:16px}
   td,th{padding:8px;border-bottom:1px solid #ddd;text-align:left}td.n,th.n{text-align:right}.tot td{border:0}.muted{color:#666}
   .test{background:#fff3cd;padding:8px 12px;border-radius:6px;margin-bottom:16px}</style>
   ${i.livemode ? '' : '<p class="test"><b>Factura de prueba</b> (modo de prueba de Stripe y entorno de pruebas de VERI*FACTU): sin validez fiscal.</p>'}
-  <h1>Factura ${e(i.full_number)}</h1><p class="muted">Fecha de expedición: ${new Date(i.issued_at).toLocaleDateString('es-ES')}</p>
+  <h1>${i.kind === 'R1' ? 'Factura rectificativa' : 'Factura'} ${e(i.full_number)}</h1><p class="muted">Fecha de expedición: ${new Date(i.issued_at).toLocaleDateString('es-ES')}</p>
   <div class="row"><div><b>${e(is.trade_name || 'Garaje')}</b><br>${e(is.name)}<br>NIF ${e(is.tax_id)}<br>${e(is.address)}<br>${e(is.postal_code)} ${e(is.city)} (${e(is.province)})<br>${e(is.email)}</div>
   <div><b>Cliente</b><br>${e(c.name)}<br>NIF ${e(c.tax_id)}<br>${e(c.address)}<br>${e(c.postal_code)} ${e(c.city)}${c.province ? ` (${e(c.province)})` : ''}</div></div>
   <table><tr><th>Concepto</th><th class="n">Importe</th></tr><tr><td>${e(i.description)}</td><td class="n">${eur(i.base)}</td></tr>
   <tr class="tot"><td class="n">Base imponible</td><td class="n">${eur(i.base)}</td></tr><tr class="tot"><td class="n">IVA ${Number(i.vat_rate)} %</td><td class="n">${eur(i.vat)}</td></tr>
   <tr class="tot"><td class="n"><b>Total</b></td><td class="n"><b>${eur(i.total)}</b></td></tr></table>
   ${i.qr ? `<div style="margin-top:24px;display:flex;gap:16px;align-items:center"><img src="${e(i.qr)}" width="120" height="120" alt="QR"><div><b>Factura verificable en la sede electrónica de la AEAT</b><br><span class="muted">VERI*FACTU</span>${i.aeat_url ? `<br><a href="${e(i.aeat_url)}">${e(i.aeat_url)}</a>` : ''}</div></div>` : ''}
-  <p class="muted" style="margin-top:24px">Pagado con tarjeta o domiciliación a través de Stripe.</p>
+  <p class="muted" style="margin-top:24px">${i.kind === 'R1' ? 'Rectificativa por diferencias (R1): importe devuelto a través de Stripe.' : 'Pagado con tarjeta o domiciliación a través de Stripe.'}</p>
   <script>window.onload=()=>window.print()<\/script></html>`);
   w.document.close();
 }
@@ -711,7 +739,7 @@ function setTab(t) {
   for (const id of ['tab-jobs', 'tab-leads', 'tab-agenda', 'tab-cars', 'tab-customers', 'tab-works', 'tab-parts', 'tab-suppliers', 'tab-profit', 'tab-team', 'tab-settings', 'tab-invoices', 'job', 'vehicle']) show(id, false);
   show('tab-' + t);
   if (t === 'jobs') renderBoard();
-  if (t === 'leads') renderLeads();
+  if (t === 'leads') { renderLeads(); renderPlanBanner(); }
   if (t === 'agenda') renderAgenda();
   if (t === 'cars') renderGrid();
   if (t === 'works') renderWorks();
@@ -1353,7 +1381,7 @@ function leadCard(l, compact = false) {
   const acts = el.querySelector('.actions');
   const btn = (label, fn, cls = 'btn small') => { const b = document.createElement('button'); b.className = cls; b.textContent = label; b.onclick = fn; acts.appendChild(b); };
   if (l.status === 'sent' || l.status === 'quoted' || l.status === 'reschedule') btn(l.status === 'sent' ? 'Responder' : l.status === 'reschedule' ? 'Proponer otra hora' : 'Cambiar respuesta', () => respondLead(l), l.status === 'quoted' ? 'btn ghost small' : 'btn small');
-  if (l.status === 'accepted') btn('Abrir orden', () => convertLead(l));
+  if (l.status === 'accepted' && !planLimited()) btn('Abrir orden', () => convertLead(l));
   if (l.status === 'converted' && l.job_id) btn('Ver orden', () => { const j = jobs.find((x) => x.id === l.job_id); if (j) openJob(j); }, 'btn ghost small');
   if (['sent', 'quoted', 'reschedule', 'accepted', 'declined'].includes(l.status)) btn(l.status === 'declined' ? 'Archivar' : 'Cerrar', () => closeLead(l), 'btn ghost small');
   return el;
@@ -1662,7 +1690,7 @@ async function openAgendaItem(it) {
   if (it.kind === 'pedida') buttons.push(['confirm', 'Confirmar', 'btn small'], ['decline', 'Rechazar', 'btn ghost small']);
   if (j) buttons.push(['job', 'Ver orden', 'btn small']);
   const unregistered = a && !j && it.kind !== 'pedida' && !a.vehicle_id && !a.ws_vehicle_id;
-  if (a && !j && it.kind !== 'pedida') buttons.push(['open', unregistered ? 'Registrar y abrir orden' : 'Abrir orden', 'btn small']);
+  if (a && !j && it.kind !== 'pedida' && !planLimited()) buttons.push(['open', unregistered ? 'Registrar y abrir orden' : 'Abrir orden', 'btn small']);
   if (l && isManager()) buttons.push(['lead', 'Ver solicitud', j ? 'btn ghost small' : 'btn small']);
   if (!it.allDay) buttons.push(['ics', 'Añadir a mi calendario', 'btn ghost small']);
   if (a) buttons.push(['edit', 'Editar', 'btn ghost small'], ['del', 'Borrar', 'btn ghost small']);
