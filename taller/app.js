@@ -2712,7 +2712,8 @@ async function issueInvoice() {
   let data = issued;
   if (data.status === 'pending') { setSaveState('Registrando en Hacienda…', 'pending'); data = await sendVerifactu(data); setSaveState(''); }
   invoices.unshift(data);
-  invoicing.next_no++;
+  // Cada tipo avanza su propia serie (migración 042): la simplificada no toca la completa.
+  if (simple) invoicing.simple_next_no++; else invoicing.next_no++;
   for (const x of new Set([j, jobs.find((y) => y.id === j.id)])) if (x) Object.assign(x, { invoice_ref: data.full_number, invoiced_at: data.issued_at, customer_tax_id: customer.tax_id ?? x.customer_tax_id, customer_address: customer.address ?? x.customer_address });
   if (job?.id === j.id) {
     Object.assign(job, { invoice_ref: data.full_number, invoiced_at: data.issued_at });
