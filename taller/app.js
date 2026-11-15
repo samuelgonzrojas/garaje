@@ -145,6 +145,20 @@ function itemName(catalogId, prof) {
   const c = (prof?.custom_items || []).find((x) => x.id === bare || 'custom:' + x.id === catalogId);
   return c ? c.name : catalogId;
 }
+// Igual que en la app (lib/domain/event_title.dart): un trabajo fuera del plan lleva su
+// nombre en la primera línea de la nota; los de una orden empiezan por «OR ».
+function eventTitle(e, prof) {
+  if (e.catalog_id) return itemName(e.catalog_id, prof);
+  const n = (e.note || '').trim();
+  if (n.startsWith('OR ')) return 'Trabajo del taller';
+  return n ? n.split('\n')[0].trim() : 'Otros trabajos';
+}
+function eventDetail(e) {
+  const n = (e.note || '').trim();
+  if (!n) return '';
+  if (e.catalog_id || n.startsWith('OR ')) return n;
+  return n.split('\n').slice(1).join(' ').trim();
+}
 function latestReading(doc) {
   const deleted = new Set(doc.deleted || []);
   let best = null;
@@ -184,7 +198,7 @@ function summary(row) {
     km: r?.value ?? null,
     kmAt: r?.at ?? null,
     itv: doc.inspection?.due_date ?? null,
-    last: events[0] ? `${fmtDate(events[0].at)} · ${itemName(events[0].catalog_id, prof)}` : '—',
+    last: events[0] ? `${fmtDate(events[0].at)} · ${eventTitle(events[0], prof)}` : '—',
     role: roles[row.id] || 'family',
     photo: prof.photo || null,
     prof, events,
@@ -888,7 +902,7 @@ function renderVehicle() {
   show('noHistory', s.events.length === 0);
   for (const e of s.events) {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td data-label="Fecha">${fmtDate(e.at)}</td><td class="h-what"><b>${esc(itemName(e.catalog_id, s.prof))}</b>${e.note ? `<small>${esc(e.note)}</small>` : ''}</td>
+    tr.innerHTML = `<td data-label="Fecha">${fmtDate(e.at)}</td><td class="h-what"><b>${esc(eventTitle(e, s.prof))}</b>${eventDetail(e) ? `<small>${esc(eventDetail(e))}</small>` : ''}</td>
       <td data-label="Km">${e.reading_value != null ? fmtKm(e.reading_value) : '—'}</td><td data-label="Coste">${fmtEur(e.cost) || '—'}</td><td data-label="Quién">${esc(e.author || '—')}</td>`;
     tb.appendChild(tr);
   }
