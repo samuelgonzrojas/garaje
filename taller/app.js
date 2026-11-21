@@ -3194,8 +3194,8 @@ $('invExport').onclick = async () => {
   const m = $('invMonth').value;
   const list = invoices.filter((i) => !m || i.issued_at.startsWith(m)).slice().reverse();
   if (!list.length) return;
-  const btn = $('invExport'), label = btn.textContent;
-  btn.disabled = true; btn.textContent = 'Preparando…';
+  const btn = $('invExport'), lab = btn.querySelector('span'), label = lab.textContent;
+  btn.disabled = true; lab.textContent = 'Preparando…';
   try {
     if (!window.ExcelJS) {
       await new Promise((ok, ko) => { const sc = document.createElement('script'); sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js'; sc.onload = ok; sc.onerror = ko; document.head.appendChild(sc); });
@@ -3217,7 +3217,7 @@ $('invExport').onclick = async () => {
   } catch {
     await notice('<h3>No se pudo preparar el Excel</h3><p>Comprueba la conexión y vuelve a intentarlo.</p>');
   } finally {
-    btn.disabled = false; btn.textContent = label;
+    btn.disabled = false; lab.textContent = label;
   }
 };
 $('invSeriesBtn').onclick = async (e) => {

@@ -747,7 +747,10 @@ dialog#dlg{max-width:760px}
 .inv-kind label.chk.off{opacity:.55}
 .inv-totals{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:12px;padding:10px 14px;border-radius:14px;background:var(--card-2);font-variant-numeric:tabular-nums}
 .inv-totals b{margin-left:auto}
-.head-actions{display:flex;flex-wrap:wrap;gap:8px}
+.page-head>div:first-child{flex:1 1 320px;min-width:0}
+.inv-series{font-size:13px;margin:6px 0 0}
+.inv-excel{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.inv-excel svg{width:16px;height:16px;fill:currentColor}
 .grp-jobs{display:flex;flex-direction:column;gap:4px;margin:8px 0 4px;max-height:260px;overflow:auto}
 .grp-jobs label.chk{margin:0;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:var(--card-2)}
 .grp-jobs label.chk span{flex:1;display:flex;flex-wrap:wrap;gap:0 4px}
