@@ -3243,16 +3243,17 @@ $('invExport').onclick = (e) => {
   e.stopPropagation();
   if (!$('invDlMenu').classList.contains('hidden')) return closeDlMenu();
   const m = $('invMonth').value, year = (m || today()).slice(0, 4);
-  const per = m ? monthLabel(m).toLowerCase() : 'todas';
   const n = invList(m).length, ny = invList(year).length;
-  const item = (k, icon, title, sub, count) => `<button type="button" role="menuitem" data-dl="${k}" ${count ? '' : 'disabled'}>${icon}<span><b>${title}</b><small>${sub} · ${count} ${count === 1 ? 'factura' : 'facturas'}</small></span></button>`;
+  const count = (c) => `${c} ${c === 1 ? 'factura' : 'facturas'}`;
+  const item = (k, icon, title, sub, c) => `<button type="button" role="menuitem" data-dl="${k}" ${c ? '' : 'disabled'}>${icon}<span><b>${title}</b><small>${sub}</small></span></button>`;
   const ICON_X = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13zM8.5 18l2.1-3.2L8.6 12h1.8l1.1 1.8 1.1-1.8h1.8l-2 2.8 2.1 3.2h-1.8l-1.2-2-1.2 2H8.5z"/></svg>';
   const ICON_P = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13zM8 13h8v1.5H8V13zm0 3h8v1.5H8V16zm0-6h3v1.5H8V10z"/></svg>';
   const ICON_C = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5v14h18V5H3zm6 12H5v-2h4v2zm0-4H5v-2h4v2zm0-4H5V7h4v2zm10 8h-8v-2h8v2zm0-4h-8v-2h8v2zm0-4h-8V7h8v2z"/></svg>';
-  $('invDlMenu').innerHTML = item('xlsx', ICON_X, 'Excel para el gestor', m ? monthLabel(m) : 'Todas las facturas', n)
-    + (m ? item('xlsx-year', ICON_X, `Excel de todo ${year}`, 'Para el resumen anual', ny) : '')
-    + item('pdf', ICON_P, 'PDF de las facturas', `Todas en un archivo · ${m ? monthLabel(m) : 'todas'}`, n)
-    + item('csv', ICON_C, 'CSV', `Para otros programas · ${m ? monthLabel(m) : 'todas'}`, n);
+  $('invDlMenu').innerHTML = `<div class="dl-head">${m ? monthLabel(m) : 'Todas las facturas'} · ${count(n)}</div>`
+    + item('xlsx', ICON_X, 'Excel para el gestor', 'Libro de facturas con totales', n)
+    + item('pdf', ICON_P, 'PDF de las facturas', 'Todas en un solo archivo', n)
+    + item('csv', ICON_C, 'CSV', 'Para importar en otros programas', n)
+    + (m ? item('xlsx-year', ICON_X, `Excel de todo ${year}`, `Resumen anual · ${count(ny)}`, ny) : '');
   show('invDlMenu', true);
   $('invExport').setAttribute('aria-expanded', 'true');
   for (const b of $('invDlMenu').querySelectorAll('[data-dl]')) b.onclick = async () => {
