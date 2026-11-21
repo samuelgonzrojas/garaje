@@ -3217,23 +3217,26 @@ function downloadInvoicesCsv(list, file) {
   downloadCsv(file, ['Fecha', 'Número', 'Tipo', 'Cliente', 'NIF/CIF', 'Dirección', 'Base imponible', '% IVA', 'Cuota de IVA', 'Total', 'Cobrado', 'Pendiente', 'Forma de pago', 'Estado', 'Rectifica a', 'Motivo', 'Sustituida por'],
     invoiceRows(list).map((r) => [fmt(r.fecha), r.numero, r.tipo, r.cliente, r.nif, r.direccion, r.base, r.ivaPct, r.iva, r.total, r.cobrado, r.pendiente, r.pago, r.estado, r.rectifica, r.motivo, r.sustituida]));
 }
-/** Todas las facturas en un solo PDF, una detrás de otra (cada una empieza en página nueva). */
+/** Todas las facturas en un solo PDF: cada una se dibuja aparte y empieza en página nueva. */
 async function downloadInvoicesPdf(list, file) {
   if (!window.html2pdf) await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js');
   const holder = document.createElement('div');
   holder.className = 'pdf-holder';
   holder.style.width = '718px';
-  holder.innerHTML = `<div>${list.map((i) => `<div class="pdf-one">${invoiceDoc(i)}</div>`).join('')}</div>`;
+  holder.innerHTML = list.map((i) => `<div class="pdf-one">${invoiceDoc(i)}</div>`).join('');
   document.body.appendChild(holder);
   try {
     await Promise.all([...holder.querySelectorAll('img')].map((i) => i.decode().catch(() => {})));
-    await window.html2pdf().set({
+    const docs = [...holder.children];
+    let w = window.html2pdf().set({
       margin: 10, filename: file,
       image: { type: 'jpeg', quality: 0.92 },
       html2canvas: { scale: 2, backgroundColor: '#ffffff', useCORS: true, scrollX: 0, scrollY: 0 },
       jsPDF: { unit: 'mm', format: 'a4' },
       pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', '.annex-job h3'] },
-    }).from(holder.firstElementChild).save();
+    }).from(docs[0]).toPdf();
+    for (const el of docs.slice(1)) w = w.get('pdf').then((pdf) => { pdf.addPage(); }).from(el).toContainer().toCanvas().toPdf();
+    await w.save();
   } finally {
     holder.remove();
   }
