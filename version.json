@@ -1,7 +1,7 @@
 {
-  "version": "1.4.1",
-  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.4.1/garaje-1.4.1-arm64.apk",
-  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.4.1/garaje-1.4.1.apk",
-  "notes": "En iPhone ya no sale el aviso de actualizar en Google Play: la app se actualiza desde la App Store.",
+  "version": "1.4.2",
+  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.4.2/garaje-1.4.2-arm64.apk",
+  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.4.2/garaje-1.4.2.apk",
+  "notes": "Los avisos con «Deshacer» (viaje quitado, repostaje o registro borrado) ya se cierran solos y no se quedan fijos en la pantalla.",
   "play_url": "https://play.google.com/store/apps/details?id=com.samuel.mantenimiento"
 }
