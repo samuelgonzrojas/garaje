@@ -3190,36 +3190,90 @@ function gestorWorkbook(ExcelJS, { rows, taller, periodo, conPruebas }) {
   return wb;
 }
 $('invGroupBtn').onclick = () => issueGroupedInvoice();
-$('invExport').onclick = async () => {
-  const m = $('invMonth').value;
-  const list = invoices.filter((i) => !m || i.issued_at.startsWith(m)).slice().reverse();
-  if (!list.length) return;
-  const btn = $('invExport'), lab = btn.querySelector('span'), label = lab.textContent;
-  btn.disabled = true; lab.textContent = 'Preparando…';
+// --- descargas de Facturas: un botón con varias opciones (Excel, PDF, CSV)
+const loadScript = (src) => new Promise((ok, ko) => { const sc = document.createElement('script'); sc.src = src; sc.onload = ok; sc.onerror = ko; document.head.appendChild(sc); });
+/** Una fila por factura, la misma para el Excel del gestor y el CSV. */
+function invoiceRows(list) {
+  return list.map((i) => {
+    const d = new Date(i.issued_at);
+    return { fecha: new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())), numero: i.full_number, tipo: INV_KIND[i.kind], cliente: i.customer?.name || '', nif: i.customer?.tax_id || '', direccion: i.customer?.address || '',
+      base: num(i.base), ivaPct: num(i.vat_rate), iva: num(i.vat), total: num(i.total), cobrado: paidOf(i), pendiente: pendingOf(i),
+      pago: [...new Set(payments.filter((p) => p.invoice_id === i.id).map((p) => PAY_METHOD[p.method]))].join(', '), estado: INV_STATUS[i.status]?.[0] || i.status,
+      rectifica: invoices.find((o) => o.id === i.rectifies_id)?.full_number || '', motivo: i.rectify_reason || '', sustituida: replacedBy(i)?.full_number || '' };
+  });
+}
+const invList = (m) => invoices.filter((i) => !m || i.issued_at.startsWith(m)).slice().reverse();
+async function downloadInvoicesExcel(list, periodo, file) {
+  if (!window.ExcelJS) await loadScript('https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js');
+  const wb = gestorWorkbook(window.ExcelJS, { rows: invoiceRows(list), taller: [workshop.legal_name || workshop.name, workshop.tax_id].filter(Boolean).join(' · '), periodo, conPruebas: list.some((i) => !i.live) });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([await wb.xlsx.writeBuffer()], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+  a.download = file;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+function downloadInvoicesCsv(list, file) {
+  const fmt = (d) => d.toISOString().slice(0, 10).split('-').reverse().join('/');
+  downloadCsv(file, ['Fecha', 'Número', 'Tipo', 'Cliente', 'NIF/CIF', 'Dirección', 'Base imponible', '% IVA', 'Cuota de IVA', 'Total', 'Cobrado', 'Pendiente', 'Forma de pago', 'Estado', 'Rectifica a', 'Motivo', 'Sustituida por'],
+    invoiceRows(list).map((r) => [fmt(r.fecha), r.numero, r.tipo, r.cliente, r.nif, r.direccion, r.base, r.ivaPct, r.iva, r.total, r.cobrado, r.pendiente, r.pago, r.estado, r.rectifica, r.motivo, r.sustituida]));
+}
+/** Todas las facturas en un solo PDF, una detrás de otra (cada una empieza en página nueva). */
+async function downloadInvoicesPdf(list, file) {
+  if (!window.html2pdf) await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js');
+  const holder = document.createElement('div');
+  holder.className = 'pdf-holder';
+  holder.style.width = '718px';
+  holder.innerHTML = `<div>${list.map((i) => `<div class="pdf-one">${invoiceDoc(i)}</div>`).join('')}</div>`;
+  document.body.appendChild(holder);
   try {
-    if (!window.ExcelJS) {
-      await new Promise((ok, ko) => { const sc = document.createElement('script'); sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js'; sc.onload = ok; sc.onerror = ko; document.head.appendChild(sc); });
-    }
-    const rows = list.map((i) => {
-      const d = new Date(i.issued_at);
-      return { fecha: new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())), numero: i.full_number, tipo: INV_KIND[i.kind], cliente: i.customer?.name || '', nif: i.customer?.tax_id || '', direccion: i.customer?.address || '',
-        base: num(i.base), ivaPct: num(i.vat_rate), iva: num(i.vat), total: num(i.total), cobrado: paidOf(i), pendiente: pendingOf(i),
-        pago: [...new Set(payments.filter((p) => p.invoice_id === i.id).map((p) => PAY_METHOD[p.method]))].join(', '), estado: INV_STATUS[i.status]?.[0] || i.status,
-        rectifica: invoices.find((o) => o.id === i.rectifies_id)?.full_number || '', motivo: i.rectify_reason || '', sustituida: replacedBy(i)?.full_number || '' };
-    });
-    const periodo = m ? monthLabel(m) : 'Todas las facturas';
-    const wb = gestorWorkbook(window.ExcelJS, { rows, taller: [workshop.legal_name || workshop.name, workshop.tax_id].filter(Boolean).join(' · '), periodo, conPruebas: list.some((i) => !i.live) });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([await wb.xlsx.writeBuffer()], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
-    a.download = `facturas-${slug(workshop.name)}-${m || 'todas'}.xlsx`;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-  } catch {
-    await notice('<h3>No se pudo preparar el Excel</h3><p>Comprueba la conexión y vuelve a intentarlo.</p>');
+    await Promise.all([...holder.querySelectorAll('img')].map((i) => i.decode().catch(() => {})));
+    await window.html2pdf().set({
+      margin: 10, filename: file,
+      image: { type: 'jpeg', quality: 0.92 },
+      html2canvas: { scale: 2, backgroundColor: '#ffffff', useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a4' },
+      pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', '.annex-job h3'] },
+    }).from(holder.firstElementChild).save();
   } finally {
-    btn.disabled = false; lab.textContent = label;
+    holder.remove();
   }
+}
+const closeDlMenu = () => { show('invDlMenu', false); $('invExport').setAttribute('aria-expanded', 'false'); };
+$('invExport').onclick = (e) => {
+  e.stopPropagation();
+  if (!$('invDlMenu').classList.contains('hidden')) return closeDlMenu();
+  const m = $('invMonth').value, year = (m || today()).slice(0, 4);
+  const per = m ? monthLabel(m).toLowerCase() : 'todas';
+  const n = invList(m).length, ny = invList(year).length;
+  const item = (k, icon, title, sub, count) => `<button type="button" role="menuitem" data-dl="${k}" ${count ? '' : 'disabled'}>${icon}<span><b>${title}</b><small>${sub} · ${count} ${count === 1 ? 'factura' : 'facturas'}</small></span></button>`;
+  const ICON_X = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13zM8.5 18l2.1-3.2L8.6 12h1.8l1.1 1.8 1.1-1.8h1.8l-2 2.8 2.1 3.2h-1.8l-1.2-2-1.2 2H8.5z"/></svg>';
+  const ICON_P = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13zM8 13h8v1.5H8V13zm0 3h8v1.5H8V16zm0-6h3v1.5H8V10z"/></svg>';
+  const ICON_C = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5v14h18V5H3zm6 12H5v-2h4v2zm0-4H5v-2h4v2zm0-4H5V7h4v2zm10 8h-8v-2h8v2zm0-4h-8v-2h8v2zm0-4h-8V7h8v2z"/></svg>';
+  $('invDlMenu').innerHTML = item('xlsx', ICON_X, 'Excel para el gestor', m ? monthLabel(m) : 'Todas las facturas', n)
+    + (m ? item('xlsx-year', ICON_X, `Excel de todo ${year}`, 'Para el resumen anual', ny) : '')
+    + item('pdf', ICON_P, 'PDF de las facturas', `Todas en un archivo · ${m ? monthLabel(m) : 'todas'}`, n)
+    + item('csv', ICON_C, 'CSV', `Para otros programas · ${m ? monthLabel(m) : 'todas'}`, n);
+  show('invDlMenu', true);
+  $('invExport').setAttribute('aria-expanded', 'true');
+  for (const b of $('invDlMenu').querySelectorAll('[data-dl]')) b.onclick = async () => {
+    closeDlMenu();
+    const kind = b.dataset.dl, btn = $('invExport'), lab = btn.querySelector('span'), label = lab.textContent;
+    const tag = `${slug(workshop.name)}-${kind === 'xlsx-year' ? year : m || 'todas'}`;
+    btn.disabled = true; lab.textContent = 'Preparando…';
+    try {
+      if (kind === 'xlsx') await downloadInvoicesExcel(invList(m), m ? monthLabel(m) : 'Todas las facturas', `facturas-${tag}.xlsx`);
+      if (kind === 'xlsx-year') await downloadInvoicesExcel(invList(year), `Año ${year}`, `facturas-${tag}.xlsx`);
+      if (kind === 'csv') downloadInvoicesCsv(invList(m), `facturas-${tag}.csv`);
+      if (kind === 'pdf') await downloadInvoicesPdf(invList(m), `facturas-${tag}.pdf`);
+    } catch (err) {
+      console.warn(err);
+      await notice('<h3>No se pudo preparar la descarga</h3><p>Comprueba la conexión y vuelve a intentarlo.</p>');
+    } finally {
+      btn.disabled = false; lab.textContent = label;
+    }
+  };
 };
+document.addEventListener('click', (e) => { if (!$('invDlMenu').contains(e.target)) closeDlMenu(); });
 $('invSeriesBtn').onclick = async (e) => {
   e.preventDefault();
   const w = workshop;

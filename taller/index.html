@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Garaje Taller">
 <link rel="stylesheet" href="../style.css?v=20261014a">
-<link rel="stylesheet" href="taller.css?v=20261121b">
+<link rel="stylesheet" href="taller.css?v=20261121c">
 </head>
 <body>
 <div class="wrap panel">
@@ -387,7 +387,7 @@
     <input id="invSearch" type="search" placeholder="Buscar por número, cliente, NIF o matrícula…" autocomplete="off">
     <select id="invMonth"></select>
     <select id="invPay"><option value="">Cobradas y pendientes</option><option value="pending">Pendientes de cobro</option><option value="paid">Cobradas</option></select>
-    <button class="btn ghost small inv-excel" id="invExport" title="Libro de facturas del mes elegido, en Excel, para tu gestor"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg><span>Excel para el gestor</span></button>
+    <div class="dl-wrap"><button class="btn ghost small inv-excel" id="invExport" aria-haspopup="menu" aria-expanded="false" aria-controls="invDlMenu" title="Descargar las facturas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg><span>Descargar</span><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5z"/></svg></button><div class="user-menu dl-menu hidden" id="invDlMenu" role="menu"></div></div>
   </div>
   <div class="t-sum inv-sum" id="invTotals"></div>
   <div class="card" id="invoicesBody"></div>
@@ -434,6 +434,6 @@
 </div>
 <datalist id="brands"></datalist>
 <datalist id="carMakes"></datalist>
-<script type="module" src="app.js?v=20261121b"></script>
+<script type="module" src="app.js?v=20261121c"></script>
 </body>
 </html>
