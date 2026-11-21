@@ -757,7 +757,7 @@ dialog#dlg{max-width:760px}
 .dl-menu button span{display:flex;flex-direction:column;line-height:1.3}
 .dl-menu button small{color:var(--muted);font-size:12.5px}
 .dl-menu button:disabled{opacity:.45;cursor:default;background:none}
-.pdf-one+.pdf-one{break-before:page;page-break-before:always}
+.pdf-one+.pdf-one{break-before:page;page-break-before:always;padding-top:12px}
 @media (max-width:640px){.dl-menu{right:auto;left:0}#tab-invoices .board-tools{flex-wrap:wrap}#tab-invoices .board-tools input[type=search]{flex:1 1 100%}#tab-invoices .board-tools select{flex:1 1 calc(50% - 6px);min-width:0}}
 .dl-head{padding:8px 10px 6px;font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--muted)}
 .grp-jobs{display:flex;flex-direction:column;gap:4px;margin:8px 0 4px;max-height:260px;overflow:auto}
