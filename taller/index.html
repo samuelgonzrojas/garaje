@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Garaje Taller">
 <link rel="stylesheet" href="../style.css?v=20261014a">
-<link rel="stylesheet" href="taller.css?v=20261102b">
+<link rel="stylesheet" href="taller.css?v=20261121a">
 </head>
 <body>
 <div class="wrap panel">
@@ -378,7 +378,7 @@
 <section id="tab-invoices" class="tab hidden no-print">
   <div class="top page-head">
     <div><h2 style="margin:0">Facturas</h2><p class="sub" style="margin:2px 0 0">Las que emites desde las órdenes, numeradas solas. No se borran: si una está mal, se rectifica.</p></div>
-    <button class="btn ghost" id="invExport">Descargar para el gestor (Excel)</button>
+    <div class="head-actions"><button class="btn" id="invGroupBtn">Factura de varias órdenes</button><button class="btn ghost" id="invExport">Descargar para el gestor (Excel)</button></div>
   </div>
   <div id="invTestBanner"></div>
   <p class="muted" style="font-size:14px;margin:0 0 10px"><span id="invSeries"></span> · <a href="#" id="invSeriesBtn">Cambiar numeración y datos de la factura</a></p>
@@ -433,6 +433,6 @@
 </div>
 <datalist id="brands"></datalist>
 <datalist id="carMakes"></datalist>
-<script type="module" src="app.js?v=20261115a"></script>
+<script type="module" src="app.js?v=20261121a"></script>
 </body>
 </html>

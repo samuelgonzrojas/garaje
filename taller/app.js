@@ -2632,7 +2632,9 @@ function verifactuLine(inv) {
   return '';
 }
 const replacedBy = (inv) => invoices.find((r) => r.replaces_id === inv.id);
-const invoiceOfJob = (id) => invoices.find((i) => i.job_id === id && ['F1', 'F2', 'F3'].includes(i.kind) && !invoices.some((r) => r.rectifies_id === i.id) && !replacedBy(i));
+/** Las órdenes de una factura: varias si junta órdenes (migración 048) o la suya. */
+const invJobIds = (inv) => (inv.job_ids?.length ? inv.job_ids : inv.job_id ? [inv.job_id] : []);
+const invoiceOfJob = (id) => invoices.find((i) => invJobIds(i).includes(id) && ['F1', 'F2', 'F3'].includes(i.kind) && !invoices.some((r) => r.rectifies_id === i.id) && !replacedBy(i));
 
 // --- cobros (supabase/030_payments.sql)
 const PAY_METHOD = { cash: 'Efectivo', card: 'Tarjeta', bizum: 'Bizum', transfer: 'Transferencia', other: 'Otro' };
@@ -2807,6 +2809,7 @@ function invoiceDoc(inv) {
   const w = inv.issuer || {}, c = inv.customer || {};
   const orig = inv.rectifies_id ? invoices.find((i) => i.id === inv.rectifies_id) : null;
   const replaced = inv.replaces_id ? invoices.find((i) => i.id === inv.replaces_id) : null;
+  if ((inv.lines || []).some((l) => l.kind === 'job')) return groupedInvoiceDoc(inv, orig);
   const rows = (inv.lines || []).map((l) => `<tr><td>${l.kind === 'labor' ? 'Mano de obra' : 'Pieza'}</td><td>${esc(l.description)}${l.brand || l.reference ? `<br><small>${esc([l.brand, l.reference].filter(Boolean).join(' · '))}</small>` : ''}</td>
     <td class="num">${String(l.qty).replace('.', ',')}</td><td class="num">${fmtEur(num(l.unit_price))}</td><td class="num">${num(l.discount) ? String(l.discount).replace('.', ',') + ' %' : ''}</td><td class="num">${fmtEur(num(l.amount))}</td></tr>`).join('');
   // El QR de Verifactu va arriba, antes del resto (Orden HAC/1177/2024).
@@ -2828,6 +2831,135 @@ function invoiceDoc(inv) {
     <div class="legal">${WARRANTY}${w.privacy ? `<p>${esc(w.privacy)}</p>` : ''}</div>
     <div class="sign"><div>${sealImages()}Firma y sello del taller</div><div></div></div>
   </div>`;
+}
+
+/** Filas de líneas de trabajo (mano de obra y piezas), con signo si es una rectificativa. */
+const detailRows = (lines, sign = 1) => (lines || []).map((l) => `<tr><td>${l.kind === 'labor' ? 'Mano de obra' : 'Pieza'}</td><td>${esc(l.description)}${l.brand || l.reference ? `<br><small>${esc([l.brand, l.reference].filter(Boolean).join(' · '))}</small>` : ''}</td>
+    <td class="num">${String(num(l.qty) * sign).replace('.', ',')}</td><td class="num">${fmtEur(num(l.unit_price))}</td><td class="num">${num(l.discount) ? String(l.discount).replace('.', ',') + ' %' : ''}</td><td class="num">${fmtEur(num(l.amount) * sign)}</td></tr>`).join('');
+/**
+ * Factura de varias órdenes (recapitulativa, art. 13 del RD 1619/2012): una línea por orden con
+ * su número, fecha de la operación, vehículo e importe, y detrás el detalle de cada orden.
+ */
+function groupedInvoiceDoc(inv, orig) {
+  const w = inv.issuer || {}, c = inv.customer || {};
+  const rect = !!inv.rectifies_id;
+  const rows = (inv.lines || []).map((l) => `<tr><td>${fmtDate(l.date)}</td><td>Orden de reparación nº ${esc(l.job_number)}</td><td>${esc(l.vehicle || '')}</td><td class="num">${fmtEur(num(l.amount))}</td></tr>`).join('');
+  const annex = (inv.lines || []).map((l) => `<div class="annex-job">
+      <h3>Orden de reparación nº ${esc(l.job_number)} <small>${fmtDate(l.date)}${l.vehicle ? ' · ' + esc(l.vehicle) : ''}${l.km != null ? ' · ' + fmtKm(l.km) : ''}</small></h3>
+      <table><thead><tr><th>Tipo</th><th>Concepto</th><th class="num">Cant.</th><th class="num">Precio</th><th class="num">Dto.</th><th class="num">Importe</th></tr></thead><tbody>${detailRows(l.detail, rect ? -1 : 1)}</tbody></table>
+      <div class="annex-sum">Base de la orden: <b>${fmtEur(num(l.amount))}</b></div></div>`).join('');
+  const month = c.month ? monthLabel(c.month).toLowerCase() : '';
+  return `<div class="doc">
+    ${inv.qr ? `<div class="vf"><img src="${esc(inv.qr)}" alt="QR"><span>Factura verificable en la sede electrónica de la AEAT<br><b>VERI*FACTU</b></span></div>` : ''}
+    ${inv.live ? '' : `<div class="doc-test">FACTURA DE PRUEBA${inv.qr ? ' (entorno de pruebas de Verifactu)' : ''} · SIN VALIDEZ FISCAL</div>`}
+    <div class="head"><div>${workshop.logo ? `<img src="${esc(workshop.logo)}" alt="" class="doc-logo">` : ''}<h1>${esc(w.name || '')}</h1>${esc(w.legal_name || '')}<br>NIF ${esc(w.tax_id || '')}<br>${esc(w.address || '')}<br>${esc([w.phone, w.email].filter(Boolean).join(' · '))}${w.registry_no ? '<br>Nº registro industrial: ' + esc(w.registry_no) : ''}</div>
+      <div style="text-align:right"><h1>${INV_KIND[inv.kind]}</h1>Nº <b>${esc(inv.full_number)}</b><br>Fecha de expedición: ${fmtDate(inv.issued_at)}${month ? `<br>Operaciones de ${esc(month)}` : ''}</div></div>
+    ${orig || inv.rectify_reason ? `<div class="box" style="margin-bottom:10px"><b>Rectifica</b>Factura ${esc(orig?.full_number || '')}${orig ? ' del ' + fmtDate(orig.issued_at) : ''}. Motivo: ${esc(inv.rectify_reason || '')}</div>` : ''}
+    <div class="boxes">
+      <div class="box"><b>Cliente</b>${esc(c.name || '')}${c.tax_id ? '<br>NIF ' + esc(c.tax_id) : ''}${c.address ? '<br>' + esc(c.address) : ''}</div>
+      <div class="box"><b>Órdenes de reparación</b>${(inv.lines || []).length} órdenes${month ? ' de ' + esc(month) : ''}: nº ${(inv.lines || []).map((l) => esc(l.job_number)).join(', ')}<br>El detalle de cada una va al final.</div>
+    </div>
+    <table><thead><tr><th>Fecha</th><th>Concepto</th><th>Vehículo</th><th class="num">Importe</th></tr></thead><tbody>${rows}</tbody></table>
+    <div class="tot"><div><span>Base imponible</span><span>${fmtEur(num(inv.base))}</span></div><div><span>IVA ${String(num(inv.vat_rate)).replace('.', ',')} %</span><span>${fmtEur(num(inv.vat))}</span></div><div class="big"><span>Total</span><span>${fmtEur(num(inv.total))}</span></div></div>
+    ${docNotes(c.notes)}
+    ${invoiceExtras(w)}
+    <div class="legal">${WARRANTY}${w.privacy ? `<p>${esc(w.privacy)}</p>` : ''}</div>
+    <div class="sign"><div>${sealImages()}Firma y sello del taller</div><div></div></div>
+    <div class="annex"><h2>Detalle de las órdenes · factura ${esc(inv.full_number)}</h2>${annex}
+      <p class="legal">Importes sin IVA. El IVA y el total están en la primera página.</p></div>
+  </div>`;
+}
+
+/** Elegir órdenes cerradas de un cliente y de un mes y hacer con ellas una sola factura. */
+const jobOpDate = (j) => (j.delivered_at ? new Date(j.delivered_at).toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' }) : today());
+function jobCustomer(j) {
+  const v = vehicleOf(j);
+  const ws = j.ws_vehicle_id ? customerOfVehicle(v) : null;
+  const o = j.vehicle_id ? ownerOf(j.vehicle_id) : null;
+  const name = (ws?.name || j.customer_name || o?.display_name || '').trim();
+  return { key: normTxt(name), name, tax_id: j.customer_tax_id || ws?.tax_id || '', address: j.customer_address || ws?.address || '' };
+}
+const groupable = () => jobs.filter((j) => ['ready', 'delivered'].includes(j.status) && !j.invoice_ref && !invoiceOfJob(j.id) && totals(j).base > 0 && jobCustomer(j).key);
+async function issueGroupedInvoice() {
+  const all = groupable();
+  // Clientes con dos órdenes o más sin facturar en un mismo mes.
+  const groups = {};
+  for (const j of all) {
+    const c = jobCustomer(j), m = jobOpDate(j).slice(0, 7), k = m + '|' + c.key;
+    (groups[k] ||= { month: m, key: c.key, name: c.name, jobs: [] }).jobs.push(j);
+  }
+  const list = Object.values(groups).filter((g) => g.jobs.length > 1).sort((a, b) => b.month.localeCompare(a.month) || a.name.localeCompare(b.name));
+  if (!list.length) {
+    await notice(`<h3>No hay órdenes que juntar</h3><p class="muted">Para una factura de varias órdenes hacen falta dos o más órdenes terminadas y sin facturar de un mismo cliente y de un mismo mes. Las órdenes de una en una se facturan desde la propia orden.</p>`);
+    return;
+  }
+  let g = list[0], picked = new Set(g.jobs.map((j) => j.id));
+  const r = await dialog(`<h3>Factura de varias órdenes</h3>
+    <p class="muted" style="margin-top:0">Una factura con una línea por orden (número, fecha, vehículo e importe) y, detrás, el detalle de cada orden. Solo junta órdenes de un mismo cliente y de un mismo mes.</p>
+    <label>Cliente y mes</label><select name="group">${list.map((x, i) => `<option value="${i}">${esc(x.name)} · ${monthLabel(x.month)} · ${x.jobs.length} órdenes</option>`).join('')}</select>
+    <div id="grpJobs" class="grp-jobs"></div>
+    <label>Nombre o razón social del cliente</label><input name="name" maxlength="200" required>
+    <div class="row2"><div><label>NIF / DNI / CIF</label><input name="tax" maxlength="20" autocomplete="off"></div>
+      <div><label>Dirección</label><input name="addr" maxlength="300" autocomplete="off"></div></div>
+    <label>Observaciones para el cliente (opcional)</label><textarea name="notes" rows="2" maxlength="2000"></textarea>
+    <div class="inv-totals" id="grpTotals"></div>
+    <p class="muted" style="font-size:13px;margin:6px 0 0">Se numera sola (<b>${esc(invCode(invoicing.series, invoicing.next_no))}</b>), como una factura completa. Si te equivocas, se corrige con una rectificativa y las órdenes vuelven a quedar sin facturar.</p>`,
+  'Emitir factura', (fd) => fd, (form) => {
+    const paint = () => {
+      const sel = g.jobs.filter((j) => picked.has(j.id));
+      const base = sel.reduce((a, j) => a + totals(j).base, 0), vat = sel.reduce((a, j) => a + totals(j).vat, 0);
+      form.querySelector('#grpTotals').innerHTML = `<span>${sel.length} órdenes</span><span>Base ${fmtEur(base)}</span><span>IVA ${fmtEur(vat)}</span><b>Total ${fmtEur(base + vat)}</b>`;
+    };
+    const fill = () => {
+      const box = form.querySelector('#grpJobs');
+      box.innerHTML = g.jobs.sort((a, b) => jobOpDate(a).localeCompare(jobOpDate(b)) || a.number - b.number).map((j) => {
+        const v = vehicleOf(j), s = v ? summary(v) : { name: '', plate: '' };
+        return `<label class="chk"><input type="checkbox" value="${j.id}" ${picked.has(j.id) ? 'checked' : ''}><span><b>OR ${j.number}</b> · ${fmtDate(jobOpDate(j))} · ${esc([s.name, s.plate].filter(Boolean).join(' · '))}<b class="grp-amt">${fmtEur(totals(j).total)}</b></span></label>`;
+      }).join('');
+      for (const cb of box.querySelectorAll('input')) cb.onchange = () => { if (cb.checked) picked.add(cb.value); else picked.delete(cb.value); paint(); };
+      const c = g.jobs.map(jobCustomer);
+      form.name.value = c[0].name;
+      form.tax.value = c.find((x) => x.tax_id)?.tax_id || '';
+      form.addr.value = c.find((x) => x.address)?.address || '';
+      paint();
+    };
+    form.group.onchange = () => { g = list[Number(form.group.value)]; picked = new Set(g.jobs.map((j) => j.id)); fill(); };
+    fill();
+    form.addEventListener('submit', (e) => {
+      if (e.submitter?.value !== 'ok') return;
+      if (picked.size < 2) {
+        e.preventDefault();
+        form.querySelector('#grpTotals').innerHTML = '<span class="err">Elige al menos dos órdenes: una sola se factura desde la propia orden.</span>';
+        return;
+      }
+      if (invoicing.mode === 'test' || form.tax.value.trim()) return;
+      e.preventDefault();
+      form.tax.focus();
+      form.tax.setCustomValidity('La factura completa necesita el NIF, DNI o CIF del cliente.');
+      form.tax.reportValidity();
+      form.tax.oninput = () => form.tax.setCustomValidity('');
+    });
+  });
+  if (!r) return;
+  const sel = g.jobs.filter((j) => picked.has(j.id));
+  const labels = {}, plates = [];
+  for (const j of sel) {
+    const v = vehicleOf(j), s = v ? summary(v) : { name: '', plate: '' };
+    labels[j.id] = [s.name, s.plate].filter(Boolean).join(' · ');
+    if (s.plate && !plates.includes(s.plate)) plates.push(s.plate);
+  }
+  const customer = { name: r.name.trim(), tax_id: (r.tax || '').trim().toUpperCase() || null, address: (r.addr || '').trim() || null,
+    vehicle: plates.length ? plates.join(', ').slice(0, 200) : null, notes: (r.notes || '').trim() || null };
+  const { data: issued, error } = await sb.rpc('issue_grouped_invoice', { p_jobs: sel.map((j) => j.id), p_customer: customer, p_labels: labels });
+  if (error) { await notice(`<h3>No se pudo emitir la factura</h3><p>${esc(error.message)}</p>`); return; }
+  let data = issued;
+  if (data.status === 'pending') { setSaveState('Registrando en Hacienda…', 'pending'); data = await sendVerifactu(data); setSaveState(''); }
+  invoicing.next_no++;
+  await Promise.all([loadInvoices(), loadJobs()]);
+  const after = await choose(`<h3>Factura ${esc(data.full_number)} emitida</h3><p class="muted">${sel.length} órdenes · ${fmtEur(num(data.total))} con IVA. Las órdenes quedan facturadas con este número.</p>${verifactuLine(data) ? `<p class="${data.status === 'error' ? 'err' : 'muted'}">${verifactuLine(data)}</p>` : ''}`, [['share', 'Enviar al cliente', 'btn small'], ['print', 'Imprimir', 'btn ghost small'], ['pay', 'Cobrar ahora', 'btn ghost small']]);
+  if (after === 'share') shareInvoice(data);
+  if (after === 'print') printInvoice(data);
+  if (after === 'pay') payInvoice(data);
 }
 
 async function printInvoice(inv) {
@@ -2877,7 +3009,7 @@ async function invoiceLink(inv) {
 }
 /** Teléfono y correo del cliente de la factura, si se saben. */
 function invoiceContact(inv) {
-  const j = jobs.find((x) => x.id === inv.job_id);
+  const j = jobs.find((x) => x.id === invJobIds(inv)[0]);
   const ws = j?.ws_vehicle_id ? wsVehicles.find((v) => v.id === j.ws_vehicle_id) : null;
   const c = ws ? customerOfVehicle(ws) : null;
   const o = j?.vehicle_id ? ownerOf(j.vehicle_id) : null;
@@ -3057,6 +3189,7 @@ function gestorWorkbook(ExcelJS, { rows, taller, periodo, conPruebas }) {
   ws.pageSetup = { orientation: 'landscape', paperSize: 9, fitToPage: true, fitToWidth: 1, fitToHeight: 0, printTitlesRow: `${top}:${top}` };
   return wb;
 }
+$('invGroupBtn').onclick = () => issueGroupedInvoice();
 $('invExport').onclick = async () => {
   const m = $('invMonth').value;
   const list = invoices.filter((i) => !m || i.issued_at.startsWith(m)).slice().reverse();

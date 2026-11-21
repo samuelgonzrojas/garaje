@@ -124,6 +124,12 @@ dialog::backdrop{background:rgba(10,16,24,.45)}
 .doc .legal{font-size:10.5px;color:#333;margin-top:14px}
 .doc .sign{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:28px}
 .doc .sign div{border-top:1px solid #000;padding-top:4px;font-size:11px}
+.doc .annex{break-before:page;page-break-before:always;padding-top:4px}
+.doc .annex h2{font-size:16px;margin:0 0 10px;border-bottom:2px solid #000;padding-bottom:6px}
+.doc .annex-job{break-inside:avoid;margin-bottom:14px}
+.doc .annex-job h3{font-size:13px;margin:0 0 4px}
+.doc .annex-job h3 small{font-weight:400;color:#444}
+.doc .annex-sum{text-align:right;font-size:12px;margin-top:4px}
 
 /* Solicitudes de presupuesto y "visible en la app" */
 label.chk{display:inline-flex;align-items:center;gap:6px;font-weight:500;margin:4px 14px 8px 0;cursor:pointer}
@@ -741,6 +747,12 @@ dialog#dlg{max-width:760px}
 .inv-kind label.chk.off{opacity:.55}
 .inv-totals{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:12px;padding:10px 14px;border-radius:14px;background:var(--card-2);font-variant-numeric:tabular-nums}
 .inv-totals b{margin-left:auto}
+.head-actions{display:flex;flex-wrap:wrap;gap:8px}
+.grp-jobs{display:flex;flex-direction:column;gap:4px;margin:8px 0 4px;max-height:260px;overflow:auto}
+.grp-jobs label.chk{margin:0;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:var(--card-2)}
+.grp-jobs label.chk span{flex:1;display:flex;flex-wrap:wrap;gap:0 4px}
+.grp-amt{margin-left:auto;font-variant-numeric:tabular-nums}
+.inv-totals .err{margin:0}
 .inv-table{width:100%;border-collapse:collapse}
 .inv-table th{text-align:left;font-size:12px;color:var(--muted);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--line)}
 .inv-table td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
