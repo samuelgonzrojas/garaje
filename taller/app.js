@@ -2993,7 +2993,7 @@ async function invoiceLink(inv) {
     const blob = await window.html2pdf().set({
       margin: ticket ? [3, 0, 3, 0] : 10,
       image: { type: 'jpeg', quality: 0.92 },
-      html2canvas: { scale: 2, backgroundColor: '#ffffff', useCORS: true },
+      html2canvas: { scale: 2, backgroundColor: '#ffffff', useCORS: true, scrollX: 0, scrollY: 0 },
       jsPDF: { unit: 'mm', format: ticket ? [80, Math.ceil(mm) + 8] : 'a4' },
     }).from(holder.firstElementChild).outputPdf('blob');
     const path = `${workshop.id}/${inv.id}/Factura-${inv.full_number}.pdf`;
@@ -3230,7 +3230,7 @@ async function downloadInvoicesPdf(list, file) {
     await window.html2pdf().set({
       margin: 10, filename: file,
       image: { type: 'jpeg', quality: 0.92 },
-      html2canvas: { scale: 2, backgroundColor: '#ffffff', useCORS: true },
+      html2canvas: { scale: 2, backgroundColor: '#ffffff', useCORS: true, scrollX: 0, scrollY: 0 },
       jsPDF: { unit: 'mm', format: 'a4' },
       pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', '.annex-job h3'] },
     }).from(holder.firstElementChild).save();
