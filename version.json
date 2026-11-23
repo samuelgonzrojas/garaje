@@ -1,7 +1,7 @@
 {
-  "version": "1.4.2",
-  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.4.2/garaje-1.4.2-arm64.apk",
-  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.4.2/garaje-1.4.2.apk",
-  "notes": "Los avisos con «Deshacer» (viaje quitado, repostaje o registro borrado) ya se cierran solos y no se quedan fijos en la pantalla.",
+  "version": "1.5.0",
+  "apk": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.5.0/garaje-1.5.0-arm64.apk",
+  "apk_universal": "https://github.com/samuelgonzrojas/garaje/releases/download/v1.5.0/garaje-1.5.0.apk",
+  "notes": "Nuevo: un consejo a la semana, los lunes a las 9:00, para cuidar tu coche o tu moto según la época del año. No llega la semana que ya tienes otro aviso y se puede quitar en Ajustes → Recordatorios.",
   "play_url": "https://play.google.com/store/apps/details?id=com.samuel.mantenimiento"
 }
